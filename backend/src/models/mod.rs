@@ -5,3 +5,7 @@ pub mod party;
 pub mod catalogue;
 pub mod accounting;
 pub mod invoice;
+pub mod department;
+pub mod audit;
+pub mod license;
+pub mod document;

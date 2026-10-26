@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Deku Finance — Desktop-First Web Accounting System
 
-## Getting Started
+Deku Finance is an enterprise-grade accounting and financial management platform inspired by **TallyPrime's speed, keyboard navigation, and workflow familiarity**, reimagined with modern visual styling, accessible controls, and strict double-entry mathematical correctness.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🏛️ Architecture Overview
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Web Desktop Client                   │
+│ Next.js 16 (App Router) • React 19 • Tailwind CSS v4   │
+│ Gateway Menu (Hotkeys) • Vouchers • Financial Reports  │
+└───────────────────────────┬────────────────────────────┘
+                            │ REST JSON API
+┌───────────────────────────▼────────────────────────────┐
+│                  Authoritative Backend                 │
+│               Rust • Axum (Port 8080)                  │
+│  Multi-tenant Auth • Double-Entry Validation • Audit   │
+└───────────────────────────┬────────────────────────────┘
+                            │ SQL & Triggers
+┌───────────────────────────▼────────────────────────────┐
+│                    Supabase PostgreSQL                 │
+│   ALERX 4-Tier Hierarchy • Ledger Balances View        │
+│    Atomic Journal Posting • Immutability & Reversals   │
+└────────────────────────────────────────────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚡ Keyboard Navigation & Shortcuts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deku Finance is built for keyboard-first operation. All accounting vouchers, reports, and navigation paths can be executed without touching a mouse.
 
-## Learn More
+### Function Keys (Vouchers & Navigation)
 
-To learn more about Next.js, take a look at the following resources:
+| Shortcut | Action | Description / Route |
+| :--- | :--- | :--- |
+| **`F1`** | **Help** | Opens the global keyboard cheatsheet modal |
+| **`F2`** | **Date** | Change current transaction date or fiscal period |
+| **`F3`** | **Company** | Switch active organisation / multi-tenant entity (`/companies`) |
+| **`F4`** | **Contra** | Bank-to-cash and bank-to-bank transfers (`/vouchers/contra`) |
+| **`F5`** | **Payment** | Vendor payments, operating expenses, cash outflows (`/vouchers/payment`) |
+| **`F6`** | **Receipt** | Customer collections, capital inflows (`/vouchers/receipt`) |
+| **`F7`** | **Journal** | Adjustments, depreciation, accruals, reclassifications (`/vouchers/journal`) |
+| **`F8`** | **Sales** | Outward sales billing & GST tax invoices (`/vouchers/sales`) |
+| **`F9`** | **Purchase** | Inward purchase bills & inventory intake (`/vouchers/purchase`) |
+| **`Alt + G`** / **`Ctrl + K`** | **Go To** | Global command palette searching across accounts, vouchers, and reports |
+| **`Esc`** | **Back / Gateway** | Close open modals/drawers or return to Gateway (`/gateway`) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Gateway Quick Jump Hotkeys
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+On the **Gateway of Deku** (`/gateway`), pressing highlighted keys instantly navigates to the corresponding module:
 
-## Deploy on Vercel
+- **`A`** ➔ **Chart of Accounts** (`/masters/chart-of-accounts`)
+- **`L`** ➔ **Parties Master** (`/masters/parties`)
+- **`P`** ➔ **Products & Services** (`/masters/products-services`)
+- **`V`** ➔ **Vouchers Workspace** (`/vouchers/payment`)
+- **`D`** ➔ **Day Book** (`/day-book`)
+- **`G`** ➔ **GST & Invoicing** (`/gst`)
+- **`T`** ➔ **Trial Balance** (`/reports/trial-balance`)
+- **`B`** ➔ **Balance Sheet** (`/reports/balance-sheet`)
+- **`N`** ➔ **Profit & Loss** (`/reports/profit-loss`)
+- **`U`** ➔ **Audit Trail** (`/audit`)
+- **`S`** ➔ **Settings & Fiscal Periods** (`/settings`)
+- **`C`** ➔ **Company Selection** (`/companies`)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📋 Complete Route Inventory
+
+### 1. Gateway & Masters
+- `/gateway`: Dual-pane Gateway dashboard with live company metadata, last entry date, and quick jump menu.
+- `/masters/chart-of-accounts`: 4-tier ALERX tree browser (Asset, Liability, Equity, Revenue, Expense) with natural balances, postable leaf badges, and account creation drawer.
+- `/masters/parties`: Customer and Vendor master with GSTIN, PAN, and billing address.
+- `/masters/products-services`: Goods and services catalogue with HSN/SAC codes and default GST slabs.
+
+### 2. Transactions & Vouchers
+- `/vouchers/payment`: F5 Payment voucher with auto-calculated total debits and credits.
+- `/vouchers/receipt`: F6 Receipt voucher for incoming client payments.
+- `/vouchers/contra`: F4 Contra voucher for internal bank transfers and cash deposits.
+- `/vouchers/journal`: F7 Multi-line general journal voucher with double-entry balance validation.
+- `/vouchers/sales`: F8 Sales voucher integrated with customer accounts and GST ledger lines.
+- `/vouchers/purchase`: F9 Purchase voucher for vendor bills.
+- `/day-book`: Chronological transaction ledger with real-time status filtering (draft/posted/reversed), voucher drill-down modal, and atomic reversal dialog.
+
+### 3. Financial Statements
+- `/reports/trial-balance`: Real-time debit and credit balances by account with total balance equilibrium indicator.
+- `/reports/profit-loss`: Revenue minus Expenses computation displaying Gross and Net Profit/Loss.
+- `/reports/balance-sheet`: Accounting equation parity verification: Assets = Liabilities + Equity.
+
+### 4. Compliance & System
+- `/gst`: GST Tax Hub with sales invoices, intra-state vs inter-state tax split, invoice generation, and issuance with automatic atomic journal posting.
+- `/companies`: Multi-tenant company switcher and creation.
+- `/audit`: Immutable audit trail tracking all postings, reversals, and user operations.
+- `/settings`: Fiscal period management (annual, quarterly, monthly) and period status controls.
+
+---
+
+## 🧮 Double-Entry Accounting Principles
+
+1. **Equilibrium Rule**: A journal entry must have at least 2 lines and total debits must exactly equal total credits ($\sum \text{Debits} = \sum \text{Credits}$).
+2. **ALERX Natural Balances**:
+   - **Assets & Expenses**: Debit increases, Credit decreases (Natural balance = $\text{Debits} - \text{Credits}$).
+   - **Liabilities, Equity & Revenue**: Credit increases, Debit decreases (Natural balance = $\text{Credits} - \text{Debits}$).
+3. **Immutability & Controlled Reversal**: Posted accounting vouchers cannot be modified or deleted. Errors are corrected via controlled reversals that create an offsetting journal entry and mark the original as reversed.
+4. **GST Tax Engine**:
+   - **Intra-State Supply**: Tax split 50/50 between Central GST (CGST) and State GST (SGST).
+   - **Inter-State Supply**: 100% attributed to Integrated GST (IGST).
+
+---
+
+## 🚀 Development Setup
+
+### Prerequisites
+- Node.js 18+ (tested with Node 20)
+- Rust & Cargo (1.75+)
+- PostgreSQL / Supabase
+
+### 1. Start the Rust Backend
+```bash
+cd backend
+cargo run
+# Authoritative server starts on http://127.0.0.1:8080
+```
+
+### 2. Start the Frontend
+```bash
+# In repository root
+npm install
+npm run dev
+# Web application starts on http://localhost:3000
+```
+
+### 3. Run Production Build
+```bash
+npm run build
+# Compiles all 31 App Router pages with Next.js Turbopack
+```
+
+### 4. Run Automated Tests
+```bash
+npm test
+# Executes Vitest suite testing formatters, accounting math, and UI components
+```
+
+---
+
+## 🔒 Security & Data Integrity
+- All financial balances are queried directly from authoritative PostgreSQL views and Axum endpoints (`/reports/...`, `/accounts`, `/journals`).
+- Frontend performs client-side double-entry pre-validation to prevent network roundtrips for unbalanced entries while the backend enforces database transactions atomically.
+- Zero mock data in production accounting statements.

@@ -1,6 +1,19 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct CreateAccountRequest {
+    pub code: String,
+    pub name: String,
+    pub account_group: String,
+    pub ledger: Option<String>,
+    pub sub_ledger: Option<String>,
+    pub label: Option<String>,
+    pub is_postable: Option<bool>,
+    pub description: Option<String>,
+    pub parent_account_id: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateFiscalPeriodRequest {
     pub name: String,
     pub start_date: String,

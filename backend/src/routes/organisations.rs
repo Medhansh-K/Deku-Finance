@@ -1,19 +1,47 @@
 use axum::{
     extract::{Path, State},
     http::HeaderMap,
-    routing::{get, post},
+    routing::{get, patch, post},
     Json, Router,
 };
+use serde::Deserialize;
 use serde_json::{json, Value};
 use crate::error::AppError;
 use crate::models::organisation::CreateOrgRequest;
 use crate::routes::AppState;
 
+#[derive(Debug, Deserialize)]
+pub struct InviteMemberRequest {
+    pub email: String,
+    pub role: Option<String>,
+    pub designation: Option<String>,
+    pub department_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AcceptInviteRequest {
+    pub token: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateMemberRoleRequest {
+    pub role: String,
+}
+
 pub fn routes(state: AppState) -> Router {
     Router::new()
         .route("/", post(create_organisation).get(list_organisations))
+        .route("/invitations/accept", post(accept_invitation))
         .route("/:id", get(get_organisation))
-        .route("/:id/members", get(get_members))
+        .route(
+            "/:id/invitations",
+            post(invite_member).get(list_invitations),
+        )
+        .route("/:id/workbench-members", get(list_members))
+        .route(
+            "/:id/workbench-members/:member_id",
+            patch(update_member_role).delete(remove_member),
+        )
         .with_state(state)
 }
 
@@ -31,22 +59,49 @@ async fn create_organisation(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
 
-    let body = json!({
-        "p_name": payload.name,
-        "p_slug": payload.slug,
-        "p_currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
-        "p_timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
-        "p_gstin": payload.gstin,
-        "p_pan": payload.pan,
-        "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
-    });
+    if let Some(user_token) = token {
+        let body = json!({
+            "p_name": payload.name,
+            "p_slug": payload.slug,
+            "p_currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
+            "p_timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
+            "p_gstin": payload.gstin,
+            "p_pan": payload.pan,
+            "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
+        });
 
-    let res = state.supabase.rpc("create_organisation", &body, token).await?;
+        let res = state.supabase.rpc("create_organisation", &body, Some(user_token)).await?;
 
-    Ok(Json(json!({
-        "success": true,
-        "organisation_id": res
-    })))
+        Ok(Json(json!({
+            "success": true,
+            "organisation_id": res
+        })))
+    } else {
+        // Direct server-to-server insert via service role key
+        let body = json!({
+            "name": payload.name,
+            "slug": payload.slug,
+            "currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
+            "timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
+            "gstin": payload.gstin,
+            "pan": payload.pan,
+            "financial_year_start_month": payload.financial_year_start_month.unwrap_or(4),
+        });
+
+        let res = state.supabase.insert_table("organisations", &body, None).await?;
+        let org_id = res
+            .as_array()
+            .and_then(|arr| arr.first())
+            .and_then(|obj| obj.get("id"))
+            .and_then(|id| id.as_str())
+            .unwrap_or_default();
+
+        Ok(Json(json!({
+            "success": true,
+            "organisation_id": org_id,
+            "data": res
+        })))
+    }
 }
 
 async fn list_organisations(
@@ -79,18 +134,154 @@ async fn get_organisation(
     })))
 }
 
-async fn get_members(
+async fn invite_member(
     State(state): State<AppState>,
     headers: HeaderMap,
-    Path(id): Path<String>,
+    Path(org_id): Path<String>,
+    Json(payload): Json<InviteMemberRequest>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
-    let org_filter = format!("eq.{}", id);
-    let query = [("select", "*"), ("organisation_id", &org_filter)];
-    let res = state.supabase.query_table("organisation_members", &query, token).await?;
+
+    let body = json!({
+        "p_org_id": org_id,
+        "p_email": payload.email,
+        "p_role": payload.role.unwrap_or_else(|| "viewer".to_string()),
+        "p_designation": payload.designation.unwrap_or_else(|| "Team Member".to_string()),
+        "p_department_id": payload.department_id,
+    });
+
+    let res = state
+        .supabase
+        .rpc("invite_user_to_organisation", &body, token)
+        .await?;
 
     Ok(Json(json!({
         "success": true,
         "data": res
     })))
 }
+
+async fn accept_invitation(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(payload): Json<AcceptInviteRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+
+    let body = json!({
+        "p_token": payload.token,
+    });
+
+    let res = state
+        .supabase
+        .rpc("accept_organisation_invitation", &body, token)
+        .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "data": res
+    })))
+}
+
+async fn list_invitations(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let org_filter = format!("eq.{}", org_id);
+    let query = [
+        ("select", "*"),
+        ("organisation_id", &org_filter),
+        ("order", "created_at.desc"),
+    ];
+
+    let res = state
+        .supabase
+        .query_table("organisation_invitations", &query, token)
+        .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "data": res
+    })))
+}
+
+async fn list_members(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let org_filter = format!("eq.{}", org_id);
+    let query = [
+        ("select", "*,profiles:user_id(id,full_name,avatar_url)"),
+        ("organisation_id", &org_filter),
+        ("order", "created_at.asc"),
+    ];
+
+    let res = state
+        .supabase
+        .query_table("organisation_members", &query, token)
+        .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "data": res
+    })))
+}
+
+async fn update_member_role(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, member_id)): Path<(String, String)>,
+    Json(payload): Json<UpdateMemberRoleRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let org_filter = format!("eq.{}", org_id);
+    let id_filter = format!("eq.{}", member_id);
+    let query = [
+        ("organisation_id", org_filter.as_str()),
+        ("id", id_filter.as_str()),
+    ];
+
+    let body = json!({
+        "role": payload.role,
+        "updated_at": "now()",
+    });
+
+    let res = state
+        .supabase
+        .update_table("organisation_members", &query, &body, token)
+        .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "data": res
+    })))
+}
+
+async fn remove_member(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, member_id)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let org_filter = format!("eq.{}", org_id);
+    let id_filter = format!("eq.{}", member_id);
+    let query = [
+        ("organisation_id", org_filter.as_str()),
+        ("id", id_filter.as_str()),
+    ];
+
+    let res = state
+        .supabase
+        .delete_table("organisation_members", &query, token)
+        .await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "data": res
+    })))
+}
+

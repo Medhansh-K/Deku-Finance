@@ -5,13 +5,19 @@ pub mod catalogue;
 pub mod accounting;
 pub mod invoices;
 pub mod audit;
+pub mod departments;
+pub mod licenses;
+pub mod documents;
+pub mod consultant;
 
 use axum::Router;
+use crate::config::Config;
 use crate::supabase::SupabaseClient;
 
 #[derive(Clone)]
 pub struct AppState {
     pub supabase: SupabaseClient,
+    pub config: Config,
 }
 
 pub fn create_router(state: AppState) -> Router {
@@ -28,4 +34,28 @@ fn api_routes(state: AppState) -> Router {
         .nest("/organisations/:org_id", accounting::routes(state.clone()))
         .nest("/organisations/:org_id/invoices", invoices::routes(state.clone()))
         .nest("/organisations/:org_id/audit-events", audit::routes(state.clone()))
+        .nest(
+            "/organisations/:org_id/departments",
+            departments::department_routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/members",
+            departments::member_routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/payroll",
+            departments::payroll_routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/license",
+            licenses::routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/documents",
+            documents::routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/consultant",
+            consultant::routes(state.clone()),
+        )
 }
