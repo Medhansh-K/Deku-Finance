@@ -183,6 +183,38 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     route: "/dashboard/returns",
     icon: FileSpreadsheetIcon,
   },
+  {
+    id: "gst-file",
+    title: "File GST Return (wizard)",
+    subtitle: "Pick a period, fix blocking issues, review and download",
+    category: "Reports",
+    route: "/gst/file",
+    icon: FileSpreadsheetIcon,
+  },
+  {
+    id: "gst-guide",
+    title: "GST Portal Guide",
+    subtitle: "How to file GSTR-1, GSTR-3B and NIL returns on gst.gov.in",
+    category: "Utilities",
+    route: "/gst/guide",
+    icon: FileSpreadsheetIcon,
+  },
+  {
+    id: "purchases",
+    title: "Purchases & ITC Register",
+    subtitle: "Purchase bills, eligible vs blocked input tax credit, CSV import",
+    category: "Transactions",
+    route: "/purchases",
+    icon: LandmarkIcon,
+  },
+  {
+    id: "collect",
+    title: "Collections (MSME Collect)",
+    subtitle: "Unpaid and overdue invoices with WhatsApp reminders",
+    category: "Transactions",
+    route: "/collect",
+    icon: LandmarkIcon,
+  },
 
   // Reports
   {
@@ -214,7 +246,7 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     title: "Sales Invoices & Billed Turnover",
     subtitle: "Invoices register, issuance, conversion tracking & revenue realization",
     category: "Transactions",
-    route: "/invoices",
+    route: "/gst",
     icon: FileText,
   },
   {

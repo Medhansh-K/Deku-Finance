@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildGstr1, buildGstr3b, ReturnInvoice } from "@/lib/gst/returns";
 import type { Account, JournalEntry, SalesInvoiceLine } from "@/types/accounting";
+import type { PurchaseBill } from "@/lib/purchases/bills";
 
 const OUR = "27AAPFU0939F1ZV"; // Maharashtra
 const CUSTOMER = "29AABCT1332L1ZA";
@@ -212,6 +213,62 @@ describe("buildGstr3b", () => {
     expect(res.json).toBeNull();
     expect(res.summary.find((s) => s.section.startsWith("4"))!.amounts).toBeNull();
     expect(res.errors[0]).toMatch(/ITC not computed: entry J9 credits Input CGST 9%/);
+  });
+
+  const bill = (over: Partial<PurchaseBill>): PurchaseBill => ({
+    id: "b",
+    organisation_id: "org",
+    party_id: null,
+    supplier_name: "Supplier",
+    supplier_gstin: "27AABCS1429B1ZU",
+    bill_number: "B-1",
+    bill_date: "2026-10-05",
+    place_of_supply: "27",
+    taxable_amount: 1000,
+    cgst: 90,
+    sgst: 90,
+    igst: 0,
+    cess: 0,
+    total_amount: 1180,
+    itc_eligibility: "eligible",
+    blocked_reason: null,
+    journal_entry_id: null,
+    ...over,
+  });
+  const bills = [
+    bill({}),
+    bill({ bill_number: "B-2", supplier_gstin: CUSTOMER, cgst: 0, sgst: 0, igst: 180.55, total_amount: 1180.55 }),
+    bill({ bill_number: "B-3", itc_eligibility: "blocked_17_5", blocked_reason: "Motor vehicle", cgst: 140, sgst: 140, taxable_amount: 2000 }),
+    bill({ bill_number: "B-4", itc_eligibility: "ineligible_other", blocked_reason: "Time-barred u/s 16(4)", cgst: 5, sgst: 5 }),
+    bill({ bill_number: "B-5", bill_date: "2026-09-30", cgst: 999, sgst: 999 }), // other period
+  ];
+
+  it("takes Table 4 from purchase bills: 17(5) in 4(A) and reversed in 4(B)(1), other ineligible in 4(D)(2)", () => {
+    // The set-off credit would block the ledger path; with bills for the period it is not consulted.
+    const setOff = je("J9", "2026-10-31", "posted", [jl("a1", 0, 50)]);
+    const res = buildGstr3b({ gstin: OUR, retPeriod: PERIOD, invoices, accounts, journals: [...journals, setOff], purchaseBills: bills });
+    expect(res.errors).toEqual([]);
+    expect(res.json!.itc_elg).toEqual({
+      itc_avl: [{ ty: "OTH", iamt: 180.55, camt: 230, samt: 230, csamt: 0 }],
+      itc_rev: [{ ty: "RUL", iamt: 0, camt: 140, samt: 140, csamt: 0 }],
+      itc_net: { iamt: 180.55, camt: 90, samt: 90, csamt: 0 },
+      itc_inelg: [{ ty: "OTH", iamt: 0, camt: 5, samt: 5, csamt: 0 }],
+    });
+    expect(res.summary.map((s) => s.section)).toContain("4(B)(1) Reversed: blocked u/s 17(5)");
+  });
+
+  it("falls back to the ledgers when no bill is dated in the period", () => {
+    const res = buildGstr3b({ gstin: OUR, retPeriod: PERIOD, invoices, accounts, journals, purchaseBills: [bills[4]] });
+    expect(res.json!.itc_elg).toEqual(r.json!.itc_elg);
+  });
+
+  it("blocks on an invalid purchase bill", () => {
+    const res = buildGstr3b({
+      gstin: OUR, retPeriod: PERIOD, invoices, accounts, journals,
+      purchaseBills: [bill({ itc_eligibility: "blocked_17_5", blocked_reason: null })],
+    });
+    expect(res.json).toBeNull();
+    expect(res.errors).toContain("Purchase bill B-1 (27AABCS1429B1ZU): Give the reason ITC is blocked or ineligible.");
   });
 
   it("blocks when the company has no GSTIN", () => {

@@ -10,6 +10,7 @@
  */
 import type { Account, JournalEntry, SalesInvoice, SalesInvoiceLine } from "@/types/accounting";
 import { isValidGstin } from "@/lib/vouchers/invoice-text-parser";
+import { billToDraft, itcTotals, validateBill, type PurchaseBill } from "@/lib/purchases/bills";
 
 /** A sales invoice as stored (migration 007): header tax columns plus its lines. */
 export type ReturnInvoice = Omit<SalesInvoice, "supply_type"> & {
@@ -30,6 +31,8 @@ export interface Gstr1Input {
 export interface Gstr3bInput extends Gstr1Input {
   accounts: Account[];
   journals: JournalEntry[];
+  /** The purchase register; when it has bills for the period, Table 4 comes from them. */
+  purchaseBills?: PurchaseBill[];
 }
 
 export interface Amounts {
@@ -63,7 +66,7 @@ export const GSTR1_NOT_COVERED = [
 export const GSTR3B_NOT_COVERED = [
   "3.1(d) inward supplies on reverse charge and 3.1(e) non-GST outward supplies",
   "3.2 supplies to composition taxpayers and UIN holders (only unregistered persons are filled)",
-  "Table 4: all ITC from the books is reported as 4(A)(5) All other ITC; imports, RCM, ISD and 4(B) reversals are not split out, and nothing is matched against GSTR-2B",
+  "Table 4: with purchase bills, 17(5) credit is reported in 4(A)(5) and reversed in 4(B)(1), other ineligible ITC in 4(D)(2); without them, Input GST ledger debits are reported as 4(A)(5). Imports, RCM, ISD and 4(B) reversals are not split out, and nothing is matched against GSTR-2B",
   "Table 5 (inward exempt supplies), 6.1 tax payment, interest and late fee",
 ];
 
@@ -324,7 +327,7 @@ export function buildGstr1(input: Gstr1Input): ReturnResult {
   return { json, errors, summary };
 }
 
-const ITC_HEADS: [RegExp, keyof Amounts][] = [
+export const ITC_HEADS: [RegExp, "camt" | "samt" | "iamt" | "csamt"][] = [
   [/^input\s+cgst\b/i, "camt"],
   [/^input\s+(sgst|utgst)\b/i, "samt"],
   [/^input\s+igst\b/i, "iamt"],
@@ -373,6 +376,17 @@ function computeItc(retPeriod: string, accounts: Account[], journals: JournalEnt
   return { itc, errors };
 }
 
+/** Table 4 from the purchase register (layout per Notification 14/2022, Circular 170/02/2022):
+ * 17(5) credit is reported in 4(A)(5) and reversed in 4(B)(1); other ineligible (16(4), PoS) goes to 4(D)(2). */
+function itcFromBills(retPeriod: string, bills: PurchaseBill[]) {
+  const errors: string[] = [];
+  for (const b of bills)
+    for (const e of validateBill(billToDraft(b)))
+      errors.push(`Purchase bill ${b.bill_number} (${b.supplier_gstin}): ${e}.`);
+  const t = itcTotals(bills, `${retPeriod.slice(2)}-${retPeriod.slice(0, 2)}`);
+  return { itc: t.eligible, blocked: t.blocked, ineligible: t.ineligible, errors };
+}
+
 export function buildGstr3b(input: Gstr3bInput): ReturnResult {
   const { errors, gstin, checked } = check(input);
 
@@ -389,21 +403,41 @@ export function buildGstr3b(input: Gstr3bInput): ReturnResult {
     }
   }
 
-  const itc = isRetPeriod(input.retPeriod)
-    ? computeItc(input.retPeriod, input.accounts, input.journals)
-    : { itc: ZERO(), errors: [] };
+  const bills = isRetPeriod(input.retPeriod)
+    ? (input.purchaseBills ?? []).filter((b) => inPeriod(b.bill_date, input.retPeriod))
+    : [];
+  const itc = !isRetPeriod(input.retPeriod)
+    ? { itc: ZERO(), blocked: null, ineligible: null, errors: [] }
+    : bills.length
+      ? itcFromBills(input.retPeriod, bills)
+      : { ...computeItc(input.retPeriod, input.accounts, input.journals), blocked: null, ineligible: null };
   errors.push(...itc.errors);
 
   const summary: SummaryRow[] = [
     { section: "3.1(a) Outward taxable", amounts: rupees(osup) },
     { section: "3.1(b) Zero rated (exports)", amounts: rupees(zero) },
     { section: "3.1(c) Nil rated / exempt", amounts: rupees(nilExempt) },
-    { section: "4 Eligible ITC", amounts: itc.errors.length ? null : rupees(itc.itc) },
+    {
+      section: bills.length ? "4(A)(5) Eligible ITC (purchase bills)" : "4 Eligible ITC (Input GST ledgers)",
+      amounts: itc.errors.length ? null : rupees(itc.itc),
+    },
   ];
+  if (itc.blocked && itc.ineligible)
+    summary.push(
+      { section: "4(B)(1) Reversed: blocked u/s 17(5)", amounts: itc.errors.length ? null : rupees(itc.blocked) },
+      { section: "4(D)(2) Ineligible (16(4) / place of supply)", amounts: itc.errors.length ? null : rupees(itc.ineligible) }
+    );
   if (errors.length) return { json: null, errors, summary };
 
-  const { iamt, camt, samt, csamt } = rupees(itc.itc);
-  const itcTax = { iamt, camt, samt, csamt };
+  const taxOnly = (a: Amounts) => {
+    const { iamt, camt, samt, csamt } = rupees(a);
+    return { iamt, camt, samt, csamt };
+  };
+  const itcTax = taxOnly(itc.itc);
+  // 4(A) carries the 17(5) credit too; 4(B)(1) takes it back out, so 4(C) net equals the eligible ITC.
+  const available = ZERO();
+  addInto(available, itc.itc);
+  if (itc.blocked) addInto(available, itc.blocked);
   const z = rupees(zero);
   const json = {
     gstin,
@@ -417,8 +451,10 @@ export function buildGstr3b(input: Gstr3bInput): ReturnResult {
       unreg_details: [...unreg].map(([pos, a]) => ({ pos, txval: a.txval / 100, iamt: a.iamt / 100 })),
     },
     itc_elg: {
-      itc_avl: [{ ty: "OTH", ...itcTax }],
+      itc_avl: [{ ty: "OTH", ...taxOnly(available) }],
+      ...(itc.blocked && { itc_rev: [{ ty: "RUL", ...taxOnly(itc.blocked) }] }),
       itc_net: itcTax,
+      ...(itc.ineligible && { itc_inelg: [{ ty: "OTH", ...taxOnly(itc.ineligible) }] }),
     },
   };
   return { json, errors, summary };

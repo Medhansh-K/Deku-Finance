@@ -50,7 +50,9 @@ const NAV: { title: string; items: NavItem[] }[] = [
     title: "Transactions",
     items: [
       { label: "Vouchers", href: "/vouchers", icon: Receipt, match: ["/vouchers/"] },
-      { label: "Sales invoices", href: "/invoices", icon: FileText, match: ["/dashboard/invoices"] },
+      { label: "Sales invoices", href: "/gst", icon: FileText },
+      { label: "Purchases & ITC", href: "/purchases", icon: Wallet },
+      { label: "Collections", href: "/collect", icon: Landmark },
       { label: "Document builder", href: "/builder", icon: ClipboardList },
       { label: "Day book", href: "/day-book", icon: BookOpen },
       { label: "Approvals", href: "/approvals", icon: ShieldCheck },
@@ -81,8 +83,9 @@ const NAV: { title: string; items: NavItem[] }[] = [
   {
     title: "Compliance",
     items: [
-      { label: "GST hub", href: "/gst", icon: FileSpreadsheet },
+      { label: "File GST return", href: "/gst/file", icon: FileSpreadsheet },
       { label: "GST returns", href: "/dashboard/returns", icon: FileSpreadsheet },
+      { label: "GST portal guide", href: "/gst/guide", icon: BookOpen },
       { label: "Audit trail", href: "/audit", icon: ScrollText },
       { label: "Activity log", href: "/logs", icon: ScrollText },
     ],

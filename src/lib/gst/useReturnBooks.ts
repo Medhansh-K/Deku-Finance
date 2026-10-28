@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { accountingApi, invoicesApi, organisationsApi } from "@/api/endpoints";
+import { accountingApi, invoicesApi, organisationsApi, purchasesApi } from "@/api/endpoints";
+import { monthBounds, type PurchaseBill } from "@/lib/purchases/bills";
 import type { Account, JournalEntry } from "@/types/accounting";
 import { buildGstr1, buildGstr3b, periodInvoices, ReturnInvoice } from "@/lib/gst/returns";
 
@@ -10,6 +11,7 @@ export interface ReturnBooks {
   invoices: ReturnInvoice[];
   accounts: Account[];
   journals: JournalEntry[];
+  purchaseBills: PurchaseBill[];
 }
 
 /** Loads the active company's books for a MMYYYY period and builds both returns from them. */
@@ -31,11 +33,13 @@ export function useReturnBooks(retPeriod: string) {
     setLoadError(null);
     setBooks(null);
     (async () => {
-      const [org, list, accounts, journals] = await Promise.all([
+      const month = `${retPeriod.slice(2)}-${retPeriod.slice(0, 2)}`;
+      const [org, list, accounts, journals, bills] = await Promise.all([
         organisationsApi.get(orgId),
         invoicesApi.list(orgId),
         accountingApi.listAccounts(orgId),
         accountingApi.listJournals(orgId),
+        purchasesApi.list(orgId, monthBounds(month)),
       ]);
       const all = (list.data || []) as unknown as ReturnInvoice[];
       // The list has the customer's GSTIN but no lines; the detail call has lines but no customer.
@@ -52,6 +56,7 @@ export function useReturnBooks(retPeriod: string) {
         invoices: all.map((i) => byId.get(i.id) ?? i),
         accounts: accounts.data || [],
         journals: journals.data || [],
+        purchaseBills: bills.data || [],
       });
     })()
       .catch((err) => !stale && setLoadError(err?.message || "Failed to load the books for this period"))

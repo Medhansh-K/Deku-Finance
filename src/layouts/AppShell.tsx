@@ -60,6 +60,7 @@ export function AppShell({ children }: AppShellProps) {
       const isInput =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
         target.isContentEditable;
 
       // Alt+G or Ctrl+K / Cmd+K -> Go To Palette

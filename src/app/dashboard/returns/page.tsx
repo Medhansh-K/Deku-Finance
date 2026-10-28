@@ -24,7 +24,7 @@ export default function ReturnsHubPage() {
         <div>
           <h1 className="text-2xl font-black text-zinc-950">GST Returns: GSTR-1 & GSTR-3B</h1>
           <p className="text-xs text-zinc-500 mt-0.5">
-            Offline JSON built from your issued sales invoices and Input GST ledgers. Exports stay locked until every check passes.
+            Offline JSON built from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes.
           </p>
         </div>
         <div className="w-44">

@@ -625,4 +625,31 @@ export const bankingApi = {
     ),
 };
 
+type PurchaseBillRow = import("@/lib/purchases/bills").PurchaseBill;
+type PurchaseBillPayload = ReturnType<typeof import("@/lib/purchases/bills").billPayload>;
+
+export const purchasesApi = {
+  /** `from`/`to` are inclusive yyyy-mm-dd bounds on the bill date. */
+  list: (orgId: string, period?: { from: string; to: string }) =>
+    apiClient<ApiResponse<PurchaseBillRow[]>>(
+      `/api/v1/organisations/${orgId}/purchases${
+        period ? `?from=${encodeURIComponent(period.from)}&to=${encodeURIComponent(period.to)}` : ""
+      }`
+    ),
+  create: (orgId: string, payload: PurchaseBillPayload) =>
+    apiClient<ApiResponse<PurchaseBillRow[]>>(`/api/v1/organisations/${orgId}/purchases`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  linkJournal: (orgId: string, billId: string, journalEntryId: string) =>
+    apiClient<ApiResponse<PurchaseBillRow[]>>(`/api/v1/organisations/${orgId}/purchases/${billId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ journal_entry_id: journalEntryId }),
+    }),
+  remove: (orgId: string, billId: string) =>
+    apiClient<ApiResponse<PurchaseBillRow[]>>(`/api/v1/organisations/${orgId}/purchases/${billId}`, {
+      method: "DELETE",
+    }),
+};
+
 
