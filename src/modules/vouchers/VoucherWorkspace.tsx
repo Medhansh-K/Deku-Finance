@@ -53,7 +53,7 @@ import {
   markDraftFinalized,
 } from "@/lib/vouchers/builder-drafts";
 import { mapBuilderDraftToVoucher } from "@/lib/vouchers/builder-mapper";
-import { VoucherItem } from "@/modules/executive/RecentlyAddedVouchers";
+import { VoucherItem } from "@/lib/reports/vouchers";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import {
   DocumentProofAttachment,

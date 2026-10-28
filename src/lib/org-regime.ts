@@ -1,57 +1,20 @@
 /**
- * Deku Finance — Organisation Tax Regime & Compliance Authority
+ * Deku Finance — Organisation Tax Regime
  *
- * Core Business Rules:
- * 1. Sec 22 vs GST is NOT a dashboard view choice — it is an organisation-level entity status.
- * 2. A Sec 22 company can be converted to GST Registered once it obtains a valid GSTIN.
- * 3. A GST Registered company CANNOT revert back to Sec 22 exemption.
- * 4. Once converted to GST, the organisation operates permanently on the GST module.
+ * The regime is read from the company record: a company with a GSTIN is GST-registered,
+ * one without is treated as unregistered (Sec 22). Converting saves the GSTIN on the record.
+ * A GST-registered company cannot revert to Sec 22.
  */
+
+import { organisationsApi } from "@/api/endpoints";
 
 export type TaxRegime = "sec22" | "gst";
 
 export interface OrgTaxProfile {
   orgId: string;
   regime: TaxRegime;
-  gstin?: string | null;
-  tradeName?: string;
-  canRevertToSec22: false; // Irreversible per Indian GST statutory compliance
-  convertedAt?: string;
-  thresholdLimitINR: number;
+  gstin: string | null;
 }
-
-// Canonical seed profiles for known demo organisations
-const DEFAULT_TAX_REGIMES: Record<string, OrgTaxProfile> = {
-  // 1. Deku Financial Technologies: Starts as Sec 22 Exempt (turnover ₹12.45L < ₹40L limit)
-  "b127e064-5da8-437f-94c4-b8d6a0c12927": {
-    orgId: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-    regime: "sec22",
-    gstin: null,
-    tradeName: "Deku Financial Technologies",
-    canRevertToSec22: false,
-    thresholdLimitINR: 4000000,
-  },
-  // 2. All Might Logistics & Warehousing: Approaching Sec 22 threshold (₹38.70L / ₹40L)
-  "b093d7d9-395a-429b-8c9a-af31b8b270f2": {
-    orgId: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-    regime: "sec22",
-    gstin: null,
-    tradeName: "All Might Logistics & Warehousing",
-    canRevertToSec22: false,
-    thresholdLimitINR: 4000000,
-  },
-  // 3. Endeavor Energy & Tech Solutions: GST Registered Corporate (turnover ₹72.50L > ₹40L)
-  "8aec2336-5531-459e-baba-6a37128cffa2": {
-    orgId: "8aec2336-5531-459e-baba-6a37128cffa2",
-    regime: "gst",
-    gstin: "27AAECE9988C1Z8",
-    tradeName: "Endeavor Energy & Tech Solutions",
-    canRevertToSec22: false,
-    thresholdLimitINR: 4000000,
-  },
-};
-
-const STORAGE_KEY = "deku_org_tax_regimes_v1";
 
 /**
  * Validates 15-character Indian GSTIN format
@@ -75,94 +38,40 @@ export function validateGstin(gstin: string): { isValid: boolean; error?: string
   return { isValid: true };
 }
 
-/**
- * Returns deterministic server-safe default tax profile without reading localStorage.
- * Used for initial React state to prevent SSR hydration mismatches.
- */
-export function getDefaultTaxProfile(orgId: string): OrgTaxProfile {
-  if (DEFAULT_TAX_REGIMES[orgId]) {
-    return DEFAULT_TAX_REGIMES[orgId];
-  }
-  return {
-    orgId,
-    regime: "sec22",
-    gstin: null,
-    canRevertToSec22: false,
-    thresholdLimitINR: 4000000,
-  };
+export function taxProfileFor(org: { id: string; gstin?: string | null }): OrgTaxProfile {
+  const gstin = org.gstin?.trim() || null;
+  return { orgId: org.id, regime: gstin ? "gst" : "sec22", gstin };
 }
 
-/**
- * Retrieves the persistent tax regime profile for an organisation from storage if on client
- */
-export function getOrgTaxProfile(orgId: string): OrgTaxProfile {
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed: Record<string, OrgTaxProfile> = JSON.parse(stored);
-        if (parsed[orgId]) {
-          return parsed[orgId];
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to load tax regime from storage:", e);
-    }
+/** Reads the company record; null when it can't be loaded (the regime is then unknown). */
+export async function loadOrgTaxProfile(orgId: string): Promise<OrgTaxProfile | null> {
+  if (!orgId) return null;
+  try {
+    const org = (await organisationsApi.get(orgId)).data?.[0];
+    return org ? taxProfileFor(org) : null;
+  } catch {
+    return null;
   }
-
-  return getDefaultTaxProfile(orgId);
 }
 
-/**
- * Converts a Sec 22 organisation to GST Registered once a valid GSTIN is provided.
- * Under statutory compliance, this conversion is irreversible.
- */
-export function convertOrgToGst(
+/** Saves the GSTIN on the company record, which makes it GST-registered. */
+export async function convertOrgToGst(
   orgId: string,
-  gstin: string,
-  tradeName?: string
-): { success: boolean; error?: string; profile?: OrgTaxProfile } {
+  gstin: string
+): Promise<{ success: boolean; error?: string; profile?: OrgTaxProfile }> {
   const validation = validateGstin(gstin);
   if (!validation.isValid) {
     return { success: false, error: validation.error };
   }
-
-  const cleanGstin = gstin.trim().toUpperCase();
-  const current = getOrgTaxProfile(orgId);
-
-  const updatedProfile: OrgTaxProfile = {
-    ...current,
-    orgId,
-    regime: "gst",
-    gstin: cleanGstin,
-    tradeName: tradeName || current.tradeName,
-    convertedAt: new Date().toISOString(),
-    canRevertToSec22: false, // Rule: A GST company cannot be Sec 22
-  };
-
-  if (typeof window !== "undefined") {
-    try {
-      let storeMap: Record<string, OrgTaxProfile> = {};
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        storeMap = JSON.parse(stored);
-      }
-      storeMap[orgId] = updatedProfile;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storeMap));
-
-      // Also sync active operating mode
-      localStorage.setItem("deku_operating_mode", "gst_enterprise");
-
-      // Notify entire app of the regime update
-      window.dispatchEvent(
-        new CustomEvent("deku_org_regime_changed", {
-          detail: { orgId, profile: updatedProfile },
-        })
-      );
-    } catch (e: any) {
-      return { success: false, error: e?.message || "Storage error" };
-    }
+  try {
+    const res = await organisationsApi.updateSettings(orgId, { gstin: gstin.trim().toUpperCase() });
+    const org = res.data?.[0];
+    if (!org?.gstin) return { success: false, error: "The company record was not updated." };
+    const profile = taxProfileFor(org);
+    localStorage.setItem("deku_operating_mode", "gst_enterprise");
+    window.dispatchEvent(new CustomEvent("deku_org_regime_changed", { detail: { orgId, profile } }));
+    return { success: true, profile };
+  } catch (e: any) {
+    return { success: false, error: e?.message || "Could not save the GSTIN" };
   }
-
-  return { success: true, profile: updatedProfile };
 }

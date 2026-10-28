@@ -263,6 +263,7 @@ export interface SalesInvoice {
   total_amount: number;
   notes?: string | null;
   terms?: string | null;
+  journal_entry_id?: string | null;
   created_at?: string;
   sales_invoice_lines?: SalesInvoiceLine[];
   parties?: {

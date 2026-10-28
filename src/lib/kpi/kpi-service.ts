@@ -1,9 +1,14 @@
 /**
- * Deku Finance — KPI Service & Dynamic Storage
- * Manages numerical business KPIs, local overrides, and detail route metadata.
+ * Deku Finance — KPI Service
+ * KPI values come from the company's books (see src/lib/reports/kpis.ts). Only the choice of
+ * which tiles to show is kept per browser.
  */
 
 import { formatINR } from "@/lib/formatters/currency";
+import { formatDateTally, toISODateString } from "@/lib/formatters/date";
+import { accountingApi, invoicesApi, organisationsApi } from "@/api/endpoints";
+import { computeKpis, LedgerKpis } from "@/lib/reports/kpis";
+import { fyStart, toRupees } from "@/lib/reports/ledger";
 
 export type KpiKey =
   | "turnover"
@@ -18,103 +23,27 @@ export type KpiKey =
 export interface KpiDefinition {
   key: KpiKey;
   label: string;
-  shortLabel: string;
   detailRoute: string;
-  description: string;
-  category: "revenue" | "profit" | "liquidity" | "receivables" | "payables" | "expenses" | "statutory";
 }
 
 export const KPI_META: Record<KpiKey, KpiDefinition> = {
-  turnover: {
-    key: "turnover",
-    label: "Gross Turnover",
-    shortLabel: "Turnover (FY 26-27)",
-    detailRoute: "/invoices",
-    description: "Annual turnover, invoicing & sales register",
-    category: "revenue",
-  },
-  profit: {
-    key: "profit",
-    label: "Net Profit (EBITDA)",
-    shortLabel: "Net Profit (EBITDA)",
-    detailRoute: "/reports/profit-loss",
-    description: "Operating bottom-line from Profit & Loss statement",
-    category: "profit",
-  },
-  billed: {
-    key: "billed",
-    label: "Billed Turnover",
-    shortLabel: "Billed Turnover",
-    detailRoute: "/invoices",
-    description: "Invoiced billing, conversions & sales register",
-    category: "revenue",
-  },
-  liquid: {
-    key: "liquid",
-    label: "Liquid Funds",
-    shortLabel: "Cash & Bank",
-    detailRoute: "/masters/chart-of-accounts?group=asset&filter=liquid",
-    description: "Chart of Accounts asset ledgers for cash & bank liquidity",
-    category: "liquidity",
-  },
-  debtors: {
-    key: "debtors",
-    label: "Trade Debtors (AR)",
-    shortLabel: "Trade Debtors",
-    detailRoute: "/reports/debtors",
-    description: "Accounts receivable from customer ledgers tracked as per DSO",
-    category: "receivables",
-  },
-  creditors: {
-    key: "creditors",
-    label: "Trade Creditors (AP)",
-    shortLabel: "Trade Creditors",
-    detailRoute: "/reports/creditors",
-    description: "Accounts payable to vendors tracked as per DPO & bills issued",
-    category: "payables",
-  },
-  expenses: {
-    key: "expenses",
-    label: "Operating Expenses",
-    shortLabel: "Operating Expenses",
-    detailRoute: "/reports/operating-expenses",
-    description: "Payment vouchers issued to entities and department-wise expenses",
-    category: "expenses",
-  },
-  gst: {
-    key: "gst",
-    label: "GST Net Payable",
-    shortLabel: "GST Net Liability",
-    detailRoute: "/gst",
-    description: "Net tax liability after Input Tax Credit (ITC) offset",
-    category: "statutory",
-  },
+  turnover: { key: "turnover", label: "Gross Turnover", detailRoute: "/invoices" },
+  profit: { key: "profit", label: "Net Profit", detailRoute: "/reports/profit-loss" },
+  billed: { key: "billed", label: "Billed Turnover", detailRoute: "/invoices" },
+  liquid: { key: "liquid", label: "Liquid Funds", detailRoute: "/masters/chart-of-accounts?group=asset&filter=liquid" },
+  debtors: { key: "debtors", label: "Trade Debtors (AR)", detailRoute: "/reports/debtors" },
+  creditors: { key: "creditors", label: "Trade Creditors (AP)", detailRoute: "/reports/creditors" },
+  expenses: { key: "expenses", label: "Operating Expenses", detailRoute: "/reports/operating-expenses" },
+  gst: { key: "gst", label: "GST Net Payable", detailRoute: "/gst" },
 };
 
-export interface RawKpiData {
-  turnover: number;
-  profit: number;
-  billed: number;
-  liquid: number;
-  debtors: number;
-  creditors: number;
-  expenses: number;
-  gst: number;
-  // Qualitative context notes
-  liquidBank?: string;
-  debtorsCount?: string;
-  debtorsAging?: string;
-  creditorsCount?: string;
-  creditorsTerms?: string;
-  expensesHeads?: string;
-  gstBreakdown?: string;
-  gstStatus?: string;
-  // Selected quick KPIs to display in Column 3
-  quickKpiKeys?: KpiKey[];
-}
+export const DEFAULT_QUICK_KPIS: KpiKey[] = ["billed", "liquid", "debtors", "creditors", "expenses", "gst"];
+
+export const SEC22_LIMIT_PAISE = 40_00_000_00;
 
 export interface FormattedKpiProfile {
-  raw: RawKpiData;
+  hasEntries: boolean;
+  periodLabel: string;
   turnover: string;
   profit: string;
   margin: string;
@@ -122,7 +51,8 @@ export interface FormattedKpiProfile {
   billedLimit: string;
   sec22Badge: string;
   sec22Variant: "safe" | "warn" | "corp";
-  sec22Progress: string;
+  /** Share of the ₹40L Sec 22 threshold reached, 0-100; null when turnover is unknown. */
+  sec22Pct: number | null;
   sec22Sub: string;
   liquid: string;
   liquidBank: string;
@@ -139,261 +69,117 @@ export interface FormattedKpiProfile {
   gstBreakdown: string;
   gstStatus: string;
   lastEntry: string;
-  activeAccounts: number;
-  quickKpiKeys: KpiKey[];
+  assets: string;
+  liabilities: string;
+  equity: string;
+  equationText: string;
+  balanced: boolean | null;
 }
 
-export const DEFAULT_QUICK_KPIS: KpiKey[] = [
-  "billed",
-  "liquid",
-  "debtors",
-  "creditors",
-  "expenses",
-  "gst",
-];
+const DASH = "–";
+const money = (p: number | null) => (p === null ? DASH : formatINR(toRupees(p), { minimumFractionDigits: 0 }));
+const lakhs = (p: number | null) => (p === null ? DASH : `₹${(p / 1e7).toFixed(2)}L`);
+const pct = (num: number | null, den: number | null) =>
+  num === null || !den ? null : Math.round((num / den) * 1000) / 10;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-const KNOWN_DEFAULT_KPIS: Record<string, RawKpiData> = {
-  // 1. Deku Financial Technologies
-  "b127e064-5da8-437f-94c4-b8d6a0c12927": {
-    turnover: 1245000,
-    profit: 825000,
-    billed: 1245000,
-    liquid: 640000,
-    debtors: 260000,
-    creditors: 115000,
-    expenses: 420000,
-    gst: 48600,
-    liquidBank: "HDFC Current + Cash",
-    debtorsCount: "14 Active Accounts",
-    debtorsAging: "0 overdue > 45d",
-    creditorsCount: "6 Vendor Accounts",
-    creditorsTerms: "Terms: Net 30d",
-    expensesHeads: "Infra, Tech & Salary",
-    gstBreakdown: "Outward ₹92k − ITC ₹44k",
-    gstStatus: "GSTR-3B Ready",
-    quickKpiKeys: DEFAULT_QUICK_KPIS,
-  },
-  // 2. All Might Logistics & Warehousing
-  "b093d7d9-395a-429b-8c9a-af31b8b270f2": {
-    turnover: 3870000,
-    profit: 1420000,
-    billed: 3870000,
-    liquid: 1180000,
-    debtors: 845000,
-    creditors: 590000,
-    expenses: 2450000,
-    gst: 162400,
-    liquidBank: "SBI Commercial + Cash",
-    debtorsCount: "28 Active Accounts",
-    debtorsAging: "2 overdue > 45d",
-    creditorsCount: "19 Vendor Accounts",
-    creditorsTerms: "Terms: Net 15d",
-    expensesHeads: "Fleet Fuel & Storage",
-    gstBreakdown: "Outward ₹4.20L − ITC ₹2.58L",
-    gstStatus: "GSTR-3B Ready",
-    quickKpiKeys: DEFAULT_QUICK_KPIS,
-  },
-  // 3. Endeavor Energy & Tech Solutions
-  "8aec2336-5531-459e-baba-6a37128cffa2": {
-    turnover: 7250000,
-    profit: 3180000,
-    billed: 7250000,
-    liquid: 2415000,
-    debtors: 1630000,
-    creditors: 980000,
-    expenses: 4070000,
-    gst: 312000,
-    liquidBank: "ICICI Corporate + Treasury",
-    debtorsCount: "42 Enterprise Clients",
-    debtorsAging: "0 overdue > 45d",
-    creditorsCount: "12 Vendor Accounts",
-    creditorsTerms: "Terms: Net 45d",
-    expensesHeads: "R&D, Cloud & Solar",
-    gstBreakdown: "Outward ₹8.50L − ITC ₹5.38L",
-    gstStatus: "Advance Tax Settled",
-    quickKpiKeys: DEFAULT_QUICK_KPIS,
-  },
-};
-
-/**
- * Returns deterministic defaults for custom orgs
- */
-function getCustomOrgDefaults(orgId: string, orgName: string): RawKpiData {
-  let hash = 0;
-  for (let i = 0; i < orgName.length; i++) {
-    hash = (hash * 31 + orgName.charCodeAt(i)) & 0xffffff;
-  }
-  const turnoverVal = 1500000 + (hash % 4500000);
-  const profitVal = Math.round(turnoverVal * 0.42);
-  const expensesVal = turnoverVal - profitVal;
-  const liquidVal = Math.round(turnoverVal * 0.35);
-  const debtorsVal = Math.round(turnoverVal * 0.18);
-  const creditorsVal = Math.round(turnoverVal * 0.09);
-  const gstVal = Math.round(turnoverVal * 0.045);
+export function formatKpis(kp: LedgerKpis, from: string, asOf: string): FormattedKpiProfile {
+  const none = kp.hasEntries ? "" : "No posted entries yet";
+  const margin = pct(kp.profitPaise, kp.turnoverPaise);
+  const ratio = pct(kp.expensesPaise, kp.turnoverPaise);
+  const s22 = kp.turnoverPaise === null ? null : Math.min(100, pct(kp.turnoverPaise, SEC22_LIMIT_PAISE)!);
+  const [sec22Badge, sec22Variant] =
+    kp.turnoverPaise === null
+      ? [DASH, "safe" as const]
+      : kp.turnoverPaise <= 30_00_000_00
+      ? ["Below Sec 22 limit", "safe" as const]
+      : kp.turnoverPaise <= SEC22_LIMIT_PAISE
+      ? ["Near Sec 22 limit", "warn" as const]
+      : ["Above Sec 22 limit", "corp" as const];
+  const sec22Sub = s22 === null ? "Turnover not computed" : `${s22}% of ₹40L limit`;
+  const gstNet =
+    kp.gstOutputPaise === null && kp.gstInputPaise === null
+      ? null
+      : (kp.gstOutputPaise ?? 0) - (kp.gstInputPaise ?? 0);
 
   return {
-    turnover: turnoverVal,
-    profit: profitVal,
-    billed: turnoverVal,
-    liquid: liquidVal,
-    debtors: debtorsVal,
-    creditors: creditorsVal,
-    expenses: expensesVal,
-    gst: gstVal,
-    liquidBank: "Operational Bank + Cash",
-    debtorsCount: `${12 + (hash % 20)} Active Accounts`,
-    debtorsAging: "0 overdue > 45d",
-    creditorsCount: `${5 + (hash % 10)} Vendor Accounts`,
-    creditorsTerms: "Terms: Net 30d",
-    expensesHeads: "Operational Overheads",
-    gstBreakdown: "Tax Engine Balanced",
-    gstStatus: "GSTR-3B Ready",
-    quickKpiKeys: DEFAULT_QUICK_KPIS,
-  };
-}
-
-/**
- * Formats a raw KPI data record into displayable strings with currency formatting
- */
-export function formatKpiProfile(raw: RawKpiData): FormattedKpiProfile {
-  const turnover = raw.turnover || 0;
-  const profit = raw.profit || 0;
-  const billed = raw.billed || raw.turnover || 0;
-  const liquid = raw.liquid || 0;
-  const debtors = raw.debtors || 0;
-  const creditors = raw.creditors || 0;
-  const expenses = raw.expenses || 0;
-  const gst = raw.gst || 0;
-
-  const margin = turnover > 0 ? `${Math.round((profit / turnover) * 1000) / 10}%` : "0.0%";
-  const expenseRatio = turnover > 0 ? `${Math.round((expenses / turnover) * 1000) / 10}% Expense Ratio` : "0.0%";
-
-  let sec22Badge = "ALERX Audited";
-  let sec22Variant: "safe" | "warn" | "corp" = "safe";
-  let sec22Progress = "w-[31.1%]";
-  let sec22Sub = "Sec 22 Limit: Enterprise Standard";
-  let billedLimit = "Sec 22 Limit: Enterprise Standard";
-
-  if (billed <= 3000000) {
-    const pct = Math.round((billed / 4000000) * 1000) / 10;
-    sec22Badge = "Sec 22 Safe";
-    sec22Variant = "safe";
-    sec22Progress = `w-[${pct}%]`;
-    sec22Sub = `${pct}% of ₹40L limit`;
-    billedLimit = `Sec 22 Limit: ${pct}% of ₹40L`;
-  } else if (billed <= 4000000) {
-    const pct = Math.round((billed / 4000000) * 1000) / 10;
-    sec22Badge = "GST Due";
-    sec22Variant = "warn";
-    sec22Progress = `w-[${pct}%]`;
-    sec22Sub = `${pct}% of ₹40L limit`;
-    billedLimit = `Sec 22 Limit: ${pct}% of ₹40L`;
-  } else {
-    sec22Badge = "Corporate Active";
-    sec22Variant = "corp";
-    sec22Progress = "w-[100%]";
-    sec22Sub = "Corporate Turnover > ₹40L";
-    billedLimit = "Corporate Turnover > ₹40L";
-  }
-
-  return {
-    raw,
-    turnover: formatINR(turnover),
-    profit: formatINR(profit),
-    margin,
-    billed: formatINR(billed, { minimumFractionDigits: 0 }),
-    billedLimit,
+    hasEntries: kp.hasEntries,
+    periodLabel: from ? `${formatDateTally(from)} to ${formatDateTally(asOf)}` : DASH,
+    turnover: money(kp.turnoverPaise),
+    profit: money(kp.profitPaise),
+    margin: margin === null ? DASH : `${margin}%`,
+    billed: money(kp.billedPaise),
+    billedLimit: kp.billedPaise === null ? "No issued invoices this year" : "Issued invoices this year",
     sec22Badge,
     sec22Variant,
-    sec22Progress,
+    sec22Pct: s22,
     sec22Sub,
-    liquid: formatINR(liquid, { minimumFractionDigits: 0 }),
-    liquidBank: raw.liquidBank || "Operational Bank + Cash",
-    debtors: formatINR(debtors, { minimumFractionDigits: 0 }),
-    debtorsCount: raw.debtorsCount || "Active Debtors",
-    debtorsAging: raw.debtorsAging || "0 overdue > 45d",
-    creditors: formatINR(creditors, { minimumFractionDigits: 0 }),
-    creditorsCount: raw.creditorsCount || "Vendor Accounts",
-    creditorsTerms: raw.creditorsTerms || "Terms: Net 30d",
-    expenses: formatINR(expenses, { minimumFractionDigits: 0 }),
-    expensesHeads: raw.expensesHeads || "Operational Overheads",
-    expenseRatio,
-    gst: formatINR(gst, { minimumFractionDigits: 0 }),
-    gstBreakdown: raw.gstBreakdown || "Tax Engine Balanced",
-    gstStatus: raw.gstStatus || "GSTR-3B Ready",
-    lastEntry: "20-Oct-2026",
-    activeAccounts: 30,
-    quickKpiKeys: raw.quickKpiKeys && raw.quickKpiKeys.length > 0 ? raw.quickKpiKeys : DEFAULT_QUICK_KPIS,
+    liquid: money(kp.liquidPaise),
+    liquidBank: kp.liquidAccounts.length ? kp.liquidAccounts.join(" + ") : none || "No cash or bank balance",
+    debtors: money(kp.debtorsPaise),
+    debtorsCount: plural(kp.debtorsCount, "customer owes", "customers owe"),
+    debtorsAging: plural(kp.debtorsOver45Count, "aged > 45d", "aged > 45d"),
+    creditors: money(kp.creditorsPaise),
+    creditorsCount: plural(kp.creditorsCount, "vendor owed", "vendors owed"),
+    creditorsTerms: kp.dpoDays === null ? `DPO ${DASH}` : `DPO ${kp.dpoDays} days`,
+    expenses: money(kp.expensesPaise),
+    expensesHeads: kp.expenseHeads.join(", ") || none || "No expenses this year",
+    expenseRatio: ratio === null ? `Expense ratio ${DASH}` : `${ratio}% Expense Ratio`,
+    gst: money(gstNet),
+    gstBreakdown:
+      gstNet === null ? "No GST ledgers" : `Output ${lakhs(kp.gstOutputPaise)} − ITC ${lakhs(kp.gstInputPaise)}`,
+    gstStatus: "Ledger balance",
+    lastEntry: kp.lastEntryDate ? formatDateTally(kp.lastEntryDate) : DASH,
+    assets: money(kp.assetsPaise),
+    liabilities: money(kp.liabilitiesPaise),
+    equity: money(kp.equityPaise),
+    equationText: kp.hasEntries
+      ? `Assets (${lakhs(kp.assetsPaise)}) = Liabilities (${lakhs(kp.liabilitiesPaise)}) + Equity (${lakhs(kp.equityPaise)})`
+      : "No posted entries yet",
+    balanced: kp.balanced,
   };
 }
 
-/**
- * Get the current KPI profile for an organization, incorporating localStorage overrides
- */
-export function getKpiProfile(orgId: string, orgName: string = ""): FormattedKpiProfile {
-  let base: RawKpiData = KNOWN_DEFAULT_KPIS[orgId] || getCustomOrgDefaults(orgId, orgName);
-
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem(`deku_kpi_profile_${orgId}`);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        base = { ...base, ...parsed };
-      }
-    } catch {
-      // Use fallback base
-    }
-  }
-
-  return formatKpiProfile(base);
+/** Loads the books for an organisation and computes its KPIs for the current financial year. */
+export async function loadKpis(orgId: string): Promise<FormattedKpiProfile> {
+  const asOf = toISODateString();
+  const [org, accounts, journals, invoices] = await Promise.all([
+    organisationsApi.get(orgId),
+    accountingApi.listAccounts(orgId),
+    accountingApi.listJournals(orgId),
+    invoicesApi.list(orgId),
+  ]);
+  const from = fyStart(asOf, org.data?.[0]?.financial_year_start_month || 4);
+  const k = computeKpis({
+    accounts: accounts.data ?? [],
+    journals: journals.data ?? [],
+    invoices: invoices.data ?? [],
+    from,
+    asOf,
+  });
+  return formatKpis(k, from, asOf);
 }
 
-/**
- * Save updated KPI profile for an organization and broadcast the change event
- */
-export function saveKpiProfile(orgId: string, updates: Partial<RawKpiData>): FormattedKpiProfile {
-  let currentRaw = KNOWN_DEFAULT_KPIS[orgId] || getCustomOrgDefaults(orgId, "Company");
+/** Placeholder while loading or when the books can't be read: every figure shows "–". */
+export const emptyKpis = () =>
+  formatKpis(computeKpis({ accounts: [], journals: [], invoices: [], from: "", asOf: "" }), "", "");
 
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem(`deku_kpi_profile_${orgId}`);
-      if (stored) {
-        currentRaw = { ...currentRaw, ...JSON.parse(stored) };
-      }
-    } catch {}
+const tilesKey = (orgId: string) => `deku_kpi_tiles_${orgId}`;
 
-    const updatedRaw: RawKpiData = {
-      ...currentRaw,
-      ...updates,
-    };
-
-    localStorage.setItem(`deku_kpi_profile_${orgId}`, JSON.stringify(updatedRaw));
-
-    // Dispatch global event for instant reactive update across all open tabs/views
-    window.dispatchEvent(
-      new CustomEvent("deku_kpi_changed", {
-        detail: { orgId, data: updatedRaw },
-      })
-    );
-
-    return formatKpiProfile(updatedRaw);
-  }
-
-  return formatKpiProfile({ ...currentRaw, ...updates });
+export function getQuickKpiKeys(orgId: string): KpiKey[] {
+  try {
+    const keys = JSON.parse(localStorage.getItem(tilesKey(orgId)) || "null");
+    if (Array.isArray(keys) && keys.length) return keys.filter((k): k is KpiKey => k in KPI_META);
+  } catch {}
+  return DEFAULT_QUICK_KPIS;
 }
 
-/**
- * Reset KPI profile to verified defaults
- */
-export function resetKpiProfile(orgId: string, orgName: string = ""): FormattedKpiProfile {
-  if (typeof window !== "undefined") {
+export function saveQuickKpiKeys(orgId: string, keys: KpiKey[] | null) {
+  try {
+    if (keys) localStorage.setItem(tilesKey(orgId), JSON.stringify(keys));
+    else localStorage.removeItem(tilesKey(orgId));
+    // Values once lived here; drop them so nothing stale lingers.
     localStorage.removeItem(`deku_kpi_profile_${orgId}`);
-    window.dispatchEvent(
-      new CustomEvent("deku_kpi_changed", {
-        detail: { orgId },
-      })
-    );
-  }
-  const base = KNOWN_DEFAULT_KPIS[orgId] || getCustomOrgDefaults(orgId, orgName);
-  return formatKpiProfile(base);
+  } catch {}
+  window.dispatchEvent(new CustomEvent("deku_kpi_changed", { detail: { orgId } }));
 }
