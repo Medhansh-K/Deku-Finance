@@ -53,13 +53,13 @@ async fn get_organisation_license(
             "data": license
         }))),
         None => {
-            // Auto-provision default GO tier plan license for this organisation
+            // First visit starts the free trial; paid plans are issued by Deku (migration 22).
+            // shortcut: owner email is a placeholder; take it from the caller's JWT once the backend decodes it.
             let issue_payload = json!({
                 "p_org_id": org_id,
                 "p_owner_email": "admin@deku.finance",
-                "p_type": "plan",
-                "p_tier": "go",
-                "p_tenure_days": 365
+                "p_type": "temp",
+                "p_tier": "go"
             });
 
             if let Ok(issued) = state.supabase.rpc("issue_organisation_license", &issue_payload, token).await {

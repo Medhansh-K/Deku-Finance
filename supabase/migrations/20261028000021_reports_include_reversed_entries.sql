@@ -5,10 +5,14 @@
 -- Every report filtered on status = 'posted', so the original vanished while its reversal
 -- stayed: after any reversal, balances, trial balance, P&L, balance sheet, cash flow and
 -- ageing were wrong by the reversed amount. A reversed entry is still part of the ledger;
--- its reversal is what cancels it. Generated from the latest definitions; only the status
--- filter differs.
+-- its reversal is what cancels it.
+--
+-- Also: the report functions below are SECURITY DEFINER and never checked that the caller
+-- belongs to p_org_id, so any signed-in user could read another company's statements,
+-- cash flow, ageing, FP&A metrics and budgets by passing its id. Each now checks membership.
+-- Generated from the latest definitions; nothing else differs.
 
--- view_general_ledger: latest definition from 20261018000011_alerx_coa_hierarchy.sql, filter changed only
+-- view_general_ledger: latest definition from 20261018000011_alerx_coa_hierarchy.sql; changed: status filter
 CREATE OR REPLACE VIEW public.view_general_ledger
 WITH (security_invoker = true)
 AS
@@ -45,7 +49,7 @@ JOIN public.fiscal_periods fp ON e.fiscal_period_id = fp.id
 LEFT JOIN public.parties p ON l.party_id = p.id
 WHERE e.status IN ('posted', 'reversed');
 
--- view_account_balances: latest definition from 20261018000011_alerx_coa_hierarchy.sql, filter changed only
+-- view_account_balances: latest definition from 20261018000011_alerx_coa_hierarchy.sql; changed: status filter
 CREATE OR REPLACE VIEW public.view_account_balances
 WITH (security_invoker = true)
 AS
@@ -88,7 +92,7 @@ GROUP BY
   a.organisation_id, a.id, a.code, a.account_group, a.ledger, a.sub_ledger, a.label, 
   a.name, a.type, a.is_active, a.is_postable;
 
--- view_profit_and_loss: latest definition from 20261018000011_alerx_coa_hierarchy.sql, filter changed only
+-- view_profit_and_loss: latest definition from 20261018000011_alerx_coa_hierarchy.sql; changed: status filter
 CREATE OR REPLACE VIEW public.view_profit_and_loss
 WITH (security_invoker = true)
 AS
@@ -128,7 +132,7 @@ GROUP BY
   a.organisation_id, e.fiscal_period_id, fp.name, a.id, a.code, a.account_group, 
   a.ledger, a.sub_ledger, a.label, a.name, a.type;
 
--- view_balance_sheet: latest definition from 20261018000011_alerx_coa_hierarchy.sql, filter changed only
+-- view_balance_sheet: latest definition from 20261018000011_alerx_coa_hierarchy.sql; changed: status filter
 CREATE OR REPLACE VIEW public.view_balance_sheet
 WITH (security_invoker = true)
 AS
@@ -168,7 +172,7 @@ GROUP BY
   a.organisation_id, e.fiscal_period_id, fp.name, a.id, a.code, a.account_group, 
   a.ledger, a.sub_ledger, a.label, a.name, a.type;
 
--- view_trial_balance: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql, filter changed only
+-- view_trial_balance: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: status filter
 CREATE OR REPLACE VIEW public.view_trial_balance
 WITH (security_invoker = true)
 AS
@@ -195,7 +199,7 @@ LEFT JOIN public.journal_entry_lines l ON a.id = l.account_id
 LEFT JOIN public.journal_entries e ON l.journal_entry_id = e.id AND e.status IN ('posted', 'reversed')
 GROUP BY a.organisation_id, a.id, a.code, a.name, a.type;
 
--- get_account_statement: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql, filter changed only
+-- get_account_statement: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: status filter + membership check
 CREATE OR REPLACE FUNCTION public.get_account_statement(
   p_org_id uuid,
   p_account_id uuid,
@@ -222,6 +226,9 @@ AS $$
 DECLARE
   v_acct_type text;
 BEGIN
+  IF NOT public.is_org_member(p_org_id) THEN
+    RAISE EXCEPTION 'Permission denied: not a member of this organisation';
+  END IF;
   SELECT type INTO v_acct_type FROM public.accounts WHERE id = p_account_id AND organisation_id = p_org_id;
 
   RETURN QUERY
@@ -268,7 +275,7 @@ BEGIN
 END;
 $$;
 
--- get_cash_flow_statement: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql, filter changed only
+-- get_cash_flow_statement: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: status filter + membership check
 CREATE OR REPLACE FUNCTION public.get_cash_flow_statement(
   p_org_id uuid,
   p_start_date date DEFAULT '2026-04-01',
@@ -289,6 +296,9 @@ DECLARE
   v_net_operating numeric(15, 2) := 0.00;
   v_net_cash_flow numeric(15, 2) := 0.00;
 BEGIN
+  IF NOT public.is_org_member(p_org_id) THEN
+    RAISE EXCEPTION 'Permission denied: not a member of this organisation';
+  END IF;
   -- 1. Calculate opening cash & bank balance before p_start_date
   SELECT COALESCE(SUM(l.debit - l.credit), 0.00)
   INTO v_opening_cash
@@ -373,7 +383,7 @@ BEGIN
 END;
 $$;
 
--- get_ar_ap_aging_analysis: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql, filter changed only
+-- get_ar_ap_aging_analysis: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: status filter + membership check
 CREATE OR REPLACE FUNCTION public.get_ar_ap_aging_analysis(
   p_org_id uuid
 )
@@ -403,6 +413,9 @@ DECLARE
   v_total_credit_sales numeric(15, 2) := 0.00;
   v_total_credit_purchases numeric(15, 2) := 0.00;
 BEGIN
+  IF NOT public.is_org_member(p_org_id) THEN
+    RAISE EXCEPTION 'Permission denied: not a member of this organisation';
+  END IF;
   -- 1. AR: Group unpaid sales invoices into aging buckets
   SELECT
     COALESCE(SUM(total_amount - balance_due), 0.00),
@@ -474,7 +487,7 @@ BEGIN
 END;
 $$;
 
--- get_fpa_corporate_metrics: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql, filter changed only
+-- get_fpa_corporate_metrics: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: status filter + membership check
 CREATE OR REPLACE FUNCTION public.get_fpa_corporate_metrics(
   p_org_id uuid
 )
@@ -502,6 +515,9 @@ DECLARE
   v_monthly_burn_rate numeric(15, 2) := 0.00;
   v_cash_runway_months numeric(5, 1) := 0.0;
 BEGIN
+  IF NOT public.is_org_member(p_org_id) THEN
+    RAISE EXCEPTION 'Permission denied: not a member of this organisation';
+  END IF;
   -- 1. Revenue
   SELECT COALESCE(SUM(l.credit - l.debit), 0.00)
   INTO v_revenue
@@ -614,6 +630,60 @@ BEGIN
       'estimated_monthly_burn', v_monthly_burn_rate,
       'cash_runway_months', v_cash_runway_months
     )
+  );
+END;
+$$;
+
+-- get_departmental_budget_variance: latest definition from 20261018000017_universal_financial_rollup_wcm_fpa.sql; changed: membership check
+CREATE OR REPLACE FUNCTION public.get_departmental_budget_variance(
+  p_org_id uuid
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_departments jsonb;
+  v_total_allocated numeric(15, 2) := 0.00;
+  v_total_utilized numeric(15, 2) := 0.00;
+BEGIN
+  IF NOT public.is_org_member(p_org_id) THEN
+    RAISE EXCEPTION 'Permission denied: not a member of this organisation';
+  END IF;
+  SELECT 
+    COALESCE(SUM(budget_allocated), 0.00),
+    COALESCE(SUM(budget_utilized), 0.00)
+  INTO v_total_allocated, v_total_utilized
+  FROM public.departments
+  WHERE organisation_id = p_org_id;
+
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'id', d.id,
+      'name', d.name,
+      'code', d.code,
+      'budget_allocated', d.budget_allocated,
+      'budget_utilized', d.budget_utilized,
+      'budget_remaining', (d.budget_allocated - d.budget_utilized),
+      'burn_percentage', CASE 
+        WHEN d.budget_allocated > 0 THEN ROUND(((d.budget_utilized / d.budget_allocated) * 100.0), 1)
+        ELSE 0.0
+      END,
+      'headcount', (SELECT COUNT(*) FROM public.employees e WHERE e.department_id = d.id AND e.status = 'active')
+    )
+  )
+  INTO v_departments
+  FROM public.departments d
+  WHERE d.organisation_id = p_org_id;
+
+  RETURN jsonb_build_object(
+    'organisation_id', p_org_id,
+    'total_budget_allocated', v_total_allocated,
+    'total_budget_utilized', v_total_utilized,
+    'total_budget_remaining', (v_total_allocated - v_total_utilized),
+    'overall_burn_pct', CASE WHEN v_total_allocated > 0 THEN ROUND(((v_total_utilized / v_total_allocated) * 100.0), 1) ELSE 0.0 END,
+    'departments', COALESCE(v_departments, '[]'::jsonb)
   );
 END;
 $$;
