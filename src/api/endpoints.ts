@@ -592,4 +592,37 @@ export const consultantApi = {
     ),
 };
 
+export interface BankReconciliation {
+  id: string;
+  organisation_id: string;
+  bank_account_id: string;
+  statement_date: string;
+  statement_amount: number; // positive = deposit, negative = withdrawal
+  statement_reference?: string | null;
+  statement_narration?: string | null;
+  journal_entry_line_id: string;
+  reconciled_by: string;
+  reconciled_at: string;
+}
+
+export const bankingApi = {
+  listReconciliations: (orgId: string, bankAccountId: string) =>
+    apiClient<ApiResponse<BankReconciliation[]>>(
+      `/api/v1/organisations/${orgId}/banking/reconciliations?bank_account_id=${encodeURIComponent(bankAccountId)}`
+    ),
+  reconcile: (
+    orgId: string,
+    payload: Omit<BankReconciliation, "id" | "organisation_id" | "reconciled_by" | "reconciled_at">
+  ) =>
+    apiClient<ApiResponse<BankReconciliation[]>>(
+      `/api/v1/organisations/${orgId}/banking/reconciliations`,
+      { method: "POST", body: JSON.stringify(payload) }
+    ),
+  unreconcile: (orgId: string, reconciliationId: string) =>
+    apiClient<ApiResponse<BankReconciliation[]>>(
+      `/api/v1/organisations/${orgId}/banking/reconciliations/${reconciliationId}`,
+      { method: "DELETE" }
+    ),
+};
+
 

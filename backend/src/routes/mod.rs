@@ -9,6 +9,7 @@ pub mod departments;
 pub mod licenses;
 pub mod documents;
 pub mod consultant;
+pub mod banking;
 
 use axum::Router;
 use crate::supabase::SupabaseClient;
@@ -55,5 +56,9 @@ fn api_routes(state: AppState) -> Router {
         .nest(
             "/organisations/:org_id/consultant",
             consultant::routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/banking",
+            banking::routes(state.clone()),
         )
 }
