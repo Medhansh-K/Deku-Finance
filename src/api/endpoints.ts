@@ -550,17 +550,6 @@ export const documentsApi = {
       `/api/v1/organisations/${orgId}/documents/proposals/${proposalId}/approve`,
       { method: "POST" }
     ),
-  processSarvam: (orgId: string, docId: string) =>
-    apiClient<{
-      success: boolean;
-      sarvam_configured: boolean;
-      message: string;
-      sarvam_job_id?: string;
-      proposal?: any;
-      error?: string;
-    }>(`/api/v1/organisations/${orgId}/documents/${docId}/process-sarvam`, {
-      method: "POST",
-    }),
 };
 
 export const consultantApi = {

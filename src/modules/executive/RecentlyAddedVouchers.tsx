@@ -476,7 +476,7 @@ export function getVouchersForOrg(orgId: string): VoucherItem[] {
   if (COMPANY_VOUCHERS[orgId]) {
     return COMPANY_VOUCHERS[orgId];
   }
-  return COMPANY_VOUCHERS["b127e064-5da8-437f-94c4-b8d6a0c12927"] || [];
+  return [];
 }
 
 export const VOUCHER_TYPE_STYLES = {

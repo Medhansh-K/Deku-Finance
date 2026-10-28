@@ -29,7 +29,7 @@ export function FpaExecutiveView() {
   const [budgetVariance, setBudgetVariance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -56,6 +56,7 @@ export function FpaExecutiveView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     fetchFpaData();
     const handleUpdate = () => fetchFpaData();
     window.addEventListener("deku_ledger_updated", handleUpdate);

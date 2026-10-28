@@ -44,8 +44,8 @@ import {
 } from "@/lib/departments/departments-service";
 
 export function DepartmentsMembersView() {
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [activeCompanyName, setActiveCompanyName] = useState<string>("Deku Financial Technologies");
+  const [orgId, setOrgId] = useState<string>("");
+  const [activeCompanyName, setActiveCompanyName] = useState<string>("");
 
   const [activeTab, setActiveTab] = useState<"departments" | "members" | "payroll" | "governance">("departments");
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -161,6 +161,7 @@ export function DepartmentsMembersView() {
   }, []);
 
   useEffect(() => {
+    if (!orgId) return;
     refreshData();
     window.addEventListener("deku_departments_changed", refreshData);
     window.addEventListener("deku_members_changed", refreshData);

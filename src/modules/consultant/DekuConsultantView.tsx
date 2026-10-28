@@ -400,38 +400,10 @@ export function DekuConsultantView() {
   const router = useRouter();
 
   // Organizations / Workbenches
-  const [orgList, setOrgList] = useState<OrgSummary[]>([
-    {
-      id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      name: "Deku Financial Technologies",
-      slug: "deku-org-9601",
-      gstin: "27AAACD1234E1Z5",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-      name: "All Might Logistics & Warehousing",
-      slug: "all-might-logistics",
-      gstin: "27AABCA5678B1Z2",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "8aec2336-5531-459e-baba-6a37128cffa2",
-      name: "Endeavor Energy & Tech Solutions",
-      slug: "endeavor-energy",
-      gstin: "27AAECE9988C1Z8",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-  ]);
+  const [orgList, setOrgList] = useState<OrgSummary[]>([]);
 
-  const [activeOrgId, setActiveOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [activeOrgName, setActiveOrgName] = useState<string>("Deku Financial Technologies");
+  const [activeOrgId, setActiveOrgId] = useState<string>("");
+  const [activeOrgName, setActiveOrgName] = useState<string>("");
   const [contextData, setContextData] = useState<any>(null);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
 
@@ -548,7 +520,7 @@ export function DekuConsultantView() {
         role: "assistant",
         content: res.response,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        model: res.model_used?.includes("sarvam") ? "Sarvam 105B" : "Deku Sovereign Financial Reasoner",
+        model: res.model_used || "Deku Ledger Analyst (on-premise)",
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -557,7 +529,7 @@ export function DekuConsultantView() {
         id: `assistant-err-${Date.now()}`,
         role: "assistant",
         content:
-          "Unable to query sovereign model right now. Please verify backend connectivity or Sarvam API subscription key in `backend/.env`.",
+          "Could not reach the Deku backend. Check that it is running and that you are signed in.",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -818,7 +790,7 @@ export function DekuConsultantView() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-slate-100 border border-slate-300 text-slate-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              <span className="font-bold font-mono text-slate-900">Sarvam AI (105B)</span>
+              <span className="font-bold font-mono text-slate-900">Ledger Analyst · on-premise</span>
               <ChevronDown className="h-3 w-3 text-slate-400" />
             </div>
 
@@ -1006,7 +978,7 @@ export function DekuConsultantView() {
                 type="button"
                 onClick={() => router.push("/vouchers")}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-                title="Upload document or bill for Sarvam OCR extraction"
+                title="Upload a bill: it is read on this device, never uploaded"
               >
                 <Paperclip className="h-4 w-4" />
               </button>

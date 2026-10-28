@@ -187,7 +187,7 @@ const DEFAULT_CREDITORS: Record<string, VendorCreditor[]> = {
 
 export function CreditorsDpoView() {
   const router = useRouter();
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
   const [creditors, setCreditors] = useState<VendorCreditor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>("cred-1");
@@ -204,7 +204,7 @@ export function CreditorsDpoView() {
     setIsLoading(true);
     try {
       const baseCreditors =
-        DEFAULT_CREDITORS[orgId] || DEFAULT_CREDITORS["b127e064-5da8-437f-94c4-b8d6a0c12927"];
+        DEFAULT_CREDITORS[orgId] ?? [];
       setCreditors(baseCreditors);
       setExpandedId(baseCreditors[0]?.id || null);
     } catch (e) {
@@ -215,6 +215,7 @@ export function CreditorsDpoView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadData();
   }, [orgId]);
 

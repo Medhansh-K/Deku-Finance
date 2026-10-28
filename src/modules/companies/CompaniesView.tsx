@@ -16,7 +16,7 @@ export function CompaniesView() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeOrgId, setActiveOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [activeOrgId, setActiveOrgId] = useState<string>("");
 
   // Create Modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);

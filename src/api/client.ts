@@ -1,4 +1,5 @@
 import { ApiError, NetworkError } from "./errors";
+import { getAccessToken } from "@/lib/supabase/client";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
@@ -21,12 +22,7 @@ export async function apiClient<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  // Retrieve token from argument, localStorage, or cookies if available in browser
-  const activeToken =
-    token ||
-    (typeof window !== "undefined"
-      ? localStorage.getItem("deku_auth_token")
-      : null);
+  const activeToken = token || (await getAccessToken());
 
   if (activeToken) {
     headers.set("Authorization", `Bearer ${activeToken}`);

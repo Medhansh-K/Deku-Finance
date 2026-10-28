@@ -22,7 +22,7 @@ export function SettingsView() {
   const [fpStart, setFpStart] = useState("2027-04-01");
   const [fpEnd, setFpEnd] = useState("2028-03-31");
 
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -45,6 +45,7 @@ export function SettingsView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadFiscalPeriods();
   }, [orgId]);
 

@@ -69,252 +69,13 @@ export interface TrackedInvoice {
   }>;
 }
 
-// Seeded company invoices for rich tracking and conversion history
-const DEFAULT_INVOICES: Record<string, TrackedInvoice[]> = {
-  // 1. Deku Financial Technologies
-  "b127e064-5da8-437f-94c4-b8d6a0c12927": [
-    {
-      id: "inv-deku-1",
-      invoice_number: "INV-2026-5360",
-      invoice_date: "2026-10-05",
-      due_date: "2026-10-25",
-      customer_name: "Apex Enterprise Systems India Pvt Ltd",
-      customer_gstin: "27AACDF1234F1Z5",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 100000,
-      cgst_amount: 9000,
-      sgst_amount: 9000,
-      igst_amount: 0,
-      total_tax: 18000,
-      total_amount: 118000,
-      amount_paid: 0,
-      balance_due: 118000,
-      status: "issued",
-      organisation_id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      items: [
-        {
-          item_name: "Enterprise Financial OS Annual License",
-          hsn_sac_code: "998315",
-          quantity: 1,
-          unit_price: 100000,
-          taxable_amount: 100000,
-          gst_rate: 18,
-          total_amount: 118000,
-        },
-      ],
-    },
-    {
-      id: "inv-deku-2",
-      invoice_number: "INV-2026-5120",
-      invoice_date: "2026-09-28",
-      due_date: "2026-10-18",
-      customer_name: "Krypton Cloud Solutions LLP",
-      customer_gstin: "27AABCK9981K1Z2",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 120339,
-      cgst_amount: 10830.5,
-      sgst_amount: 10830.5,
-      igst_amount: 0,
-      total_tax: 21661,
-      total_amount: 142000,
-      amount_paid: 0,
-      balance_due: 142000,
-      status: "issued",
-      organisation_id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      items: [
-        {
-          item_name: "Multi-tenant Double Entry Engine Integration",
-          hsn_sac_code: "998315",
-          quantity: 1,
-          unit_price: 120339,
-          taxable_amount: 120339,
-          gst_rate: 18,
-          total_amount: 142000,
-        },
-      ],
-    },
-    {
-      id: "inv-deku-3",
-      invoice_number: "INV-2026-4820",
-      invoice_date: "2026-09-15",
-      due_date: "2026-10-05",
-      customer_name: "Zenith Cloud Consulting",
-      customer_gstin: "27AABCZ5512Z1ZQ",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 200000,
-      cgst_amount: 18000,
-      sgst_amount: 18000,
-      igst_amount: 0,
-      total_tax: 36000,
-      total_amount: 236000,
-      amount_paid: 236000,
-      balance_due: 0,
-      status: "converted",
-      converted_at: "2026-10-16",
-      receipt_voucher_number: "RCP-2026-0048",
-      conversion_note: "Full settlement via HDFC Operating Bank A/c (NEFT #8812)",
-      organisation_id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      items: [
-        {
-          item_name: "Q2 Platform Customization & Accounting Connector",
-          hsn_sac_code: "998315",
-          quantity: 1,
-          unit_price: 200000,
-          taxable_amount: 200000,
-          gst_rate: 18,
-          total_amount: 236000,
-        },
-      ],
-    },
-    {
-      id: "inv-deku-4",
-      invoice_number: "INV-2026-4412",
-      invoice_date: "2026-08-20",
-      due_date: "2026-09-10",
-      customer_name: "Reliance Digital Logistics Hub",
-      customer_gstin: "27AAACR1288R1ZW",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 350000,
-      cgst_amount: 31500,
-      sgst_amount: 31500,
-      igst_amount: 0,
-      total_tax: 63000,
-      total_amount: 413000,
-      amount_paid: 413000,
-      balance_due: 0,
-      status: "converted",
-      converted_at: "2026-09-08",
-      receipt_voucher_number: "RCP-2026-0031",
-      conversion_note: "Direct RTGS Bank Transfer into ICICI Bank",
-      organisation_id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      items: [
-        {
-          item_name: "Warehouse Ledger Sync Gateway (Annual)",
-          hsn_sac_code: "998315",
-          quantity: 1,
-          unit_price: 350000,
-          taxable_amount: 350000,
-          gst_rate: 18,
-          total_amount: 413000,
-        },
-      ],
-    },
-    {
-      id: "inv-deku-5",
-      invoice_number: "INV-2026-3910",
-      invoice_date: "2026-07-10",
-      due_date: "2026-07-30",
-      customer_name: "Tata Consultancy Digital Hub",
-      customer_gstin: "27AAACT2727T1ZY",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 284745.76,
-      cgst_amount: 25627.12,
-      sgst_amount: 25627.12,
-      igst_amount: 0,
-      total_tax: 51254.24,
-      total_amount: 336000,
-      amount_paid: 336000,
-      balance_due: 0,
-      status: "converted",
-      converted_at: "2026-07-28",
-      receipt_voucher_number: "RCP-2026-0019",
-      conversion_note: "Corporate CMS settlement",
-      organisation_id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      items: [
-        {
-          item_name: "Real-time GST Invoicing Subsystem Setup",
-          hsn_sac_code: "998315",
-          quantity: 1,
-          unit_price: 284745.76,
-          taxable_amount: 284745.76,
-          gst_rate: 18,
-          total_amount: 336000,
-        },
-      ],
-    },
-  ],
-
-  // 2. All Might Logistics
-  "b093d7d9-395a-429b-8c9a-af31b8b270f2": [
-    {
-      id: "inv-all-1",
-      invoice_number: "INV-2026-4410",
-      invoice_date: "2026-10-18",
-      due_date: "2026-11-02",
-      customer_name: "Brimstone Cargo Express",
-      customer_gstin: "07AABCB5511B1ZX",
-      supply_type: "inter_state",
-      place_of_supply: "07-Delhi",
-      taxable_amount: 400000,
-      cgst_amount: 0,
-      sgst_amount: 0,
-      igst_amount: 72000,
-      total_tax: 72000,
-      total_amount: 472000,
-      amount_paid: 0,
-      balance_due: 472000,
-      status: "issued",
-      organisation_id: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-      items: [
-        {
-          item_name: "Interstate Cold Chain Freight Corridors",
-          hsn_sac_code: "996511",
-          quantity: 1,
-          unit_price: 400000,
-          taxable_amount: 400000,
-          gst_rate: 18,
-          total_amount: 472000,
-        },
-      ],
-    },
-    {
-      id: "inv-all-2",
-      invoice_number: "INV-2026-4109",
-      invoice_date: "2026-09-12",
-      due_date: "2026-09-27",
-      customer_name: "Pinnacle Retail Fleet",
-      customer_gstin: "27AABCP8801P1Z9",
-      supply_type: "intra_state",
-      place_of_supply: "27-Maharashtra",
-      taxable_amount: 525423.73,
-      cgst_amount: 47288.13,
-      sgst_amount: 47288.13,
-      igst_amount: 0,
-      total_tax: 94576.27,
-      total_amount: 620000,
-      amount_paid: 620000,
-      balance_due: 0,
-      status: "converted",
-      converted_at: "2026-10-19",
-      receipt_voucher_number: "RCP-2026-0112",
-      conversion_note: "CMS inward credit into SBI Commercial A/c",
-      organisation_id: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-      items: [
-        {
-          item_name: "Express Freight Distribution Services",
-          hsn_sac_code: "996511",
-          quantity: 1,
-          unit_price: 525423.73,
-          taxable_amount: 525423.73,
-          gst_rate: 18,
-          total_amount: 620000,
-        },
-      ],
-    },
-  ],
-};
 
 export function InvoicesView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialFilter = searchParams?.get("status") || "all";
 
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
   const [invoices, setInvoices] = useState<TrackedInvoice[]>([]);
   const [customers, setCustomers] = useState<Party[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -385,9 +146,7 @@ export function InvoicesView() {
       }
 
       if (cached.length === 0) {
-        // Fall back to default seeded data for this company
-        const seeded = DEFAULT_INVOICES[orgId] || DEFAULT_INVOICES["b127e064-5da8-437f-94c4-b8d6a0c12927"];
-        cached = [...seeded];
+        
 
         // Also merge any live backend invoices
         if (invRes.data && invRes.data.length > 0) {
@@ -431,6 +190,7 @@ export function InvoicesView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadData();
     const handleUpdate = () => loadData();
     window.addEventListener("deku_ledger_updated", handleUpdate);

@@ -148,7 +148,7 @@ export default function LicenseManagementPage() {
                 </span>
               </div>
               <span className="text-xs text-zinc-500 block mt-0.5">
-                Organisation: <strong>{organisation?.name || "Datalis Infoedge Pvt Ltd"}</strong>
+                Organisation: <strong>{organisation?.name || "No company selected"}</strong>
               </span>
             </div>
           </div>

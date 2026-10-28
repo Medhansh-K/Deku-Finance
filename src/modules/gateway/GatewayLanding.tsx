@@ -24,41 +24,13 @@ import {
 export function GatewayLanding() {
   const router = useRouter();
 
-  const [orgList, setOrgList] = useState<OrgSummary[]>([
-    {
-      id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      name: "Deku Financial Technologies",
-      slug: "deku-org-9601",
-      gstin: "27AAACD1234E1Z5",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-      name: "All Might Logistics & Warehousing",
-      slug: "all-might-logistics",
-      gstin: "27AABCA5678B1Z2",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "8aec2336-5531-459e-baba-6a37128cffa2",
-      name: "Endeavor Energy & Tech Solutions",
-      slug: "endeavor-energy",
-      gstin: "27AAECE9988C1Z8",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-  ]);
+  const [orgList, setOrgList] = useState<OrgSummary[]>([]);
 
   const [activeOrg, setActiveOrg] = useState({
-    id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-    name: "Deku Financial Technologies",
-    slug: "deku-org-9601",
-    gstin: "27AAACD1234E1Z5",
+    id: "",
+    name: "",
+    slug: "",
+    gstin: "" as string | null,
     currency: "INR",
   });
 
@@ -80,15 +52,34 @@ export function GatewayLanding() {
     return () => window.removeEventListener("deku_kpi_changed", handleKpiChanged);
   }, [activeOrg.id, activeOrg.name]);
 
+  // Handle switching company
+  const handleSwitchCompany = (org: OrgSummary | { id: string; name: string; gstin?: string | null; currency?: string; slug?: string }) => {
+    setActiveOrg({
+      id: org.id,
+      name: org.name,
+      slug: org.slug || org.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+      gstin: org.gstin ?? null,
+      currency: org.currency || "INR",
+    });
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("deku_active_org_id", org.id);
+      localStorage.setItem("deku_active_org_name", org.name);
+      // Notify AppShell's TopBar to sync immediately
+      window.dispatchEvent(new Event("deku_active_org_changed"));
+    }
+  };
+
   // Load all organisations from PostgreSQL backend
   const loadOrganisations = async () => {
     try {
       const res = await organisationsApi.list();
       if (res.data && res.data.length > 0) {
         setOrgList(res.data);
+        if (!localStorage.getItem("deku_active_org_id")) handleSwitchCompany(res.data[0]);
       }
     } catch {
-      // Keep verified defaults
+      // Backend unreachable or not signed in: show no companies rather than placeholders.
     }
   };
 
@@ -109,7 +100,7 @@ export function GatewayLanding() {
                 id: org.id,
                 name: org.name,
                 slug: org.slug,
-                gstin: org.gstin || "27AAACD1234E1Z5",
+                gstin: org.gstin ?? null,
                 currency: org.currency || "INR",
               });
             } else if (savedName) {
@@ -143,24 +134,6 @@ export function GatewayLanding() {
         setLastEntryDate(prof.lastEntry);
       });
   }, [activeOrg.id, activeOrg.name]);
-
-  // Handle switching company
-  const handleSwitchCompany = (org: OrgSummary | { id: string; name: string; gstin?: string | null; currency?: string; slug?: string }) => {
-    setActiveOrg({
-      id: org.id,
-      name: org.name,
-      slug: org.slug || org.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-      gstin: org.gstin || "27AAACD1234E1Z5",
-      currency: org.currency || "INR",
-    });
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", org.id);
-      localStorage.setItem("deku_active_org_name", org.name);
-      // Notify AppShell's TopBar to sync immediately
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
-  };
 
   // Keyboard shortcut handler
   useEffect(() => {

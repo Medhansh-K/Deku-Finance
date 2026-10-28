@@ -113,9 +113,16 @@ On the **Gateway of Deku** (`/gateway`), pressing highlighted keys instantly nav
 ## 🚀 Development Setup
 
 ### Prerequisites
-- Node.js 18+ (tested with Node 20)
+- Node.js 22+
 - Rust & Cargo (1.75+)
 - PostgreSQL / Supabase
+
+### 0. Database
+```bash
+supabase db push     # apply migrations to your project
+supabase db reset    # local only: migrations + demo sandbox from supabase/seed.sql
+```
+For a hosted project, run `supabase/seed.sql` once in the SQL editor to create the demo sandbox.
 
 ### 1. Start the Rust Backend
 ```bash
@@ -149,4 +156,9 @@ npm test
 ## 🔒 Security & Data Integrity
 - All financial balances are queried directly from authoritative PostgreSQL views and Axum endpoints (`/reports/...`, `/accounts`, `/journals`).
 - Frontend performs client-side double-entry pre-validation to prevent network roundtrips for unbalanced entries while the backend enforces database transactions atomically.
-- Zero mock data in production accounting statements.
+- Every API call runs as the signed-in user, so Supabase row-level security decides what each person sees. The backend has no service-role fallback and rejects requests without a login.
+- Database functions cannot be called with the public anon key (migration 18).
+- **No financial data leaves your infrastructure.** Invoices are read in the browser (PDF text layer, or on-device OCR for scans); the Deku Consultant answers from your own ledger on your own server. Nothing is sent to a third-party AI service.
+- Extracted values are never guessed: anything that cannot be read is left blank and flagged for the user.
+- **Demo sandbox:** "Try demo" signs in to real sandbox accounts (`demo-owner@`, `demo-accountant@`, `demo-freelancer@deku.finance`, password `DekuDemo#2026`) that belong only to fictional companies.
+- Known gap: some report screens (Creditors, Operating Expenses, Executive dashboard) still show built-in sample figures instead of ledger data.

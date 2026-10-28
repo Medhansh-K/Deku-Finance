@@ -282,7 +282,7 @@ const DEFAULT_EXPENSE_VOUCHERS: Record<string, PaymentVoucherExpense[]> = {
 
 export function OperatingExpensesView() {
   const router = useRouter();
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
   const [vouchers, setVouchers] = useState<PaymentVoucherExpense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -304,7 +304,7 @@ export function OperatingExpensesView() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const list = DEFAULT_EXPENSE_VOUCHERS[orgId] || DEFAULT_EXPENSE_VOUCHERS["b127e064-5da8-437f-94c4-b8d6a0c12927"];
+      const list = DEFAULT_EXPENSE_VOUCHERS[orgId] ?? [];
       setVouchers(list);
     } catch (e) {
       console.error(e);
@@ -314,6 +314,7 @@ export function OperatingExpensesView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadData();
   }, [orgId]);
 

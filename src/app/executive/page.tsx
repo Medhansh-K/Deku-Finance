@@ -174,10 +174,10 @@ function getExecProfile(orgId: string): ExecCompanyProfile {
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
 
-  const [activeOrgId, setActiveOrgId] = useState("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [activeOrgName, setActiveOrgName] = useState("Deku Financial Technologies");
+  const [activeOrgId, setActiveOrgId] = useState("");
+  const [activeOrgName, setActiveOrgName] = useState("");
   const [taxProfile, setTaxProfile] = useState<OrgTaxProfile>(() =>
-    getDefaultTaxProfile("b127e064-5da8-437f-94c4-b8d6a0c12927")
+    getDefaultTaxProfile("")
   );
 
   // Conversion Modal State
@@ -192,35 +192,7 @@ export default function ExecutiveDashboardPage() {
     getKpiProfile("b127e064-5da8-437f-94c4-b8d6a0c12927", "Deku Financial Technologies")
   );
 
-  const [orgList, setOrgList] = useState<OrgSummary[]>([
-    {
-      id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-      name: "Deku Financial Technologies",
-      slug: "deku-org-9601",
-      gstin: null,
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "b093d7d9-395a-429b-8c9a-af31b8b270f2",
-      name: "All Might Logistics & Warehousing",
-      slug: "all-might-logistics",
-      gstin: null,
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-    {
-      id: "8aec2336-5531-459e-baba-6a37128cffa2",
-      name: "Endeavor Energy & Tech Solutions",
-      slug: "endeavor-energy",
-      gstin: "27AAECE9988C1Z8",
-      currency: "INR",
-      timezone: "Asia/Kolkata",
-      financial_year_start_month: 4,
-    },
-  ]);
+  const [orgList, setOrgList] = useState<OrgSummary[]>([]);
 
   // Synchronize active organization and tax profile from storage
   const syncFromStorage = () => {

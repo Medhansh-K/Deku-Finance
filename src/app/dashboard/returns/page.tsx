@@ -18,55 +18,12 @@ export default function ReturnsHubPage() {
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
   const handleDownloadGstr3b = () => {
-    const gstr3bData = {
-      gstin: organisation?.gstin || "27AABCD1234F1Z5",
-      ret_period: "102026",
-      filing_typ: "GSTR3B",
-      sec_sum: {
-        "3.1": {
-          osup_det: {
-            txval: 640000.0,
-            camt: 28800.0,
-            samt: 28800.0,
-            iamt: 0.0,
-            csamt: 0.0,
-          },
-        },
-        "4": {
-          itc_avl: [
-            {
-              ty: "IMPG",
-              iamt: 0.0,
-              camt: 0.0,
-              samt: 0.0,
-              csamt: 0.0,
-            },
-            {
-              ty: "OTH",
-              iamt: 0.0,
-              camt: 9450.0,
-              samt: 9450.0,
-              csamt: 0.0,
-            },
-          ],
-        },
-      },
-    };
-
-    const blob = new Blob([JSON.stringify(gstr3bData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `GSTR3B_${organisation?.gstin || "27AABCD1234F1Z5"}_102026.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    setDownloadSuccess("GSTR-3B Offline JSON generated & downloaded! Upload directly to gst.gov.in.");
-    setTimeout(() => setDownloadSuccess(null), 4000);
+    // shortcut: export disabled until GSTR-3B is computed from posted GST ledgers for the period.
+    // The old file used the same hardcoded figures for every company, i.e. a false return.
+    setDownloadSuccess(
+      "GSTR-3B export is not available yet: it will be generated from your posted GST ledgers. Nothing was downloaded."
+    );
+    setTimeout(() => setDownloadSuccess(null), 6000);
   };
 
   const isPure = operatingMode === "pure_accounting";

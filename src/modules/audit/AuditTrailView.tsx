@@ -62,8 +62,8 @@ interface UnifiedLogItem {
 }
 
 export function AuditTrailView() {
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [orgName, setOrgName] = useState<string>("Deku Financial Technologies");
+  const [orgId, setOrgId] = useState<string>("");
+  const [orgName, setOrgName] = useState<string>("");
   const [userLogs, setUserLogs] = useState<UserActivityLog[]>([]);
   const [dbEvents, setDbEvents] = useState<AuditEvent[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
@@ -112,12 +112,14 @@ export function AuditTrailView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadUserLogs();
     fetchDbAudit();
   }, [orgId]);
 
   // Listen to live activity logging events
   useEffect(() => {
+    if (!orgId) return;
     const handleNewActivity = () => {
       loadUserLogs();
     };

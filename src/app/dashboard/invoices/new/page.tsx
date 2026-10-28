@@ -35,7 +35,7 @@ export default function CreateInvoicePage() {
     isPure ? "Unregistered / Consumer" : "27XYZAB9876C1Z3"
   );
   const [customerState, setCustomerState] = useState("Maharashtra (27)");
-  const [upiVpa, setUpiVpa] = useState("7506461004@paytm");
+  const [upiVpa, setUpiVpa] = useState(organisation?.upi_vpa ?? "");
 
   // Custom Fields State (As requested)
   const [customFields, setCustomFields] = useState({
@@ -300,12 +300,12 @@ export default function CreateInvoicePage() {
               Billed From (Supplier)
             </span>
             <div className="font-bold text-sm text-zinc-950">
-              {organisation?.name || "Datalis Infoedge Pvt Ltd"}
+              {organisation?.name || "Your company"}
             </div>
             <div className="text-zinc-600">
               {isPure
                 ? "GSTIN: Unregistered / Exempt under Section 22"
-                : "GSTIN: 27AABCD1234F1Z5"}
+                : organisation?.gstin ? `GSTIN: ${organisation.gstin}` : "GSTIN: not set (add it in Settings)"}
             </div>
             <div className="text-zinc-500">Mumbai, Maharashtra (27) • India</div>
           </div>

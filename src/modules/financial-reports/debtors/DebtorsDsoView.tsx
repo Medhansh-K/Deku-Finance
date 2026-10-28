@@ -139,7 +139,7 @@ const DEFAULT_DEBTORS: Record<string, CustomerDebtor[]> = {
 
 export function DebtorsDsoView() {
   const router = useRouter();
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
   const [debtors, setDebtors] = useState<CustomerDebtor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>("deb-1");
@@ -156,7 +156,7 @@ export function DebtorsDsoView() {
     setIsLoading(true);
     try {
       const partyRes = await partiesApi.list(orgId).catch(() => ({ data: [] as Party[] }));
-      const baseDebtors = DEFAULT_DEBTORS[orgId] || DEFAULT_DEBTORS["b127e064-5da8-437f-94c4-b8d6a0c12927"];
+      const baseDebtors = DEFAULT_DEBTORS[orgId] ?? [];
 
       // Check if we have dynamic invoices in local storage
       const storageKey = `deku_invoices_${orgId}`;
@@ -245,6 +245,7 @@ export function DebtorsDsoView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadData();
   }, [orgId]);
 

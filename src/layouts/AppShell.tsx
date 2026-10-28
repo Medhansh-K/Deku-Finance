@@ -36,8 +36,8 @@ export function AppShell({ children }: AppShellProps) {
     name: string;
     financialYear: string;
   }>({
-    id: "b127e064-5da8-437f-94c4-b8d6a0c12927",
-    name: "Deku Financial Technologies",
+    id: "",
+    name: "",
     financialYear: "2026-27",
   });
 

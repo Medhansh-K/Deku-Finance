@@ -47,10 +47,10 @@ export function DayBookView() {
   const [error, setError] = useState<string | null>(null);
 
   // Active Organisation State (initialized with deterministic server default)
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [orgName, setOrgName] = useState<string>("Deku Financial Technologies");
+  const [orgId, setOrgId] = useState<string>("");
+  const [orgName, setOrgName] = useState<string>("");
   const [taxProfile, setTaxProfile] = useState<OrgTaxProfile>(() =>
-    getDefaultTaxProfile("b127e064-5da8-437f-94c4-b8d6a0c12927")
+    getDefaultTaxProfile("")
   );
   const [orgList, setOrgList] = useState<OrgSummary[]>([]);
 
@@ -84,8 +84,8 @@ export function DayBookView() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
-      const savedId = localStorage.getItem("deku_active_org_id") || "b127e064-5da8-437f-94c4-b8d6a0c12927";
-      const savedName = localStorage.getItem("deku_active_org_name") || "Deku Financial Technologies";
+      const savedId = localStorage.getItem("deku_active_org_id") || "";
+      const savedName = localStorage.getItem("deku_active_org_name") || "";
       setOrgId(savedId);
       setOrgName(savedName);
       setTaxProfile(getOrgTaxProfile(savedId));
@@ -116,6 +116,7 @@ export function DayBookView() {
 
   // Reactive listener for ledger changes from voucher posting or reversals
   useEffect(() => {
+    if (!orgId) return;
     const handleUpdate = () => {
       fetchJournals();
     };
@@ -228,6 +229,7 @@ export function DayBookView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     fetchJournals();
   }, [orgId]);
 

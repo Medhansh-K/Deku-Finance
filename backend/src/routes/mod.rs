@@ -11,13 +11,11 @@ pub mod documents;
 pub mod consultant;
 
 use axum::Router;
-use crate::config::Config;
 use crate::supabase::SupabaseClient;
 
 #[derive(Clone)]
 pub struct AppState {
     pub supabase: SupabaseClient,
-    pub config: Config,
 }
 
 pub fn create_router(state: AppState) -> Router {

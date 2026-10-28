@@ -6,6 +6,7 @@
  */
 
 import { auditApi } from "@/api/endpoints";
+import { getAccessToken } from "@/lib/supabase/client";
 
 export type CrudOperation = "CREATE" | "READ" | "UPDATE" | "DELETE";
 
@@ -47,7 +48,7 @@ function getActiveOrgId(): string {
     const saved = localStorage.getItem("deku_active_org_id");
     if (saved) return saved;
   }
-  return "b127e064-5da8-437f-94c4-b8d6a0c12927"; // Deku Financial Technologies default
+  return "";
 }
 
 function getActiveActor(): { name: string; role: string } {
@@ -385,7 +386,7 @@ export async function downloadSecureAuditExport(
 
   try {
     const url = auditApi.exportUrl(orgId, format);
-    const token = localStorage.getItem("deku_auth_token");
+    const token = await getAccessToken();
     const headers: Record<string, string> = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
 

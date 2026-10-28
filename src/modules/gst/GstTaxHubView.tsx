@@ -45,7 +45,7 @@ export function GstTaxHubView() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
 
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
 
   // New Invoice Form State
   const [newInvCustomer, setNewInvCustomer] = useState("");
@@ -109,6 +109,7 @@ export function GstTaxHubView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     loadData();
   }, [orgId]);
 

@@ -184,7 +184,7 @@ export default function DashboardSidebar() {
           </div>
 
           <div className="font-bold text-xs text-white truncate">
-            {organisation?.name || "Datalis Infoedge Pvt Ltd"}
+            {organisation?.name || "No company selected"}
           </div>
 
           {/* License Status Badge with rules */}

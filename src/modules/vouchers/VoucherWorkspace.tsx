@@ -36,7 +36,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, partiesApi } from "@/api/endpoints";
+import { accountingApi, organisationsApi, partiesApi } from "@/api/endpoints";
 import { Account, CreateJournalRequest, FiscalPeriod, Party } from "@/types/accounting";
 import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
@@ -213,7 +213,8 @@ export function VoucherWorkspace({
 
   const activeConfig = VOUCHER_CONFIGS[activeMode];
 
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
+  const [orgGstin, setOrgGstin] = useState<string | null>(null);
   const [activeCompanyName, setActiveCompanyName] = useState<string>("Deku Financial Technologies");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
@@ -301,6 +302,11 @@ export function VoucherWorkspace({
   }, []);
 
   useEffect(() => {
+    if (!orgId) return;
+    organisationsApi
+      .get(orgId)
+      .then((res) => setOrgGstin(res.data?.[0]?.gstin ?? null))
+      .catch(() => setOrgGstin(null));
     Promise.all([
       accountingApi.listAccounts(orgId),
       partiesApi.list(orgId),
@@ -657,9 +663,9 @@ export function VoucherWorkspace({
   const applyExtractedData = (data: ExtractedVoucherData) => {
     setExtractedData(data);
     setActiveMode(data.detectedType);
-    setVoucherNumber(data.voucherNumber);
-    setReference(data.reference);
-    setEntryDate(data.date);
+    // Keep the form's own voucher number and date unless the document gave us real ones.
+    setReference(data.reference ?? "");
+    if (data.date) setEntryDate(data.date);
     setNarration(data.narration);
 
     if (data.lines && data.lines.length > 0) {
@@ -667,7 +673,7 @@ export function VoucherWorkspace({
         id: `extracted-${idx}-${Date.now()}`,
         line_number: idx + 1,
         dr_cr: l.dr_cr,
-        account_id: l.accountId || (accounts[idx % accounts.length]?.id ?? ""),
+        account_id: l.accountId,
         party_id: l.partyId || data.partyId || "",
         description: l.description,
         amount: l.amount,
@@ -707,7 +713,7 @@ export function VoucherWorkspace({
     ]);
   };
 
-  // Run simulation extraction pipeline for files or sample bills
+  // Read a file or sample bill into the voucher form
   const triggerDocumentExtraction = async (
     extractFn: () => Promise<ExtractedVoucherData> | ExtractedVoucherData
   ) => {
@@ -715,14 +721,7 @@ export function VoucherWorkspace({
     setApiError(null);
     setSubmissionSuccess(null);
 
-    setExtractionProgressText("Scanning document layout with ALERX OCR...");
-    await new Promise((r) => setTimeout(r, 400));
-
-    setExtractionProgressText("Detecting invoice #, date, and counterparty...");
-    await new Promise((r) => setTimeout(r, 450));
-
-    setExtractionProgressText("Classifying ledger accounts & verifying double-entry parity...");
-    await new Promise((r) => setTimeout(r, 350));
+    setExtractionProgressText("Reading the document on this device (nothing is uploaded)...");
 
     try {
       const result = await extractFn();
@@ -739,7 +738,7 @@ export function VoucherWorkspace({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    triggerDocumentExtraction(() => extractFromFile(file, accounts, parties));
+    triggerDocumentExtraction(() => extractFromFile(file, accounts, parties, orgGstin));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -751,11 +750,11 @@ export function VoucherWorkspace({
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
 
-    triggerDocumentExtraction(() => extractFromFile(file, accounts, parties));
+    triggerDocumentExtraction(() => extractFromFile(file, accounts, parties, orgGstin));
   };
 
   const handleSampleSelect = (sampleId: string) => {
-    triggerDocumentExtraction(() => extractFromSample(sampleId, accounts, parties));
+    triggerDocumentExtraction(() => extractFromSample(sampleId, accounts, parties, orgGstin));
   };
 
   // Submit Voucher (Draft or Post)
@@ -1120,8 +1119,8 @@ export function VoucherWorkspace({
             </div>
 
             <p className="text-[11px] text-slate-500 mb-2.5 leading-snug">
-              Drop an invoice, receipt or bill to automatically detect voucher type,
-              amounts, parties and ledger accounts.
+              Drop a GST invoice to pre-fill the voucher. It is read on this device and never
+              uploaded. Anything it can&apos;t read is left blank for you.
             </p>
 
             {/* Hidden File Input */}
@@ -1172,7 +1171,11 @@ export function VoucherWorkspace({
 
             {/* Extracted Document Info Card */}
             {extractedData && !isExtracting && (
-              <div className="mt-2.5 p-2 rounded bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1.5">
+              <div className={`mt-2.5 p-2 rounded border space-y-1.5 ${
+                extractedData.missingFields.length || extractedData.warnings.length
+                  ? "bg-amber-50 border-amber-300 text-amber-950"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-900"
+              }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 font-bold text-[11px]">
                     <FileCheck2 className="h-3.5 w-3.5 text-emerald-600" />
@@ -1198,21 +1201,36 @@ export function VoucherWorkspace({
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500">Confidence: </span>
-                    <span className="font-bold text-emerald-700">
-                      {extractedData.confidence.toFixed(1)}%
+                    <span className="text-slate-500">Invoice: </span>
+                    <span className="font-bold text-slate-900">
+                      {extractedData.reference ?? "not read"}
                     </span>
                   </div>
                   <div className="col-span-2">
                     <span className="text-slate-500">Total: </span>
                     <span className="font-bold text-slate-900">
-                      {formatINR(extractedData.totalAmount)}
+                      {extractedData.totalAmount === null ? "not read" : formatINR(extractedData.totalAmount)}
                     </span>
                   </div>
                 </div>
 
-                <div className="text-[9px] text-emerald-700 bg-white/70 px-1.5 py-0.5 rounded border border-emerald-200">
-                  ✓ Auto-filled into active voucher form
+                {extractedData.missingFields.length > 0 && (
+                  <div className="text-[10px] bg-white/70 px-1.5 py-1 rounded border border-amber-300">
+                    <span className="font-bold">Not found, please fill in:</span>
+                    <ul className="list-disc pl-4">
+                      {extractedData.missingFields.map((f) => (
+                        <li key={f}>{f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {extractedData.warnings.map((w) => (
+                  <div key={w} role="alert" className="text-[10px] font-semibold text-rose-700 bg-white/70 px-1.5 py-1 rounded border border-rose-200">
+                    {w}
+                  </div>
+                ))}
+                <div className="text-[9px] bg-white/70 px-1.5 py-0.5 rounded border border-slate-200 text-slate-600">
+                  Filled into the voucher form. Review every line before posting.
                 </div>
               </div>
             )}
@@ -1220,7 +1238,7 @@ export function VoucherWorkspace({
             {/* Quick Sample Invoices */}
             <div className="mt-3 pt-2.5 border-t border-slate-200">
               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-                Quick Test Samples
+                Try a sample (fictional data)
               </div>
               <div className="space-y-1">
                 {SAMPLE_DOCUMENTS.map((sample) => (

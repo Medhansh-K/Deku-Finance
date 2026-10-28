@@ -92,7 +92,7 @@ export function TopBar({
           <Link
             href="/consultant"
             className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-teal-950/40 text-teal-300 hover:bg-teal-900/60 hover:text-white border border-teal-500/40 hover:border-teal-400 transition-colors shadow-xs"
-            title="Deku Consultant AI CFO (Sarvam AI Powered)"
+            title="Deku Consultant: answers from your own ledger, on your servers"
           >
             <span className="font-bold"><u>K</u>onsultant</span>
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />

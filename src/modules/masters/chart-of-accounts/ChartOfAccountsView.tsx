@@ -92,7 +92,7 @@ export function ChartOfAccountsView() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Active Organisation (from localStorage or default)
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
 
   // Create Account Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -181,6 +181,7 @@ export function ChartOfAccountsView() {
   };
 
   useEffect(() => {
+    if (!orgId) return;
     fetchAccounts();
     const handleUpdate = () => fetchAccounts();
     window.addEventListener("deku_ledger_updated", handleUpdate);

@@ -24,12 +24,14 @@ export function CashFlowView() {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
+  const [orgId, setOrgId] = useState<string>("");
 
   const [startDate, setStartDate] = useState("2026-04-01");
-  const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
+  // Set on mount: "today" must not be frozen into the prerendered page at build time.
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
+    setEndDate(new Date().toISOString().split("T")[0]);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -53,6 +55,7 @@ export function CashFlowView() {
   };
 
   useEffect(() => {
+    if (!orgId || !endDate) return;
     fetchCashFlow();
     const handleUpdate = () => fetchCashFlow();
     window.addEventListener("deku_ledger_updated", handleUpdate);

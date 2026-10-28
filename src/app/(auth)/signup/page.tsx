@@ -409,7 +409,7 @@ function SignupForm() {
                     type="text"
                     value={upiVpa}
                     onChange={(e) => setUpiVpa(e.target.value)}
-                    placeholder="e.g. 7506461004@paytm or yourbusiness@okaxis"
+                    placeholder="e.g. yourbusiness@okaxis"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
                   />
                 </div>

@@ -6,3 +6,10 @@ export function createClient() {
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
+
+/** The signed-in user's Supabase JWT, sent to the backend so row-level security applies. */
+export async function getAccessToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  const { data } = await createClient().auth.getSession();
+  return data.session?.access_token ?? null;
+}

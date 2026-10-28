@@ -1,7 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { organisationsApi, OrgSummary } from "@/api/endpoints";
 import {
   UserProfile,
   Organisation,
@@ -96,41 +98,25 @@ export const createDefaultLicense = (
   };
 };
 
-const DEFAULT_DEMO_ORG: Organisation = {
-  id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  name: "Datalis Infoedge Pvt Ltd",
-  slug: "datalis-infoedge",
-  legal_name: "Datalis Infoedge Private Limited",
-  gstin: "27AABCD1234F1Z5",
-  pan: "AABCD1234F",
-  currency: "INR",
-  timezone: "Asia/Kolkata",
-  fy_start_month: 4,
-  operating_mode: "pure_accounting",
-  operating_state: "Maharashtra",
-  state_code: "27",
-  upi_vpa: "7506461004@paytm",
-  turnover_limit: 4000000,
-  current_turnover: 640000,
-  license: createDefaultLicense(
-    "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    "owner@tenant1.com",
-    "temp",
-    "go"
-  ),
-};
+// Sandbox accounts from supabase/seed.sql. They belong only to fictional demo companies,
+// so row-level security keeps demo visitors out of every real tenant.
+const DEMO_ACCOUNTS = {
+  owner: "demo-owner@deku.finance",
+  accountant: "demo-accountant@deku.finance",
+  freelancer: "demo-freelancer@deku.finance",
+} as const;
+const DEMO_PASSWORD = "DekuDemo#2026";
+
+const slugify = (name: string) =>
+  `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${crypto.randomUUID().slice(0, 6)}`;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [organisation, setOrg] = useState<Organisation | null>(DEFAULT_DEMO_ORG);
-  const [organisations, setOrganisations] = useState<Organisation[]>([
-    DEFAULT_DEMO_ORG,
-  ]);
-  const [license, setLicense] = useState<OrganisationLicense | null>(
-    DEFAULT_DEMO_ORG.license || null
-  );
+  const [organisation, setOrg] = useState<Organisation | null>(null);
+  const [organisations, setOrganisations] = useState<Organisation[]>([]);
+  const [license, setLicense] = useState<OrganisationLicense | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [operatingMode, setOperatingModeState] =
     useState<OperatingMode>("pure_accounting");
@@ -139,90 +125,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const savedDemo = localStorage.getItem("deku_demo_user");
-        const savedOrg = localStorage.getItem("deku_active_org");
-        const savedMode = localStorage.getItem(
-          "deku_operating_mode"
-        ) as OperatingMode;
-        const savedLicense = localStorage.getItem("deku_active_license");
+  const setOrganisation = (org: Organisation) => {
+    setOrg(org);
+    setOperatingModeState(org.operating_mode);
+    if (org.license) {
+      setLicense(org.license);
+      localStorage.setItem("deku_active_license", JSON.stringify(org.license));
+    }
+    localStorage.setItem("deku_active_org", JSON.stringify(org));
+    localStorage.setItem("deku_operating_mode", org.operating_mode);
+    // Screens read the active company id from here.
+    localStorage.setItem("deku_active_org_id", org.id);
+    localStorage.setItem("deku_active_org_name", org.name);
+    window.dispatchEvent(new Event("deku_active_org_changed"));
+  };
 
-        if (savedMode) {
-          setOperatingModeState(savedMode);
-        }
+  const toUser = (u: User): UserProfile => ({
+    id: u.id,
+    email: u.email || "",
+    full_name: u.user_metadata?.full_name || u.email?.split("@")[0],
+    avatar_url: u.user_metadata?.avatar_url,
+    is_demo: u.user_metadata?.is_demo === true,
+  });
 
-        if (savedOrg) {
-          try {
-            const parsed = JSON.parse(savedOrg);
-            setOrg(parsed);
-            if (parsed.license) {
-              setLicense(parsed.license);
-            }
-          } catch {
-            setOrg(DEFAULT_DEMO_ORG);
-            setLicense(DEFAULT_DEMO_ORG.license || null);
-          }
-        }
-
-        if (savedLicense) {
-          try {
-            const parsedLic = JSON.parse(savedLicense);
-            setLicense(parsedLic);
-          } catch {
-            // ignore
-          }
-        }
-
-        if (savedDemo) {
-          try {
-            const parsedUser = JSON.parse(savedDemo);
-            setUser(parsedUser);
-            setIsLoading(false);
-            return;
-          } catch {
-            localStorage.removeItem("deku_demo_user");
-          }
-        }
-
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || "",
-            full_name:
-              session.user.user_metadata?.full_name ||
-              session.user.email?.split("@")[0],
-            avatar_url: session.user.user_metadata?.avatar_url,
-            is_demo: false,
-          });
-        }
-      } catch (e) {
-        console.error("Auth init error:", e);
-      } finally {
-        setIsLoading(false);
+  // Companies come from the database; row-level security returns only this user's.
+  const loadOrganisations = async (email: string, businessName?: string) => {
+    try {
+      let list: OrgSummary[] = (await organisationsApi.list()).data || [];
+      if (list.length === 0 && businessName) {
+        // Signup records the business name; the company is created on first sign-in.
+        await organisationsApi.create({ name: businessName, slug: slugify(businessName) });
+        list = (await organisationsApi.list()).data || [];
       }
-    };
+      const savedMode = localStorage.getItem("deku_operating_mode") as OperatingMode | null;
+      let savedLicense: OrganisationLicense | null = null;
+      try {
+        savedLicense = JSON.parse(localStorage.getItem("deku_active_license") || "null");
+      } catch {
+        // ignore a corrupt saved license
+      }
+      // shortcut: licenses are still issued client-side; move them to the backend licenses API.
+      const orgs: Organisation[] = list.map((o) => ({
+        id: o.id,
+        name: o.name,
+        slug: o.slug,
+        gstin: o.gstin ?? undefined,
+        pan: o.pan ?? undefined,
+        currency: o.currency,
+        timezone: o.timezone,
+        fy_start_month: o.financial_year_start_month,
+        operating_mode: savedMode || (o.gstin ? "gst_enterprise" : "pure_accounting"),
+        license:
+          savedLicense?.organisation_id === o.id ? savedLicense : createDefaultLicense(o.id, email),
+      }));
+      setOrganisations(orgs);
+      const savedId = localStorage.getItem("deku_active_org_id");
+      const active = orgs.find((o) => o.id === savedId) ?? orgs[0];
+      if (active) setOrganisation(active);
+    } catch (e) {
+      console.error("Failed to load companies:", e);
+    }
+  };
 
-    initAuth();
-
+  useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          full_name:
-            session.user.user_metadata?.full_name ||
-            session.user.email?.split("@")[0],
-          avatar_url: session.user.user_metadata?.avatar_url,
-          is_demo: false,
-        });
-        localStorage.removeItem("deku_demo_user");
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === "INITIAL_SESSION" || event === "SIGNED_IN")) {
+        const u = session.user;
+        setUser(toUser(u));
+        // Supabase calls inside this callback can deadlock, so load after it returns.
+        setTimeout(() => {
+          loadOrganisations(u.email || "", u.user_metadata?.business_name).finally(() => setIsLoading(false));
+        }, 0);
+      } else if (event === "INITIAL_SESSION" || event === "SIGNED_OUT") {
+        setUser(null);
+        setOrg(null);
+        setOrganisations([]);
+        setIsLoading(false);
       }
     });
 
@@ -239,17 +219,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setOrg(updated);
       localStorage.setItem("deku_active_org", JSON.stringify(updated));
     }
-  };
-
-  const setOrganisation = (org: Organisation) => {
-    setOrg(org);
-    setOperatingModeState(org.operating_mode);
-    if (org.license) {
-      setLicense(org.license);
-      localStorage.setItem("deku_active_license", JSON.stringify(org.license));
-    }
-    localStorage.setItem("deku_active_org", JSON.stringify(org));
-    localStorage.setItem("deku_operating_mode", org.operating_mode);
   };
 
   const dismissEmailNotification = () => {
@@ -378,13 +347,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || email,
-          full_name: data.user.user_metadata?.full_name || email.split("@")[0],
-          is_demo: false,
-        });
-        localStorage.removeItem("deku_demo_user");
+        setUser(toUser(data.user));
 
         // Automatically trigger activation email dispatch record for the logged in user
         await sendActivationEmail(email);
@@ -427,42 +390,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         return { error: error.message };
       }
-
-      const orgId = crypto.randomUUID();
-      // Auto-issue 15-day Temp License with 5-day migration grace period
-      const newLicense = createDefaultLicense(orgId, email, "temp", plan);
-
-      const newOrg: Organisation = {
-        id: orgId,
-        name: businessName,
-        slug: businessName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-        legal_name: businessName,
-        currency: "INR",
-        timezone: "Asia/Kolkata",
-        fy_start_month: 4,
-        operating_mode: mode,
-        operating_state: state,
-        state_code: "27",
-        upi_vpa: "7506461004@paytm",
-        turnover_limit: mode === "pure_accounting" ? 4000000 : undefined,
-        current_turnover: 0,
-        license: newLicense,
-      };
-
-      setOrganisation(newOrg);
-      setLicense(newLicense);
-      localStorage.setItem("deku_active_license", JSON.stringify(newLicense));
+      localStorage.setItem("deku_operating_mode", mode);
 
       // Dispatch activation email on signup
       await sendActivationEmail(email);
 
       if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || email,
-          full_name: fullName,
-          is_demo: false,
-        });
+        setUser(toUser(data.user));
       }
       return {};
     } catch (err: unknown) {
@@ -474,79 +408,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginDemo = async (type: "owner" | "accountant" | "freelancer") => {
     setIsLoading(true);
-    let demoUser: UserProfile;
-    let demoOrg: Organisation;
-    let demoLic: OrganisationLicense;
-
-    if (type === "owner") {
-      demoUser = {
-        id: "11111111-1111-1111-1111-111111111111",
-        email: "owner@tenant1.com",
-        full_name: "Medhansh (Founder)",
-        is_demo: true,
-      };
-      demoLic = createDefaultLicense(
-        DEFAULT_DEMO_ORG.id,
-        "owner@tenant1.com",
-        "plan",
-        "pro"
-      );
-      demoOrg = {
-        ...DEFAULT_DEMO_ORG,
-        operating_mode: "gst_enterprise",
-        license: demoLic,
-      };
-    } else if (type === "freelancer") {
-      demoUser = {
-        id: "44444444-4444-4444-4444-444444444444",
-        email: "freelancer@deku.finance",
-        full_name: "Aarav Sharma (Studio Lead)",
-        is_demo: true,
-      };
-      demoLic = createDefaultLicense(
-        "44444444-org-4444-4444-444444444444",
-        "freelancer@deku.finance",
-        "temp",
-        "go"
-      );
-      demoOrg = {
-        ...DEFAULT_DEMO_ORG,
-        id: "44444444-org-4444-4444-444444444444",
-        name: "Sharma Creative Studio",
-        legal_name: "Sharma Creative Studio",
-        gstin: undefined,
-        operating_mode: "pure_accounting",
-        license: demoLic,
-      };
-    } else {
-      demoUser = {
-        id: "22222222-2222-2222-2222-222222222222",
-        email: "accountant@tenant1.com",
-        full_name: "Rohan Verma (Tax Lead)",
-        is_demo: true,
-      };
-      demoLic = createDefaultLicense(
-        DEFAULT_DEMO_ORG.id,
-        "accountant@tenant1.com",
-        "plan",
-        "pro"
-      );
-      demoOrg = {
-        ...DEFAULT_DEMO_ORG,
-        operating_mode: "gst_enterprise",
-        license: demoLic,
-      };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: DEMO_ACCOUNTS[type],
+        password: DEMO_PASSWORD,
+      });
+      if (error) throw new Error(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setUser(demoUser);
-    setOrganisation(demoOrg);
-    setLicense(demoLic);
-    setOperatingModeState(demoOrg.operating_mode);
-    localStorage.setItem("deku_demo_user", JSON.stringify(demoUser));
-    localStorage.setItem("deku_active_org", JSON.stringify(demoOrg));
-    localStorage.setItem("deku_active_license", JSON.stringify(demoLic));
-    localStorage.setItem("deku_operating_mode", demoOrg.operating_mode);
-    setIsLoading(false);
   };
 
   const logout = async () => {
@@ -556,9 +426,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn("Sign out err:", e);
     }
     setUser(null);
-    localStorage.removeItem("deku_demo_user");
-    localStorage.removeItem("deku_active_org");
-    localStorage.removeItem("deku_active_license");
+    setOrg(null);
+    setOrganisations([]);
+    for (const key of ["deku_active_org", "deku_active_license", "deku_active_org_id", "deku_active_org_name"]) {
+      localStorage.removeItem(key);
+    }
   };
 
   return (

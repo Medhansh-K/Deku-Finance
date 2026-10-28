@@ -58,50 +58,22 @@ async fn create_organisation(
     Json(payload): Json<CreateOrgRequest>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
+    let body = json!({
+        "p_name": payload.name,
+        "p_slug": payload.slug,
+        "p_currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
+        "p_timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
+        "p_gstin": payload.gstin,
+        "p_pan": payload.pan,
+        "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
+    });
 
-    if let Some(user_token) = token {
-        let body = json!({
-            "p_name": payload.name,
-            "p_slug": payload.slug,
-            "p_currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
-            "p_timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
-            "p_gstin": payload.gstin,
-            "p_pan": payload.pan,
-            "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
-        });
+    let res = state.supabase.rpc("create_organisation", &body, token).await?;
 
-        let res = state.supabase.rpc("create_organisation", &body, Some(user_token)).await?;
-
-        Ok(Json(json!({
-            "success": true,
-            "organisation_id": res
-        })))
-    } else {
-        // Direct server-to-server insert via service role key
-        let body = json!({
-            "name": payload.name,
-            "slug": payload.slug,
-            "currency": payload.currency.unwrap_or_else(|| "INR".to_string()),
-            "timezone": payload.timezone.unwrap_or_else(|| "Asia/Kolkata".to_string()),
-            "gstin": payload.gstin,
-            "pan": payload.pan,
-            "financial_year_start_month": payload.financial_year_start_month.unwrap_or(4),
-        });
-
-        let res = state.supabase.insert_table("organisations", &body, None).await?;
-        let org_id = res
-            .as_array()
-            .and_then(|arr| arr.first())
-            .and_then(|obj| obj.get("id"))
-            .and_then(|id| id.as_str())
-            .unwrap_or_default();
-
-        Ok(Json(json!({
-            "success": true,
-            "organisation_id": org_id,
-            "data": res
-        })))
-    }
+    Ok(Json(json!({
+        "success": true,
+        "organisation_id": res
+    })))
 }
 
 async fn list_organisations(

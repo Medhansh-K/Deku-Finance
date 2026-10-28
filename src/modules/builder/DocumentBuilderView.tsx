@@ -1,5 +1,6 @@
 "use client";
 
+import { organisationsApi } from "@/api/endpoints";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -142,9 +143,12 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
 export function DocumentBuilderView() {
   const router = useRouter();
   const [activeDocType, setActiveDocType] = useState<DocumentType>("invoice");
-  const [orgId, setOrgId] = useState<string>("b127e064-5da8-437f-94c4-b8d6a0c12927");
-  const [activeCompanyName, setActiveCompanyName] = useState<string>("Deku Financial Technologies");
-  const [activeGSTIN, setActiveGSTIN] = useState<string>("27AAACD1234E1Z5");
+  const [orgId, setOrgId] = useState<string>("");
+  const [activeCompanyName, setActiveCompanyName] = useState<string>("");
+  const [activeGSTIN, setActiveGSTIN] = useState<string>("");
+  // PAN and state code are embedded in the GSTIN (chars 3-12 and 1-2).
+  const activePAN = activeGSTIN.slice(2, 12);
+  const activeStateCode = activeGSTIN.slice(0, 2);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [isSuccessAction, setIsSuccessAction] = useState<string | null>(null);
 
@@ -235,7 +239,7 @@ export function DocumentBuilderView() {
   const [bankName, setBankName] = useState<string>("HDFC Bank — Corporate Current A/c");
   const [bankAccount, setBankAccount] = useState<string>("50200088921478");
   const [bankIFSC, setBankIFSC] = useState<string>("HDFC0000128");
-  const [signatoryName, setSignatoryName] = useState<string>("Medhansh K.");
+  const [signatoryName, setSignatoryName] = useState<string>("");
   const [signatoryTitle, setSignatoryTitle] = useState<string>("Managing Director");
 
   // Synchronize company context
@@ -247,6 +251,15 @@ export function DocumentBuilderView() {
       if (savedOrgName) setActiveCompanyName(savedOrgName);
     }
   }, []);
+
+  // The issuer GSTIN printed on documents must be the company's own, never a placeholder.
+  useEffect(() => {
+    if (!orgId) return;
+    organisationsApi
+      .get(orgId)
+      .then((res) => setActiveGSTIN(res.data?.[0]?.gstin ?? ""))
+      .catch(() => setActiveGSTIN(""));
+  }, [orgId]);
 
   // Handle Dragging Sidebar Width
   useEffect(() => {
@@ -537,7 +550,7 @@ export function DocumentBuilderView() {
       company: {
         name: activeCompanyName,
         gstin: activeGSTIN,
-        pan: "AAACD1234E",
+        pan: activePAN,
         address: "Plot 104, BKC Financial Center, Mumbai, Maharashtra 400051",
       },
       party: {
@@ -604,7 +617,7 @@ export function DocumentBuilderView() {
       border,
       `                      ${activeCompanyName.toUpperCase()}`,
       `        Plot 104, BKC Financial Center, Mumbai, Maharashtra - 400051`,
-      `        GSTIN: ${activeGSTIN}  |  PAN: AAACD1234E  |  State: 27`,
+      `        GSTIN: ${activeGSTIN}  |  PAN: ${activePAN}  |  State: ${activeStateCode}`,
       border,
       ` DOCUMENT TYPE : ${activeDocType.toUpperCase().replace("_", " ")}`,
       ` DOCUMENT NO   : ${docNumber.padEnd(25)} ISSUE DATE : ${docDate}`,
@@ -690,7 +703,7 @@ export function DocumentBuilderView() {
               <td style="border: none; vertical-align: top;">
                 <h1>${activeCompanyName}</h1>
                 <div>Plot 104, BKC Financial Center, Mumbai, Maharashtra — 400051</div>
-                <div>GSTIN: <b>${activeGSTIN}</b> | PAN: <b>AAACD1234E</b> | State: 27</div>
+                <div>GSTIN: <b>${activeGSTIN}</b> | PAN: <b>${activePAN}</b> | State: <b>${activeStateCode}</b></div>
               </td>
               <td style="border: none; text-align: right; vertical-align: top;">
                 <span class="doc-badge">${activeDocType.toUpperCase().replace("_", " ")}</span>
@@ -1863,7 +1876,7 @@ export function DocumentBuilderView() {
                           <div className="text-[10px] font-mono text-slate-700 mt-1 flex items-center gap-3">
                             <span>GSTIN: <strong>{activeGSTIN}</strong></span>
                             <span>•</span>
-                            <span>PAN: <strong>AAACD1234E</strong></span>
+                            <span>PAN: <strong>{activePAN}</strong></span>
                             <span>•</span>
                             <span>State: <strong>27 - Maharashtra</strong></span>
                           </div>

@@ -32,7 +32,6 @@ async fn main() {
     let supabase_client = SupabaseClient::new(&config);
     let state = AppState {
         supabase: supabase_client,
-        config: config.clone(),
     };
 
     // 4. Configure CORS

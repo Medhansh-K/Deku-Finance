@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { AppShell } from "@/layouts/AppShell";
 import { InvoicesView } from "@/modules/invoices/InvoicesView";
 import { Metadata } from "next";
@@ -11,7 +12,9 @@ export default function InvoicesPage() {
   return (
     <AppShell>
       <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-        <InvoicesView />
+        <Suspense fallback={<div className="p-4 text-xs text-slate-500 font-mono">Loading invoices...</div>}>
+          <InvoicesView />
+        </Suspense>
       </div>
     </AppShell>
   );
