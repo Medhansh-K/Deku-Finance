@@ -32,7 +32,9 @@ pub struct CreateInvoiceRequest {
     pub due_date: String,
     pub supply_type: String, // intra_state, inter_state, export, exempt
     pub place_of_supply: String,
+    pub sales_channel: Option<String>,
     pub taxable_amount: f64,
+    pub round_off: Option<f64>,
     pub total_amount: f64,
     pub lines: Vec<CreateInvoiceLineRequest>,
     pub notes: Option<String>,

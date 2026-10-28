@@ -259,7 +259,9 @@ export interface SalesInvoice {
   status: InvoiceStatus;
   supply_type: SupplyType;
   place_of_supply: string;
+  sales_channel?: string;
   taxable_amount: number;
+  round_off?: number;
   total_amount: number;
   notes?: string | null;
   terms?: string | null;
@@ -279,7 +281,9 @@ export interface CreateInvoiceRequest {
   due_date: string;
   supply_type: SupplyType;
   place_of_supply: string;
+  sales_channel?: string;
   taxable_amount: number;
+  round_off?: number;
   total_amount: number;
   notes?: string;
   terms?: string;
