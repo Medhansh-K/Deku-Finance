@@ -85,10 +85,10 @@ export function SettingsView() {
       {orgId && <CompanyControlsCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
-      <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-4">
+      <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono">
+            <h3 className="text-sm font-bold uppercase text-ink font-mono">
               Fiscal Accounting Periods
             </h3>
             <p className="text-[11px] text-slate-500">
@@ -115,7 +115,7 @@ export function SettingsView() {
         <div className="rounded border border-slate-200 overflow-hidden">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#1F2324] text-white font-mono text-[11px]">
+              <tr className="bg-panel text-white font-mono text-[11px]">
                 <th className="py-2 px-3">Period Title</th>
                 <th className="py-2 px-3">Start Date</th>
                 <th className="py-2 px-3">End Date</th>
@@ -145,8 +145,8 @@ export function SettingsView() {
       </div>
 
       {/* Accounting Standards & Engine Info */}
-      <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-3">
-        <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono border-b border-slate-200 pb-2">
+      <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+        <h3 className="text-sm font-bold uppercase text-ink font-mono border-b border-slate-200 pb-2">
           Accounting Standard & Enforcement
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">

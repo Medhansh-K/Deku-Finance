@@ -1,60 +1,51 @@
-/* Deku Finance — Design Tokens & Keyboard Accounting Aesthetics
- * Palette:
- *   --deku-obsidian: #0A0A0A (Dark brand & top navigation)
- *   --deku-charcoal: #1F2324 (Dark slate header / sidebars)
- *   --deku-slate:    #3E4848 (Muted borders & structural lines)
- *   --deku-teal:     #5BB5BB (Primary active highlight / action accent)
- *   --deku-aqua:     #91D7D2 (Secondary soft teal / badges)
- * High-contrast data entry workspace: crisp white/cream background, sharp typography.
- */
+/* Deku Finance: legacy CSS variables and shared table styles.
+ * Colours come from the semantic tokens in src/app/globals.css (@theme); keep these in step. */
 
 :root {
-  --deku-obsidian: #0a0a0a;
-  --deku-charcoal: #1f2324;
-  --deku-slate: #3e4848;
-  --deku-teal: #5bb5bb;
-  --deku-teal-hover: #4ea5a5;
-  --deku-teal-light: rgba(91, 181, 187, 0.12);
-  --deku-aqua: #91d7d2;
-  --deku-aqua-light: rgba(145, 215, 210, 0.18);
+  --deku-obsidian: #070b14;
+  --deku-charcoal: #0f172a;
+  --deku-slate: #2a3549;
+  --deku-teal: #2ab3a6;
+  --deku-teal-hover: #23a094;
+  --deku-teal-light: rgb(42 179 166 / 0.12);
+  --deku-aqua: #a5e9de;
+  --deku-aqua-light: rgb(165 233 222 / 0.18);
 
-  /* High-contrast workspace tokens */
-  --workspace-bg: #f8fafc;
+  --workspace-bg: #f6f7f9;
   --workspace-surface: #ffffff;
-  --workspace-border: #e2e8f0;
-  --workspace-border-strong: #cbd5e1;
-  --workspace-text-main: #0f172a;
+  --workspace-border: #e5e7eb;
+  --workspace-border-strong: #d1d5db;
+  --workspace-text-main: #0b1220;
   --workspace-text-muted: #64748b;
   --workspace-text-subtle: #94a3b8;
 
-  /* Tally-inspired Keyboard navigation focus rings */
-  --deku-focus-ring: 0 0 0 2px rgba(91, 181, 187, 0.85);
-  --deku-row-active: rgba(91, 181, 187, 0.08);
+  --deku-focus-ring: 0 0 0 2px rgb(42 179 166 / 0.85);
+  --deku-row-active: rgb(42 179 166 / 0.08);
 }
 
-/* Keyboard active cell styling */
+/* Keyboard-driven grid: the active cell stays visible while typing. */
 .tally-cell-focused {
   outline: 2px solid var(--deku-teal) !important;
   outline-offset: -1px;
   background-color: var(--deku-row-active) !important;
 }
 
-/* High contrast data table rules */
 .deku-table-th {
-  background-color: #1f2324;
-  color: #f1f5f9;
-  font-family: var(--font-mono, monospace);
+  background-color: #f3f5f8;
+  color: #475569;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 8px 12px;
-  font-weight: 700;
-  border-right: 1px solid #3e4848;
+  letter-spacing: 0.06em;
+  padding: 9px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
 }
 
 .deku-table-td {
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 13px;
-  border-bottom: 1px solid #e2e8f0;
-  border-right: 1px solid #e2e8f0;
+  color: #0b1220;
+  border-bottom: 1px solid #eef1f5;
+  font-variant-numeric: tabular-nums;
 }

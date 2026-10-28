@@ -898,7 +898,7 @@ export function DocumentBuilderView() {
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden font-sans text-xs bg-[#F8FAFC] print:h-auto print:w-auto print:overflow-visible print:bg-white">
+    <div className="flex h-full w-full overflow-hidden font-sans text-xs bg-canvas print:h-auto print:w-auto print:overflow-visible print:bg-white">
       {/* ========================================================================= */}
       {/* 1. SLIDEABLE & ADJUSTABLE SIDEBAR: DOCUMENT SELECTOR                      */}
       {/* ========================================================================= */}
@@ -907,13 +907,13 @@ export function DocumentBuilderView() {
           width: isSidebarCollapsed ? 0 : sidebarWidth,
         }}
         className={`bg-white flex flex-col shrink-0 select-none overflow-hidden transition-[width] duration-200 relative no-print ${
-          isSidebarCollapsed ? "w-0 border-none pointer-events-none" : "border-r border-[#CBD5E1]"
+          isSidebarCollapsed ? "w-0 border-none pointer-events-none" : "border-r border-line-strong"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="p-3 border-b border-[#CBD5E1] bg-slate-50 flex items-center justify-between">
+        <div className="p-3 border-b border-line-strong bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded bg-[#0A0A0A] flex items-center justify-center text-[#5BB5BB]">
+            <div className="h-7 w-7 rounded bg-panel-deep flex items-center justify-center text-brand">
               <FileText className="h-4 w-4" />
             </div>
             <div>
@@ -949,14 +949,14 @@ export function DocumentBuilderView() {
                 onClick={() => applyPresetForDocType(doc.id)}
                 className={`w-full text-left p-2.5 rounded-lg border transition-all flex items-start gap-2.5 group ${
                   isActive
-                    ? "bg-[#1F2324] text-white border-[#5BB5BB] shadow-sm"
+                    ? "bg-panel text-white border-brand shadow-sm"
                     : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                 }`}
               >
                 <div
                   className={`h-7 w-7 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                     isActive
-                      ? "bg-[#5BB5BB] text-[#0A0A0A]"
+                      ? "bg-brand text-ink"
                       : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
                   }`}
                 >
@@ -982,7 +982,7 @@ export function DocumentBuilderView() {
         </div>
 
         {/* Sidebar Footer Info */}
-        <div className="p-2.5 border-t border-[#CBD5E1] bg-slate-50 text-[10px] text-slate-500 space-y-1">
+        <div className="p-2.5 border-t border-line-strong bg-slate-50 text-[10px] text-slate-500 space-y-1">
           <div className="flex items-center justify-between">
             <span>Authoritative Engine:</span>
             <span className="font-mono font-bold text-slate-800">Deku OS v2.4</span>
@@ -998,10 +998,10 @@ export function DocumentBuilderView() {
       {!isSidebarCollapsed && (
         <div
           onMouseDown={() => setIsDraggingSidebar(true)}
-          className="w-1.5 hover:w-2 bg-transparent hover:bg-[#5BB5BB]/40 cursor-col-resize transition-all shrink-0 relative flex items-center justify-center select-none no-print"
+          className="w-1.5 hover:w-2 bg-transparent hover:bg-brand/40 cursor-col-resize transition-all shrink-0 relative flex items-center justify-center select-none no-print"
           title="Drag to resize sidebar width"
         >
-          <div className="h-8 w-0.5 bg-slate-300 group-hover:bg-[#5BB5BB] rounded-full" />
+          <div className="h-8 w-0.5 bg-slate-300 group-hover:bg-brand rounded-full" />
         </div>
       )}
 
@@ -1010,7 +1010,7 @@ export function DocumentBuilderView() {
       {/* ========================================================================= */}
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-white min-w-0 print:h-auto print:overflow-visible print:w-full print:block">
         {/* Unified Top Toolbar */}
-        <header className="h-12 border-b border-[#CBD5E1] bg-slate-50/90 px-4 flex items-center justify-between gap-3 shrink-0 select-none no-print">
+        <header className="h-12 border-b border-line-strong bg-slate-50/90 px-4 flex items-center justify-between gap-3 shrink-0 select-none no-print">
           {/* Left: Dedicated Sidebar Toggle + Document Title */}
           <div className="flex items-center gap-2.5 min-w-0">
             <button
@@ -1019,14 +1019,14 @@ export function DocumentBuilderView() {
               onClick={() => setIsSidebarCollapsed((prev) => !prev)}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs font-semibold transition-all shrink-0 ${
                 isSidebarCollapsed
-                  ? "bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-[#5BB5BB] shadow-2xs"
+                  ? "bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-brand shadow-2xs"
                   : "bg-slate-200/90 border-slate-300 text-slate-800 hover:bg-slate-300"
               }`}
               title={isSidebarCollapsed ? "Expand Templates Sidebar (Shift+B)" : "Collapse Sidebar to Full Width (Shift+B)"}
             >
               {isSidebarCollapsed ? (
                 <>
-                  <PanelLeft className="h-4 w-4 text-[#5BB5BB]" />
+                  <PanelLeft className="h-4 w-4 text-brand" />
                   <span className="hidden md:inline font-mono text-[11px]">Templates</span>
                 </>
               ) : (
@@ -1059,11 +1059,11 @@ export function DocumentBuilderView() {
               onClick={() => setViewMode("create")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
                 viewMode === "create"
-                  ? "bg-[#1F2324] text-white shadow-xs"
+                  ? "bg-panel text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <Edit3 className="h-3.5 w-3.5 text-[#5BB5BB]" />
+              <Edit3 className="h-3.5 w-3.5 text-brand" />
               <span>Create / Edit</span>
             </button>
 
@@ -1072,11 +1072,11 @@ export function DocumentBuilderView() {
               onClick={() => setViewMode("preview")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
                 viewMode === "preview"
-                  ? "bg-[#1F2324] text-white shadow-xs"
+                  ? "bg-panel text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <Eye className="h-3.5 w-3.5 text-[#5BB5BB]" />
+              <Eye className="h-3.5 w-3.5 text-brand" />
               <span>Preview</span>
             </button>
 
@@ -1085,15 +1085,15 @@ export function DocumentBuilderView() {
               onClick={() => setViewMode("split")}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
                 viewMode === "split"
-                  ? "bg-[#1F2324] text-white shadow-xs"
+                  ? "bg-panel text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
               title="Split View (Form & Preview side-by-side with real-time updates)"
             >
-              <Columns className="h-3.5 w-3.5 text-[#5BB5BB]" />
+              <Columns className="h-3.5 w-3.5 text-brand" />
               <span className="hidden sm:inline">Split</span>
               {viewMode === "split" && (
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-black/40 text-[#91D7D2]">
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-black/40 text-brand-soft">
                   {Math.round(splitRatio)}%
                 </span>
               )}
@@ -1128,7 +1128,7 @@ export function DocumentBuilderView() {
                   type="button"
                   onClick={() => setZoomMode("auto")}
                   className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                    zoomMode === "auto" ? "text-[#0A0A0A] bg-white shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                    zoomMode === "auto" ? "text-ink bg-white shadow-2xs" : "text-slate-600 hover:text-slate-900"
                   }`}
                   title="Reset to Fit Width"
                 >
@@ -1155,9 +1155,9 @@ export function DocumentBuilderView() {
               <button
                 suppressHydrationWarning
                 onClick={() => setIsDownloadOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#1F2324] text-white hover:bg-[#2A3032] border border-[#3E4848] font-bold text-xs transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-panel text-white hover:bg-[#2A3032] border border-edge font-bold text-xs transition-colors shadow-xs"
               >
-                <Download className="h-3.5 w-3.5 text-[#5BB5BB]" />
+                <Download className="h-3.5 w-3.5 text-brand" />
                 <span>Download</span>
                 <ChevronDown className="h-3 w-3 text-slate-400 ml-0.5" />
               </button>
@@ -1228,7 +1228,7 @@ export function DocumentBuilderView() {
               className="gap-1.5 text-xs font-bold px-3 py-1.5 shadow-xs"
               title="Stage document and navigate to Voucher Desk"
             >
-              <ArrowRightLeft className="h-3.5 w-3.5 text-[#5BB5BB]" />
+              <ArrowRightLeft className="h-3.5 w-3.5 text-brand" />
               <span className="hidden sm:inline">Post to Voucher Page</span>
               <span className="sm:hidden">Post</span>
             </Button>
@@ -1320,7 +1320,7 @@ export function DocumentBuilderView() {
                             setPlaceOfSupply(e.target.value);
                             setIsInterstate(e.target.value !== "27-Maharashtra");
                           }}
-                          className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                          className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
                         >
                           <option value="27-Maharashtra">27 - Maharashtra (Intrastate CGST+SGST)</option>
                           <option value="29-Karnataka">29 - Karnataka (Interstate IGST)</option>
@@ -1544,7 +1544,7 @@ export function DocumentBuilderView() {
                       rows={2}
                       value={partyAddress}
                       onChange={(e) => setPartyAddress(e.target.value)}
-                      className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-[#5BB5BB] focus:outline-none"
+                      className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-brand focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1561,7 +1561,7 @@ export function DocumentBuilderView() {
                       variant="outline"
                       size="sm"
                       onClick={handleAddItem}
-                      className="gap-1 text-[10px] h-6 px-2 text-[#5BB5BB]"
+                      className="gap-1 text-[10px] h-6 px-2 text-brand"
                     >
                       <Plus className="h-3 w-3" /> Add Item
                     </Button>
@@ -1581,7 +1581,7 @@ export function DocumentBuilderView() {
                             placeholder="Item name / description"
                             value={item.description}
                             onChange={(e) => handleItemChange(idx, "description", e.target.value)}
-                            className="flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 font-medium focus:border-[#5BB5BB] focus:outline-none"
+                            className="flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 font-medium focus:border-brand focus:outline-none"
                           />
                           <button
                             suppressHydrationWarning
@@ -1692,7 +1692,7 @@ export function DocumentBuilderView() {
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-[#5BB5BB] focus:outline-none"
+                    className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-brand focus:outline-none"
                   />
                 </div>
               </div>
@@ -1706,7 +1706,7 @@ export function DocumentBuilderView() {
             <div
               onMouseDown={() => setIsDraggingSplit(true)}
               onDoubleClick={() => setSplitRatio(50)}
-              className="w-2 hover:w-2.5 bg-slate-200 hover:bg-[#5BB5BB] cursor-col-resize transition-all shrink-0 flex items-center justify-center group select-none border-x border-slate-300 no-print"
+              className="w-2 hover:w-2.5 bg-slate-200 hover:bg-brand cursor-col-resize transition-all shrink-0 flex items-center justify-center group select-none border-x border-slate-300 no-print"
               title="Drag left/right to adjust form and preview container sizes (Double-click to reset 50/50)"
             >
               <div className="flex flex-col gap-1 items-center">
@@ -1750,15 +1750,15 @@ export function DocumentBuilderView() {
                       transformOrigin: "top left",
                     }}
                   >
-                    <div className="bg-gradient-to-r from-[#0A0A0A] via-[#1A2526] to-[#0A0A0A] p-6 text-white relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-panel-deep via-[#1A2526] to-panel-deep p-6 text-white relative overflow-hidden">
                       <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-15 pointer-events-none">
-                        <Tag className="h-44 w-44 text-[#5BB5BB]" />
+                        <Tag className="h-44 w-44 text-brand" />
                       </div>
 
                       <div className="flex items-start justify-between relative z-10">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-[10px] tracking-wider uppercase px-2 py-0.5 rounded bg-[#5BB5BB] text-[#0A0A0A]">
+                            <span className="font-mono font-bold text-[10px] tracking-wider uppercase px-2 py-0.5 rounded bg-brand text-ink">
                               Verified Business Voucher
                             </span>
                             <span className="text-slate-400 text-[10px] font-mono">FY 2026-27</span>
@@ -1769,7 +1769,7 @@ export function DocumentBuilderView() {
 
                         <div className="text-right">
                           <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Voucher Value</span>
-                          <span className="text-2xl font-black text-[#5BB5BB]">
+                          <span className="text-2xl font-black text-brand">
                             {discountType === "percentage" ? `${discountValue}% OFF` : formatINR(discountValue)}
                           </span>
                         </div>
@@ -1783,7 +1783,7 @@ export function DocumentBuilderView() {
                     </div>
 
                     <div className="p-6 bg-white space-y-4">
-                      <div className="bg-slate-50 border-2 border-dashed border-[#5BB5BB]/60 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="bg-slate-50 border-2 border-dashed border-brand/60 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
                             Promotional Coupon Code
@@ -1814,7 +1814,7 @@ export function DocumentBuilderView() {
                         <div>
                           <span className="text-[10px] font-bold uppercase text-slate-400 block">Redemption Validity</span>
                           <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
-                            <Calendar className="h-3.5 w-3.5 text-[#5BB5BB]" /> Valid until {couponValidUntil}
+                            <Calendar className="h-3.5 w-3.5 text-brand" /> Valid until {couponValidUntil}
                           </span>
                         </div>
                         <div>

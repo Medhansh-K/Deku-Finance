@@ -147,9 +147,9 @@ export function CompaniesView() {
             <div
               key={org.id}
               onClick={() => handleSelectOrg(org)}
-              className={`p-4 rounded-lg border cursor-pointer transition-all bg-white shadow-xs hover:border-[#5BB5BB] ${
+              className={`p-4 rounded-lg border cursor-pointer transition-all bg-white shadow-xs hover:border-brand ${
                 isActive
-                  ? "border-[#5BB5BB] ring-2 ring-[#5BB5BB]/20"
+                  ? "border-brand ring-2 ring-brand/20"
                   : "border-slate-300 hover:bg-slate-50"
               }`}
             >
@@ -157,13 +157,13 @@ export function CompaniesView() {
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-8 w-8 rounded flex items-center justify-center font-bold ${
-                      isActive ? "bg-[#5BB5BB] text-[#0A0A0A]" : "bg-slate-100 text-slate-600"
+                      isActive ? "bg-brand text-ink" : "bg-slate-100 text-slate-600"
                     }`}
                   >
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#0F172A]">{org.name}</h3>
+                    <h3 className="font-bold text-sm text-ink">{org.name}</h3>
                     <span className="font-mono text-[10px] text-slate-400">
                       Slug: {org.slug}
                     </span>
@@ -194,7 +194,7 @@ export function CompaniesView() {
               </div>
 
               <div className="mt-3 pt-2 flex justify-end">
-                <span className="text-[11px] font-bold text-[#5BB5BB] flex items-center gap-1">
+                <span className="text-[11px] font-bold text-brand flex items-center gap-1">
                   Select Workspace <ArrowRight className="h-3 w-3" />
                 </span>
               </div>

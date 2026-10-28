@@ -113,7 +113,7 @@ export function ProfitLossView() {
             Operating Revenue & Income
           </span>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-base font-bold font-mono text-[#0F172A]">
+            <span className="text-base font-bold font-mono text-ink">
               {formatINR(totalIncome)}
             </span>
             <ArrowUpRight className="h-4 w-4 text-emerald-600" />
@@ -125,7 +125,7 @@ export function ProfitLossView() {
             Operating Expenses & Overhead
           </span>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-base font-bold font-mono text-[#0F172A]">
+            <span className="text-base font-bold font-mono text-ink">
               {formatINR(totalExpense)}
             </span>
             <ArrowDownRight className="h-4 w-4 text-rose-600" />
@@ -155,8 +155,8 @@ export function ProfitLossView() {
       {/* Detailed Dual-Column Statement */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Expenses Side */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden">
-          <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
+        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden">
+          <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Expenses & Outflows</span>
             <span className="text-slate-300 font-bold">{formatINR(totalExpense)}</span>
           </div>
@@ -201,8 +201,8 @@ export function ProfitLossView() {
         </div>
 
         {/* Income / Revenue Side */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden">
-          <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
+        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden">
+          <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Income & Inflows</span>
             <span className="text-emerald-400 font-bold">{formatINR(totalIncome)}</span>
           </div>

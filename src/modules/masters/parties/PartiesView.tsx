@@ -211,7 +211,7 @@ export function PartiesView() {
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 text-xs font-semibold rounded capitalize transition-colors ${
                 activeTab === tab
-                  ? "bg-[#1F2324] text-white font-bold"
+                  ? "bg-panel text-white font-bold"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -302,7 +302,7 @@ export function PartiesView() {
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value as PartyType })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="customer">Customer (Debtor)</option>
                 <option value="vendor">Vendor / Supplier (Creditor)</option>

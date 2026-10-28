@@ -89,9 +89,9 @@ function FinancialTable({
   };
 
   return (
-    <div className="my-3 rounded-xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
+    <div className="my-3 rounded-xl border border-line-strong bg-white overflow-hidden shadow-xs">
       {/* Top Table Toolbar (Matching Image 1 Dabby) */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border-b border-[#CBD5E1]">
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border-b border-line-strong">
         <div className="flex items-center gap-2">
           {categoryNumber && (
             <span className="h-5 w-5 rounded bg-blue-600 text-white font-mono font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
@@ -127,7 +127,7 @@ function FinancialTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-[#CBD5E1] bg-slate-100/80 text-[10px] font-mono font-bold uppercase tracking-wider text-[#2D7A7A]">
+            <tr className="border-b border-line-strong bg-slate-100/80 text-[10px] font-mono font-bold uppercase tracking-wider text-brand-strong">
               {headers.map((h, idx) => (
                 <th
                   key={idx}
@@ -342,7 +342,7 @@ function FinancialMessageRenderer({ content }: { content: string }) {
                 const bulletContent = trimmed.substring(2);
                 return (
                   <div key={lIdx} className="flex items-start gap-2 pl-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#2D7A7A] mt-1.5 shrink-0" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-strong mt-1.5 shrink-0" />
                     <span>{renderInlineMarkdown(bulletContent)}</span>
                   </div>
                 );
@@ -351,7 +351,7 @@ function FinancialMessageRenderer({ content }: { content: string }) {
               if (trimmed.match(/^\d+\.\s+/)) {
                 return (
                   <div key={lIdx} className="flex items-start gap-2 pl-1">
-                    <span className="font-bold font-mono text-[10px] text-[#2D7A7A] mt-0.5 shrink-0">
+                    <span className="font-bold font-mono text-[10px] text-brand-strong mt-0.5 shrink-0">
                       {trimmed.match(/^\d+\./)?.[0]}
                     </span>
                     <span>{renderInlineMarkdown(trimmed.replace(/^\d+\.\s+/, ""))}</span>
@@ -611,22 +611,22 @@ export function DekuConsultantView() {
     : messages;
 
   return (
-    <div className="flex h-full w-full bg-[#F8FAFC] text-slate-900 font-sans select-none overflow-hidden">
+    <div className="flex h-full w-full bg-canvas text-slate-900 font-sans select-none overflow-hidden">
       {/* ========================================================================= */}
       {/* 1. LEFT SIDEBAR (WORKBENCHES, AUDITED HEALTH, SESSIONS)                   */}
       {/* ========================================================================= */}
-      <aside className="w-64 xl:w-72 bg-white border-r border-[#CBD5E1] flex flex-col justify-between shrink-0 shadow-xs">
+      <aside className="w-64 xl:w-72 bg-white border-r border-line-strong flex flex-col justify-between shrink-0 shadow-xs">
         <div className="p-3.5 space-y-4 overflow-y-auto">
           {/* New Chat Button (Deku Charcoal with Teal Highlight) */}
           <button
             onClick={handleStartNewChat}
-            className="w-full bg-[#1F2324] hover:bg-[#0A0A0A] text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-between border border-[#3E4848] shadow-xs hover:border-[#5BB5BB] transition-all transform active:scale-98 cursor-pointer group"
+            className="w-full bg-panel hover:bg-panel-deep text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-between border border-edge shadow-xs hover:border-brand transition-all transform active:scale-98 cursor-pointer group"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[#5BB5BB] group-hover:scale-110 transition-transform" />
+              <Sparkles className="h-4 w-4 text-brand group-hover:scale-110 transition-transform" />
               <span>New Chat</span>
             </span>
-            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#5BB5BB] text-[#0A0A0A] font-black">
+            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand text-ink font-black">
               Ctrl + K
             </kbd>
           </button>
@@ -635,7 +635,7 @@ export function DekuConsultantView() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between px-2 text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold">
               <span className="flex items-center gap-1.5">
-                <Building2 className="h-3.5 w-3.5 text-[#2D7A7A]" />
+                <Building2 className="h-3.5 w-3.5 text-brand-strong" />
                 Workbenches
               </span>
               <ChevronDown className="h-3 w-3 text-slate-400" />
@@ -673,7 +673,7 @@ export function DekuConsultantView() {
 
               <Link
                 href="/companies"
-                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-[#2D7A7A] hover:text-[#5BB5BB] flex items-center gap-1 transition-colors"
+                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-brand-strong hover:text-brand flex items-center gap-1 transition-colors"
               >
                 <span>+ VIEW ALL</span>
               </Link>
@@ -740,10 +740,10 @@ export function DekuConsultantView() {
         </div>
 
         {/* Sidebar Footer (User Account & Settings) */}
-        <div className="p-3 space-y-1.5 bg-slate-50 border-t border-[#CBD5E1]">
+        <div className="p-3 space-y-1.5 bg-slate-50 border-t border-line-strong">
           <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-slate-200">
             <div className="flex items-center gap-2 truncate">
-              <div className="h-7 w-7 rounded-full bg-[#5BB5BB]/20 border border-[#5BB5BB]/40 flex items-center justify-center font-bold text-xs text-[#2D7A7A] shrink-0">
+              <div className="h-7 w-7 rounded-full bg-brand/20 border border-brand/40 flex items-center justify-center font-bold text-xs text-brand-strong shrink-0">
                 {userName.charAt(0)}
               </div>
               <div className="truncate text-left">
@@ -763,7 +763,7 @@ export function DekuConsultantView() {
             </Link>
             <Link
               href="/gateway"
-              className="flex items-center gap-1 text-[11px] font-mono text-[#2D7A7A] hover:text-[#5BB5BB] transition-colors font-bold"
+              className="flex items-center gap-1 text-[11px] font-mono text-brand-strong hover:text-brand transition-colors font-bold"
             >
               <span>Gateway (Esc)</span>
             </Link>
@@ -774,14 +774,14 @@ export function DekuConsultantView() {
       {/* ========================================================================= */}
       {/* 2. MAIN CENTER CANVAS (WHITE HERO OR CONVERSATION STREAM WITH TABLES)     */}
       {/* ========================================================================= */}
-      <main className="flex-1 flex flex-col justify-between overflow-hidden relative bg-[#F8FAFC]">
+      <main className="flex-1 flex flex-col justify-between overflow-hidden relative bg-canvas">
         {/* Top Header Bar */}
-        <header className="h-12 px-6 flex items-center justify-between shrink-0 bg-white border-b border-[#CBD5E1] z-10 shadow-2xs">
+        <header className="h-12 px-6 flex items-center justify-between shrink-0 bg-white border-b border-line-strong z-10 shadow-2xs">
           <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg bg-[#5BB5BB]/15 border border-[#5BB5BB]/40 flex items-center justify-center text-[#2D7A7A]">
+            <div className="h-7 w-7 rounded-lg bg-brand/15 border border-brand/40 flex items-center justify-center text-brand-strong">
               <Bot className="h-4 w-4" />
             </div>
-            <span className="font-black text-sm tracking-tight text-[#0A0A0A]">Deku Konsultant</span>
+            <span className="font-black text-sm tracking-tight text-ink">Deku Konsultant</span>
             <span className="text-[9px] font-mono px-2 py-0.5 rounded uppercase font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
               Executive AI CFO
             </span>
@@ -818,12 +818,12 @@ export function DekuConsultantView() {
             <div className="w-full max-w-4xl flex flex-col items-center space-y-6 my-auto">
               {/* Mascot & Typewriter Greeting */}
               <div className="flex flex-col items-center text-center space-y-1.5">
-                <div className="h-14 w-14 rounded-2xl bg-white border border-[#CBD5E1] shadow-xs flex items-center justify-center text-[#2D7A7A] mb-1">
+                <div className="h-14 w-14 rounded-2xl bg-white border border-line-strong shadow-xs flex items-center justify-center text-brand-strong mb-1">
                   <Bot className="h-8 w-8" />
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-black text-[#0A0A0A] tracking-tight flex items-center gap-1">
+                <h1 className="text-2xl lg:text-3xl font-black text-ink tracking-tight flex items-center gap-1">
                   <span>Welcome back, {userName}</span>
-                  <span className="inline-block w-2.5 h-6 bg-[#2D7A7A] animate-pulse ml-0.5" />
+                  <span className="inline-block w-2.5 h-6 bg-brand-strong animate-pulse ml-0.5" />
                 </h1>
                 <p className="text-xs lg:text-sm text-slate-500 max-w-lg">
                   Your AI-powered executive business intelligence &amp; CFO assistant
@@ -832,11 +832,11 @@ export function DekuConsultantView() {
 
               {/* Subheading Divider "ASK DEKU KONSULTANT" */}
               <div className="w-full flex items-center gap-4 pt-1">
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
+                <div className="flex-1 h-px bg-line" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
                   Ask Deku Konsultant
                 </span>
-                <div className="flex-1 h-px bg-[#E2E8F0]" />
+                <div className="flex-1 h-px bg-line" />
               </div>
 
               {/* 6 Executive Cards Grid (3x2) - Clean Light Theme */}
@@ -847,7 +847,7 @@ export function DekuConsultantView() {
                     <button
                       key={idx}
                       onClick={() => handleSendMessage(card.prompt)}
-                      className="bg-white hover:bg-slate-50 border border-[#CBD5E1] hover:border-[#5BB5BB] rounded-xl p-4 text-left transition-all duration-150 group flex flex-col justify-between min-h-[110px] shadow-xs hover:shadow-md cursor-pointer"
+                      className="bg-white hover:bg-slate-50 border border-line-strong hover:border-brand rounded-xl p-4 text-left transition-all duration-150 group flex flex-col justify-between min-h-[110px] shadow-xs hover:shadow-md cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full mb-2">
                         <span
@@ -855,13 +855,13 @@ export function DekuConsultantView() {
                         >
                           {card.category}
                         </span>
-                        <div className="p-1 rounded-md bg-slate-100 text-slate-500 group-hover:text-[#2D7A7A] transition-colors">
+                        <div className="p-1 rounded-md bg-slate-100 text-slate-500 group-hover:text-brand-strong transition-colors">
                           <Icon className="h-3.5 w-3.5" />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#0A0A0A] transition-colors">
+                        <h4 className="text-xs font-bold text-slate-900 group-hover:text-ink transition-colors">
                           {card.title}
                         </h4>
                         <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
@@ -879,9 +879,9 @@ export function DekuConsultantView() {
             /* =================================================================== */
             <div className="w-full max-w-4xl space-y-4 pb-6">
               {/* Dabby-Style Chat Header Bar (Matching Image 1) */}
-              <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-3 mb-2">
+              <div className="flex items-center justify-between border-b border-line-strong pb-3 mb-2">
                 <div>
-                  <h2 className="text-base font-black text-[#0A0A0A] tracking-tight">
+                  <h2 className="text-base font-black text-ink tracking-tight">
                     Chat
                   </h2>
                   <p className="text-[11px] text-slate-500">
@@ -897,7 +897,7 @@ export function DekuConsultantView() {
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                     placeholder="Search messages..."
-                    className="w-full pl-8 pr-3 py-1 bg-white border border-[#CBD5E1] rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#5BB5BB]"
+                    className="w-full pl-8 pr-3 py-1 bg-white border border-line-strong rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
@@ -914,8 +914,8 @@ export function DekuConsultantView() {
                     <div
                       className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold shadow-xs ${
                         isUser
-                          ? "bg-[#1F2324] text-white"
-                          : "bg-[#5BB5BB]/15 text-[#2D7A7A] border border-[#5BB5BB]/40"
+                          ? "bg-panel text-white"
+                          : "bg-brand/15 text-brand-strong border border-brand/40"
                       }`}
                     >
                       {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
@@ -924,8 +924,8 @@ export function DekuConsultantView() {
                     <div
                       className={`max-w-[95%] sm:max-w-[90%] rounded-2xl p-4 text-xs leading-relaxed shadow-xs ${
                         isUser
-                          ? "bg-[#1F2324] text-white rounded-tr-none border border-[#3E4848]"
-                          : "bg-white text-slate-900 rounded-tl-none border border-[#CBD5E1]"
+                          ? "bg-panel text-white rounded-tr-none border border-edge"
+                          : "bg-white text-slate-900 rounded-tl-none border border-line-strong"
                       }`}
                     >
                       {isUser ? (
@@ -941,7 +941,7 @@ export function DekuConsultantView() {
                       >
                         <span>{m.timestamp}</span>
                         {m.model && (
-                          <span className="font-mono font-bold text-[#2D7A7A]">
+                          <span className="font-mono font-bold text-brand-strong">
                             {m.model}
                           </span>
                         )}
@@ -953,11 +953,11 @@ export function DekuConsultantView() {
 
               {isSending && (
                 <div className="flex items-start gap-3.5">
-                  <div className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 bg-[#5BB5BB]/15 text-[#2D7A7A] border border-[#5BB5BB]/40">
+                  <div className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 bg-brand/15 text-brand-strong border border-brand/40">
                     <Bot className="h-4 w-4 animate-pulse" />
                   </div>
-                  <div className="rounded-2xl p-3.5 text-xs text-slate-600 flex items-center gap-2 bg-white border border-[#CBD5E1] shadow-xs">
-                    <Sparkles className="h-3.5 w-3.5 animate-spin text-[#2D7A7A]" />
+                  <div className="rounded-2xl p-3.5 text-xs text-slate-600 flex items-center gap-2 bg-white border border-line-strong shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 animate-spin text-brand-strong" />
                     <span>Analyzing Universal Ledger &amp; synthesizing financial statements...</span>
                   </div>
                 </div>
@@ -970,8 +970,8 @@ export function DekuConsultantView() {
         {/* ========================================================================= */}
         {/* 3. BOTTOM FLOATING PROMPT BAR (CLEAN LIGHT THEME)                          */}
         {/* ========================================================================= */}
-        <div className="p-4 lg:p-6 w-full flex flex-col items-center shrink-0 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC] to-transparent">
-          <div className="w-full max-w-3xl bg-white border border-[#CBD5E1] rounded-2xl p-2.5 shadow-md flex flex-col gap-2 focus-within:border-[#5BB5BB] focus-within:ring-2 focus-within:ring-[#5BB5BB]/20 transition-all">
+        <div className="p-4 lg:p-6 w-full flex flex-col items-center shrink-0 bg-gradient-to-t from-canvas via-canvas to-transparent">
+          <div className="w-full max-w-3xl bg-white border border-line-strong rounded-2xl p-2.5 shadow-md flex flex-col gap-2 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 transition-all">
             <div className="flex items-center gap-2 px-1">
               {/* Attachment Button */}
               <button
@@ -987,7 +987,7 @@ export function DekuConsultantView() {
               <button
                 type="button"
                 onClick={() => loadContext(activeOrgId)}
-                className="p-1.5 rounded-lg text-[#2D7A7A] hover:bg-slate-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-brand-strong hover:bg-slate-100 transition-colors cursor-pointer"
                 title="Live Universal Ledger connection active"
               >
                 <Database className="h-4 w-4" />
@@ -1025,7 +1025,7 @@ export function DekuConsultantView() {
                 disabled={isSending || !inputQuery.trim()}
                 className={`h-8 w-8 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   inputQuery.trim()
-                    ? "bg-[#1F2324] hover:bg-[#0A0A0A] text-white shadow-xs cursor-pointer"
+                    ? "bg-panel hover:bg-panel-deep text-white shadow-xs cursor-pointer"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed"
                 }`}
               >

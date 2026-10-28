@@ -267,7 +267,7 @@ export function GstTaxHubView() {
       header: "Invoice No.",
       sortKey: (inv) => inv.invoice_number,
       cell: (inv) => (
-        <span className="font-mono font-bold text-[#0F172A]">
+        <span className="font-mono font-bold text-ink">
           {inv.invoice_number}
         </span>
       ),
@@ -346,7 +346,7 @@ export function GstTaxHubView() {
             onClick={() => setActiveTab("invoices")}
             className={`px-3 py-1.5 rounded transition-colors ${
               activeTab === "invoices"
-                ? "bg-[#1F2324] text-white font-bold"
+                ? "bg-panel text-white font-bold"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -356,7 +356,7 @@ export function GstTaxHubView() {
             onClick={() => setActiveTab("create")}
             className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1 ${
               activeTab === "create"
-                ? "bg-[#5BB5BB] text-[#0A0A0A] font-bold"
+                ? "bg-brand text-ink font-bold"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -407,11 +407,11 @@ export function GstTaxHubView() {
       {activeTab === "create" && (
         <form
           onSubmit={handleCreateInvoice}
-          className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-4"
+          className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4"
         >
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div>
-              <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono">
+              <h3 className="text-sm font-bold uppercase text-ink font-mono">
                 New GST Sales Invoice
               </h3>
               <p className="text-[11px] text-slate-500">
@@ -429,7 +429,7 @@ export function GstTaxHubView() {
               <select
                 value={newInvCustomer}
                 onChange={(e) => setNewInvCustomer(e.target.value)}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
                 required
               >
                 <option value="">— Select Customer —</option>
@@ -472,7 +472,7 @@ export function GstTaxHubView() {
                     updateLineCalculations(idx, "item_name", newInvLines[idx].item_name, st)
                   );
                 }}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
               >
                 <option value="intra_state">Intra-State (Within Maharashtra: CGST + SGST)</option>
                 <option value="inter_state">Inter-State (Outside State: Integrated IGST)</option>
@@ -491,7 +491,7 @@ export function GstTaxHubView() {
           {/* Lines Table */}
           <div className="rounded border border-slate-300 overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-[#1F2324] text-white font-mono text-[11px]">
+              <thead className="bg-panel text-white font-mono text-[11px]">
                 <tr>
                   <th className="py-2 px-3">Item / Service Title</th>
                   <th className="py-2 px-3 w-28">HSN/SAC</th>
@@ -566,7 +566,7 @@ export function GstTaxHubView() {
                     <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
                       {formatINR(line.taxable_amount)}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-[#0F172A]">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
                       {formatINR(line.total_amount)}
                     </td>
                     <td className="py-2 px-2 text-center">
@@ -661,7 +661,7 @@ export function GstTaxHubView() {
             <div className="border border-slate-300 rounded p-4 bg-slate-50 space-y-3">
               <div className="flex justify-between items-start border-b border-slate-200 pb-3">
                 <div>
-                  <h3 className="text-base font-black text-[#0A0A0A] font-mono">
+                  <h3 className="text-base font-black text-ink font-mono">
                     TAX INVOICE
                   </h3>
                   <p className="text-[11px] text-slate-500">
@@ -686,7 +686,7 @@ export function GstTaxHubView() {
                   <span className="text-slate-400 font-mono text-[10px] uppercase block">
                     Billed To:
                   </span>
-                  <div className="font-bold text-[#0F172A] mt-0.5">
+                  <div className="font-bold text-ink mt-0.5">
                     {selectedInvoice.parties?.legal_name || "Client"}
                   </div>
                   <div className="font-mono text-slate-600 text-[11px]">
@@ -701,7 +701,7 @@ export function GstTaxHubView() {
                   <span className="text-slate-400 font-mono text-[10px] uppercase block">
                     Invoice Details:
                   </span>
-                  <div className="font-mono font-bold text-[#0F172A] mt-0.5">
+                  <div className="font-mono font-bold text-ink mt-0.5">
                     No: {selectedInvoice.invoice_number}
                   </div>
                   <div className="font-mono text-slate-600 text-[11px]">

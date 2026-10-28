@@ -30,6 +30,11 @@ export function Modal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Keyboard and screen-reader users land inside the dialog, not behind it.
+  useEffect(() => {
+    if (isOpen) modalRef.current?.focus();
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const widthClasses = {
@@ -44,7 +49,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Dim backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-panel-deep/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -54,30 +59,31 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-lg border border-[#3E4848] bg-white shadow-2xl overflow-hidden`}
+        tabIndex={-1}
+        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-xl border border-line bg-surface shadow-pop overflow-hidden`}
       >
-        {/* Header with Dark Obsidian Accent */}
-        <div className="flex items-center justify-between border-b border-[#3E4848] bg-[#1F2324] px-4 py-3 text-white">
+        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>
-            <h3 id="modal-title" className="text-sm font-bold tracking-wide">
+            <h3 id="modal-title" className="text-base font-semibold tracking-tight text-ink">
               {title}
             </h3>
             {description && (
-              <p className="text-xs text-[#91D7D2]/80 mt-0.5">{description}</p>
+              <p className="text-sm text-ink-muted mt-1">{description}</p>
             )}
           </div>
           <button
             suppressHydrationWarning
             onClick={onClose}
-            className="rounded p-1 text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="rounded-md p-1 text-ink-subtle hover:text-ink hover:bg-canvas-sunken transition-colors"
             title="Close (Esc)"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 bg-white max-h-[80vh] overflow-y-auto">
+        <div className="p-5 bg-surface max-h-[80vh] overflow-y-auto">
           {children}
         </div>
       </div>

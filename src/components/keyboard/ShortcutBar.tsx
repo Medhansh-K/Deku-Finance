@@ -36,7 +36,7 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
   return (
     <footer
       id="keyboard-shortcut-bar"
-      className="h-7 bg-[#1F2324] border-t border-[#3E4848] text-slate-300 flex items-center justify-between px-2 select-none text-[11px] font-sans shrink-0 z-30 no-print"
+      className="hidden md:flex h-8 bg-surface border-t border-line text-ink-muted items-center justify-between px-3 select-none text-[11px] font-sans shrink-0 z-30 no-print"
     >
       <div className="flex items-center gap-1 overflow-x-auto py-0.5">
         {shortcuts.map((sc, i) => {
@@ -44,11 +44,11 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
             <div
               className={`flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer transition-colors ${
                 sc.active
-                  ? "bg-[#5BB5BB] text-[#0A0A0A] font-bold"
-                  : "hover:bg-[#3E4848] hover:text-white"
+                  ? "bg-brand/12 text-brand-strong font-semibold"
+                  : "hover:bg-canvas-sunken hover:text-ink"
               }`}
             >
-              <kbd className="font-mono font-bold text-[10px] text-[#91D7D2]">
+              <kbd className="font-mono font-medium text-[10px] text-ink-subtle">
                 {sc.key}:
               </kbd>
               <span className="truncate">{sc.label}</span>
@@ -71,7 +71,7 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
         })}
       </div>
 
-      <div className="text-[10px] font-mono text-slate-400 hidden sm:block">
+      <div className="text-[10px] font-mono text-ink-subtle hidden sm:block">
         Deku Financial OS • Double-Entry Strict
       </div>
     </footer>

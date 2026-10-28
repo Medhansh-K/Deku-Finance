@@ -113,7 +113,7 @@ export function CustomizeKpiModal({
           <button
             type="button"
             onClick={handleReset}
-            className="text-[11px] font-mono font-medium text-slate-600 hover:text-[#2D7A7A] flex items-center gap-1 px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-[#5BB5BB] transition-colors cursor-pointer"
+            className="text-[11px] font-mono font-medium text-slate-600 hover:text-brand-strong flex items-center gap-1 px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-brand transition-colors cursor-pointer"
             title="Reset to verified standard defaults"
           >
             <RotateCcw className="h-3 w-3" />
@@ -123,8 +123,8 @@ export function CustomizeKpiModal({
 
         {/* Section 1: Numerical KPI Values */}
         <div>
-          <div className="flex items-center gap-1.5 mb-2 font-mono font-bold uppercase tracking-wider text-[10px] text-[#3E4848]">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-[#5BB5BB]" />
+          <div className="flex items-center gap-1.5 mb-2 font-mono font-bold uppercase tracking-wider text-[10px] text-ink-soft">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-brand" />
             <span>Numerical Values (₹ INR)</span>
           </div>
 
@@ -140,7 +140,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.turnover}
                 onChange={(e) => handleChange("turnover", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -156,7 +156,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.profit}
                 onChange={(e) => handleChange("profit", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-emerald-700 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-emerald-700 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -172,7 +172,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.billed}
                 onChange={(e) => handleChange("billed", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -188,7 +188,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.liquid}
                 onChange={(e) => handleChange("liquid", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -204,7 +204,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.debtors}
                 onChange={(e) => handleChange("debtors", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -220,7 +220,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.creditors}
                 onChange={(e) => handleChange("creditors", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -236,7 +236,7 @@ export function CustomizeKpiModal({
                 step="1000"
                 value={formData.expenses}
                 onChange={(e) => handleChange("expenses", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -252,7 +252,7 @@ export function CustomizeKpiModal({
                 step="500"
                 value={formData.gst}
                 onChange={(e) => handleChange("gst", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-rose-700 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-rose-700 focus:bg-white focus:border-brand focus:outline-none"
                 required
               />
             </div>
@@ -262,7 +262,7 @@ export function CustomizeKpiModal({
         {/* Section 2: Quick KPIs Selection for Column 3 */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px] text-[#3E4848]">
+            <span className="font-mono font-bold uppercase tracking-wider text-[10px] text-ink-soft">
               Quick KPIs Selection (Listed in Gateway Column 3)
             </span>
             <span className="text-[10px] text-slate-500 font-mono">
@@ -288,7 +288,7 @@ export function CustomizeKpiModal({
                   key={kpiKey}
                   className={`flex items-center gap-2 p-2 rounded border cursor-pointer transition-colors ${
                     isChecked
-                      ? "bg-white border-[#5BB5BB] text-slate-900 shadow-2xs"
+                      ? "bg-white border-brand text-slate-900 shadow-2xs"
                       : "bg-slate-100/60 border-slate-200 text-slate-500"
                   }`}
                 >
@@ -296,7 +296,7 @@ export function CustomizeKpiModal({
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => handleToggleKpi(kpiKey)}
-                    className="accent-[#2D7A7A] rounded cursor-pointer"
+                    className="accent-brand-strong rounded cursor-pointer"
                   />
                   <div className="truncate">
                     <span className="font-bold text-[11px] block truncate">{meta.label}</span>
@@ -332,9 +332,9 @@ export function CustomizeKpiModal({
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-lg bg-[#1F2324] hover:bg-[#0A0A0A] text-[#91D7D2] hover:text-white font-bold text-xs border border-[#3E4848] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-panel hover:bg-panel-deep text-brand-soft hover:text-white font-bold text-xs border border-edge transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#5BB5BB]" />
+              <Sparkles className="h-3.5 w-3.5 text-brand" />
               <span>Save &amp; Update KPIs</span>
             </button>
           </div>

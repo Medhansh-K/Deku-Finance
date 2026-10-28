@@ -392,20 +392,20 @@ export function DepartmentsMembersView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Prime Owner License Holder Strip */}
-      <div className="bg-[#1F2324] border border-[#3E4848] rounded-lg p-3 text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+      <div className="bg-panel border border-edge rounded-lg p-3 text-white flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-[#5BB5BB]/20 border border-[#5BB5BB] flex items-center justify-center shrink-0">
-            <Crown className="h-5 w-5 text-[#5BB5BB]" />
+          <div className="h-9 w-9 rounded-full bg-brand/20 border border-brand flex items-center justify-center shrink-0">
+            <Crown className="h-5 w-5 text-brand" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm tracking-wide">{primeOwner?.name}</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#5BB5BB] text-[#0A0A0A]">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand text-ink">
                 Prime License Owner
               </span>
-              <span className="text-[11px] text-[#91D7D2]">• {primeOwner?.designation}</span>
+              <span className="text-[11px] text-brand-soft">• {primeOwner?.designation}</span>
               {isSyncing ? (
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#5BB5BB]/20 text-[#5BB5BB] border border-[#5BB5BB]/30 flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand/20 text-brand border border-brand/30 flex items-center gap-1">
                   <Clock className="h-3 w-3 animate-spin" /> Syncing API...
                 </span>
               ) : (
@@ -437,7 +437,7 @@ export function DepartmentsMembersView() {
             onClick={() => setIsNewDeptModalOpen(true)}
             className="gap-1.5 text-white border-slate-600 hover:bg-white/10"
           >
-            <Building2 className="h-3.5 w-3.5 text-[#5BB5BB]" /> Create Department
+            <Building2 className="h-3.5 w-3.5 text-brand" /> Create Department
           </Button>
         </div>
       </div>
@@ -494,11 +494,11 @@ export function DepartmentsMembersView() {
             onClick={() => setActiveTab("departments")}
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "departments"
-                ? "bg-[#1F2324] text-white"
+                ? "bg-panel text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <Building2 className="h-3.5 w-3.5 text-[#5BB5BB]" />
+            <Building2 className="h-3.5 w-3.5 text-brand" />
             Departments &amp; Tasks ({departments.length})
           </button>
 
@@ -508,11 +508,11 @@ export function DepartmentsMembersView() {
             onClick={() => setActiveTab("members")}
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "members"
-                ? "bg-[#1F2324] text-white"
+                ? "bg-panel text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <Users className="h-3.5 w-3.5 text-[#5BB5BB]" />
+            <Users className="h-3.5 w-3.5 text-brand" />
             Members &amp; Roles ({members.length})
           </button>
 
@@ -521,11 +521,11 @@ export function DepartmentsMembersView() {
             onClick={() => setActiveTab("payroll")}
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "payroll"
-                ? "bg-[#1F2324] text-white"
+                ? "bg-panel text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <DollarSign className="h-3.5 w-3.5 text-[#5BB5BB]" />
+            <DollarSign className="h-3.5 w-3.5 text-brand" />
             Payroll, CTC &amp; Reimbursements
           </button>
 
@@ -534,11 +534,11 @@ export function DepartmentsMembersView() {
             onClick={() => setActiveTab("governance")}
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "governance"
-                ? "bg-[#1F2324] text-white"
+                ? "bg-panel text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <ShieldCheck className="h-3.5 w-3.5 text-[#5BB5BB]" />
+            <ShieldCheck className="h-3.5 w-3.5 text-brand" />
             Owner Access Governance Matrix
           </button>
         </div>
@@ -603,7 +603,7 @@ export function DepartmentsMembersView() {
                       }}
                       className="gap-1 text-[11px] shrink-0"
                     >
-                      <Plus className="h-3 w-3 text-[#5BB5BB]" /> Add Task
+                      <Plus className="h-3 w-3 text-brand" /> Add Task
                     </Button>
                   </div>
 
@@ -614,7 +614,7 @@ export function DepartmentsMembersView() {
                         Departmental Lead
                       </span>
                       <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                        <Briefcase className="h-3.5 w-3.5 text-[#5BB5BB]" />
+                        <Briefcase className="h-3.5 w-3.5 text-brand" />
                         <span>{dept.lead_name}</span>
                       </div>
                       <div className="text-[10px] text-slate-500">{dept.lead_designation}</div>
@@ -647,7 +647,7 @@ export function DepartmentsMembersView() {
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
-                          utilizationPercent > 85 ? "bg-rose-500" : "bg-[#5BB5BB]"
+                          utilizationPercent > 85 ? "bg-rose-500" : "bg-brand"
                         }`}
                         style={{ width: `${utilizationPercent}%` }}
                       />
@@ -720,7 +720,7 @@ export function DepartmentsMembersView() {
                                       refreshData();
                                     }
                                   }}
-                                  className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-[#5BB5BB] focus:outline-none cursor-pointer"
+                                  className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
                                   title="Click to assign or reassign task to any member"
                                 >
                                   <option value="">— Unassigned —</option>
@@ -780,7 +780,7 @@ export function DepartmentsMembersView() {
                 placeholder="Search member by name, designation, email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded border border-slate-300 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-brand focus:outline-none"
               />
             </div>
 
@@ -789,7 +789,7 @@ export function DepartmentsMembersView() {
                 suppressHydrationWarning
                 value={selectedDeptFilter}
                 onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="all">All Departments ({members.length})</option>
                 {departments.map((d) => (
@@ -839,7 +839,7 @@ export function DepartmentsMembersView() {
                           <div className="font-bold text-slate-900 flex items-center gap-1.5">
                             <span>{member.name}</span>
                             {member.is_owner && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#5BB5BB] text-[#0A0A0A]">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-ink">
                                 👑 Prime Owner
                               </span>
                             )}
@@ -868,7 +868,7 @@ export function DepartmentsMembersView() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider uppercase border ${
                           member.role === "owner"
-                            ? "bg-[#5BB5BB]/15 text-[#2A7575] border-[#5BB5BB]/40"
+                            ? "bg-brand/15 text-[#2A7575] border-brand/40"
                             : member.role === "cfo"
                             ? "bg-indigo-50 text-indigo-700 border-indigo-200"
                             : member.role === "admin"
@@ -965,7 +965,7 @@ export function DepartmentsMembersView() {
                               setTaskForm((prev) => ({ ...prev, assigned_to_id: member.id }));
                               setIsAddTaskModalOpen(true);
                             }}
-                            className="text-[10px] text-slate-400 hover:text-[#5BB5BB] hover:underline flex items-center gap-1 font-medium"
+                            className="text-[10px] text-slate-400 hover:text-brand hover:underline flex items-center gap-1 font-medium"
                           >
                             <Plus className="h-3 w-3" /> Assign Task
                           </button>
@@ -1013,7 +1013,7 @@ export function DepartmentsMembersView() {
                           }}
                           className="gap-1 text-[11px]"
                         >
-                          <Sliders className="h-3 w-3 text-[#5BB5BB]" /> Access
+                          <Sliders className="h-3 w-3 text-brand" /> Access
                         </Button>
                       </div>
                     </td>
@@ -1065,7 +1065,7 @@ export function DepartmentsMembersView() {
                       <div className="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>{m.name}</span>
                         {m.is_owner && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#5BB5BB] text-[#0A0A0A]">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-ink">
                             👑 Owner
                           </span>
                         )}
@@ -1130,7 +1130,7 @@ export function DepartmentsMembersView() {
                         }}
                         className="gap-1 text-[11px]"
                       >
-                        <Award className="h-3 w-3 text-[#5BB5BB]" /> Grant Bonus
+                        <Award className="h-3 w-3 text-brand" /> Grant Bonus
                       </Button>
                     </td>
                   </tr>
@@ -1149,7 +1149,7 @@ export function DepartmentsMembersView() {
           <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200">
             <div>
               <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-[#5BB5BB]" />
+                <ShieldCheck className="h-5 w-5 text-brand" />
                 <h3 className="font-bold text-sm text-slate-900">Owner Access &amp; Role Privilege Governance</h3>
               </div>
               <p className="text-[11px] text-slate-500 mt-1 max-w-2xl leading-relaxed">
@@ -1157,7 +1157,7 @@ export function DepartmentsMembersView() {
                 Regular employees are granted selective access only to modules designated by the Owner.
               </p>
             </div>
-            <span className="px-2.5 py-1 rounded bg-[#1F2324] text-white font-mono font-bold text-xs shrink-0">
+            <span className="px-2.5 py-1 rounded bg-panel text-white font-mono font-bold text-xs shrink-0">
               Double-Entry Protected
             </span>
           </div>
@@ -1305,7 +1305,7 @@ export function DepartmentsMembersView() {
               suppressHydrationWarning
               value={newDeptForm.lead_id}
               onChange={(e) => setNewDeptForm({ ...newDeptForm, lead_id: e.target.value })}
-              className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+              className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               required
             >
               <option value="">— Select Departmental Lead —</option>
@@ -1343,7 +1343,7 @@ export function DepartmentsMembersView() {
               placeholder="Outline mandate, objectives and responsibilities..."
               value={newDeptForm.description}
               onChange={(e) => setNewDeptForm({ ...newDeptForm, description: e.target.value })}
-              className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+              className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 focus:border-brand focus:outline-none"
             />
           </div>
 
@@ -1417,7 +1417,7 @@ export function DepartmentsMembersView() {
                 suppressHydrationWarning
                 value={newMemberForm.department_id}
                 onChange={(e) => setNewMemberForm({ ...newMemberForm, department_id: e.target.value })}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
                 required
               >
                 <option value="">— Select Department —</option>
@@ -1439,7 +1439,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setNewMemberForm({ ...newMemberForm, role: e.target.value as EmployeeMember["role"] })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="owner">Owner (Founder / License Holder)</option>
                 <option value="cfo">CFO (Finance Manager &amp; Sign-Off)</option>
@@ -1493,7 +1493,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_view_vouchers: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>View Accounting Vouchers</span>
               </label>
@@ -1508,7 +1508,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_create_vouchers: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>Create &amp; Post Vouchers</span>
               </label>
@@ -1523,7 +1523,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_view_financial_reports: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>Financial Reports (P&amp;L, B/S)</span>
               </label>
@@ -1538,7 +1538,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_view_gst: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>GST Returns &amp; Filing Hub</span>
               </label>
@@ -1553,7 +1553,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_view_banking: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>Bank Accounts &amp; Liquidity</span>
               </label>
@@ -1568,7 +1568,7 @@ export function DepartmentsMembersView() {
                       permissions: { ...newMemberForm.permissions, can_manage_payroll: e.target.checked },
                     })
                   }
-                  className="rounded text-[#5BB5BB]"
+                  className="rounded text-brand"
                 />
                 <span>Manage Payroll &amp; Compensation</span>
               </label>
@@ -1705,7 +1705,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, type: e.target.value as "intra" | "inter" })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="intra">Intra-Department (Internal Team)</option>
                 <option value="inter">Inter-Department (Cross-Team Collaboration)</option>
@@ -1722,7 +1722,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, priority: e.target.value as DepartmentTask["priority"] })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -1765,7 +1765,7 @@ export function DepartmentsMembersView() {
                 suppressHydrationWarning
                 value={taskForm.assigned_to_id}
                 onChange={(e) => setTaskForm({ ...taskForm, assigned_to_id: e.target.value })}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
                 required
               >
                 <option value="">— Select Assignee —</option>
@@ -1848,7 +1848,7 @@ export function DepartmentsMembersView() {
                         role: e.target.value as EmployeeMember["role"],
                       })
                     }
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
                   >
                     <option value="member">Regular Member (Minimal Scope)</option>
                     <option value="accountant">Accountant (General Ledger &amp; GST)</option>
@@ -1891,7 +1891,7 @@ export function DepartmentsMembersView() {
                             },
                           })
                         }
-                        className="rounded text-[#5BB5BB] h-4 w-4"
+                        className="rounded text-brand h-4 w-4"
                       />
                     </label>
                   ))}
@@ -2086,7 +2086,7 @@ export function DepartmentsMembersView() {
                                 refreshData();
                               }
                             }}
-                            className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-[#5BB5BB] focus:outline-none cursor-pointer"
+                            className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
                           >
                             {members.map((m) => (
                               <option key={m.id} value={m.id}>
@@ -2117,7 +2117,7 @@ export function DepartmentsMembersView() {
                   setSelectedMemberForTasks(null);
                   setIsAddTaskModalOpen(true);
                 }}
-                className="gap-1 font-bold text-[11px] text-[#5BB5BB] hover:bg-teal-50"
+                className="gap-1 font-bold text-[11px] text-brand hover:bg-teal-50"
               >
                 <Plus className="h-3.5 w-3.5" /> Assign New Task
               </Button>

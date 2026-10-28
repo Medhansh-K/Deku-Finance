@@ -22,21 +22,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-colors select-none focus:outline-none focus:ring-2 focus:ring-[#5BB5BB] focus:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none rounded";
+      "inline-flex items-center justify-center font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow] duration-150 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-md";
 
     const sizeStyles = {
-      sm: "text-xs px-2.5 py-1 gap-1.5",
-      md: "text-sm px-3.5 py-1.5 gap-2",
-      lg: "text-base px-5 py-2.5 gap-2.5",
+      sm: "text-xs h-7 px-2.5 gap-1.5",
+      md: "text-sm h-9 px-3.5 gap-2",
+      lg: "text-sm h-11 px-5 gap-2.5",
     };
 
     const variantStyles = {
-      primary: "bg-[#1F2324] text-white hover:bg-[#0A0A0A] border border-[#3E4848]",
-      secondary: "bg-[#f1f5f9] text-[#0f172a] hover:bg-[#e2e8f0] border border-[#cbd5e1]",
-      outline: "bg-transparent text-[#1f2324] hover:bg-[#f1f5f9] border border-[#3e4848]",
-      danger: "bg-rose-700 text-white hover:bg-rose-800 border border-rose-900",
-      ghost: "bg-transparent text-[#64748b] hover:text-[#0f172a] hover:bg-slate-100",
-      tally: "bg-[#5BB5BB] text-[#0a0a0a] font-bold hover:bg-[#4ea5a5] border border-[#3e4848] shadow-sm",
+      primary: "bg-ink text-white hover:bg-panel-raised shadow-[0_1px_0_rgb(255_255_255/0.08)_inset,0_1px_2px_rgb(11_18_32/0.2)]",
+      secondary: "bg-surface text-ink border border-line-strong hover:bg-canvas shadow-card",
+      outline: "bg-transparent text-ink border border-line-strong hover:bg-canvas hover:border-ink-subtle",
+      danger: "bg-rose-600 text-white hover:bg-rose-700 shadow-card",
+      ghost: "bg-transparent text-ink-muted hover:text-ink hover:bg-canvas-sunken",
+      tally: "bg-brand text-panel-deep font-semibold hover:bg-brand-hover shadow-card",
     };
 
     return (
@@ -70,7 +70,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {children}
         {shortcutHint && (
-          <kbd className="ml-1.5 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/10 border border-black/20 text-current">
+          <kbd className="ml-1 text-[10px] font-mono font-medium px-1.5 py-px rounded bg-current/10 opacity-70">
             {shortcutHint}
           </kbd>
         )}

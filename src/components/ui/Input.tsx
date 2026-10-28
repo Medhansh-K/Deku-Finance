@@ -29,14 +29,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold uppercase tracking-wider text-[#3E4848]"
+            className="block text-xs font-medium text-ink-soft"
           >
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {prefixSymbol && (
-            <span className="absolute left-3 text-xs font-semibold text-[#64748b] select-none pointer-events-none">
+            <span className="absolute left-3 text-xs font-semibold text-ink-muted select-none pointer-events-none">
               {prefixSymbol}
             </span>
           )}
@@ -44,15 +44,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             suppressHydrationWarning
-            className={`w-full rounded border border-[#cbd5e1] bg-white text-sm text-[#0f172a] placeholder-[#94a3b8] transition-colors focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB] disabled:bg-[#f8fafc] disabled:text-[#94a3b8] ${
+            className={`w-full h-9 rounded-md border border-line-strong bg-surface text-sm text-ink placeholder-ink-subtle shadow-[0_1px_1px_rgb(11_18_32/0.04)] transition-[border-color,box-shadow] focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20 disabled:bg-canvas disabled:text-ink-subtle ${
               prefixSymbol ? "pl-7" : "px-3"
-            } ${suffixSymbol ? "pr-8" : "px-3"} py-1.5 ${
+            } ${suffixSymbol ? "pr-8" : "px-3"} ${
               isNumeric ? "text-right font-mono" : ""
             } ${error ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" : ""} ${className}`}
             {...props}
           />
           {suffixSymbol && (
-            <span className="absolute right-3 text-xs font-semibold text-[#64748b] select-none pointer-events-none">
+            <span className="absolute right-3 text-xs font-semibold text-ink-muted select-none pointer-events-none">
               {suffixSymbol}
             </span>
           )}

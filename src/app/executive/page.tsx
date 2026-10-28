@@ -306,20 +306,20 @@ export default function ExecutiveDashboardPage() {
 
   return (
     <AppShell>
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F8FAFC] font-sans text-slate-900 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-canvas font-sans text-slate-900 space-y-6">
         {/* Top Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#CBD5E1] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line-strong pb-4">
           <div className="flex items-center gap-3">
             <Link
               href="/gateway"
-              className="p-2 rounded-xl bg-white border border-[#CBD5E1] hover:bg-slate-50 text-slate-700 hover:text-[#0A0A0A] transition-colors"
+              className="p-2 rounded-xl bg-white border border-line-strong hover:bg-slate-50 text-slate-700 hover:text-ink transition-colors"
               title="Return to Gateway (Esc)"
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-[#0A0A0A] tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-ink tracking-tight">
                   Executive Financial Dashboard
                 </h1>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-800 border border-emerald-300">
@@ -340,16 +340,16 @@ export default function ExecutiveDashboardPage() {
                 id="executive-company-selector"
                 value={activeOrgId}
                 onChange={(e) => handleSwitchOrg(e.target.value)}
-                className="bg-[#1F2324] text-white font-bold text-xs py-2 px-3 pr-8 rounded-xl border border-[#3E4848] focus:border-[#5BB5BB] focus:outline-none cursor-pointer appearance-none shadow-xs hover:border-[#5BB5BB] transition-colors"
+                className="bg-panel text-white font-bold text-xs py-2 px-3 pr-8 rounded-xl border border-edge focus:border-brand focus:outline-none cursor-pointer appearance-none shadow-xs hover:border-brand transition-colors"
                 title="Select active company workspace"
               >
                 {orgList.map((org) => (
-                  <option key={org.id} value={org.id} className="bg-[#1F2324] text-white py-1">
+                  <option key={org.id} value={org.id} className="bg-panel text-white py-1">
                     🏢 {org.name}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="h-3.5 w-3.5 text-[#5BB5BB] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="h-3.5 w-3.5 text-brand absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
             {/* ========================================================================= */}
@@ -372,10 +372,10 @@ export default function ExecutiveDashboardPage() {
                       setNewGstin("");
                       setIsConvertModalOpen(true);
                     }}
-                    className="px-3 py-2 rounded-xl bg-white border border-[#5BB5BB] hover:bg-[#5BB5BB]/15 text-[#0A0A0A] font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-white border border-brand hover:bg-brand/15 text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                     title="A Sec 22 company can convert to GST registered once it gets a valid GST ID"
                   >
-                    <ShieldCheck className="h-3.5 w-3.5 text-[#2D7A7A]" />
+                    <ShieldCheck className="h-3.5 w-3.5 text-brand-strong" />
                     <span>Convert to GST</span>
                   </button>
                 </div>
@@ -403,16 +403,16 @@ export default function ExecutiveDashboardPage() {
 
             <button
               onClick={() => setIsKpiModalOpen(true)}
-              className="px-3 py-2 rounded-xl bg-white border border-[#3E4848] hover:border-[#5BB5BB] hover:bg-[#5BB5BB]/10 text-slate-800 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-white border border-edge hover:border-brand hover:bg-brand/10 text-slate-800 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
               title="Change and customize listed KPI values and targets"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-[#2D7A7A]" />
+              <SlidersHorizontal className="h-3.5 w-3.5 text-brand-strong" />
               <span>Customize KPIs</span>
             </button>
 
             <Link
               href="/gateway"
-              className="px-3.5 py-2 rounded-xl bg-[#5BB5BB] hover:bg-[#91D7D2] text-[#0A0A0A] font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-brand hover:bg-brand-soft text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
             >
               <span className="font-mono text-[10px]">Esc</span>
               <span>Gateway</span>
@@ -425,25 +425,25 @@ export default function ExecutiveDashboardPage() {
           {/* Card 1: Revenue & Turnover */}
           <Link
             href="/invoices"
-            className="bg-white p-4 rounded-xl border border-[#CBD5E1] shadow-xs space-y-2 hover:border-[#5BB5BB] hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Sales Invoices Register & Billed Turnover Tracker"
           >
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
                 Gross Turnover
               </span>
-              <span className="h-6 w-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A] transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </span>
             </div>
-            <div className="text-xl font-black font-mono text-[#0A0A0A] group-hover:text-[#2D7A7A] transition-colors">
+            <div className="text-xl font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
               {kpiProfile.turnover}
             </div>
 
             {isSec22 ? (
               <div className="space-y-1">
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                  <div className={`bg-[#5BB5BB] h-full rounded-full ${kpiProfile.sec22Progress}`} />
+                  <div className={`bg-brand h-full rounded-full ${kpiProfile.sec22Progress}`} />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                   <span>{kpiProfile.sec22Sub}</span>
@@ -466,14 +466,14 @@ export default function ExecutiveDashboardPage() {
           {/* Card 2: Net Profit */}
           <Link
             href="/reports/profit-loss"
-            className="bg-white p-4 rounded-xl border border-[#CBD5E1] shadow-xs space-y-2 hover:border-[#5BB5BB] hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Profit & Loss Account (L)"
           >
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
                 Net Profit (EBITDA)
               </span>
-              <span className="h-6 w-6 rounded-lg bg-[#5BB5BB]/15 text-[#2D7A7A] flex items-center justify-center font-bold group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A] transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-brand/15 text-brand-strong flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
                 <TrendingUp className="h-3.5 w-3.5" />
               </span>
             </div>
@@ -489,18 +489,18 @@ export default function ExecutiveDashboardPage() {
           {/* Card 3: Liquid Bank & Cash */}
           <Link
             href="/masters/chart-of-accounts?group=asset&filter=liquid"
-            className="bg-white p-4 rounded-xl border border-[#CBD5E1] shadow-xs space-y-2 hover:border-[#5BB5BB] hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Chart of Accounts: Liquid Cash & Bank Asset Units and Values"
           >
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
                 Liquid Cash &amp; Bank
               </span>
-              <span className="h-6 w-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A] transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
                 <DollarSign className="h-3.5 w-3.5" />
               </span>
             </div>
-            <div className="text-xl font-black font-mono text-[#0A0A0A] group-hover:text-[#2D7A7A] transition-colors">
+            <div className="text-xl font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
               {kpiProfile.liquid}
             </div>
             <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
@@ -512,18 +512,18 @@ export default function ExecutiveDashboardPage() {
           {/* Card 4: Accounts Receivable */}
           <Link
             href="/reports/debtors"
-            className="bg-white p-4 rounded-xl border border-[#CBD5E1] shadow-xs space-y-2 hover:border-[#5BB5BB] hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Trade Debtors (AR) DSO Analysis & Customer Invoices"
           >
             <div className="flex items-center justify-between text-xs text-slate-500">
               <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
                 Trade Debtors
               </span>
-              <span className="h-6 w-6 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center font-bold group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A] transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
                 <Receipt className="h-3.5 w-3.5" />
               </span>
             </div>
-            <div className="text-xl font-black font-mono text-[#0A0A0A] group-hover:text-[#2D7A7A] transition-colors">
+            <div className="text-xl font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
               {kpiProfile.debtors}
             </div>
             <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
@@ -535,7 +535,7 @@ export default function ExecutiveDashboardPage() {
           {/* Card 5: Statutory & GST (Dynamic Sec 22 Exempt vs GST Registered) */}
           <Link
             href="/gst"
-            className="bg-white p-4 rounded-xl border border-[#CBD5E1] shadow-xs space-y-2 hover:border-[#5BB5BB] hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title={isSec22 ? "Section 22 Exemption Hub" : "Open GST Returns & Tax Engine Hub (G)"}
           >
             <div className="flex items-center justify-between text-xs text-slate-500">
@@ -545,8 +545,8 @@ export default function ExecutiveDashboardPage() {
               <span
                 className={`h-6 w-6 rounded-lg flex items-center justify-center font-bold transition-colors ${
                   isSec22
-                    ? "bg-emerald-50 text-emerald-700 group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A]"
-                    : "bg-rose-50 text-rose-700 group-hover:bg-[#5BB5BB] group-hover:text-[#0A0A0A]"
+                    ? "bg-emerald-50 text-emerald-700 group-hover:bg-brand group-hover:text-ink"
+                    : "bg-rose-50 text-rose-700 group-hover:bg-brand group-hover:text-ink"
                 }`}
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -573,11 +573,11 @@ export default function ExecutiveDashboardPage() {
         {/* 2-Column Analytical Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Financial Statement Health & ALERX Parity (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-[#CBD5E1] rounded-xl p-5 shadow-xs space-y-4">
+          <div className="lg:col-span-7 bg-white border border-line-strong rounded-xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-[#5BB5BB]" />
-                <h2 className="text-sm font-bold text-[#0A0A0A]">
+                <Layers className="h-4 w-4 text-brand" />
+                <h2 className="text-sm font-bold text-ink">
                   ALERX Double-Entry Balance Health
                 </h2>
               </div>
@@ -608,12 +608,12 @@ export default function ExecutiveDashboardPage() {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-[#F8FAFC] rounded-lg border border-slate-200 flex items-center justify-between text-xs font-mono">
+              <div className="p-3.5 bg-canvas rounded-lg border border-slate-200 flex items-center justify-between text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
                   <span className="text-slate-700">Accounting Parity Equation:</span>
                 </div>
-                <span className="font-bold text-[#0A0A0A]">
+                <span className="font-bold text-ink">
                   {baseProfile.equationText}
                 </span>
               </div>
@@ -624,13 +624,13 @@ export default function ExecutiveDashboardPage() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/reports/balance-sheet"
-                  className="font-bold text-[#2D7A7A] hover:text-[#5BB5BB] transition-colors"
+                  className="font-bold text-brand-strong hover:text-brand transition-colors"
                 >
                   Balance Sheet ➔
                 </Link>
                 <Link
                   href="/reports/trial-balance"
-                  className="font-bold text-[#2D7A7A] hover:text-[#5BB5BB] transition-colors"
+                  className="font-bold text-brand-strong hover:text-brand transition-colors"
                 >
                   Trial Balance ➔
                 </Link>
@@ -639,12 +639,12 @@ export default function ExecutiveDashboardPage() {
           </div>
 
           {/* Right: Quick Action Hub & Navigation (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-[#CBD5E1] rounded-xl p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 bg-white border border-line-strong rounded-xl p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-[#5BB5BB]" />
-                  <h2 className="text-sm font-bold text-[#0A0A0A]">
+                  <Sparkles className="h-4 w-4 text-brand" />
+                  <h2 className="text-sm font-bold text-ink">
                     Accounting Workflow Shortcuts
                   </h2>
                 </div>
@@ -654,7 +654,7 @@ export default function ExecutiveDashboardPage() {
               <div className="grid grid-cols-2 gap-2.5 pt-3">
                 <Link
                   href="/vouchers/payment"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-[#5BB5BB]/10 border border-slate-200 hover:border-[#5BB5BB] transition-all text-left"
+                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">Payment</span>
@@ -665,7 +665,7 @@ export default function ExecutiveDashboardPage() {
 
                 <Link
                   href="/vouchers/receipt"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-[#5BB5BB]/10 border border-slate-200 hover:border-[#5BB5BB] transition-all text-left"
+                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">Receipt</span>
@@ -676,7 +676,7 @@ export default function ExecutiveDashboardPage() {
 
                 <Link
                   href="/vouchers/sales"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-[#5BB5BB]/10 border border-slate-200 hover:border-[#5BB5BB] transition-all text-left"
+                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">
@@ -691,7 +691,7 @@ export default function ExecutiveDashboardPage() {
 
                 <Link
                   href="/day-book"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-[#5BB5BB]/10 border border-slate-200 hover:border-[#5BB5BB] transition-all text-left"
+                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900">Day Book</span>
@@ -706,7 +706,7 @@ export default function ExecutiveDashboardPage() {
               <span className="text-slate-500">Return to Gateway menu anytime:</span>
               <Link
                 href="/gateway"
-                className="font-bold text-[#1F2324] hover:text-[#5BB5BB] flex items-center gap-1"
+                className="font-bold text-ink hover:text-brand flex items-center gap-1"
               >
                 <span>Gateway of Deku</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -773,7 +773,7 @@ export default function ExecutiveDashboardPage() {
                 placeholder="e.g. 27AAACD1234E1Z5"
                 maxLength={15}
                 required
-                className="w-full bg-white border border-slate-300 rounded-lg py-2 px-3 text-xs font-mono font-bold tracking-wider placeholder:text-slate-400 focus:outline-none focus:border-[#5BB5BB] focus:ring-1 focus:ring-[#5BB5BB]"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2 px-3 text-xs font-mono font-bold tracking-wider placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
               />
               <span className="text-[10px] text-slate-400 font-mono mt-1 block">
                 Format: 2 state digits + 10-char PAN + 1 entity num + 'Z' + check digit

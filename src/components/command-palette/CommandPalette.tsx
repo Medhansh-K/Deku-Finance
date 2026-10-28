@@ -378,12 +378,12 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
       {/* Palette Container */}
       <div
-        className="relative z-10 w-full max-w-xl rounded-lg border border-[#3E4848] bg-[#0A0A0A] text-white shadow-2xl overflow-hidden font-sans"
+        className="relative z-10 w-full max-w-xl rounded-lg border border-edge bg-panel-deep text-white shadow-2xl overflow-hidden font-sans"
         onKeyDown={handleKeyDown}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center border-b border-[#3E4848] px-4 py-3 bg-[#1F2324]">
-          <Search className="h-5 w-5 text-[#5BB5BB] mr-3" />
+        <div className="flex items-center border-b border-edge px-4 py-3 bg-panel">
+          <Search className="h-5 w-5 text-brand mr-3" />
           <input
             ref={inputRef}
             type="text"
@@ -409,14 +409,14 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                   onClick={() => handleSelect(cmd.route)}
                   className={`flex items-center justify-between p-2.5 rounded cursor-pointer transition-colors ${
                     isSelected
-                      ? "bg-[#5BB5BB] text-[#0A0A0A]"
+                      ? "bg-brand text-ink"
                       : "text-slate-200 hover:bg-slate-800/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon
                       className={`h-4 w-4 ${
-                        isSelected ? "text-[#0A0A0A]" : "text-[#5BB5BB]"
+                        isSelected ? "text-ink" : "text-brand"
                       }`}
                     />
                     <div>
@@ -426,7 +426,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                       {cmd.subtitle && (
                         <div
                           className={`text-[11px] mt-1 ${
-                            isSelected ? "text-[#0A0A0A]/80" : "text-slate-400"
+                            isSelected ? "text-ink/80" : "text-slate-400"
                           }`}
                         >
                           {cmd.subtitle}
@@ -438,7 +438,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     <span
                       className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded ${
                         isSelected
-                          ? "bg-black/20 text-[#0A0A0A]"
+                          ? "bg-black/20 text-ink"
                           : "bg-slate-800 text-slate-400"
                       }`}
                     >
@@ -448,8 +448,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                       <kbd
                         className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
                           isSelected
-                            ? "bg-black/10 border-black/30 text-[#0A0A0A]"
-                            : "bg-slate-800 border-slate-700 text-[#91D7D2]"
+                            ? "bg-black/10 border-black/30 text-ink"
+                            : "bg-slate-800 border-slate-700 text-brand-soft"
                         }`}
                       >
                         {cmd.shortcut}
@@ -467,13 +467,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         </div>
 
         {/* Footer Shortcut Hints */}
-        <div className="flex items-center justify-between border-t border-[#3E4848] bg-[#1F2324] px-4 py-2 text-[11px] text-slate-400 font-mono">
+        <div className="flex items-center justify-between border-t border-edge bg-panel px-4 py-2 text-[11px] text-slate-400 font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
             <span>Esc Dismiss</span>
           </div>
-          <div className="text-[#91D7D2]">Tally Go To: Alt+G / Ctrl+K</div>
+          <div className="text-brand-soft">Tally Go To: Alt+G / Ctrl+K</div>
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
     <nav className="flex items-center gap-1.5 text-xs text-slate-500 font-sans select-none">
       <Link
         href="/gateway"
-        className="flex items-center gap-1 text-slate-600 hover:text-[#5BB5BB] transition-colors"
+        className="flex items-center gap-1 text-slate-600 hover:text-brand transition-colors"
       >
         <Home className="h-3.5 w-3.5" />
         <span>Gateway</span>
@@ -28,13 +28,13 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
           <React.Fragment key={index}>
             <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
             {isLast || !item.href ? (
-              <span className="font-semibold text-[#0F172A] truncate">
+              <span className="font-semibold text-ink truncate">
                 {item.label}
               </span>
             ) : (
               <Link
                 href={item.href}
-                className="text-slate-600 hover:text-[#5BB5BB] transition-colors truncate"
+                className="text-slate-600 hover:text-brand transition-colors truncate"
               >
                 {item.label}
               </Link>

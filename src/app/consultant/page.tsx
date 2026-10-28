@@ -7,7 +7,7 @@ import { DekuConsultantView } from "@/modules/consultant/DekuConsultantView";
 export default function DekuConsultantPage() {
   return (
     <AppShell>
-      <div className="w-full h-full overflow-hidden flex flex-col flex-1 bg-[#F8FAFC] text-slate-900">
+      <div className="w-full h-full overflow-hidden flex flex-col flex-1 bg-canvas text-slate-900">
         <DekuConsultantView />
       </div>
     </AppShell>

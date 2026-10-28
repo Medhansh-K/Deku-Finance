@@ -120,9 +120,9 @@ export function BalanceSheetView() {
       {/* T-Account Two Column Balance Sheet */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left Side: Liabilities & Equity */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
+            <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
               <span>Capital & Liabilities</span>
               <span className="text-slate-300 font-bold">
                 {formatINR(totalLiabilitiesAndEquity)}
@@ -186,7 +186,7 @@ export function BalanceSheetView() {
             </table>
           </div>
 
-          <div className="bg-[#1F2324] text-white p-3 border-t-2 border-[#3E4848] flex items-center justify-between font-mono font-bold">
+          <div className="bg-panel text-white p-3 border-t-2 border-edge flex items-center justify-between font-mono font-bold">
             <span>Total Liabilities & Equity</span>
             <span className="text-emerald-400">
               {formatINR(totalLiabilitiesAndEquity)}
@@ -195,9 +195,9 @@ export function BalanceSheetView() {
         </div>
 
         {/* Right Side: Assets */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
+            <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
               <span>Assets (Property & Liquid Capital)</span>
               <span className="text-emerald-400 font-bold">
                 {formatINR(totalAssets)}
@@ -232,7 +232,7 @@ export function BalanceSheetView() {
             </table>
           </div>
 
-          <div className="bg-[#1F2324] text-white p-3 border-t-2 border-[#3E4848] flex items-center justify-between font-mono font-bold">
+          <div className="bg-panel text-white p-3 border-t-2 border-edge flex items-center justify-between font-mono font-bold">
             <span>Total Assets</span>
             <span className="text-emerald-400">{formatINR(totalAssets)}</span>
           </div>

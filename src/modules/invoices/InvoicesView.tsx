@@ -385,10 +385,10 @@ export function InvoicesView() {
             setSelectedInvoice(inv);
             setIsDetailOpen(true);
           }}
-          className="font-mono font-bold text-slate-900 hover:text-[#5BB5BB] hover:underline flex items-center gap-1 text-left"
+          className="font-mono font-bold text-slate-900 hover:text-brand hover:underline flex items-center gap-1 text-left"
           title="Click to view complete invoice & double-entry trace"
         >
-          <FileText className="h-3.5 w-3.5 text-[#2D7A7A]" />
+          <FileText className="h-3.5 w-3.5 text-brand-strong" />
           <span>{inv.invoice_number}</span>
         </button>
       ),
@@ -509,7 +509,7 @@ export function InvoicesView() {
               setSelectedInvoice(inv);
               setIsDetailOpen(true);
             }}
-            className="p-1 text-slate-500 hover:text-[#5BB5BB] hover:bg-slate-100 rounded transition-colors"
+            className="p-1 text-slate-500 hover:text-brand hover:bg-slate-100 rounded transition-colors"
             title="Preview Invoice & Trace"
           >
             <Eye className="h-3.5 w-3.5" />
@@ -539,7 +539,7 @@ export function InvoicesView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
         <div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
-            <Link href="/gateway" className="hover:text-[#5BB5BB] transition-colors">
+            <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -673,7 +673,7 @@ export function InvoicesView() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
-                  ? "bg-[#1F2324] text-white font-bold"
+                  ? "bg-panel text-white font-bold"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -780,7 +780,7 @@ export function InvoicesView() {
             {/* Itemized Table */}
             <div className="border border-slate-200 rounded overflow-hidden">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#1F2324] text-white text-[11px]">
+                <thead className="bg-panel text-white text-[11px]">
                   <tr>
                     <th className="p-2">Item Description</th>
                     <th className="p-2 text-center">HSN/SAC</th>
@@ -942,7 +942,7 @@ export function InvoicesView() {
               <select
                 value={convertPaymentMode}
                 onChange={(e) => setConvertPaymentMode(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-medium focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-medium focus:border-brand focus:outline-none"
               >
                 <option value="HDFC Operating Current A/c">HDFC Operating Current A/c (LF-201)</option>
                 <option value="ICICI Bank Liquid Account">ICICI Bank Liquid Account (LF-202)</option>
@@ -1053,7 +1053,7 @@ export function InvoicesView() {
               <select
                 value={newSupplyType}
                 onChange={(e) => setNewSupplyType(e.target.value as any)}
-                className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-medium focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded px-3 py-2 text-xs font-medium focus:border-brand focus:outline-none"
               >
                 <option value="intra_state">Intra-State (CGST 9% + SGST 9%)</option>
                 <option value="inter_state">Inter-State (IGST 18%)</option>

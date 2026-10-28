@@ -257,7 +257,7 @@ export function ProductsServicesView() {
                     type: e.target.value as CatalogueItemType,
                   })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
               >
                 <option value="services">Services (SAC Code)</option>
                 <option value="goods">Goods / Products (HSN Code)</option>

@@ -2,18 +2,45 @@
 @import "../styles/tokens.css";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f6f7f9;
+  --foreground: #0b1220;
+}
+
+/* Deku design system: every screen colours through these semantic tokens.
+ * Light surfaces: canvas < surface; dark chrome: panel-deep < panel < edge.
+ * brand is for fills, icons and text on dark chrome; brand-strong is brand text on light surfaces (5.4:1). */
+@theme {
+  --color-canvas: #f6f7f9;
+  --color-canvas-sunken: #eef1f5;
+  --color-surface: #ffffff;
+  --color-ink: #0b1220;
+  --color-ink-soft: #334155;
+  --color-ink-muted: #64748b;
+  --color-ink-subtle: #94a3b8;
+  --color-line: #e5e7eb;
+  --color-line-strong: #d1d5db;
+  --color-panel-deep: #070b14;
+  --color-panel: #0f172a;
+  --color-panel-raised: #1a2336;
+  --color-edge: #2a3549;
+  --color-brand: #2ab3a6;
+  --color-brand-hover: #23a094;
+  --color-brand-strong: #0f766e;
+  --color-brand-soft: #a5e9de;
+
+  --color-deku-obsidian: #070b14;
+  --color-deku-charcoal: #0f172a;
+  --color-deku-slate: #2a3549;
+  --color-deku-teal: #2ab3a6;
+  --color-deku-aqua: #a5e9de;
+
+  --shadow-card: 0 1px 2px rgb(11 18 32 / 0.04), 0 1px 3px rgb(11 18 32 / 0.06);
+  --shadow-pop: 0 12px 32px -8px rgb(11 18 32 / 0.25), 0 4px 8px -4px rgb(11 18 32 / 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-deku-obsidian: #0a0a0a;
-  --color-deku-charcoal: #1f2324;
-  --color-deku-slate: #3e4848;
-  --color-deku-teal: #5bb5bb;
-  --color-deku-aqua: #91d7d2;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -22,6 +49,22 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Figures line up in columns everywhere. */
+.font-mono,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgb(42 179 166 / 0.25);
 }
 
 /* Custom scrollbars for compact high-density accounting tables */

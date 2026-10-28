@@ -453,7 +453,7 @@ export function ChartOfAccountsView() {
             <div className="flex items-center gap-2">
               <span
                 className={`font-sans ${
-                  isHeader ? "font-bold text-[#0A0A0A]" : "text-slate-900"
+                  isHeader ? "font-bold text-ink" : "text-slate-900"
                 }`}
               >
                 {acc.name}
@@ -516,7 +516,7 @@ export function ChartOfAccountsView() {
             <span
               className={`text-xs font-bold ${
                 units > 0
-                  ? "text-[#0A0A0A] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200"
+                  ? "text-ink bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200"
                   : "text-slate-400"
               }`}
             >
@@ -555,7 +555,7 @@ export function ChartOfAccountsView() {
                   isHeader
                     ? "font-black text-slate-900"
                     : val > 0
-                    ? "text-[#0A0A0A]"
+                    ? "text-ink"
                     : val < 0
                     ? "text-rose-700"
                     : "text-slate-400"
@@ -651,7 +651,7 @@ export function ChartOfAccountsView() {
               }}
               className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
                 activeGroup === tab.id
-                  ? "bg-[#1F2324] text-white font-bold"
+                  ? "bg-panel text-white font-bold"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -813,7 +813,7 @@ export function ChartOfAccountsView() {
                     onClick={() => handleGroupChange(grp)}
                     className={`py-1.5 px-2 text-center rounded border text-xs font-semibold capitalize transition-all ${
                       newGroup === grp
-                        ? "bg-[#1F2324] text-white border-[#1F2324] shadow-sm"
+                        ? "bg-panel text-white border-panel shadow-sm"
                         : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                     }`}
                   >
@@ -865,7 +865,7 @@ export function ChartOfAccountsView() {
                 value={newLedger}
                 onChange={(e) => setNewLedger(e.target.value)}
                 placeholder="Select or enter ledger"
-                className="w-full rounded border border-[#cbd5e1] bg-white text-sm text-[#0f172a] px-3 py-1.5 focus:border-[#5BB5BB] focus:outline-none"
+                className="w-full rounded border border-line-strong bg-white text-sm text-ink px-3 py-1.5 focus:border-brand focus:outline-none"
               />
               <datalist id="ledger-options">
                 {COMMON_LEDGERS[newGroup]?.map((opt) => (
@@ -1071,7 +1071,7 @@ export function ChartOfAccountsView() {
                 <span className="text-slate-400 block text-[10px] uppercase font-mono">
                   Account Code
                 </span>
-                <span className="font-mono font-bold text-sm text-[#0F172A]">
+                <span className="font-mono font-bold text-sm text-ink">
                   {selectedAccount.code}
                 </span>
               </div>
@@ -1092,7 +1092,7 @@ export function ChartOfAccountsView() {
                 <span className="text-slate-400 block text-[10px] uppercase font-mono">
                   Posting Status
                 </span>
-                <span className="font-bold text-[#0F172A]">
+                <span className="font-bold text-ink">
                   {selectedAccount.is_postable
                     ? "Postable (Can receive journal lines)"
                     : "Header Only (Summary rollup)"}

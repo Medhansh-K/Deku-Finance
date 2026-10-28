@@ -431,17 +431,17 @@ export function AuditTrailView() {
       {/* ========================================================================= */}
       {/* 1. Header Banner & Live Sync Status                                       */}
       {/* ========================================================================= */}
-      <div className="bg-white p-3 rounded-lg border border-[#CBD5E1] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white p-3 rounded-lg border border-line-strong shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-[#1F2324] border border-[#3E4848] flex items-center justify-center text-[#5BB5BB]">
+          <div className="h-9 w-9 rounded-lg bg-panel border border-edge flex items-center justify-center text-brand">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-sm text-[#0F172A] tracking-tight">
+              <h2 className="font-bold text-sm text-ink tracking-tight">
                 User Activity Logs &amp; Audit Trail
               </h2>
-              <kbd className="font-mono text-[10px] font-bold text-[#5BB5BB] bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
+              <kbd className="font-mono text-[10px] font-bold text-brand bg-panel px-1.5 py-0.2 rounded border border-edge">
                 Shortcut: L
               </kbd>
             </div>
@@ -462,7 +462,7 @@ export function AuditTrailView() {
             variant="outline"
             size="sm"
             onClick={handleSimulateActivity}
-            className="text-xs hover:border-[#5BB5BB] hover:text-[#2D7A7A]"
+            className="text-xs hover:border-brand hover:text-brand-strong"
             title="Trigger a simulated user event to verify instant logging"
           >
             <Zap className="h-3 w-3 text-amber-500" /> Simulate Activity
@@ -493,7 +493,7 @@ export function AuditTrailView() {
             </Button>
             {isExportMenuOpen && (
               <div
-                className="absolute right-0 mt-1 w-44 bg-white border border-[#CBD5E1] rounded shadow-lg z-20 py-1 text-xs"
+                className="absolute right-0 mt-1 w-44 bg-white border border-line-strong rounded shadow-lg z-20 py-1 text-xs"
                 onClick={() => setIsExportMenuOpen(false)}
               >
                 <button
@@ -532,14 +532,14 @@ export function AuditTrailView() {
       {/* 2. Top Statistics Cards (Pure CRUD Operations)                           */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <div className="bg-white p-2.5 rounded-lg border border-[#CBD5E1] shadow-2xs">
+        <div className="bg-white p-2.5 rounded-lg border border-line-strong shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
               Total CRUD Operations
             </span>
             <Database className="h-3.5 w-3.5 text-slate-400" />
           </div>
-          <div className="text-xl font-bold font-mono text-[#0F172A] mt-1">
+          <div className="text-xl font-bold font-mono text-ink mt-1">
             {stats.total}
           </div>
           <span className="text-[10px] text-slate-400 font-mono">
@@ -547,7 +547,7 @@ export function AuditTrailView() {
           </span>
         </div>
 
-        <div className="bg-white p-2.5 rounded-lg border border-[#CBD5E1] shadow-2xs">
+        <div className="bg-white p-2.5 rounded-lg border border-line-strong shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-emerald-600 uppercase font-semibold">
               Created (C)
@@ -562,7 +562,7 @@ export function AuditTrailView() {
           </span>
         </div>
 
-        <div className="bg-white p-2.5 rounded-lg border border-[#CBD5E1] shadow-2xs">
+        <div className="bg-white p-2.5 rounded-lg border border-line-strong shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-amber-600 uppercase font-semibold">
               Updated (U)
@@ -577,7 +577,7 @@ export function AuditTrailView() {
           </span>
         </div>
 
-        <div className="bg-white p-2.5 rounded-lg border border-[#CBD5E1] shadow-2xs">
+        <div className="bg-white p-2.5 rounded-lg border border-line-strong shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-rose-600 uppercase font-semibold">
               Deleted / Purged (D)
@@ -596,7 +596,7 @@ export function AuditTrailView() {
       {/* ========================================================================= */}
       {/* 3. Search Bar & Filter Categories                                         */}
       {/* ========================================================================= */}
-      <div className="bg-white p-3 rounded-lg border border-[#CBD5E1] shadow-2xs space-y-2.5">
+      <div className="bg-white p-3 rounded-lg border border-line-strong shadow-2xs space-y-2.5">
         <div className="flex flex-col md:flex-row items-center gap-2">
           {/* Live Search */}
           <div className="relative flex-1 w-full">
@@ -606,7 +606,7 @@ export function AuditTrailView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search CRUD events by action, description, actor, entity ID, or module..."
-              className="w-full bg-slate-50 border border-slate-300 rounded pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-[#5BB5BB] focus:bg-white transition-colors"
+              className="w-full bg-slate-50 border border-slate-300 rounded pl-8 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-brand focus:bg-white transition-colors"
             />
             {searchQuery && (
               <button
@@ -626,7 +626,7 @@ export function AuditTrailView() {
               onClick={() => setTimeFilter("ALL")}
               className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
                 timeFilter === "ALL"
-                  ? "bg-[#1F2324] text-white shadow-2xs"
+                  ? "bg-panel text-white shadow-2xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -637,7 +637,7 @@ export function AuditTrailView() {
               onClick={() => setTimeFilter("TODAY")}
               className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
                 timeFilter === "TODAY"
-                  ? "bg-[#1F2324] text-white shadow-2xs"
+                  ? "bg-panel text-white shadow-2xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -648,7 +648,7 @@ export function AuditTrailView() {
               onClick={() => setTimeFilter("7DAYS")}
               className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
                 timeFilter === "7DAYS"
-                  ? "bg-[#1F2324] text-white shadow-2xs"
+                  ? "bg-panel text-white shadow-2xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -660,7 +660,7 @@ export function AuditTrailView() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-slate-50 border border-slate-300 text-slate-700 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#5BB5BB] shrink-0"
+            className="bg-slate-50 border border-slate-300 text-slate-700 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand shrink-0"
             title="Filter by status"
           >
             <option value="ALL">All Statuses</option>
@@ -691,7 +691,7 @@ export function AuditTrailView() {
                 onClick={() => setSelectedCrud(op.id)}
                 className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold whitespace-nowrap transition-colors border ${
                   isSelected
-                    ? "bg-[#1F2324] text-[#91D7D2] border-[#3E4848] shadow-2xs"
+                    ? "bg-panel text-brand-soft border-edge shadow-2xs"
                     : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                 }`}
               >
@@ -722,7 +722,7 @@ export function AuditTrailView() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-2.5 py-1 rounded text-[11px] font-medium whitespace-nowrap transition-colors border ${
                   isSelected
-                    ? "bg-[#1F2324] text-[#91D7D2] border-[#3E4848] font-bold shadow-2xs"
+                    ? "bg-panel text-brand-soft border-edge font-bold shadow-2xs"
                     : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                 }`}
               >
@@ -736,11 +736,11 @@ export function AuditTrailView() {
       {/* ========================================================================= */}
       {/* 4. Activity Logs Feed / Table                                             */}
       {/* ========================================================================= */}
-      <div className="bg-white rounded-lg border border-[#CBD5E1] shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-lg border border-line-strong shadow-2xs overflow-hidden">
         {/* Table Header Bar */}
         <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-[#5BB5BB]" />
+            <Clock className="h-4 w-4 text-brand" />
             <span className="font-mono text-xs font-bold text-slate-800 uppercase tracking-wide">
               CRUD Activity Stream ({filteredLogs.length} events)
             </span>
@@ -819,7 +819,7 @@ export function AuditTrailView() {
                         <button
                           type="button"
                           onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                          className="mt-1 text-[10px] font-mono text-[#2D7A7A] hover:text-[#5BB5BB] flex items-center gap-0.5 font-semibold"
+                          className="mt-1 text-[10px] font-mono text-brand-strong hover:text-brand flex items-center gap-0.5 font-semibold"
                         >
                           {isExpanded ? (
                             <>Hide Payload <ChevronDown className="h-3 w-3" /></>
@@ -833,7 +833,7 @@ export function AuditTrailView() {
 
                   {/* Expandable Metadata Payload */}
                   {isExpanded && hasMetadata && (
-                    <div className="mt-2.5 p-2.5 bg-[#0F172A] text-emerald-400 rounded-md font-mono text-[10px] border border-slate-700 overflow-x-auto shadow-inner">
+                    <div className="mt-2.5 p-2.5 bg-ink text-emerald-400 rounded-md font-mono text-[10px] border border-slate-700 overflow-x-auto shadow-inner">
                       <div className="flex items-center justify-between text-slate-400 border-b border-slate-700 pb-1 mb-1.5">
                         <span>Structured Audit Event Payload</span>
                         <span>Log ID: {log.id}</span>
@@ -875,7 +875,7 @@ export function AuditTrailView() {
         {/* Footer Note */}
         <div className="p-3 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2 font-mono">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#5BB5BB]" />
+            <ShieldCheck className="h-3.5 w-3.5 text-brand" />
             <span>Section 128(5) &amp; Rule 3(1) Companies (Accounts) Rules Compliance Verified</span>
           </div>
           <div className="text-slate-400">

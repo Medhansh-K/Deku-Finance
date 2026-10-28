@@ -131,7 +131,7 @@ export function DataTable<TData>({
               setCurrentPage(0);
             }}
             placeholder={searchPlaceholder}
-            className="w-full rounded border border-[#cbd5e1] bg-white pl-9 pr-4 py-1.5 text-xs text-[#0f172a] placeholder-[#94a3b8] focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB]"
+            className="w-full rounded border border-line-strong bg-white pl-9 pr-4 py-1.5 text-xs text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
         <div className="text-xs text-slate-500 font-mono">
@@ -140,7 +140,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded border border-[#3E4848] bg-white shadow-xs">
+      <div className="overflow-x-auto rounded border border-edge bg-white shadow-xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr>
@@ -176,9 +176,9 @@ export function DataTable<TData>({
                         <span className="opacity-70">
                           {isSorted ? (
                             sortDirection === "asc" ? (
-                              <ArrowUp className="h-3 w-3 text-[#5BB5BB]" />
+                              <ArrowUp className="h-3 w-3 text-brand" />
                             ) : (
-                              <ArrowDown className="h-3 w-3 text-[#5BB5BB]" />
+                              <ArrowDown className="h-3 w-3 text-brand" />
                             )
                           ) : (
                             <ChevronsUpDown className="h-3 w-3 text-slate-400" />
@@ -199,7 +199,7 @@ export function DataTable<TData>({
                   className="py-12 text-center text-slate-500"
                 >
                   <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-[#5BB5BB]" />
+                    <Loader2 className="h-5 w-5 animate-spin text-brand" />
                     <span className="font-medium">Loading authoritative data...</span>
                   </div>
                 </td>
@@ -216,7 +216,7 @@ export function DataTable<TData>({
                     }}
                     className={`cursor-pointer transition-colors ${
                       isFocused
-                        ? "bg-[#5BB5BB]/15 text-[#0A0A0A] font-medium"
+                        ? "bg-brand/15 text-ink font-medium"
                         : "hover:bg-slate-50 text-[#1e293b]"
                     }`}
                   >

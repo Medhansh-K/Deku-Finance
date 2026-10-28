@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TopBar } from "@/components/navigation/TopBar";
+import { Menu, X } from "lucide-react";
+import { AppSidebar } from "@/components/navigation/AppSidebar";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
@@ -29,17 +30,10 @@ export function AppShell({ children }: AppShellProps) {
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   // Default active company context verified against backend
-  const [activeCompany, setActiveCompany] = useState<{
-    id: string;
-    name: string;
-    financialYear: string;
-  }>({
-    id: "",
-    name: "",
-    financialYear: "2026-27",
-  });
+  const [activeCompany, setActiveCompany] = useState<{ id: string; name: string }>({ id: "", name: "" });
 
   // Sync active company from localStorage if saved or upon company shift
   useEffect(() => {
@@ -48,11 +42,7 @@ export function AppShell({ children }: AppShellProps) {
         const savedOrgId = localStorage.getItem("deku_active_org_id");
         const savedOrgName = localStorage.getItem("deku_active_org_name");
         if (savedOrgId && savedOrgName) {
-          setActiveCompany({
-            id: savedOrgId,
-            name: savedOrgName,
-            financialYear: "2026-27",
-          });
+          setActiveCompany({ id: savedOrgId, name: savedOrgName });
         }
       }
     };
@@ -151,27 +141,57 @@ export function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [router, pathname, isCommandPaletteOpen, isHelpOpen]);
 
+  const sidebar = (
+    <AppSidebar
+      companyName={activeCompany.name}
+      onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+      onOpenHelp={() => setIsHelpOpen(true)}
+      onNavigate={() => setIsNavOpen(false)}
+    />
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="app-shell-root flex flex-col h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] font-sans print:h-auto print:w-auto print:overflow-visible print:bg-white">
-        {/* Top Tally Navigation Bar */}
-        <TopBar
-          companyName={activeCompany.name}
-          financialYear={activeCompany.financialYear}
-          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-          onOpenHelp={() => setIsHelpOpen(true)}
-        />
+      <div className="app-shell-root flex h-screen w-screen overflow-hidden bg-canvas text-ink font-sans print:h-auto print:w-auto print:overflow-visible print:bg-white">
+        <div className="hidden lg:flex no-print">{sidebar}</div>
 
-        {/* Dynamic App Workspace */}
-        <div className="flex-1 overflow-hidden flex flex-col relative print:overflow-visible print:h-auto print:flex-none">
-          {children}
-        </div>
+        {isNavOpen && (
+          <div className="fixed inset-0 z-40 flex lg:hidden no-print" role="dialog" aria-modal="true" aria-label="Navigation">
+            <div className="fixed inset-0 bg-panel-deep/60 backdrop-blur-sm" onClick={() => setIsNavOpen(false)} />
+            <div className="relative z-10 flex">{sidebar}</div>
+            <button
+              onClick={() => setIsNavOpen(false)}
+              className="relative z-10 m-3 h-9 w-9 rounded-md bg-surface text-ink shadow-pop grid place-items-center"
+              aria-label="Close navigation"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="flex min-w-0 flex-1 flex-col print:block">
+          <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-surface px-4 lg:hidden no-print">
+            <button
+              onClick={() => setIsNavOpen(true)}
+              className="grid h-8 w-8 place-items-center rounded-md text-ink-soft hover:bg-canvas-sunken"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="truncate text-sm font-semibold">{activeCompany.name || "Deku Finance"}</span>
+          </header>
+
+          <div className="relative flex flex-1 flex-col overflow-hidden print:overflow-visible print:h-auto print:flex-none">
+            {children}
+          </div>
 
         {/* Bottom Keyboard Shortcut Strip */}
         <ShortcutBar
           onOpenHelp={() => setIsHelpOpen(true)}
           onOpenGoTo={() => setIsCommandPaletteOpen(true)}
         />
+
+        </div>
 
         {/* Global Dialogs */}
         <CommandPalette

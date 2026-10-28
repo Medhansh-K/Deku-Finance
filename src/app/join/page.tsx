@@ -86,12 +86,12 @@ function JoinWorkspaceContent() {
       <div className="w-full max-w-md">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#5BB5BB] to-emerald-400 text-slate-950 shadow-xl shadow-[#5BB5BB]/20 mb-4 font-black text-2xl tracking-tight">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand to-emerald-400 text-slate-950 shadow-xl shadow-brand/20 mb-4 font-black text-2xl tracking-tight">
             出
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center justify-center gap-2">
             Deku Financial OS
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#5BB5BB]/20 text-[#5BB5BB] border border-[#5BB5BB]/30 uppercase tracking-widest">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand/20 text-brand border border-brand/30 uppercase tracking-widest">
               Workbench
             </span>
           </h1>
@@ -111,13 +111,13 @@ function JoinWorkspaceContent() {
                 <h3 className="text-base font-bold text-white">Welcome to the Workbench!</h3>
                 <p className="text-xs text-slate-400 mt-1">
                   You joined <strong className="text-slate-200">{successInfo.orgName}</strong> as{" "}
-                  <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#5BB5BB]/20 text-[#5BB5BB] uppercase">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-brand/20 text-brand uppercase">
                     {successInfo.role}
                   </span>
                 </p>
               </div>
               <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#5BB5BB]" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-brand" />
                 Redirecting to gateway executive dashboard...
               </p>
             </div>
@@ -140,7 +140,7 @@ function JoinWorkspaceContent() {
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
                     placeholder="deku-inv-xxxxxxxxxxxxxxxxxxxxxxxx"
-                    className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono placeholder:text-slate-600 focus:outline-none focus:border-[#5BB5BB] focus:ring-1 focus:ring-[#5BB5BB]"
+                    className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono placeholder:text-slate-600 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                   <p className="text-[10px] text-slate-500 mt-1">
                     Enter or paste the token received in your team invite link
@@ -164,7 +164,7 @@ function JoinWorkspaceContent() {
                     type="button"
                     onClick={() => handleAcceptToken()}
                     disabled={isLoading || !tokenInput}
-                    className="w-full bg-[#5BB5BB] hover:bg-[#4EA5A5] text-slate-950 font-bold text-xs py-3 rounded-xl shadow-lg shadow-[#5BB5BB]/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    className="w-full bg-brand hover:bg-brand-hover text-slate-950 font-bold text-xs py-3 rounded-xl shadow-lg shadow-brand/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                   >
                     {isLoading ? (
                       <>
@@ -189,7 +189,7 @@ function JoinWorkspaceContent() {
                     </Link>
                     <Link
                       href={`/signup?redirect=/join?token=${encodeURIComponent(tokenInput)}`}
-                      className="w-full text-center px-4 py-2.5 rounded-xl bg-[#5BB5BB] hover:bg-[#4EA5A5] text-slate-950 text-xs font-bold transition shadow-md shadow-[#5BB5BB]/10"
+                      className="w-full text-center px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-slate-950 text-xs font-bold transition shadow-md shadow-brand/10"
                     >
                       Create Account
                     </Link>
@@ -200,7 +200,7 @@ function JoinWorkspaceContent() {
               {/* Roles Matrix Explainer */}
               <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
                 <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#5BB5BB]" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand" />
                   7-Tier Enterprise Multi-Tenant Security
                 </div>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
@@ -228,7 +228,7 @@ export default function JoinWorkspacePage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs">
-          <Loader2 className="w-5 h-5 animate-spin text-[#5BB5BB]" />
+          <Loader2 className="w-5 h-5 animate-spin text-brand" />
         </div>
       }
     >

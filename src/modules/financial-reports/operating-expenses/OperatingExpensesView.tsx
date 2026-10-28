@@ -413,8 +413,8 @@ export function OperatingExpensesView() {
           }}
           className="font-mono text-left group"
         >
-          <div className="font-bold text-slate-900 group-hover:text-[#5BB5BB] group-hover:underline flex items-center gap-1">
-            <Receipt className="h-3.5 w-3.5 text-[#2D7A7A]" />
+          <div className="font-bold text-slate-900 group-hover:text-brand group-hover:underline flex items-center gap-1">
+            <Receipt className="h-3.5 w-3.5 text-brand-strong" />
             <span>{v.voucher_number}</span>
           </div>
           <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -500,7 +500,7 @@ export function OperatingExpensesView() {
             setSelectedVoucher(v);
             setIsDetailOpen(true);
           }}
-          className="p-1 text-slate-500 hover:text-[#5BB5BB] hover:bg-slate-100 rounded transition-colors"
+          className="p-1 text-slate-500 hover:text-brand hover:bg-slate-100 rounded transition-colors"
           title="View Voucher Details & Double-Entry"
         >
           <Eye className="h-3.5 w-3.5" />
@@ -515,7 +515,7 @@ export function OperatingExpensesView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
         <div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
-            <Link href="/gateway" className="hover:text-[#5BB5BB] transition-colors">
+            <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -535,7 +535,7 @@ export function OperatingExpensesView() {
           </Button>
           <Link
             href="/vouchers/payment"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-[#5BB5BB] hover:bg-[#91D7D2] text-[#0A0A0A] shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-ink shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
             <span>Create Payment Voucher (F5)</span>
@@ -621,7 +621,7 @@ export function OperatingExpensesView() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
           <div>
             <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-[#2D7A7A]" />
+              <Briefcase className="h-4 w-4 text-brand-strong" />
               <span>Department-Wise Expense Breakdown &amp; Budget Utilization</span>
             </h2>
             <p className="text-xs text-slate-500">
@@ -631,7 +631,7 @@ export function OperatingExpensesView() {
           {selectedDept !== "all" && (
             <button
               onClick={() => setSelectedDept("all")}
-              className="text-xs text-[#2D7A7A] hover:underline font-bold"
+              className="text-xs text-brand-strong hover:underline font-bold"
             >
               Reset to All Departments
             </button>
@@ -650,7 +650,7 @@ export function OperatingExpensesView() {
                 onClick={() => setSelectedDept(isSelected ? "all" : dept.id)}
                 className={`p-3 rounded-lg border cursor-pointer transition-all ${
                   isSelected
-                    ? "border-[#5BB5BB] bg-[#5BB5BB]/10 shadow-xs ring-1 ring-[#5BB5BB]"
+                    ? "border-brand bg-brand/10 shadow-xs ring-1 ring-brand"
                     : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/70"
                 }`}
               >
@@ -670,7 +670,7 @@ export function OperatingExpensesView() {
                 {/* Progress bar */}
                 <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
                   <div
-                    className="bg-[#2D7A7A] h-full rounded-full transition-all"
+                    className="bg-brand-strong h-full rounded-full transition-all"
                     style={{ width: `${budgetPct}%` }}
                   />
                 </div>
@@ -694,7 +694,7 @@ export function OperatingExpensesView() {
               onClick={() => setPayeeTypeFilter(t)}
               className={`px-2.5 py-1 rounded capitalize transition-colors cursor-pointer ${
                 payeeTypeFilter === t
-                  ? "bg-[#1F2324] text-white font-bold"
+                  ? "bg-panel text-white font-bold"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -789,7 +789,7 @@ export function OperatingExpensesView() {
             {/* Double-Entry Journal Lines */}
             <div className="border border-slate-200 rounded overflow-hidden">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#1F2324] text-white text-[11px]">
+                <thead className="bg-panel text-white text-[11px]">
                   <tr>
                     <th className="p-2">Type</th>
                     <th className="p-2">Account Name &amp; Category</th>

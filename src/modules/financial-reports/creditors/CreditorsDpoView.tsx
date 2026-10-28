@@ -246,7 +246,7 @@ export function CreditorsDpoView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
         <div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
-            <Link href="/gateway" className="hover:text-[#5BB5BB] transition-colors">
+            <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -266,7 +266,7 @@ export function CreditorsDpoView() {
           </Button>
           <Link
             href="/vouchers/payment"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-[#5BB5BB] hover:bg-[#91D7D2] text-[#0A0A0A] shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-ink shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
             <span>Issue Payment Voucher (F5)</span>
@@ -358,7 +358,7 @@ export function CreditorsDpoView() {
             onClick={() => setTimingFilter(tab.id)}
             className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap cursor-pointer ${
               timingFilter === tab.id
-                ? "bg-[#1F2324] text-white font-bold"
+                ? "bg-panel text-white font-bold"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -426,7 +426,7 @@ export function CreditorsDpoView() {
                   <div className="h-7 w-7 rounded flex items-center justify-center bg-slate-100 text-slate-600">
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 ${
-                        isExpanded ? "rotate-180 text-[#2D7A7A]" : ""
+                        isExpanded ? "rotate-180 text-brand-strong" : ""
                       }`}
                     />
                   </div>
@@ -438,7 +438,7 @@ export function CreditorsDpoView() {
                 <div className="border-t border-slate-200 bg-slate-50/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5 text-[#2D7A7A]" />
+                      <FileText className="h-3.5 w-3.5 text-brand-strong" />
                       <span>Vendor Invoices Issued by {cred.vendor_name}</span>
                     </span>
                     <span className="text-xs text-slate-500 font-mono">
@@ -448,7 +448,7 @@ export function CreditorsDpoView() {
 
                   <div className="overflow-x-auto border border-slate-200 rounded bg-white shadow-2xs">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-[#1F2324] text-white text-[11px]">
+                      <thead className="bg-panel text-white text-[11px]">
                         <tr>
                           <th className="p-2.5">Vendor Bill / Inv #</th>
                           <th className="p-2.5">Bill Date</th>
@@ -489,7 +489,7 @@ export function CreditorsDpoView() {
                             <td className="p-2.5 text-center">
                               <Link
                                 href="/vouchers/payment"
-                                className="px-2.5 py-1 text-[10px] font-bold bg-[#1F2324] text-white hover:bg-[#5BB5BB] hover:text-[#0A0A0A] rounded transition-colors inline-block"
+                                className="px-2.5 py-1 text-[10px] font-bold bg-panel text-white hover:bg-brand hover:text-ink rounded transition-colors inline-block"
                               >
                                 Pay (F5)
                               </Link>

@@ -24,17 +24,17 @@ export default function InteractiveModePreview() {
   });
 
   return (
-    <div className="w-full bg-[#1F2324] rounded-3xl p-6 sm:p-10 border border-[#3E4848] shadow-2xl text-white relative overflow-hidden font-sans">
+    <div className="w-full bg-panel rounded-3xl p-6 sm:p-10 border border-edge shadow-2xl text-white relative overflow-hidden font-sans">
       {/* Background Subtle Ambient Glow */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-[#5BB5BB]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-brand/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header and Mode Selector Buttons */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-[#3E4848]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-edge">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-[#5BB5BB]/15 px-2.5 py-0.5 text-xs font-mono font-semibold text-[#91D7D2] border border-[#5BB5BB]/30">
-              <Zap className="h-3 w-3 text-[#5BB5BB]" />
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-brand/15 px-2.5 py-0.5 text-xs font-mono font-semibold text-brand-soft border border-brand/30">
+              <Zap className="h-3 w-3 text-brand" />
               Interactive Architecture Demo
             </span>
             <span className="text-xs text-slate-400">Toggle mode to see real-time engine shift</span>
@@ -48,13 +48,13 @@ export default function InteractiveModePreview() {
         </div>
 
         {/* The 2 Mode Toggles */}
-        <div className="flex items-center bg-[#0A0A0A] p-1.5 rounded-2xl border border-[#3E4848] self-start lg:self-auto">
+        <div className="flex items-center bg-panel-deep p-1.5 rounded-2xl border border-edge self-start lg:self-auto">
           <button
             type="button"
             onClick={() => setActiveMode("pure")}
             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeMode === "pure"
-                ? "bg-[#5BB5BB] text-[#0A0A0A] shadow-md font-bold"
+                ? "bg-brand text-ink shadow-md font-bold"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -66,7 +66,7 @@ export default function InteractiveModePreview() {
             onClick={() => setActiveMode("gst")}
             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeMode === "gst"
-                ? "bg-[#5BB5BB] text-[#0A0A0A] shadow-md font-bold"
+                ? "bg-brand text-ink shadow-md font-bold"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -82,9 +82,9 @@ export default function InteractiveModePreview() {
         <div className="lg:col-span-5 space-y-5">
           {activeMode === "pure" ? (
             <div className="space-y-4">
-              <div className="rounded-2xl bg-[#0A0A0A] border border-[#3E4848] p-5 space-y-3">
+              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#5BB5BB]">
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
                     Legal Protection
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
@@ -101,19 +101,19 @@ export default function InteractiveModePreview() {
               </div>
 
               {/* Turnover Tracker Box */}
-              <div className="rounded-2xl bg-[#0A0A0A] border border-[#3E4848] p-5 space-y-3">
+              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400 font-medium">Turnover Exemption Tracker</span>
-                  <span className="text-[#91D7D2] font-mono font-bold">16% of ₹40L Utilized</span>
+                  <span className="text-brand-soft font-mono font-bold">16% of ₹40L Utilized</span>
                 </div>
-                <div className="w-full bg-[#181B1C] h-2.5 rounded-full overflow-hidden border border-[#3E4848]">
-                  <div className="bg-[#5BB5BB] h-full rounded-full w-[16%] transition-all duration-500" />
+                <div className="w-full bg-panel h-2.5 rounded-full overflow-hidden border border-edge">
+                  <div className="bg-brand h-full rounded-full w-[16%] transition-all duration-500" />
                 </div>
                 <div className="flex justify-between text-[11px] font-mono text-slate-400">
                   <span>Current FY: ₹6,40,000</span>
                   <span>Threshold Limit: ₹40,00,000</span>
                 </div>
-                <div className="pt-2 border-t border-[#3E4848]/80 flex items-center gap-2 text-xs text-slate-400">
+                <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
                   <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
                   <span>No GSTIN or monthly GSTR returns required.</span>
                 </div>
@@ -121,9 +121,9 @@ export default function InteractiveModePreview() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-2xl bg-[#0A0A0A] border border-[#3E4848] p-5 space-y-3">
+              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#5BB5BB]">
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
                     Compliance Status
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
@@ -140,20 +140,20 @@ export default function InteractiveModePreview() {
               </div>
 
               {/* GST Returns Readiness Box */}
-              <div className="rounded-2xl bg-[#0A0A0A] border border-[#3E4848] p-5 space-y-3">
+              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <span className="text-xs text-slate-400 font-medium">Auto Return Preparation</span>
                 <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="bg-[#121617] rounded-xl p-3 border border-[#3E4848]">
+                  <div className="bg-panel-deep rounded-xl p-3 border border-edge">
                     <span className="text-[10px] text-slate-400 block uppercase font-mono">GSTR-1 Outward</span>
                     <span className="text-sm font-bold text-emerald-400">Offline JSON Ready</span>
                   </div>
-                  <div className="bg-[#121617] rounded-xl p-3 border border-[#3E4848]">
+                  <div className="bg-panel-deep rounded-xl p-3 border border-edge">
                     <span className="text-[10px] text-slate-400 block uppercase font-mono">GSTR-3B Tax Match</span>
-                    <span className="text-sm font-bold text-[#91D7D2]">ITC Offset Computed</span>
+                    <span className="text-sm font-bold text-brand-soft">ITC Offset Computed</span>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-[#3E4848]/80 flex items-center gap-2 text-xs text-slate-400">
-                  <FileSpreadsheet className="h-4 w-4 text-[#5BB5BB] shrink-0" />
+                <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
+                  <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
                   <span>Validated directly against GSTN Portal specifications.</span>
                 </div>
               </div>
@@ -161,8 +161,8 @@ export default function InteractiveModePreview() {
           )}
 
           {/* Instant UPI Scan-To-Pay Feature Callout */}
-          <div className="rounded-2xl bg-gradient-to-r from-[#5BB5BB]/15 to-[#5BB5BB]/5 border border-[#3E4848] p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-[#5BB5BB] text-[#0A0A0A] flex items-center justify-center font-bold shrink-0">
+          <div className="rounded-2xl bg-gradient-to-r from-brand/15 to-brand/5 border border-edge p-4 flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-brand text-ink flex items-center justify-center font-bold shrink-0">
               <QrCode className="h-5 w-5" />
             </div>
             <div>
@@ -179,10 +179,10 @@ export default function InteractiveModePreview() {
         {/* Right Column: Live Document & Invoice Simulation (7 cols) */}
         <div className="lg:col-span-7 bg-white text-slate-900 rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4">
           {/* Interactive Invoice Customization Bar */}
-          <div className="bg-[#F8FAFC] rounded-xl p-3 border border-slate-200">
+          <div className="bg-canvas rounded-xl p-3 border border-slate-200">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <Sliders className="h-3.5 w-3.5 text-[#2D7A7A]" />
+                <Sliders className="h-3.5 w-3.5 text-brand-strong" />
                 Live Invoice Field Customizer (Interactive)
               </span>
               <span className="text-[10px] text-slate-500 font-medium">Click to toggle fields</span>
@@ -195,7 +195,7 @@ export default function InteractiveModePreview() {
                 }
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
                   customFields.showPoNumber
-                    ? "bg-[#5BB5BB] text-[#0A0A0A] border-[#5BB5BB] font-bold shadow-xs"
+                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
                     : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
                 }`}
               >
@@ -209,7 +209,7 @@ export default function InteractiveModePreview() {
                 }
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
                   customFields.showEwayBill
-                    ? "bg-[#5BB5BB] text-[#0A0A0A] border-[#5BB5BB] font-bold shadow-xs"
+                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
                     : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
                 }`}
               >
@@ -223,7 +223,7 @@ export default function InteractiveModePreview() {
                 }
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
                   customFields.showPaymentTerms
-                    ? "bg-[#5BB5BB] text-[#0A0A0A] border-[#5BB5BB] font-bold shadow-xs"
+                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
                     : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
                 }`}
               >
@@ -252,7 +252,7 @@ export default function InteractiveModePreview() {
             {/* Invoice Header Mock */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848]">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft">
                   {activeMode === "pure" ? "Pure Accounting Bill" : "Standard Tax Document"}
                 </span>
                 <h4 className="text-lg font-black text-slate-950">
@@ -345,7 +345,7 @@ export default function InteractiveModePreview() {
                         className={`font-semibold px-2 py-0.5 rounded text-[10px] ${
                           activeMode === "pure"
                             ? "bg-slate-100 text-slate-600"
-                            : "bg-[#5BB5BB]/15 text-[#1F2324] font-bold"
+                            : "bg-brand/15 text-ink font-bold"
                         }`}
                       >
                         {activeMode === "pure" ? "0% (Exempt)" : "18% (9+9%)"}
@@ -358,7 +358,7 @@ export default function InteractiveModePreview() {
             </div>
 
             {/* Tax Computation Summary */}
-            <div className="bg-[#F8FAFC] rounded-xl p-4 border border-slate-200 text-xs space-y-1.5">
+            <div className="bg-canvas rounded-xl p-4 border border-slate-200 text-xs space-y-1.5">
               <div className="flex justify-between text-slate-600">
                 <span>Taxable Amount</span>
                 <span className="font-mono">₹50,000.00</span>
@@ -367,11 +367,11 @@ export default function InteractiveModePreview() {
                 <>
                   <div className="flex justify-between text-slate-600">
                     <span>Central GST (CGST 9%)</span>
-                    <span className="font-mono font-medium text-[#2D7A7A]">+₹4,500.00</span>
+                    <span className="font-mono font-medium text-brand-strong">+₹4,500.00</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>State GST (SGST 9%)</span>
-                    <span className="font-mono font-medium text-[#2D7A7A]">+₹4,500.00</span>
+                    <span className="font-mono font-medium text-brand-strong">+₹4,500.00</span>
                   </div>
                 </>
               ) : (
@@ -382,7 +382,7 @@ export default function InteractiveModePreview() {
               )}
               <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-950">
                 <span>Grand Total</span>
-                <span className="font-mono text-base text-[#0A0A0A]">
+                <span className="font-mono text-base text-ink">
                   {activeMode === "pure" ? "₹50,000.00" : "₹59,000.00"}
                 </span>
               </div>
@@ -390,7 +390,7 @@ export default function InteractiveModePreview() {
 
             {/* Direct Bharat UPI Payment QR Block Embedded on Invoice */}
             {customFields.showPaymentQr && (
-              <div className="p-3.5 bg-gradient-to-r from-slate-50 via-slate-50/80 to-[#5BB5BB]/10 rounded-xl border border-[#CBD5E1] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="p-3.5 bg-gradient-to-r from-slate-50 via-slate-50/80 to-brand/10 rounded-xl border border-line-strong flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
                   {/* High Contrast Rendered QR Visual */}
                   <div className="bg-white p-2 rounded-lg border border-slate-300 shadow-xs shrink-0">
@@ -477,12 +477,12 @@ export default function InteractiveModePreview() {
           </div>
 
           {/* Bottom Live Ledger State Reflection */}
-          <div className="p-3 bg-[#0A0A0A] border border-[#3E4848] text-slate-300 rounded-xl text-[11px] font-mono flex items-center justify-between">
+          <div className="p-3 bg-panel-deep border border-edge text-slate-300 rounded-xl text-[11px] font-mono flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#5BB5BB] animate-ping" />
+              <span className="h-2 w-2 rounded-full bg-brand animate-ping" />
               <span>ALERX Ledger Posting:</span>
             </div>
-            <span className="text-[#91D7D2] truncate max-w-xs font-bold">
+            <span className="text-brand-soft truncate max-w-xs font-bold">
               {activeMode === "pure"
                 ? "Dr Trade Debtors ₹50k ⇄ Cr Revenue ₹50k"
                 : "Dr AR ₹59k ⇄ Cr Revenue ₹50k + Output GST ₹9k"}

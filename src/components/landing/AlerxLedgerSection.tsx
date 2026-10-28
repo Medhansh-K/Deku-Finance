@@ -136,7 +136,7 @@ export default function AlerxLedgerSection() {
       subtitle: "Marketplace sales (Amazon/Flipkart), inventory, and shipping",
       icon: ShoppingBag,
       tag: "E-Commerce & Retail",
-      color: "from-[#5BB5BB]/20 to-[#91D7D2]/20 text-[#5BB5BB] border-[#5BB5BB]/30",
+      color: "from-brand/20 to-brand-soft/20 text-brand border-brand/30",
       summary: "Tracks Section 14 ECO marketplace receivables, stock inventory valuation, Shiprocket logistics freight, and reverse charge.",
       accounts: [
         {
@@ -370,7 +370,7 @@ export default function AlerxLedgerSection() {
       case "A":
         return "bg-blue-500/10 text-blue-400 border-blue-500/30";
       case "L":
-        return "bg-[#5BB5BB]/10 text-[#91D7D2] border-[#5BB5BB]/30";
+        return "bg-brand/10 text-brand-soft border-brand/30";
       case "E":
         return "bg-purple-500/10 text-purple-400 border-purple-500/30";
       case "R":
@@ -383,21 +383,21 @@ export default function AlerxLedgerSection() {
   };
 
   return (
-    <section id="alerx" className="py-24 bg-[#0A0A0A] border-b border-[#3E4848] text-white relative overflow-hidden scroll-mt-16 font-sans">
+    <section id="alerx" className="py-24 bg-panel-deep border-b border-edge text-white relative overflow-hidden scroll-mt-16 font-sans">
       {/* Background Decorative Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#5BB5BB10,transparent_60%)] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#1F2324] px-4 py-1.5 text-xs font-mono font-bold text-[#91D7D2] border border-[#3E4848] shadow-sm">
-            <Layers className="h-3.5 w-3.5 text-[#5BB5BB]" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-4 py-1.5 text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
+            <Layers className="h-3.5 w-3.5 text-brand" />
             <span>The ALERX 4-Tier Foundation • Standard Indian GAAP</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
             Effortless Chart of Accounts (COA) for{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#91D7D2] via-[#5BB5BB] to-[#2D7A7A]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-soft via-brand to-brand-strong">
               Any Business Model
             </span>
           </h2>
@@ -408,38 +408,38 @@ export default function AlerxLedgerSection() {
         </div>
 
         {/* The 4-Tier Hierarchy Flow Banner */}
-        <div className="bg-[#1F2324] rounded-2xl border border-[#3E4848] p-4 sm:p-6 shadow-xl">
-          <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#5BB5BB] mb-3 flex items-center gap-2">
-            <Database className="h-4 w-4 text-[#5BB5BB]" />
+        <div className="bg-panel rounded-2xl border border-edge p-4 sm:p-6 shadow-xl">
+          <div className="text-xs font-mono font-bold uppercase tracking-wider text-brand mb-3 flex items-center gap-2">
+            <Database className="h-4 w-4 text-brand" />
             <span>Mathematical ALERX 4-Tier Architecture Enforced at Database Level</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
-            <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#3E4848] space-y-1">
+            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 1: Group</span>
               <h4 className="font-bold text-white text-sm">ALERX Group</h4>
               <p className="text-[11px] text-slate-400">Assets, Liabilities, Equity, Revenue, Expense.</p>
             </div>
 
-            <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#3E4848] space-y-1">
+            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 2: Major</span>
               <h4 className="font-bold text-white text-sm">Ledger Category</h4>
               <p className="text-[11px] text-slate-400">Liquid Capital, Receivables, Statutory Taxes.</p>
             </div>
 
-            <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#3E4848] space-y-1">
+            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 3: Control</span>
               <h4 className="font-bold text-white text-sm">Sub-Ledger Bucket</h4>
               <p className="text-[11px] text-slate-400">Bank Accounts, Trade Debtors, Output GST.</p>
             </div>
 
-            <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#5BB5BB]/40 bg-[#5BB5BB]/5 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-[#5BB5BB] uppercase">Tier 4: Leaf Account</span>
-              <h4 className="font-bold text-[#91D7D2] text-sm">Transacting Label</h4>
+            <div className="bg-panel-deep p-3.5 rounded-xl border border-brand/40 bg-brand/5 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-brand uppercase">Tier 4: Leaf Account</span>
+              <h4 className="font-bold text-brand-soft text-sm">Transacting Label</h4>
               <p className="text-[11px] text-slate-400">HDFC Bank, Primary Customer, Server Hosting.</p>
             </div>
 
-            <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 space-y-1">
+            <div className="bg-panel-deep p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 space-y-1">
               <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">State & Magnitude</span>
               <h4 className="font-bold text-emerald-300 text-sm">Units & INR Value</h4>
               <p className="text-[11px] text-slate-400">Count of vouchers (units) & Net INR balance.</p>
@@ -466,7 +466,7 @@ export default function AlerxLedgerSection() {
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
                 placeholder="Search accounts or code..."
-                className="w-full px-3.5 py-2 rounded-xl bg-[#0A0A0A] border border-[#3E4848] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#5BB5BB] transition-colors"
+                className="w-full px-3.5 py-2 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand transition-colors"
               />
             </div>
           </div>
@@ -485,14 +485,14 @@ export default function AlerxLedgerSection() {
                   onClick={() => setSelectedPreset(key)}
                   className={`p-4 rounded-2xl border text-left transition-all ${
                     isSelected
-                      ? "bg-[#5BB5BB]/15 border-[#5BB5BB] ring-1 ring-[#5BB5BB] shadow-lg"
-                      : "bg-[#0A0A0A]/60 border-[#3E4848] hover:border-slate-600 hover:bg-[#121617]"
+                      ? "bg-brand/15 border-brand ring-1 ring-brand shadow-lg"
+                      : "bg-panel-deep/60 border-edge hover:border-slate-600 hover:bg-panel-deep"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div
                       className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-                        isSelected ? "bg-[#5BB5BB] text-[#0A0A0A] font-bold" : "bg-[#181B1C] text-slate-400"
+                        isSelected ? "bg-brand text-ink font-bold" : "bg-panel text-slate-400"
                       }`}
                     >
                       <IconComp className="h-4 w-4" />
@@ -513,9 +513,9 @@ export default function AlerxLedgerSection() {
           </div>
 
           {/* Preset Summary Callout */}
-          <div className="rounded-xl bg-[#1F2324] border border-[#3E4848] px-4 py-3 flex items-center justify-between text-xs text-slate-300">
+          <div className="rounded-xl bg-panel border border-edge px-4 py-3 flex items-center justify-between text-xs text-slate-300">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-[#5BB5BB] shrink-0" />
+              <Sparkles className="h-4 w-4 text-brand shrink-0" />
               <span>{currentPreset.summary}</span>
             </div>
             <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 font-bold">
@@ -543,7 +543,7 @@ export default function AlerxLedgerSection() {
                   {filteredAccounts.length > 0 ? (
                     filteredAccounts.map((acc) => (
                       <tr key={acc.code} className="hover:bg-zinc-800/40 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-[#5BB5BB]">
+                        <td className="py-3.5 px-4 font-bold text-brand">
                           {acc.code}
                         </td>
                         <td className="py-3.5 px-4">
@@ -594,7 +594,7 @@ export default function AlerxLedgerSection() {
             </div>
 
             {/* Bottom Enforced Integrity Note */}
-            <div className="p-4 bg-[#0A0A0A] border-t border-[#3E4848] text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3 font-sans">
+            <div className="p-4 bg-panel-deep border-t border-edge text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3 font-sans">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
                 <span>
@@ -603,7 +603,7 @@ export default function AlerxLedgerSection() {
               </div>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5BB5BB] hover:text-[#91D7D2]"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:text-brand-soft"
               >
                 <span>Seed Your Business COA Now</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -614,8 +614,8 @@ export default function AlerxLedgerSection() {
 
         {/* 3 Strategic Pillars of ALERX */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 font-sans">
-          <div className="bg-[#1F2324] border border-[#3E4848] p-6 rounded-2xl space-y-3">
-            <div className="h-10 w-10 rounded-xl bg-[#5BB5BB]/15 text-[#5BB5BB] flex items-center justify-center font-bold font-mono">
+          <div className="bg-panel border border-edge p-6 rounded-2xl space-y-3">
+            <div className="h-10 w-10 rounded-xl bg-brand/15 text-brand flex items-center justify-center font-bold font-mono">
               1
             </div>
             <h4 className="text-base font-bold text-white">Instant GAAP Compliance</h4>

@@ -125,14 +125,14 @@ export function TrialBalanceView() {
       )}
 
       {/* Trial Balance Statement Sheet */}
-      <div className="bg-white border border-[#3E4848] rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border border-edge rounded-lg shadow-sm overflow-hidden">
         {/* Statement Header */}
-        <div className="bg-[#1F2324] text-white p-4 border-b border-[#3E4848] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="bg-panel text-white p-4 border-b border-edge flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-bold tracking-wide uppercase font-mono">
               Trial Balance Statement
             </h2>
-            <p className="text-[11px] text-[#91D7D2]">
+            <p className="text-[11px] text-brand-soft">
               As computed by PostgreSQL ALERX Natural Balance Engine
             </p>
           </div>
@@ -172,7 +172,7 @@ export function TrialBalanceView() {
                       }
                       className={`cursor-pointer transition-colors ${
                         hasMovement
-                          ? "hover:bg-[#5BB5BB]/10 font-medium text-slate-900"
+                          ? "hover:bg-brand/10 font-medium text-slate-900"
                           : "text-slate-400 hover:bg-slate-50"
                       }`}
                     >
@@ -198,7 +198,7 @@ export function TrialBalanceView() {
                       <td className="py-2 px-4 text-right font-mono">
                         {row.total_credit > 0 ? formatINR(row.total_credit, { showCurrencySymbol: false }) : "—"}
                       </td>
-                      <td className="py-2 px-4 text-right font-mono font-bold text-[#0F172A]">
+                      <td className="py-2 px-4 text-right font-mono font-bold text-ink">
                         {formatINR(row.natural_balance, { showDrCr: true })}
                       </td>
                     </tr>
@@ -214,7 +214,7 @@ export function TrialBalanceView() {
             </tbody>
             <tfoot>
               {/* Grand Totals */}
-              <tr className="bg-[#1F2324] text-white border-t-2 border-[#3E4848] font-mono font-bold text-xs">
+              <tr className="bg-panel text-white border-t-2 border-edge font-mono font-bold text-xs">
                 <td colSpan={3} className="py-3 px-4 uppercase tracking-wider">
                   Total Trial Balance Equilibrium
                 </td>

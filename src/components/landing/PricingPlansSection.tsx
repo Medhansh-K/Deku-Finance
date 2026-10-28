@@ -48,7 +48,7 @@ export default function PricingPlansSection() {
       name: "PRO",
       tagline: "For high-volume B2B suppliers, e-commerce sellers, and multi-state growing enterprises.",
       badge: "⚡ Most Popular for Growth",
-      badgeColor: "bg-[#5BB5BB]/15 text-[#91D7D2] border-[#5BB5BB]/30",
+      badgeColor: "bg-brand/15 text-brand-soft border-brand/30",
       priceMonthly: 4999,
       priceAnnual: 3999, // ₹3,999/mo billed as ₹47,988/yr
       trialText: "Designed for scaling compliance & unlimited volume",
@@ -178,18 +178,18 @@ export default function PricingPlansSection() {
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-white text-slate-900 border-b border-[#CBD5E1] scroll-mt-16 font-sans">
+    <section id="pricing" className="py-24 bg-white text-slate-900 border-b border-line-strong scroll-mt-16 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#1F2324] px-4 py-1.5 text-xs font-mono font-bold text-[#91D7D2] border border-[#3E4848] shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-[#5BB5BB]" />
+          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-4 py-1.5 text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-brand" />
             <span>Built for Indian Businesses • 100% Transparent</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-[#0A0A0A]">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-ink">
             Simple Plans,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1F2324] via-[#2D7A7A] to-[#5BB5BB]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-panel via-brand-strong to-brand">
               Transparent Pricing.
             </span>
           </h2>
@@ -212,10 +212,10 @@ export default function PricingPlansSection() {
               onClick={() =>
                 setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")
               }
-              className="w-12 h-6 bg-[#1F2324] border border-[#3E4848] rounded-full p-1 transition-colors relative"
+              className="w-12 h-6 bg-panel border border-edge rounded-full p-1 transition-colors relative"
             >
               <div
-                className={`w-4 h-4 rounded-full bg-[#5BB5BB] transition-transform ${
+                className={`w-4 h-4 rounded-full bg-brand transition-transform ${
                   billingCycle === "annual" ? "translate-x-6" : "translate-x-0"
                 }`}
               />
@@ -226,7 +226,7 @@ export default function PricingPlansSection() {
               }`}
             >
               <span>Annual Billing</span>
-              <span className="inline-block bg-[#5BB5BB]/15 text-[#1F2324] text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full border border-[#5BB5BB]/30">
+              <span className="inline-block bg-brand/15 text-ink text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full border border-brand/30">
                 Save 20%
               </span>
             </span>
@@ -244,8 +244,8 @@ export default function PricingPlansSection() {
                 key={plan.id}
                 className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
                   plan.isPopular
-                    ? "bg-[#1F2324] text-white border-2 border-[#5BB5BB] shadow-2xl ring-4 ring-[#5BB5BB]/10"
-                    : "bg-[#F8FAFC] text-slate-900 border border-slate-200 shadow-sm"
+                    ? "bg-panel text-white border-2 border-brand shadow-2xl ring-4 ring-brand/10"
+                    : "bg-canvas text-slate-900 border border-slate-200 shadow-sm"
                 }`}
               >
                 {/* Free Trial / Popular Badge */}
@@ -260,7 +260,7 @@ export default function PricingPlansSection() {
                     className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
                       plan.id === "go"
                         ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                        : "text-[#91D7D2] bg-[#5BB5BB]/10 border-[#5BB5BB]/30 font-mono"
+                        : "text-brand-soft bg-brand/10 border-brand/30 font-mono"
                     }`}
                   >
                     {plan.id === "go" ? "Instant 60s Setup" : "Full Compliance Suite"}
@@ -295,7 +295,7 @@ export default function PricingPlansSection() {
 
                   <p
                     className={`text-[11px] font-medium pt-1 ${
-                      plan.isPopular ? "text-[#91D7D2]" : "text-emerald-700"
+                      plan.isPopular ? "text-brand-soft" : "text-emerald-700"
                     }`}
                   >
                     {plan.trialText}
@@ -317,7 +317,7 @@ export default function PricingPlansSection() {
                         <div
                           className={`h-4 w-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
                             plan.isPopular
-                              ? "bg-[#5BB5BB] text-[#0A0A0A] font-bold"
+                              ? "bg-brand text-ink font-bold"
                               : "bg-emerald-500 text-white"
                           }`}
                         >
@@ -341,8 +341,8 @@ export default function PricingPlansSection() {
                     href={plan.ctaHref}
                     className={`w-full py-3.5 px-6 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-md ${
                       plan.isPopular
-                        ? "bg-[#5BB5BB] hover:bg-[#91D7D2] text-[#0A0A0A] shadow-[#5BB5BB]/20"
-                        : "bg-[#1F2324] hover:bg-[#0A0A0A] text-white border border-[#3E4848]"
+                        ? "bg-brand hover:bg-brand-soft text-ink shadow-brand/20"
+                        : "bg-panel hover:bg-panel-deep text-white border border-edge"
                     }`}
                   >
                     <span>{plan.ctaText}</span>
@@ -366,7 +366,7 @@ export default function PricingPlansSection() {
         {/* Detailed Plan Feature Breakup Table */}
         <div className="pt-10 space-y-6 max-w-5xl mx-auto">
           <div className="text-center space-y-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#3E4848]">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-ink-soft">
               Feature Matrix
             </span>
             <h3 className="text-2xl font-black text-slate-950">
@@ -381,15 +381,15 @@ export default function PricingPlansSection() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#1F2324] text-white text-[11px] font-bold uppercase tracking-wider border-b border-[#3E4848]">
+                  <tr className="bg-panel text-white text-[11px] font-bold uppercase tracking-wider border-b border-edge">
                     <th className="py-4 px-5 w-1/2">Capabilities & Modules</th>
-                    <th className="py-4 px-5 text-center w-1/4 bg-[#181B1C]">
+                    <th className="py-4 px-5 text-center w-1/4 bg-panel">
                       GO (₹1,499/mo)
                       <span className="block text-[10px] text-emerald-400 font-normal lowercase font-mono">
                         (15-day free trial)
                       </span>
                     </th>
-                    <th className="py-4 px-5 text-center w-1/4 text-[#91D7D2] bg-[#0A0A0A] border-x border-[#3E4848]">
+                    <th className="py-4 px-5 text-center w-1/4 text-brand-soft bg-panel-deep border-x border-edge">
                       PRO (₹4,999/mo)
                       <span className="block text-[10px] text-slate-300 font-normal lowercase font-mono">
                         (unlimited scaling)
@@ -417,7 +417,7 @@ export default function PricingPlansSection() {
                           <td className="py-3.5 px-5 text-center font-medium text-slate-700 bg-slate-50/50">
                             {feat.go}
                           </td>
-                          <td className="py-3.5 px-5 text-center font-bold text-slate-950 bg-[#5BB5BB]/5 border-x border-slate-200">
+                          <td className="py-3.5 px-5 text-center font-bold text-slate-950 bg-brand/5 border-x border-slate-200">
                             {feat.pro}
                           </td>
                         </tr>

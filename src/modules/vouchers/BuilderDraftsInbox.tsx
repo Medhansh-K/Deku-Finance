@@ -73,11 +73,11 @@ export function BuilderDraftsInbox({
   };
 
   return (
-    <div className="bg-white border border-[#CBD5E1] rounded-lg p-3 shadow-xs space-y-3">
+    <div className="bg-white border border-line-strong rounded-lg p-3 shadow-xs space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-200">
         <div className="flex items-center gap-1.5 min-w-0">
-          <FileSpreadsheet className="h-4 w-4 text-[#5BB5BB] shrink-0" />
+          <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
           <div>
             <h3 className="text-xs font-bold text-slate-900 leading-tight">
               Builder Ledger Requests
@@ -149,7 +149,7 @@ export function BuilderDraftsInbox({
             <button
               type="button"
               onClick={handleResetSample}
-              className="text-[10px] text-[#5BB5BB] hover:underline font-bold"
+              className="text-[10px] text-brand hover:underline font-bold"
             >
               Reload Sample Builder Requests
             </button>
@@ -170,7 +170,7 @@ export function BuilderDraftsInbox({
                 onClick={() => onSelectDraft(draft)}
                 className={`p-2.5 rounded-lg border transition-all cursor-pointer relative group text-left ${
                   isSelected
-                    ? "bg-[#1F2324] text-white border-[#5BB5BB] shadow-sm ring-1 ring-[#5BB5BB]"
+                    ? "bg-panel text-white border-brand shadow-sm ring-1 ring-brand"
                     : "bg-slate-50/80 hover:bg-slate-100 border-slate-200 text-slate-800"
                 }`}
               >
@@ -191,7 +191,7 @@ export function BuilderDraftsInbox({
 
                     <div className={`text-[10px] mt-0.5 flex items-center justify-between ${isSelected ? "text-slate-400" : "text-slate-500"}`}>
                       <span>Date: {draft.docDate}</span>
-                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-[#5BB5BB]" : "text-slate-900"}`}>
+                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-brand" : "text-slate-900"}`}>
                         {formatINR(draft.calculations.roundedTotal)}
                       </span>
                     </div>
@@ -221,7 +221,7 @@ export function BuilderDraftsInbox({
                     </button>
                     <span
                       className={`font-bold flex items-center gap-0.5 ${
-                        isSelected ? "text-[#5BB5BB]" : "text-blue-600 group-hover:underline"
+                        isSelected ? "text-brand" : "text-blue-600 group-hover:underline"
                       }`}
                     >
                       {isSelected ? "Active in Desk" : "Populate Desk"} <ArrowRight className="h-2.5 w-2.5" />

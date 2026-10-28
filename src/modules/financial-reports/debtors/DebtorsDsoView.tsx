@@ -279,7 +279,7 @@ export function DebtorsDsoView() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
         <div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
-            <Link href="/gateway" className="hover:text-[#5BB5BB] transition-colors">
+            <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
             <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -299,7 +299,7 @@ export function DebtorsDsoView() {
           </Button>
           <Link
             href="/vouchers/receipt"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-[#5BB5BB] hover:bg-[#91D7D2] text-[#0A0A0A] shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-ink shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
             <span>Record Receipt (F6)</span>
@@ -392,7 +392,7 @@ export function DebtorsDsoView() {
             onClick={() => setActiveBucket(tab.id)}
             className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap cursor-pointer ${
               activeBucket === tab.id
-                ? "bg-[#1F2324] text-white font-bold"
+                ? "bg-panel text-white font-bold"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -460,7 +460,7 @@ export function DebtorsDsoView() {
                   <div className="h-7 w-7 rounded flex items-center justify-center bg-slate-100 text-slate-600">
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 ${
-                        isExpanded ? "rotate-180 text-[#2D7A7A]" : ""
+                        isExpanded ? "rotate-180 text-brand-strong" : ""
                       }`}
                     />
                   </div>
@@ -472,12 +472,12 @@ export function DebtorsDsoView() {
                 <div className="border-t border-slate-200 bg-slate-50/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5 text-[#2D7A7A]" />
+                      <FileText className="h-3.5 w-3.5 text-brand-strong" />
                       <span>Outstanding Invoices Owed by {deb.customer_name}</span>
                     </span>
                     <Link
                       href="/invoices"
-                      className="text-xs text-[#2D7A7A] hover:underline font-bold flex items-center gap-1"
+                      className="text-xs text-brand-strong hover:underline font-bold flex items-center gap-1"
                     >
                       <span>View All Invoices</span>
                       <ExternalLink className="h-3 w-3" />
@@ -486,7 +486,7 @@ export function DebtorsDsoView() {
 
                   <div className="overflow-x-auto border border-slate-200 rounded bg-white shadow-2xs">
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-[#1F2324] text-white text-[11px]">
+                      <thead className="bg-panel text-white text-[11px]">
                         <tr>
                           <th className="p-2.5">Invoice #</th>
                           <th className="p-2.5">Issued Date</th>
@@ -504,7 +504,7 @@ export function DebtorsDsoView() {
                             <td className="p-2.5 font-bold text-slate-900">
                               <Link
                                 href="/invoices"
-                                className="hover:text-[#5BB5BB] hover:underline flex items-center gap-1"
+                                className="hover:text-brand hover:underline flex items-center gap-1"
                               >
                                 <FileText className="h-3 w-3 text-slate-400" />
                                 <span>{inv.invoice_number}</span>

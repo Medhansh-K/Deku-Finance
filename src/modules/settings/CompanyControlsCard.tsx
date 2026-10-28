@@ -48,10 +48,10 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
   };
 
   return (
-    <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-4">
+    <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
       <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
         <Building2 className="h-4 w-4 text-slate-600" />
-        <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono">Company Controls</h3>
+        <h3 className="text-sm font-bold uppercase text-ink font-mono">Company Controls</h3>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -98,7 +98,7 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
                   e.target.checked ? "Approvals turned on." : "Approvals turned off."
                 )
               }
-              className="h-4 w-4 accent-[#5BB5BB]"
+              className="h-4 w-4 accent-brand"
             />
             <span className="font-semibold">{requireApproval ? "On" : "Off"}</span>
           </label>

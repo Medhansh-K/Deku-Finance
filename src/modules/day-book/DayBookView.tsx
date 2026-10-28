@@ -476,7 +476,7 @@ export function DayBookView() {
       sortKey: (j) => j.entry_number,
       cell: (j) => (
         <div>
-          <span className="font-mono font-bold text-[#0F172A] block">
+          <span className="font-mono font-bold text-ink block">
             {j.entry_number}
           </span>
           <span className="text-[10px] font-mono text-slate-400">
@@ -619,7 +619,7 @@ export function DayBookView() {
               setSelectedEntry(j);
               setIsPrintSlipOpen(true);
             }}
-            className="p-1 rounded hover:bg-slate-100 text-[#2D7A7A] hover:text-[#1F2324] cursor-pointer"
+            className="p-1 rounded hover:bg-slate-100 text-brand-strong hover:text-ink cursor-pointer"
             title="Print Indian GAAP Voucher Slip"
           >
             <Printer className="h-3.5 w-3.5" />
@@ -644,12 +644,12 @@ export function DayBookView() {
       {/* Top Bar with Organisation Context */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-[#5BB5BB]/20 border border-[#5BB5BB]/50 flex items-center justify-center text-[#5BB5BB]">
+          <div className="h-8 w-8 rounded-lg bg-brand/20 border border-brand/50 flex items-center justify-center text-brand">
             <BookOpen className="h-4 w-4" />
           </div>
           <div>
             <div className="flex items-center gap-2" suppressHydrationWarning>
-              <span className="font-bold text-sm text-[#0F172A]">Day Book Register</span>
+              <span className="font-bold text-sm text-ink">Day Book Register</span>
               {taxProfile.regime === "sec22" ? (
                 <span
                   suppressHydrationWarning
@@ -677,7 +677,7 @@ export function DayBookView() {
             <select
               value={orgId}
               onChange={(e) => handleSwitchOrg(e.target.value)}
-              className="bg-white text-slate-800 font-semibold text-xs py-1.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#5BB5BB] cursor-pointer"
+              className="bg-white text-slate-800 font-semibold text-xs py-1.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-brand cursor-pointer"
             >
               {orgList.map((org) => (
                 <option key={org.id} value={org.id}>
@@ -730,7 +730,7 @@ export function DayBookView() {
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1 font-semibold rounded text-xs capitalize transition-colors cursor-pointer ${
                   statusFilter === st
-                    ? "bg-[#1F2324] text-white font-bold"
+                    ? "bg-panel text-white font-bold"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
@@ -768,7 +768,7 @@ export function DayBookView() {
             {dateFilter && (
               <button
                 onClick={() => setDateFilter("")}
-                className="text-[11px] text-[#5BB5BB] hover:underline cursor-pointer"
+                className="text-[11px] text-brand hover:underline cursor-pointer"
               >
                 Clear
               </button>
@@ -784,7 +784,7 @@ export function DayBookView() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search party, LF folio, or voucher..."
-            className="w-full bg-white border border-slate-300 rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#5BB5BB]"
+            className="w-full bg-white border border-slate-300 rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-slate-400 focus:outline-none focus:border-brand"
           />
         </div>
       </div>
@@ -831,7 +831,7 @@ export function DayBookView() {
                 <span className="text-slate-400 block text-[10px] font-mono uppercase">
                   Voucher / Invoice No.
                 </span>
-                <span className="font-mono font-bold text-sm text-[#0F172A]">
+                <span className="font-mono font-bold text-sm text-ink">
                   {selectedEntry.entry_number}
                 </span>
                 <span className="text-[10px] font-mono text-slate-400 block">
@@ -845,7 +845,7 @@ export function DayBookView() {
                 <span className="font-semibold text-slate-900 block truncate">
                   {selectedEntry.source_document}
                 </span>
-                <span className="font-mono font-bold text-xs text-[#2D7A7A]">
+                <span className="font-mono font-bold text-xs text-brand-strong">
                   Ledger Folio: {selectedEntry.ledger_folio}
                 </span>
               </div>
@@ -1037,7 +1037,7 @@ export function DayBookView() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsPrintSlipOpen(true)}
-                  className="gap-1.5 text-xs text-[#2D7A7A] border-[#2D7A7A]/40"
+                  className="gap-1.5 text-xs text-brand-strong border-brand-strong/40"
                 >
                   <Printer className="h-3.5 w-3.5" /> Print Voucher Slip
                 </Button>
@@ -1195,7 +1195,7 @@ export function DayBookView() {
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[9px] uppercase">Ledger Folio</span>
-                  <strong className="text-[#2D7A7A]">{selectedEntry.ledger_folio}</strong>
+                  <strong className="text-brand-strong">{selectedEntry.ledger_folio}</strong>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[9px] uppercase">Reference</span>
