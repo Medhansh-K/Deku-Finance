@@ -161,4 +161,4 @@ npm test
 - **No financial data leaves your infrastructure.** Invoices are read in the browser (PDF text layer, or on-device OCR for scans); the Deku Consultant answers from your own ledger on your own server. Nothing is sent to a third-party AI service.
 - Extracted values are never guessed: anything that cannot be read is left blank and flagged for the user.
 - **Demo sandbox:** "Try demo" signs in to real sandbox accounts (`demo-owner@`, `demo-accountant@`, `demo-freelancer@deku.finance`, password `DekuDemo#2026`) that belong only to fictional companies.
-- Known gap: some report screens (Creditors, Operating Expenses, Executive dashboard) still show built-in sample figures instead of ledger data.
+- Creditors, Debtors, Operating Expenses, the Executive dashboard and Gateway KPIs are computed from posted journal entries; anything the books can't support (vendor credit terms, departments, budgets) shows "–" instead of a figure.

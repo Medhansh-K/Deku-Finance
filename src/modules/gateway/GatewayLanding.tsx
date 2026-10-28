@@ -15,10 +15,13 @@ import {
   Sparkles,
   Bot,
 } from "lucide-react";
-import { organisationsApi, accountingApi, OrgSummary } from "@/api/endpoints";
+import { organisationsApi, OrgSummary } from "@/api/endpoints";
 import {
-  getKpiProfile,
+  emptyKpis,
+  getQuickKpiKeys,
+  loadKpis,
   FormattedKpiProfile,
+  KpiKey,
 } from "@/lib/kpi/kpi-service";
 
 export function GatewayLanding() {
@@ -34,23 +37,29 @@ export function GatewayLanding() {
     currency: "INR",
   });
 
-  const [lastEntryDate, setLastEntryDate] = useState<string>("18-Oct-2026");
-  const [profile, setProfile] = useState<FormattedKpiProfile>(() =>
-    getKpiProfile(activeOrg.id, activeOrg.name)
-  );
-
-  // Sync profile when activeOrg changes or KPI event fires
-  useEffect(() => {
-    setProfile(getKpiProfile(activeOrg.id, activeOrg.name));
-  }, [activeOrg.id, activeOrg.name]);
+  const [profile, setProfile] = useState<FormattedKpiProfile>(emptyKpis);
+  const [quickKeys, setQuickKeys] = useState<KpiKey[]>([]);
+  const show = (k: KpiKey) => quickKeys.includes(k);
 
   useEffect(() => {
-    const handleKpiChanged = () => {
-      setProfile(getKpiProfile(activeOrg.id, activeOrg.name));
+    if (!activeOrg.id) return;
+    setProfile(emptyKpis());
+    let live = true;
+    loadKpis(activeOrg.id)
+      .then((p) => live && setProfile(p))
+      .catch(() => {});
+    return () => {
+      live = false;
     };
-    window.addEventListener("deku_kpi_changed", handleKpiChanged);
-    return () => window.removeEventListener("deku_kpi_changed", handleKpiChanged);
-  }, [activeOrg.id, activeOrg.name]);
+  }, [activeOrg.id]);
+
+  useEffect(() => {
+    if (!activeOrg.id) return;
+    const sync = () => setQuickKeys(getQuickKpiKeys(activeOrg.id));
+    sync();
+    window.addEventListener("deku_kpi_changed", sync);
+    return () => window.removeEventListener("deku_kpi_changed", sync);
+  }, [activeOrg.id]);
 
   // Handle switching company
   const handleSwitchCompany = (org: OrgSummary | { id: string; name: string; gstin?: string | null; currency?: string; slug?: string }) => {
@@ -115,25 +124,6 @@ export function GatewayLanding() {
       }
     }
   }, []);
-
-  // Fetch journals and last entry date when active company changes
-  useEffect(() => {
-    accountingApi
-      .listJournals(activeOrg.id)
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          const latest = res.data[0];
-          setLastEntryDate(latest.entry_date);
-        } else {
-          const prof = getKpiProfile(activeOrg.id, activeOrg.name);
-          setLastEntryDate(prof.lastEntry);
-        }
-      })
-      .catch(() => {
-        const prof = getKpiProfile(activeOrg.id, activeOrg.name);
-        setLastEntryDate(prof.lastEntry);
-      });
-  }, [activeOrg.id, activeOrg.name]);
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -215,13 +205,7 @@ export function GatewayLanding() {
 
 
 
-  const companyShortName = activeOrg.name.startsWith("All Might")
-    ? "All Might"
-    : activeOrg.name.startsWith("Endeavor")
-    ? "Endeavor"
-    : activeOrg.name.startsWith("Deku")
-    ? "Deku"
-    : activeOrg.name.split(" ")[0];
+  const companyShortName = activeOrg.name.split(" ")[0];
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-2 sm:p-2.5 lg:px-4 lg:py-1 bg-[#F8FAFC] w-full min-h-0">
@@ -265,7 +249,7 @@ export function GatewayLanding() {
 
               <div className="flex items-center gap-1.5 mt-1.5">
                 <span className="text-[10px] font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
-                  GSTIN: {activeOrg.gstin}
+                  GSTIN: {activeOrg.gstin || "–"}
                 </span>
                 <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 font-bold">
                   {activeOrg.currency}
@@ -331,13 +315,13 @@ export function GatewayLanding() {
               <div className="flex justify-between py-0.5 border-b border-slate-100">
                 <span className="text-slate-500">Current Period:</span>
                 <span className="font-mono font-bold text-[#0F172A]">
-                  01-Apr-2026 to 31-Mar-2027
+                  {profile.periodLabel}
                 </span>
               </div>
               <div className="flex justify-between py-0.5 border-b border-slate-100">
                 <span className="text-slate-500">Date of Last Entry:</span>
                 <span className="font-mono font-bold text-[#0F172A]">
-                  {lastEntryDate}
+                  {profile.lastEntry}
                 </span>
               </div>
               <div className="flex justify-between py-0.5 border-b border-slate-100">
@@ -684,7 +668,7 @@ export function GatewayLanding() {
               </div>
               <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                Live Audited ({companyShortName})
+                From the books ({companyShortName})
               </span>
             </div>
 
@@ -697,7 +681,7 @@ export function GatewayLanding() {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
-                    Turnover (FY 26-27)
+                    Turnover (FY to date)
                   </span>
                   <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#5BB5BB] transition-colors" />
                 </div>
@@ -712,7 +696,7 @@ export function GatewayLanding() {
               >
                 <div className="flex items-center justify-end gap-1">
                   <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
-                    Net Profit (EBITDA)
+                    Net Profit
                   </span>
                   <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#5BB5BB] transition-colors" />
                 </div>
@@ -731,6 +715,7 @@ export function GatewayLanding() {
 
               <div className="divide-y divide-slate-100 border border-slate-200 rounded overflow-hidden bg-white text-xs">
                 {/* 1. Billed Turnover & Invoices Hub -> /invoices */}
+                {show("billed") && (
                 <Link
                   href="/invoices"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -762,8 +747,10 @@ export function GatewayLanding() {
                     </span>
                   </div>
                 </Link>
+                )}
 
                 {/* 2. Liquid Funds (Cash & Bank) -> /masters/chart-of-accounts?group=asset&filter=liquid */}
+                {show("liquid") && (
                 <Link
                   href="/masters/chart-of-accounts?group=asset&filter=liquid"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -785,8 +772,10 @@ export function GatewayLanding() {
                     <span className="text-[10px] text-slate-400 font-mono">Instant Liquidity</span>
                   </div>
                 </Link>
+                )}
 
                 {/* 3. Trade Debtors (AR DSO Tracking) -> /reports/debtors */}
+                {show("debtors") && (
                 <Link
                   href="/reports/debtors"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -810,8 +799,10 @@ export function GatewayLanding() {
                     </span>
                   </div>
                 </Link>
+                )}
 
                 {/* 4. Trade Creditors (AP DPO Tracking) -> /reports/creditors */}
+                {show("creditors") && (
                 <Link
                   href="/reports/creditors"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -833,8 +824,10 @@ export function GatewayLanding() {
                     <span className="text-[10px] text-slate-400 font-mono">{profile.creditorsTerms}</span>
                   </div>
                 </Link>
+                )}
 
                 {/* 5. Operating Expenses & Payment Vouchers -> /reports/operating-expenses */}
+                {show("expenses") && (
                 <Link
                   href="/reports/operating-expenses"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -856,8 +849,10 @@ export function GatewayLanding() {
                     <span className="text-[10px] text-slate-400 font-mono">{profile.expenseRatio}</span>
                   </div>
                 </Link>
+                )}
 
                 {/* 6. GST Net Liability -> /gst */}
+                {show("gst") && (
                 <Link
                   href="/gst"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
@@ -881,6 +876,7 @@ export function GatewayLanding() {
                     </span>
                   </div>
                 </Link>
+                )}
               </div>
             </div>
           </div>

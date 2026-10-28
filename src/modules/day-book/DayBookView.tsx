@@ -31,12 +31,13 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, organisationsApi, OrgSummary } from "@/api/endpoints";
+import { accountingApi, organisationsApi, partiesApi, OrgSummary } from "@/api/endpoints";
 import { JournalEntry, JournalStatus } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
-import { getOrgTaxProfile, getDefaultTaxProfile, OrgTaxProfile } from "@/lib/org-regime";
-import { getVouchersForOrg, VoucherItem, VOUCHER_TYPE_STYLES } from "@/modules/executive/RecentlyAddedVouchers";
+import { loadOrgTaxProfile, OrgTaxProfile } from "@/lib/org-regime";
+import { VOUCHER_TYPE_STYLES } from "@/modules/executive/RecentlyAddedVouchers";
+import { journalToVoucher, VoucherItem } from "@/lib/reports/vouchers";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
 import { DocumentProofAttachment, SAMPLE_PROOFS } from "@/lib/vouchers/document-proof";
 
@@ -49,9 +50,7 @@ export function DayBookView() {
   // Active Organisation State (initialized with deterministic server default)
   const [orgId, setOrgId] = useState<string>("");
   const [orgName, setOrgName] = useState<string>("");
-  const [taxProfile, setTaxProfile] = useState<OrgTaxProfile>(() =>
-    getDefaultTaxProfile("")
-  );
+  const [taxProfile, setTaxProfile] = useState<OrgTaxProfile | null>(null);
   const [orgList, setOrgList] = useState<OrgSummary[]>([]);
 
   // Filters
@@ -88,7 +87,7 @@ export function DayBookView() {
       const savedName = localStorage.getItem("deku_active_org_name") || "";
       setOrgId(savedId);
       setOrgName(savedName);
-      setTaxProfile(getOrgTaxProfile(savedId));
+      loadOrgTaxProfile(savedId).then(setTaxProfile);
     }
 
     organisationsApi
@@ -105,7 +104,7 @@ export function DayBookView() {
     const found = orgList.find((o) => o.id === newId);
     setOrgId(newId);
     if (found) setOrgName(found.name);
-    setTaxProfile(getOrgTaxProfile(newId));
+    loadOrgTaxProfile(newId).then(setTaxProfile);
 
     if (typeof window !== "undefined") {
       localStorage.setItem("deku_active_org_id", newId);
@@ -131,98 +130,24 @@ export function DayBookView() {
   const fetchJournals = async () => {
     setIsLoading(true);
     setError(null);
+    const localRaw = typeof window !== "undefined" ? localStorage.getItem("deku_local_daybook_vouchers") : null;
+    const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
     try {
-      const seed = getVouchersForOrg(orgId);
-      const res = await accountingApi.listJournals(orgId);
-
-      if (res.data && res.data.length > 0) {
-        const apiVouchers: VoucherItem[] = res.data.map((j) => {
-          const pfx = (j.entry_number || "").split("-")[0].toUpperCase();
-          let vType: VoucherItem["voucher_type"] = "journal";
-          let fKey = "F7";
-          let lf = "LF-100";
-          let srcDoc = "General Journal Memo";
-
-          if (pfx.includes("SLS") || pfx.includes("SAL") || pfx.includes("INV")) {
-            vType = "sales";
-            fKey = "F8";
-            lf = "LF-104";
-            srcDoc = taxProfile.regime === "sec22" ? "Bill of Supply (BOS)" : "Tax Invoice";
-          } else if (pfx.includes("PAY")) {
-            vType = "payment";
-            fKey = "F5";
-            lf = "LF-502";
-            srcDoc = "Payment Advice Voucher";
-          } else if (pfx.includes("RCP") || pfx.includes("REC")) {
-            vType = "receipt";
-            fKey = "F6";
-            lf = "LF-201";
-            srcDoc = "Bank Collection Advice";
-          } else if (pfx.includes("PUR")) {
-            vType = "purchase";
-            fKey = "F9";
-            lf = "LF-305";
-            srcDoc = "Vendor Inward Bill";
-          } else if (pfx.includes("CNT")) {
-            vType = "contra";
-            fKey = "F4";
-            lf = "LF-203";
-            srcDoc = "Cash / Bank Contra Slip";
-          }
-
-          const totalAmount = (j.journal_entry_lines || []).reduce(
-            (sum, l) => sum + (l.debit || 0),
-            0
-          );
-
-          return {
-            id: j.id,
-            entry_number: j.entry_number,
-            voucher_type: vType,
-            f_key: fKey,
-            entry_date: j.entry_date,
-            entry_time: "12:00 PM",
-            party_name: j.narration?.split("-")[0]?.trim() || "Authoritative Transaction",
-            source_document: srcDoc,
-            ledger_folio: lf,
-            reference: j.reference || j.entry_number,
-            narration: j.narration || "Authoritative ALERX Entry",
-            amount: totalAmount || 10000,
-            dr_cr: "Dr",
-            status: (j.status as any) || "posted",
-            organisation_id: orgId,
-            lines: (j.journal_entry_lines || []).map((l, idx) => ({
-              dr_cr: l.debit > 0 ? "Dr" : "Cr",
-              account_name: l.description || `Ledger Head (${l.account_id})`,
-              category: "Asset",
-              debit: l.debit || 0,
-              credit: l.credit || 0,
-              ledger_folio: `LF-${100 + idx * 5}`,
-              description: l.description,
-            })),
-          };
-        });
-
-        const localRaw = typeof window !== "undefined" ? localStorage.getItem("deku_local_daybook_vouchers") : null;
-        const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-        const existingNos = new Set([...apiVouchers.map((v) => v.entry_number), ...localVouchers.map((v) => v.entry_number)]);
-        const uniqueSeed = seed.filter((v) => !existingNos.has(v.entry_number));
-        setJournals([...localVouchers, ...apiVouchers, ...uniqueSeed]);
-      } else {
-        const localRaw = typeof window !== "undefined" ? localStorage.getItem("deku_local_daybook_vouchers") : null;
-        const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-        const existingNos = new Set(localVouchers.map((v) => v.entry_number));
-        const uniqueSeed = seed.filter((v) => !existingNos.has(v.entry_number));
-        setJournals([...localVouchers, ...uniqueSeed]);
-      }
+      const [res, accounts, parties] = await Promise.all([
+        accountingApi.listJournals(orgId),
+        accountingApi.listAccounts(orgId),
+        partiesApi.list(orgId),
+      ]);
+      const accountMap = new Map((accounts.data ?? []).map((a) => [a.id, a]));
+      const partyMap = new Map((parties.data ?? []).map((p) => [p.id, p]));
+      const apiVouchers = (res.data ?? []).map((j) =>
+        journalToVoucher(j, accountMap, partyMap, taxProfile?.regime)
+      );
+      const apiNos = new Set(apiVouchers.map((v) => v.entry_number));
+      setJournals([...localVouchers.filter((v) => !apiNos.has(v.entry_number)), ...apiVouchers]);
     } catch (err: any) {
-      // Fallback seamlessly to seed + local confirmed vouchers
-      const localRaw = typeof window !== "undefined" ? localStorage.getItem("deku_local_daybook_vouchers") : null;
-      const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-      const seed = getVouchersForOrg(orgId);
-      const existingNos = new Set(localVouchers.map((v) => v.entry_number));
-      const uniqueSeed = seed.filter((v) => !existingNos.has(v.entry_number));
-      setJournals([...localVouchers, ...uniqueSeed]);
+      setError(err?.message || "Could not load the day book");
+      setJournals(localVouchers);
     } finally {
       setIsLoading(false);
     }
@@ -231,7 +156,7 @@ export function DayBookView() {
   useEffect(() => {
     if (!orgId) return;
     fetchJournals();
-  }, [orgId]);
+  }, [orgId, taxProfile?.regime]);
 
   // Handle Post Draft Journal to ledger
   const handlePostDraft = async (vch: VoucherItem) => {
@@ -650,7 +575,7 @@ export function DayBookView() {
           <div>
             <div className="flex items-center gap-2" suppressHydrationWarning>
               <span className="font-bold text-sm text-[#0F172A]">Day Book Register</span>
-              {taxProfile.regime === "sec22" ? (
+              {!taxProfile ? null : taxProfile.regime === "sec22" ? (
                 <span
                   suppressHydrationWarning
                   className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300"
@@ -662,7 +587,7 @@ export function DayBookView() {
                   suppressHydrationWarning
                   className="text-[10px] font-mono font-bold text-emerald-950 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300"
                 >
-                  GST Registered • {taxProfile.gstin || "Active"}
+                  GST Registered • {taxProfile.gstin}
                 </span>
               )}
             </div>
@@ -1165,10 +1090,10 @@ export function DayBookView() {
                     Financial Operating System • Corporate Day Book Ledger
                   </p>
                   <div className="text-[10px] font-mono text-slate-500 mt-0.5">
-                    {taxProfile.regime === "sec22" ? (
-                      <span>Regime: Section 22 Pure Tax Exempt • No GST Applicable</span>
+                    {!taxProfile ? null : taxProfile.regime === "sec22" ? (
+                      <span>No GSTIN on the company record</span>
                     ) : (
-                      <span>GSTIN: <strong>{taxProfile.gstin || "27AABCU9603R1ZM"}</strong> • Maharashtra</span>
+                      <span>GSTIN: <strong>{taxProfile.gstin}</strong></span>
                     )}
                   </div>
                 </div>

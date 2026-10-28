@@ -6,12 +6,10 @@ import {
   KpiKey,
   KPI_META,
   DEFAULT_QUICK_KPIS,
-  RawKpiData,
-  getKpiProfile,
-  saveKpiProfile,
-  resetKpiProfile,
+  getQuickKpiKeys,
+  saveQuickKpiKeys,
 } from "@/lib/kpi/kpi-service";
-import { Sparkles, RotateCcw, Check, SlidersHorizontal, ArrowUpRight } from "lucide-react";
+import { Sparkles, RotateCcw, Check } from "lucide-react";
 
 interface CustomizeKpiModalProps {
   isOpen: boolean;
@@ -28,52 +26,26 @@ export function CustomizeKpiModal({
   activeOrgName,
   onSaved,
 }: CustomizeKpiModalProps) {
-  const [formData, setFormData] = useState<RawKpiData>({
-    turnover: 1245000,
-    profit: 825000,
-    billed: 1245000,
-    liquid: 640000,
-    debtors: 260000,
-    creditors: 115000,
-    expenses: 420000,
-    gst: 48600,
-    quickKpiKeys: DEFAULT_QUICK_KPIS,
-  });
-
+  const [keys, setKeys] = useState<KpiKey[]>(DEFAULT_QUICK_KPIS);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      const current = getKpiProfile(activeOrgId, activeOrgName);
-      setFormData(current.raw);
+      setKeys(getQuickKpiKeys(activeOrgId));
       setSaveSuccess(false);
     }
-  }, [isOpen, activeOrgId, activeOrgName]);
-
-  const handleChange = (field: keyof RawKpiData, value: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: isNaN(value) ? 0 : value,
-    }));
-  };
+  }, [isOpen, activeOrgId]);
 
   const handleToggleKpi = (key: KpiKey) => {
-    setFormData((prev) => {
-      const currentKeys = prev.quickKpiKeys || DEFAULT_QUICK_KPIS;
-      const exists = currentKeys.includes(key);
-      const updated = exists
-        ? currentKeys.filter((k) => k !== key)
-        : [...currentKeys, key];
-      return {
-        ...prev,
-        quickKpiKeys: updated.length > 0 ? updated : [key],
-      };
+    setKeys((prev) => {
+      const updated = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
+      return updated.length > 0 ? updated : [key];
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    saveKpiProfile(activeOrgId, formData);
+    saveQuickKpiKeys(activeOrgId, keys);
     setSaveSuccess(true);
     if (onSaved) onSaved();
     setTimeout(() => {
@@ -82,8 +54,8 @@ export function CustomizeKpiModal({
   };
 
   const handleReset = () => {
-    const res = resetKpiProfile(activeOrgId, activeOrgName);
-    setFormData(res.raw);
+    saveQuickKpiKeys(activeOrgId, null);
+    setKeys(DEFAULT_QUICK_KPIS);
     setSaveSuccess(true);
     if (onSaved) onSaved();
     setTimeout(() => {
@@ -95,8 +67,8 @@ export function CustomizeKpiModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Customize Business KPIs & Targets"
-      description={`Update numerical metrics and select Quick KPIs for ${activeOrgName}`}
+      title="Customize Business KPIs"
+      description={`Choose which Quick KPIs to list for ${activeOrgName}`}
       maxWidth="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
@@ -104,159 +76,21 @@ export function CustomizeKpiModal({
         <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
           <div>
             <span className="font-bold text-slate-800 block text-xs">
-              Live Audited Business KPIs
+              KPI values come from your posted entries
             </span>
             <span className="text-[11px] text-slate-500">
-              Changes reflect immediately on Executive Dashboard and Gateway Column 3
+              Pick which ones the Gateway lists. Values can&apos;t be edited here.
             </span>
           </div>
           <button
             type="button"
             onClick={handleReset}
             className="text-[11px] font-mono font-medium text-slate-600 hover:text-[#2D7A7A] flex items-center gap-1 px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-[#5BB5BB] transition-colors cursor-pointer"
-            title="Reset to verified standard defaults"
+            title="Show the default KPI list"
           >
             <RotateCcw className="h-3 w-3" />
             <span>Reset Defaults</span>
           </button>
-        </div>
-
-        {/* Section 1: Numerical KPI Values */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2 font-mono font-bold uppercase tracking-wider text-[10px] text-[#3E4848]">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-[#5BB5BB]" />
-            <span>Numerical Values (₹ INR)</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 border border-slate-200 rounded-lg">
-            {/* Turnover */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Gross Turnover (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.turnover}
-                onChange={(e) => handleChange("turnover", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Net Profit */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Net Profit (EBITDA) (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.profit}
-                onChange={(e) => handleChange("profit", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-emerald-700 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Billed Turnover */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Billed Turnover (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.billed}
-                onChange={(e) => handleChange("billed", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Liquid Funds */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Liquid Funds (Bank + Cash) (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.liquid}
-                onChange={(e) => handleChange("liquid", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Trade Debtors (AR) */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Trade Debtors (Receivables) (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.debtors}
-                onChange={(e) => handleChange("debtors", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Trade Creditors (AP) */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Trade Creditors (Payables) (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.creditors}
-                onChange={(e) => handleChange("creditors", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Operating Expenses */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                Operating Expenses (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={formData.expenses}
-                onChange={(e) => handleChange("expenses", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-slate-900 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* GST Net Liability */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                GST Net Liability (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="500"
-                value={formData.gst}
-                onChange={(e) => handleChange("gst", parseFloat(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 font-mono text-xs font-bold text-rose-700 focus:bg-white focus:border-[#5BB5BB] focus:outline-none"
-                required
-              />
-            </div>
-          </div>
         </div>
 
         {/* Section 2: Quick KPIs Selection for Column 3 */}
@@ -282,7 +116,7 @@ export function CustomizeKpiModal({
               ] as KpiKey[]
             ).map((kpiKey) => {
               const meta = KPI_META[kpiKey];
-              const isChecked = (formData.quickKpiKeys || DEFAULT_QUICK_KPIS).includes(kpiKey);
+              const isChecked = keys.includes(kpiKey);
               return (
                 <label
                   key={kpiKey}
@@ -318,7 +152,7 @@ export function CustomizeKpiModal({
                 <Check className="h-3 w-3" /> Saved &amp; Synced!
               </span>
             ) : (
-              "All KPIs sync across Gateway & Executive Dashboard"
+              "Saved in this browser"
             )}
           </span>
 
@@ -335,7 +169,7 @@ export function CustomizeKpiModal({
               className="px-4 py-1.5 rounded-lg bg-[#1F2324] hover:bg-[#0A0A0A] text-[#91D7D2] hover:text-white font-bold text-xs border border-[#3E4848] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <Sparkles className="h-3.5 w-3.5 text-[#5BB5BB]" />
-              <span>Save &amp; Update KPIs</span>
+              <span>Save KPI List</span>
             </button>
           </div>
         </div>
