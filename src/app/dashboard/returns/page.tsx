@@ -6,7 +6,8 @@ import { Download, ShieldCheck, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, invoicesApi, organisationsApi } from "@/api/endpoints";
+import { accountingApi, invoicesApi, organisationsApi, purchasesApi } from "@/api/endpoints";
+import { monthBounds, type PurchaseBill } from "@/lib/purchases/bills";
 import type { Account, JournalEntry } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import {
@@ -24,6 +25,7 @@ interface Books {
   invoices: ReturnInvoice[];
   accounts: Account[];
   journals: JournalEntry[];
+  purchaseBills: PurchaseBill[];
 }
 
 function download(name: string, json: unknown) {
@@ -134,11 +136,13 @@ export default function ReturnsHubPage() {
     setLoadError(null);
     setBooks(null);
     (async () => {
-      const [org, list, accounts, journals] = await Promise.all([
+      const month = `${retPeriod.slice(2)}-${retPeriod.slice(0, 2)}`;
+      const [org, list, accounts, journals, bills] = await Promise.all([
         organisationsApi.get(orgId),
         invoicesApi.list(orgId),
         accountingApi.listAccounts(orgId),
         accountingApi.listJournals(orgId),
+        purchasesApi.list(orgId, monthBounds(month)),
       ]);
       const all = (list.data || []) as unknown as ReturnInvoice[];
       // The list has the customer's GSTIN but no lines; the detail call has lines but no customer.
@@ -155,6 +159,7 @@ export default function ReturnsHubPage() {
         invoices: all.map((i) => byId.get(i.id) ?? i),
         accounts: accounts.data || [],
         journals: journals.data || [],
+        purchaseBills: bills.data || [],
       });
     })()
       .catch((err) => !stale && setLoadError(err?.message || "Failed to load the books for this period"))
@@ -176,7 +181,7 @@ export default function ReturnsHubPage() {
         <div>
           <h1 className="text-2xl font-black text-zinc-950">GST Returns: GSTR-1 & GSTR-3B</h1>
           <p className="text-xs text-zinc-500 mt-0.5">
-            Offline JSON built from your issued sales invoices and Input GST ledgers. Exports stay locked until every check passes.
+            Offline JSON built from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes.
           </p>
         </div>
         <div className="w-44">
