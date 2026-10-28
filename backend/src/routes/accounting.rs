@@ -8,7 +8,8 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use crate::error::AppError;
 use crate::models::accounting::{
-    CreateAccountRequest, CreateFiscalPeriodRequest, CreateJournalRequest, ReverseJournalRequest,
+    CreateAccountRequest, CreateFiscalPeriodRequest, CreateJournalRequest, RejectJournalRequest,
+    ReverseJournalRequest,
 };
 use crate::routes::AppState;
 
@@ -29,6 +30,8 @@ pub fn routes(state: AppState) -> Router {
         // Journal Entries
         .route("/journals", post(create_journal).get(list_journals))
         .route("/journals/:entry_id/post", post(post_journal))
+        .route("/journals/:entry_id/submit", post(submit_journal))
+        .route("/journals/:entry_id/reject", post(reject_journal))
         .route("/journals/:entry_id/reverse", post(reverse_journal))
         // Financial Reports & Universal Rollup Engine
         .route("/reports/general-ledger", get(get_general_ledger))
@@ -342,6 +345,40 @@ async fn post_journal(
     Ok(Json(json!({
         "success": true,
         "message": "Journal entry posted successfully",
+        "entry": res
+    })))
+}
+
+/// Maker-checker: sends a balanced draft to an approver (see migration 20).
+async fn submit_journal(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, entry_id)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let payload = json!({ "p_org_id": org_id, "p_entry_id": entry_id });
+    let res = state.supabase.rpc("submit_journal_for_approval", &payload, token).await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "Voucher submitted for approval",
+        "entry": res
+    })))
+}
+
+async fn reject_journal(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, entry_id)): Path<(String, String)>,
+    Json(payload): Json<RejectJournalRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let rpc_payload = json!({ "p_org_id": org_id, "p_entry_id": entry_id, "p_reason": payload.reason });
+    let res = state.supabase.rpc("reject_journal_entry", &rpc_payload, token).await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "Voucher sent back to its maker",
         "entry": res
     })))
 }

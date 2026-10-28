@@ -33,6 +33,7 @@ pub fn routes(state: AppState) -> Router {
         .route("/", post(create_organisation).get(list_organisations))
         .route("/invitations/accept", post(accept_invitation))
         .route("/:id", get(get_organisation))
+        .route("/:id/settings", patch(update_settings))
         .route(
             "/:id/invitations",
             post(invite_member).get(list_invitations),
@@ -104,6 +105,45 @@ async fn get_organisation(
         "success": true,
         "data": res
     })))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateSettingsRequest {
+    pub require_journal_approval: Option<bool>,
+    pub gstin: Option<String>,
+}
+
+/// Company settings an owner/admin may change; RLS (`organisations_update_admins`) enforces who.
+async fn update_settings(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+    Json(payload): Json<UpdateSettingsRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let mut body = serde_json::Map::new();
+    if let Some(v) = payload.require_journal_approval {
+        body.insert("require_journal_approval".into(), json!(v));
+    }
+    if let Some(g) = payload.gstin {
+        let g = g.trim().to_uppercase();
+        body.insert("gstin".into(), if g.is_empty() { Value::Null } else { json!(g) });
+    }
+    if body.is_empty() {
+        return Err(AppError::BadRequest("Nothing to update".into()));
+    }
+
+    let id_filter = format!("eq.{}", id);
+    let res = state
+        .supabase
+        .update_table("organisations", &[("id", id_filter.as_str())], &Value::Object(body), token)
+        .await?;
+    // RLS silently matches zero rows for someone who may not edit this company.
+    if res.as_array().map_or(true, |rows| rows.is_empty()) {
+        return Err(AppError::Unauthorized("Only an owner or admin can change company settings".into()));
+    }
+
+    Ok(Json(json!({ "success": true, "data": res })))
 }
 
 async fn invite_member(

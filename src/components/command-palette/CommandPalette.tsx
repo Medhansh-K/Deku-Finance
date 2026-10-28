@@ -17,6 +17,9 @@ import {
   TrendingUp,
   FileText,
   Sparkles,
+  ShieldCheck as ShieldCheckIcon,
+  Landmark as LandmarkIcon,
+  FileSpreadsheet as FileSpreadsheetIcon,
 } from "lucide-react";
 
 export interface CommandItem {
@@ -155,6 +158,30 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     category: "Transactions",
     route: "/day-book",
     icon: Calendar,
+  },
+  {
+    id: "approvals",
+    title: "Voucher Approvals",
+    subtitle: "Maker-checker queue: approve or send back vouchers",
+    category: "Transactions",
+    route: "/approvals",
+    icon: ShieldCheckIcon,
+  },
+  {
+    id: "bank-reconciliation",
+    title: "Bank Reconciliation",
+    subtitle: "Import a bank statement and match it to the books",
+    category: "Transactions",
+    route: "/banking/reconciliation",
+    icon: LandmarkIcon,
+  },
+  {
+    id: "gst-returns",
+    title: "GST Returns (GSTR-1 / 3B)",
+    subtitle: "Generate return JSON from posted invoices and ITC ledgers",
+    category: "Reports",
+    route: "/dashboard/returns",
+    icon: FileSpreadsheetIcon,
   },
 
   // Reports

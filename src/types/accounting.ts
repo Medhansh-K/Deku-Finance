@@ -125,6 +125,12 @@ export interface JournalEntry {
   posted_at?: string | null;
   posted_by?: string | null;
   created_at?: string;
+  created_by?: string | null;
+  submitted_at?: string | null;
+  submitted_by?: string | null;
+  rejected_at?: string | null;
+  rejected_by?: string | null;
+  rejection_reason?: string | null;
   journal_entry_lines: JournalEntryLine[];
 }
 

@@ -215,6 +215,8 @@ export function VoucherWorkspace({
 
   const [orgId, setOrgId] = useState<string>("");
   const [orgGstin, setOrgGstin] = useState<string | null>(null);
+  // Maker-checker (migration 20): when on, "post" submits the voucher for someone else to approve.
+  const [requireApproval, setRequireApproval] = useState(false);
   const [activeCompanyName, setActiveCompanyName] = useState<string>("Deku Financial Technologies");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [parties, setParties] = useState<Party[]>([]);
@@ -305,7 +307,10 @@ export function VoucherWorkspace({
     if (!orgId) return;
     organisationsApi
       .get(orgId)
-      .then((res) => setOrgGstin(res.data?.[0]?.gstin ?? null))
+      .then((res) => {
+        setOrgGstin(res.data?.[0]?.gstin ?? null);
+        setRequireApproval(res.data?.[0]?.require_journal_approval ?? false);
+      })
       .catch(() => setOrgGstin(null));
     Promise.all([
       accountingApi.listAccounts(orgId),
@@ -833,7 +838,13 @@ export function VoucherWorkspace({
       const draftRes = await accountingApi.createJournal(orgId, payload);
       const createdEntryId = draftRes.entry?.[0]?.id;
 
-      if (shouldPost && createdEntryId) {
+      const posted = shouldPost && !requireApproval;
+      if (shouldPost && requireApproval && createdEntryId) {
+        await accountingApi.submitJournal(orgId, createdEntryId);
+        setSubmissionSuccess(
+          `Voucher ${voucherNumber} submitted for approval. It reaches the ledger once another approver signs it off in Approvals.`
+        );
+      } else if (posted && createdEntryId) {
         await accountingApi.postJournal(orgId, createdEntryId);
         setSubmissionSuccess(
           `Voucher ${voucherNumber} successfully verified by [${documentProof?.title || "Document Proof"}] and posted to General Ledger & Financial Reports!`
@@ -848,8 +859,8 @@ export function VoucherWorkspace({
       logUserActivity({
         category: "VOUCHER",
         crud_type: "CREATE",
-        action: shouldPost ? "Voucher Posted" : "Voucher Draft Saved",
-        description: `${shouldPost ? "Posted" : "Saved draft"} ${activeMode.toUpperCase()} voucher #${voucherNumber} for ₹${totalDebit.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (${narration})`,
+        action: posted ? "Voucher Posted" : shouldPost ? "Voucher Submitted for Approval" : "Voucher Draft Saved",
+        description: `${posted ? "Posted" : shouldPost ? "Submitted for approval" : "Saved draft"} ${activeMode.toUpperCase()} voucher #${voucherNumber} for ₹${totalDebit.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (${narration})`,
         entity_type: "voucher",
         entity_id: voucherNumber,
         organisation_id: orgId,
@@ -893,7 +904,7 @@ export function VoucherWorkspace({
           narration: narration,
           amount: totalDebit,
           dr_cr: "Dr",
-          status: shouldPost ? "posted" : "draft",
+          status: posted ? "posted" : "draft",
           organisation_id: orgId,
           document_proof: documentProof || undefined,
           lines: lines.map((l, idx) => ({
@@ -916,7 +927,7 @@ export function VoucherWorkspace({
           JSON.stringify([localDaybookEntry, ...existing])
         );
 
-        if (shouldPost) {
+        if (posted) {
           // If bill-wise matching settled an open sales invoice, update invoice status in registry
           if (documentProof?.linkedInvoiceNumber) {
             const invKey = `deku_invoices_${orgId}`;
@@ -2211,11 +2222,12 @@ export function VoucherWorkspace({
             >
               {loadedBuilderDraft ? (
                 <>
-                  <Check className="h-3.5 w-3.5" /> Confirm &amp; Post to Day Book &amp; Ledger
+                  <Check className="h-3.5 w-3.5" />{" "}
+                  {requireApproval ? "Confirm & Submit for Approval" : "Confirm & Post to Day Book & Ledger"}
                 </>
               ) : (
                 <>
-                  <Send className="h-3.5 w-3.5" /> Post &amp; Validate Voucher
+                  <Send className="h-3.5 w-3.5" /> {requireApproval ? "Submit for Approval" : "Post & Validate Voucher"}
                 </>
               )}
             </Button>

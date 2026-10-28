@@ -10,6 +10,7 @@ import { accountingApi, organisationsApi } from "@/api/endpoints";
 import { FiscalPeriod } from "@/types/accounting";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { logUserActivity } from "@/lib/logging/activity-logger";
+import { CompanyControlsCard } from "./CompanyControlsCard";
 
 export function SettingsView() {
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
@@ -81,6 +82,8 @@ export function SettingsView() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
+      {orgId && <CompanyControlsCard orgId={orgId} />}
+
       {/* Fiscal Periods Management */}
       <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">

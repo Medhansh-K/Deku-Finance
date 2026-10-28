@@ -31,6 +31,7 @@ export interface OrgSummary {
   gstin?: string | null;
   pan?: string | null;
   financial_year_start_month: number;
+  require_journal_approval?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -63,6 +64,11 @@ export const organisationsApi = {
         body: JSON.stringify(payload),
       }
     ),
+  updateSettings: (orgId: string, payload: { require_journal_approval?: boolean; gstin?: string }) =>
+    apiClient<{ success: boolean; data: OrgSummary[] }>(`/api/v1/organisations/${orgId}/settings`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   inviteMember: (
     orgId: string,
     payload: {
@@ -201,6 +207,16 @@ export const accountingApi = {
     apiClient<{ success: boolean; message: string; entry: any }>(
       `/api/v1/organisations/${orgId}/journals/${entryId}/post`,
       { method: "POST" }
+    ),
+  submitJournal: (orgId: string, entryId: string) =>
+    apiClient<{ success: boolean; message: string; entry: JournalEntry }>(
+      `/api/v1/organisations/${orgId}/journals/${entryId}/submit`,
+      { method: "POST" }
+    ),
+  rejectJournal: (orgId: string, entryId: string, reason: string) =>
+    apiClient<{ success: boolean; message: string; entry: JournalEntry }>(
+      `/api/v1/organisations/${orgId}/journals/${entryId}/reject`,
+      { method: "POST", body: JSON.stringify({ reason }) }
     ),
   reverseJournal: (
     orgId: string,
