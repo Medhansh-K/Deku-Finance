@@ -67,28 +67,11 @@ export function FpaExecutiveView() {
     };
   }, [orgId]);
 
-  const prof = fpaMetrics?.profitability || {
-    total_revenue: 0,
-    gross_profit: 0,
-    gross_margin_pct: 0,
-    net_profit: 0,
-    net_margin_pct: 0,
-    opex: 0,
-  };
-
-  const liq = fpaMetrics?.liquidity_and_balance_sheet || {
-    current_assets: 0,
-    current_liabilities: 0,
-    working_capital: 0,
-    current_ratio: 2.1,
-    quick_ratio: 1.6,
-  };
-
-  const runway = fpaMetrics?.treasury_and_runway || {
-    cash_and_bank_reserves: 0,
-    estimated_monthly_burn: 0,
-    cash_runway_months: 18.0,
-  };
+  // Missing figures stay missing ("–"); never substitute benchmark ratios.
+  const prof = fpaMetrics?.profitability ?? {};
+  const liq = fpaMetrics?.liquidity_and_balance_sheet ?? {};
+  const runway = fpaMetrics?.treasury_and_runway ?? {};
+  const num = (v: number | null | undefined, suffix: string) => (v == null ? "–" : `${v}${suffix}`);
 
   const depts = budgetVariance?.departments || [];
 
@@ -151,7 +134,7 @@ export function FpaExecutiveView() {
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-400">Gross Margin %</span>
-            <Badge variant="teal" size="sm">{prof.gross_margin_pct}%</Badge>
+            <Badge variant="teal" size="sm">{num(prof.gross_margin_pct, "%")}</Badge>
           </div>
           <div className="text-xl font-bold text-teal-400">
             {formatINR(prof.gross_profit)}
@@ -174,7 +157,7 @@ export function FpaExecutiveView() {
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-400">Net Profit Margin</span>
             <Badge variant={prof.net_profit >= 0 ? "teal" : "danger"} size="sm">
-              {prof.net_margin_pct}%
+              {num(prof.net_margin_pct, "%")}
             </Badge>
           </div>
           <div className={`text-xl font-bold ${prof.net_profit >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
@@ -223,14 +206,14 @@ export function FpaExecutiveView() {
             <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
               <div className="text-xs text-slate-400">Current Ratio</div>
               <div className="text-lg font-bold text-emerald-400 mt-1">
-                {liq.current_ratio}x
+                {num(liq.current_ratio, "x")}
               </div>
               <div className="text-[10px] text-slate-500">Benchmark: &gt; 1.5x</div>
             </div>
             <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
               <div className="text-xs text-slate-400">Quick Ratio</div>
               <div className="text-lg font-bold text-cyan-400 mt-1">
-                {liq.quick_ratio}x
+                {num(liq.quick_ratio, "x")}
               </div>
               <div className="text-[10px] text-slate-500">Benchmark: &gt; 1.0x</div>
             </div>
@@ -246,7 +229,7 @@ export function FpaExecutiveView() {
             </div>
             <span className="text-xs text-amber-400 font-semibold flex items-center">
               <Flame className="h-3.5 w-3.5 mr-0.5" />
-              {runway.cash_runway_months} Months
+              {num(runway.cash_runway_months, " months")}
             </span>
           </div>
           <div className="text-2xl font-bold text-amber-400">

@@ -42,3 +42,9 @@ describe('Date Formatters', () => {
     expect(toISODateString(d)).toBe('2026-10-20');
   });
 });
+
+it("shows a missing amount as a dash, not a zero", () => {
+  expect(formatINR(null)).toBe("–");
+  expect(formatINR(undefined)).toBe("–");
+  expect(formatINR(0)).toContain("0.00");
+});

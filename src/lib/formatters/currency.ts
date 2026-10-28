@@ -19,8 +19,9 @@ export function formatINR(
     minimumFractionDigits = 2,
   } = options;
 
-  if (amount === null || amount === undefined || isNaN(Number(amount))) {
-    return showCurrencySymbol ? "₹ 0.00" : "0.00";
+  // A missing figure must not look like a real zero.
+  if (amount === null || amount === undefined || amount === "" || isNaN(Number(amount))) {
+    return "–";
   }
 
   const num = Number(amount);
