@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Receipt,
   Plus,
@@ -259,6 +259,27 @@ export function VoucherWorkspace({
       amount: "",
     },
   ]);
+
+  // Prefill from a deep link, e.g. bank reconciliation's "Create voucher" on an unmatched statement line.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const amount = parseAmount(searchParams.get("amount") || "");
+    const date = searchParams.get("date") || "";
+    const bankAccountId = searchParams.get("bank_account_id") || "";
+    const bankSide = activeMode === "receipt" ? "Dr" : activeMode === "payment" ? "Cr" : null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) setEntryDate(date);
+    if (searchParams.get("narration")) setNarration(searchParams.get("narration")!);
+    if (searchParams.get("reference")) setReference(searchParams.get("reference")!);
+    if (amount > 0) {
+      setLines((prev) =>
+        prev.map((l) => ({
+          ...l,
+          amount: String(amount),
+          account_id: bankAccountId && l.dr_cr === bankSide ? bankAccountId : l.account_id,
+        }))
+      );
+    }
+  }, [searchParams, activeMode]);
 
   // Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
