@@ -54,27 +54,21 @@ function convertBelowThousand(n: number): string {
   return str.trim();
 }
 
-export function numberToIndianWords(amount: number): string {
-  if (isNaN(amount) || amount === 0) return "Rupees Zero Only";
-
-  const num = Math.floor(Math.abs(amount));
-  const paise = Math.round((Math.abs(amount) - num) * 100);
-
-  let crores = Math.floor(num / 10000000);
+function integerToIndianWords(num: number): string {
+  const crores = Math.floor(num / 10000000);
   let remainder = num % 10000000;
 
-  let lakhs = Math.floor(remainder / 100000);
+  const lakhs = Math.floor(remainder / 100000);
   remainder %= 100000;
 
-  let thousands = Math.floor(remainder / 1000);
+  const thousands = Math.floor(remainder / 1000);
   remainder %= 1000;
-
-  let hundreds = remainder;
 
   let result = "";
 
+  // Above 999 crore the crore count itself is spelled in the Indian system ("One Thousand Crore").
   if (crores > 0) {
-    result += convertBelowThousand(crores) + " Crore ";
+    result += integerToIndianWords(crores) + " Crore ";
   }
   if (lakhs > 0) {
     result += convertBelowThousand(lakhs) + " Lakh ";
@@ -82,16 +76,23 @@ export function numberToIndianWords(amount: number): string {
   if (thousands > 0) {
     result += convertBelowThousand(thousands) + " Thousand ";
   }
-  if (hundreds > 0) {
-    result += convertBelowThousand(hundreds) + " ";
+  if (remainder > 0) {
+    result += convertBelowThousand(remainder) + " ";
   }
 
-  result = result.trim();
-  let fullText = result ? `Rupees ${result}` : "Rupees";
+  return result.trim();
+}
 
-  if (paise > 0) {
-    fullText += ` and ${convertBelowThousand(paise)} Paise`;
-  }
+export function numberToIndianWords(amount: number): string {
+  if (isNaN(amount) || amount === 0) return "Rupees Zero Only";
 
-  return `${fullText} Only`;
+  // Work in whole paise so 0.29 or 1.10 don't lose a paisa to float error.
+  const totalPaise = Math.round(Math.abs(amount) * 100);
+  const rupees = integerToIndianWords(Math.floor(totalPaise / 100));
+  const paise = totalPaise % 100;
+
+  if (!rupees && !paise) return "Rupees Zero Only";
+  const paiseText = paise > 0 ? `${convertBelowThousand(paise)} Paise` : "";
+  if (!rupees) return `${paiseText} Only`;
+  return `Rupees ${rupees}${paiseText ? ` and ${paiseText}` : ""} Only`;
 }

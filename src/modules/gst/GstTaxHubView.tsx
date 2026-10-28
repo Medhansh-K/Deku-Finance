@@ -2,41 +2,27 @@
 
 import React, { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/data-table/DataTable";
-import {
-  FileText,
-  Plus,
-  RefreshCw,
-  Printer,
-  CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
-  ArrowRight,
-  Send,
-  Trash2,
-} from "lucide-react";
+import { Plus, RefreshCw, Printer, AlertTriangle, RotateCcw, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
-import { Input } from "@/components/ui/Input";
-import { invoicesApi, partiesApi, catalogueApi } from "@/api/endpoints";
-import {
-  CatalogueItem,
-  CreateInvoiceRequest,
-  Party,
-  SalesInvoice,
-  SalesInvoiceLine,
-  SupplyType,
-} from "@/types/accounting";
-import { formatINR, parseAmount } from "@/lib/formatters/currency";
-import { formatDateTally, toISODateString } from "@/lib/formatters/date";
+import { invoicesApi, partiesApi } from "@/api/endpoints";
+import { Party, SalesInvoice } from "@/types/accounting";
+import { formatINR } from "@/lib/formatters/currency";
+import { formatDateTally } from "@/lib/formatters/date";
+import { numberToIndianWords } from "@/lib/builder/number-to-words";
+import { toPaise } from "@/lib/invoices/tax-summary";
+import { EMPTY_SETTLEMENT, SALES_CHANNELS, loadSettlement } from "@/lib/invoices/settlement";
+import { useAuth } from "@/context/AuthContext";
+import { SalesInvoiceEditor } from "./SalesInvoiceEditor";
+import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
 
 export function GstTaxHubView() {
+  const { organisation } = useAuth();
   const [activeTab, setActiveTab] = useState<"invoices" | "create" | "summary">("invoices");
 
   const [invoices, setInvoices] = useState<SalesInvoice[]>([]);
   const [customers, setCustomers] = useState<Party[]>([]);
-  const [catalogue, setCatalogue] = useState<CatalogueItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,41 +32,8 @@ export function GstTaxHubView() {
   const [isActionPending, setIsActionPending] = useState(false);
 
   const [orgId, setOrgId] = useState<string>("");
-
-  // New Invoice Form State
-  const [newInvCustomer, setNewInvCustomer] = useState("");
-  const [newInvNumber, setNewInvNumber] = useState("INV-2026-1001");
-  const [newInvDate, setNewInvDate] = useState("2026-10-20");
-  const [newInvDueDate, setNewInvDueDate] = useState("2026-10-20");
-  const [newInvSupplyType, setNewInvSupplyType] = useState<SupplyType>("intra_state");
-  const [newInvPlaceOfSupply, setNewInvPlaceOfSupply] = useState("27-Maharashtra");
-
-  useEffect(() => {
-    setNewInvNumber(`INV-2026-${Math.floor(1000 + Math.random() * 9000)}`);
-    setNewInvDate(toISODateString());
-    setNewInvDueDate(toISODateString());
-  }, []);
-  const [newInvLines, setNewInvLines] = useState<Omit<SalesInvoiceLine, "id" | "invoice_id">[]>([
-    {
-      line_number: 1,
-      item_name: "Cloud Advisory & ERP Implementation",
-      description: "Monthly enterprise financial software services",
-      hsn_sac_code: "998315",
-      unit_code: "OTH",
-      quantity: 1,
-      unit_price: 100000,
-      discount_amount: 0,
-      taxable_amount: 100000,
-      gst_rate: 18,
-      cgst_rate: 9,
-      cgst_amount: 9000,
-      sgst_rate: 9,
-      sgst_amount: 9000,
-      igst_rate: 0,
-      igst_amount: 0,
-      total_amount: 118000,
-    },
-  ]);
+  // Read while the invoice is open so details edited in the editor show up when printing.
+  const savedSettlement = isDetailOpen ? loadSettlement(orgId) : EMPTY_SETTLEMENT;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -93,14 +46,9 @@ export function GstTaxHubView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [invRes, partRes, catRes] = await Promise.all([
-        invoicesApi.list(orgId),
-        partiesApi.list(orgId),
-        catalogueApi.list(orgId),
-      ]);
+      const [invRes, partRes] = await Promise.all([invoicesApi.list(orgId), partiesApi.list(orgId)]);
       setInvoices(invRes.data || []);
       setCustomers((partRes.data || []).filter((p) => p.type === "customer"));
-      setCatalogue(catRes.data || []);
     } catch (err: any) {
       setError(err.message || "Failed to load GST & Invoice data from backend");
     } finally {
@@ -112,116 +60,6 @@ export function GstTaxHubView() {
     if (!orgId) return;
     loadData();
   }, [orgId]);
-
-  // Recalculate line totals on change
-  const updateLineCalculations = (
-    index: number,
-    field: string,
-    val: any,
-    supplyType: SupplyType = newInvSupplyType
-  ) => {
-    setNewInvLines((prev) => {
-      const lines = [...prev];
-      const line = { ...lines[index], [field]: val };
-
-      const qty = Number(line.quantity) || 1;
-      const price = Number(line.unit_price) || 0;
-      const discount = Number(line.discount_amount) || 0;
-      const taxable = Math.max(0, qty * price - discount);
-      const gstRate = Number(line.gst_rate) || 0;
-
-      line.taxable_amount = taxable;
-
-      if (supplyType === "intra_state") {
-        line.cgst_rate = gstRate / 2;
-        line.cgst_amount = Math.round((taxable * (gstRate / 2)) / 100 * 100) / 100;
-        line.sgst_rate = gstRate / 2;
-        line.sgst_amount = Math.round((taxable * (gstRate / 2)) / 100 * 100) / 100;
-        line.igst_rate = 0;
-        line.igst_amount = 0;
-      } else {
-        line.cgst_rate = 0;
-        line.cgst_amount = 0;
-        line.sgst_rate = 0;
-        line.sgst_amount = 0;
-        line.igst_rate = gstRate;
-        line.igst_amount = Math.round((taxable * gstRate) / 100 * 100) / 100;
-      }
-
-      line.total_amount =
-        taxable + (line.cgst_amount || 0) + (line.sgst_amount || 0) + (line.igst_amount || 0);
-
-      lines[index] = line;
-      return lines;
-    });
-  };
-
-  const handleAddLine = () => {
-    setNewInvLines((prev) => [
-      ...prev,
-      {
-        line_number: prev.length + 1,
-        item_name: "",
-        hsn_sac_code: "998315",
-        unit_code: "OTH",
-        quantity: 1,
-        unit_price: 0,
-        taxable_amount: 0,
-        gst_rate: 18,
-        cgst_rate: newInvSupplyType === "intra_state" ? 9 : 0,
-        cgst_amount: 0,
-        sgst_rate: newInvSupplyType === "intra_state" ? 9 : 0,
-        sgst_amount: 0,
-        igst_rate: newInvSupplyType === "inter_state" ? 18 : 0,
-        igst_amount: 0,
-        total_amount: 0,
-      },
-    ]);
-  };
-
-  const handleRemoveLine = (idx: number) => {
-    if (newInvLines.length <= 1) return;
-    setNewInvLines((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  // Submit invoice
-  const handleCreateInvoice = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newInvCustomer) {
-      alert("Please select a customer.");
-      return;
-    }
-
-    const totalTaxable = newInvLines.reduce((s, l) => s + l.taxable_amount, 0);
-    const totalGrand = newInvLines.reduce((s, l) => s + l.total_amount, 0);
-
-    const payload: CreateInvoiceRequest = {
-      customer_id: newInvCustomer,
-      invoice_number: newInvNumber,
-      invoice_date: newInvDate,
-      due_date: newInvDueDate,
-      supply_type: newInvSupplyType,
-      place_of_supply: newInvPlaceOfSupply,
-      taxable_amount: totalTaxable,
-      total_amount: totalGrand,
-      lines: newInvLines,
-    };
-
-    setIsActionPending(true);
-    try {
-      await invoicesApi.create(orgId, payload);
-      alert(`Invoice ${newInvNumber} drafted successfully.`);
-      setActiveTab("invoices");
-      setNewInvNumber(
-        `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-      );
-      await loadData();
-    } catch (err: any) {
-      alert(err.message || "Failed to draft invoice");
-    } finally {
-      setIsActionPending(false);
-    }
-  };
 
   // Issue invoice with atomic double-entry journal creation
   const handleIssueInvoice = async (invId: string) => {
@@ -405,246 +243,16 @@ export function GstTaxHubView() {
 
       {/* Tab 2: Create GST Invoice Form */}
       {activeTab === "create" && (
-        <form
-          onSubmit={handleCreateInvoice}
-          className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4"
-        >
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-            <div>
-              <h3 className="text-sm font-bold uppercase text-ink font-mono">
-                New GST Sales Invoice
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                Calculates CGST/SGST (Intra-state) or IGST (Inter-state) and creates double-entry receivable allocations
-              </p>
-            </div>
-            <Badge variant="teal">GST Compliant</Badge>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                Customer
-              </label>
-              <select
-                value={newInvCustomer}
-                onChange={(e) => setNewInvCustomer(e.target.value)}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
-                required
-              >
-                <option value="">— Select Customer —</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.legal_name} ({c.gstin || "Unregistered"})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <Input
-              label="Invoice Number"
-              value={newInvNumber}
-              onChange={(e) => setNewInvNumber(e.target.value)}
-              required
-            />
-
-            <Input
-              label="Invoice Date"
-              type="date"
-              value={newInvDate}
-              onChange={(e) => setNewInvDate(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                Supply Type
-              </label>
-              <select
-                value={newInvSupplyType}
-                onChange={(e) => {
-                  const st = e.target.value as SupplyType;
-                  setNewInvSupplyType(st);
-                  // Recalculate all lines for new tax type
-                  newInvLines.forEach((_, idx) =>
-                    updateLineCalculations(idx, "item_name", newInvLines[idx].item_name, st)
-                  );
-                }}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
-              >
-                <option value="intra_state">Intra-State (Within Maharashtra: CGST + SGST)</option>
-                <option value="inter_state">Inter-State (Outside State: Integrated IGST)</option>
-              </select>
-            </div>
-
-            <Input
-              label="Place of Supply (State Code)"
-              value={newInvPlaceOfSupply}
-              onChange={(e) => setNewInvPlaceOfSupply(e.target.value)}
-              placeholder="e.g. 27-Maharashtra"
-              required
-            />
-          </div>
-
-          {/* Lines Table */}
-          <div className="rounded border border-slate-300 overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-panel text-white font-mono text-[11px]">
-                <tr>
-                  <th className="py-2 px-3">Item / Service Title</th>
-                  <th className="py-2 px-3 w-28">HSN/SAC</th>
-                  <th className="py-2 px-2 text-right w-20">Qty</th>
-                  <th className="py-2 px-3 text-right w-28">Rate (₹)</th>
-                  <th className="py-2 px-2 text-right w-20">GST %</th>
-                  <th className="py-2 px-3 text-right w-28">Taxable (₹)</th>
-                  <th className="py-2 px-3 text-right w-28">Total (₹)</th>
-                  <th className="py-2 px-2 w-10 text-center"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {newInvLines.map((line, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50">
-                    <td className="py-2 px-3">
-                      <input
-                        type="text"
-                        value={line.item_name}
-                        onChange={(e) =>
-                          updateLineCalculations(idx, "item_name", e.target.value)
-                        }
-                        placeholder="Item or service description"
-                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
-                        required
-                      />
-                    </td>
-                    <td className="py-2 px-3">
-                      <input
-                        type="text"
-                        value={line.hsn_sac_code || ""}
-                        onChange={(e) =>
-                          updateLineCalculations(idx, "hsn_sac_code", e.target.value)
-                        }
-                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs font-mono"
-                      />
-                    </td>
-                    <td className="py-2 px-2 text-right">
-                      <input
-                        type="number"
-                        value={line.quantity}
-                        onChange={(e) =>
-                          updateLineCalculations(idx, "quantity", Number(e.target.value))
-                        }
-                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs font-mono text-right"
-                      />
-                    </td>
-                    <td className="py-2 px-3 text-right">
-                      <input
-                        type="number"
-                        value={line.unit_price}
-                        onChange={(e) =>
-                          updateLineCalculations(idx, "unit_price", Number(e.target.value))
-                        }
-                        className="w-full border border-slate-300 rounded px-2 py-1 text-xs font-mono text-right"
-                      />
-                    </td>
-                    <td className="py-2 px-2 text-right">
-                      <select
-                        value={line.gst_rate}
-                        onChange={(e) =>
-                          updateLineCalculations(idx, "gst_rate", Number(e.target.value))
-                        }
-                        className="w-full border border-slate-300 rounded px-1 py-1 text-xs font-mono text-right"
-                      >
-                        <option value="0">0%</option>
-                        <option value="5">5%</option>
-                        <option value="12">12%</option>
-                        <option value="18">18%</option>
-                        <option value="28">28%</option>
-                      </select>
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-800">
-                      {formatINR(line.taxable_amount)}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
-                      {formatINR(line.total_amount)}
-                    </td>
-                    <td className="py-2 px-2 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveLine(idx)}
-                        className="text-slate-400 hover:text-rose-600 p-1"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex justify-between items-center pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddLine}
-              className="gap-1"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add Line Item
-            </Button>
-
-            {/* Calculations Summary */}
-            <div className="text-right font-mono text-xs space-y-1">
-              <div>
-                <span className="text-slate-500 mr-3">Taxable Value:</span>
-                <span className="font-bold">
-                  {formatINR(newInvLines.reduce((s, l) => s + l.taxable_amount, 0))}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-500 mr-3">
-                  Total GST ({newInvSupplyType === "intra_state" ? "CGST + SGST" : "IGST"}):
-                </span>
-                <span className="font-bold text-emerald-700">
-                  {formatINR(
-                    newInvLines.reduce(
-                      (s, l) =>
-                        s + (l.cgst_amount || 0) + (l.sgst_amount || 0) + (l.igst_amount || 0),
-                      0
-                    )
-                  )}
-                </span>
-              </div>
-              <div className="text-sm font-black border-t border-slate-300 pt-1 text-slate-950">
-                <span className="mr-3">Grand Total:</span>
-                <span>
-                  {formatINR(newInvLines.reduce((s, l) => s + l.total_amount, 0))}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setActiveTab("invoices")}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="tally"
-              size="sm"
-              isLoading={isActionPending}
-            >
-              Save Draft Invoice
-            </Button>
-          </div>
-        </form>
+        <SalesInvoiceEditor
+          key={orgId}
+          orgId={orgId}
+          customers={customers}
+          onCancel={() => setActiveTab("invoices")}
+          onCreated={async () => {
+            setActiveTab("invoices");
+            await loadData();
+          }}
+        />
       )}
 
       {/* Invoice Detail / Printable View Modal */}
@@ -710,6 +318,9 @@ export function GstTaxHubView() {
                   <div className="font-mono text-slate-600 text-[11px]">
                     Supply: {selectedInvoice.supply_type}
                   </div>
+                  <div className="text-slate-600 text-[11px]">
+                    Channel: {SALES_CHANNELS.find((c) => c.value === (selectedInvoice.sales_channel ?? "direct"))?.label}
+                  </div>
                 </div>
               </div>
             </div>
@@ -754,6 +365,18 @@ export function GstTaxHubView() {
                 </tbody>
               </table>
             </div>
+
+            <div className="flex items-baseline justify-between gap-4">
+              <p className="text-xs text-ink-soft">{numberToIndianWords(selectedInvoice.total_amount)}</p>
+              <p className="font-mono text-sm font-semibold text-ink">{formatINR(selectedInvoice.total_amount)}</p>
+            </div>
+
+            <InvoiceSettlementBlock
+              settlement={savedSettlement}
+              payee={savedSettlement.beneficiaryName || organisation?.legal_name || organisation?.name || ""}
+              amountPaise={toPaise(selectedInvoice.total_amount)}
+              invoiceNumber={selectedInvoice.invoice_number}
+            />
 
             <div className="flex justify-between items-center pt-2 border-t border-slate-200">
               <Button
