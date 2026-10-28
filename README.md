@@ -97,6 +97,13 @@ On the **Gateway of Deku** (`/gateway`), pressing highlighted keys instantly nav
 
 ---
 
+## ✨ Professional Controls
+
+- **Maker-checker approvals** (`/approvals`): turn on in Settings → Company controls. Vouchers are submitted, then approved and posted by a different owner/CFO/admin, or sent back with a reason. Enforced in the database (migration 20), not just the UI.
+- **GST returns from the books** (`/dashboard/returns`): GSTR-1 (B2B, B2CS, exempt, HSN summary, document count) and GSTR-3B (3.1, 3.2, Table 4 ITC) built from issued invoices and Input GST ledgers. Any validation failure blocks the download and is listed on screen.
+- **Bank reconciliation** (`/banking/reconciliation`): import a CSV statement (HDFC, ICICI, SBI, Axis, Kotak layouts), parsed in the browser; lines are auto-matched to bank-account journal lines by amount, date window, UTR/cheque reference and party name. Matches are only saved when you confirm; unmatched lines open a pre-filled receipt or payment voucher.
+- **Invoice reading on-device**: PDF text layer or local OCR; GSTIN check digits verified; unread fields left blank and flagged.
+
 ## 🧮 Double-Entry Accounting Principles
 
 1. **Equilibrium Rule**: A journal entry must have at least 2 lines and total debits must exactly equal total credits ($\sum \text{Debits} = \sum \text{Credits}$).
@@ -147,6 +154,7 @@ npm run build
 
 ### 4. Run Automated Tests
 ```bash
+bash supabase/tests/run_local.sh   # all migrations + seed + SQL tests on Postgres in Docker
 npm test
 # Executes Vitest suite testing formatters, accounting math, and UI components
 ```
