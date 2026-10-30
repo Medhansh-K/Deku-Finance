@@ -32,10 +32,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary: "bg-[#1F2324] text-white hover:bg-[#0A0A0A] border border-[#3E4848]",
-      secondary: "bg-[#f1f5f9] text-[#0f172a] hover:bg-[#e2e8f0] border border-[#cbd5e1]",
-      outline: "bg-transparent text-[#1f2324] hover:bg-[#f1f5f9] border border-[#3e4848]",
+      secondary: "bg-[#f1f5f9] dark:bg-[#0B1522] text-[#0f172a] dark:text-slate-200 hover:bg-[#e2e8f0] dark:hover:bg-[#15273C] border border-[#cbd5e1] dark:border-[#1A2E44]",
+      outline: "bg-transparent text-[#1f2324] dark:text-slate-200 hover:bg-[#f1f5f9] dark:hover:bg-[#15273C] border border-[#3e4848] dark:border-[#1A2E44]",
       danger: "bg-rose-700 text-white hover:bg-rose-800 border border-rose-900",
-      ghost: "bg-transparent text-[#64748b] hover:text-[#0f172a] hover:bg-slate-100",
+      ghost: "bg-transparent text-[#64748b] dark:text-slate-400 hover:text-[#0f172a] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#15273C]",
       tally: "bg-[#5BB5BB] text-[#0a0a0a] font-bold hover:bg-[#4ea5a5] border border-[#3e4848] shadow-sm",
     };
 

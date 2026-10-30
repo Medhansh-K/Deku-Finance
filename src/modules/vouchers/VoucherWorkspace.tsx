@@ -995,8 +995,8 @@ export function VoucherWorkspace({
       {/* ============================================================ */}
       <div className="w-full lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-0 lg:self-start">
         {/* Card 1: Voucher Types Selector */}
-        <div className="bg-white border border-[#CBD5E1] rounded-lg p-3 shadow-xs">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+        <div className="bg-white dark:bg-[#0B1522] border border-[#CBD5E1] dark:border-[#1A2E44] rounded-lg p-3 shadow-xs">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-[#182C40]">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#0A0A0A]">
               Voucher Type
             </span>
@@ -1028,7 +1028,7 @@ export function VoucherWorkspace({
                   className={`w-full flex items-center justify-between p-2 rounded transition-all text-left ${
                     isCurrent
                       ? "bg-[#1F2324] text-white shadow-sm ring-1 ring-[#5BB5BB]"
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                      : "bg-slate-50 dark:bg-[#07111E] hover:bg-slate-100 dark:hover:bg-[#15273C] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#1A2E44]"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -1065,7 +1065,7 @@ export function VoucherWorkspace({
         </div>
 
         {/* Sidebar Sub-Tabs: Builder Drafts vs Smart OCR */}
-        <div className="flex items-center bg-slate-200/90 p-0.5 rounded-lg border border-slate-300">
+        <div className="flex items-center bg-slate-200/90 dark:bg-[#07111E] p-0.5 rounded-lg border border-slate-300 dark:border-[#1A2E44]">
           <button
             type="button"
             onClick={() => setSidebarTab("drafts")}
@@ -1106,8 +1106,8 @@ export function VoucherWorkspace({
           />
         ) : (
           /* Tab 2: Document Auto-Extraction (OCR) */
-          <div className="bg-white border border-[#3E4848] rounded-lg p-3 shadow-xs">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+          <div className="bg-white dark:bg-[#0B1522] border border-[#3E4848] dark:border-[#1A2E44] rounded-lg p-3 shadow-xs">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-[#182C40]">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-[#5BB5BB]" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#0A0A0A]">
@@ -1145,7 +1145,7 @@ export function VoucherWorkspace({
               className={`border-2 border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors ${
                 isDragOver
                   ? "border-[#5BB5BB] bg-[#5BB5BB]/10"
-                  : "border-slate-300 hover:border-[#5BB5BB] hover:bg-slate-50"
+                  : "border-slate-300 dark:border-[#1A2E44] hover:border-[#5BB5BB] hover:bg-slate-50 dark:hover:bg-[#15273C]"
               }`}
             >
               <UploadCloud className="h-6 w-6 text-slate-400 mx-auto mb-1" />
@@ -1326,7 +1326,7 @@ export function VoucherWorkspace({
 
         {/* Voucher Header Strip */}
         <div className="bg-white border border-[#CBD5E1] rounded-lg p-4 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 dark:border-[#182C40] gap-2">
             <div className="flex items-center gap-2">
               <Badge variant="teal">{activeConfig.fKey}</Badge>
               <h2 className="text-sm font-bold uppercase tracking-wider text-[#0A0A0A] flex items-center gap-1.5">
@@ -1552,7 +1552,7 @@ export function VoucherWorkspace({
         {/* MANDATORY DOCUMENT PROOF & STATUTORY VERIFICATION */}
         {/* ============================================================ */}
         <div className="bg-white border border-[#CBD5E1] rounded-lg p-4 shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-200 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-200 dark:border-[#182C40] gap-2">
             <div className="flex items-center gap-2">
               <div
                 className={`h-7 w-7 rounded-lg flex items-center justify-center font-bold ${

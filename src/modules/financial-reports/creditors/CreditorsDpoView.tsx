@@ -297,7 +297,7 @@ export function CreditorsDpoView() {
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Total Payables (AP)
             </span>
-            <span className="h-5 w-5 rounded bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+            <span className="h-5 w-5 rounded bg-slate-100 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold">
               <DollarSign className="h-3 w-3" />
             </span>
           </div>
@@ -387,7 +387,7 @@ export function CreditorsDpoView() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm text-slate-900">{cred.vendor_name}</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200">
                         {cred.agreed_terms}
                       </span>
                     </div>
@@ -396,7 +396,7 @@ export function CreditorsDpoView() {
                       <span>•</span>
                       <span>{cred.city}, {cred.state}</span>
                       <span>•</span>
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
                         {cred.bills.length} vendor {cred.bills.length === 1 ? "bill" : "bills"}
                       </span>
                     </div>
@@ -436,7 +436,7 @@ export function CreditorsDpoView() {
               {isExpanded && (
                 <div className="border-t border-slate-200 bg-slate-50/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-[#2D7A7A]" />
                       <span>Vendor Invoices Issued by {cred.vendor_name}</span>
                     </span>
@@ -468,7 +468,7 @@ export function CreditorsDpoView() {
                             </td>
                             <td className="p-2.5 text-slate-600">{formatDateTally(bill.bill_date)}</td>
                             <td className="p-2.5 text-slate-600">{formatDateTally(bill.due_date)}</td>
-                            <td className="p-2.5 text-right text-slate-700">{formatINR(bill.total_amount)}</td>
+                            <td className="p-2.5 text-right text-slate-700 dark:text-slate-300">{formatINR(bill.total_amount)}</td>
                             <td className="p-2.5 text-right font-bold text-slate-950">
                               {formatINR(bill.balance_owed)}
                             </td>

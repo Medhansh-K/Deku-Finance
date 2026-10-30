@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import LicenseEmailToast from "@/components/auth/LicenseEmailToast";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { LicenseEmailToast } from "@/components/auth/LicenseEmailToast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,14 +35,24 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Prevent flash of wrong theme on load */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('deku_theme');if(t==='dark'){document.documentElement.classList.add('dark');}else if(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-white text-zinc-900 selection:bg-amber-400/30 selection:text-amber-900"
+        className="min-h-full flex flex-col bg-white dark:bg-[#101820] text-zinc-900 dark:text-slate-100 selection:bg-[#4F7CAC]/30 selection:text-white transition-colors duration-200"
       >
-        <AuthProvider>
-          {children}
-          <LicenseEmailToast />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <LicenseEmailToast />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

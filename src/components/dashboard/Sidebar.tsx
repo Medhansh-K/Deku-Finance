@@ -146,16 +146,16 @@ export default function DashboardSidebar() {
       {/* Brand Header */}
       <div>
         <div className="h-16 px-5 border-b border-zinc-800/80 flex items-center justify-between">
-          <Link href="/gateway" className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-amber-400 text-zinc-950 flex items-center justify-center font-black shadow-md shadow-amber-400/20">
+          <Link href="/" title="Go to Landing Page" className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-[#5BB5BB] text-[#060D17] flex items-center justify-center font-black shadow-md shadow-[#5BB5BB]/20">
               <ReceiptText className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-sm tracking-tight text-white">
-                  Deku<span className="text-amber-400">Finance</span>
+                  Deku<span className="text-[#5BB5BB]">Finance</span>
                 </span>
-                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-[#5BB5BB]/20 text-[#91D7D2] border border-[#5BB5BB]/30">
                   IN GAAP
                 </span>
               </div>
@@ -190,10 +190,10 @@ export default function DashboardSidebar() {
           {/* License Status Badge with rules */}
           <Link
             href="/dashboard/license"
-            className="block rounded-xl bg-zinc-900 border border-zinc-800 p-2 hover:border-amber-400/50 transition-colors group"
+            className="block rounded-xl bg-zinc-900 border border-zinc-800 p-2 hover:border-[#5BB5BB]/50 transition-colors group"
           >
             <div className="flex items-center justify-between text-[11px]">
-              <span className="flex items-center gap-1 font-bold text-amber-300">
+              <span className="flex items-center gap-1 font-bold text-[#91D7D2]">
                 <KeyRound className="h-3 w-3" />
                 <span>{planTier.toUpperCase()} {isTemp ? "Temp License" : "Plan"}</span>
               </span>
@@ -203,7 +203,7 @@ export default function DashboardSidebar() {
             </div>
             <div className="text-[10px] text-zinc-400 mt-1 flex items-center justify-between">
               <span>{isTemp ? "15d Trial + 5d Grace" : "Terminates per tenure"}</span>
-              <span className="text-amber-400 group-hover:underline">Manage ➔</span>
+              <span className="text-[#5BB5BB] group-hover:underline">Manage ➔</span>
             </div>
           </Link>
         </div>
@@ -225,9 +225,9 @@ export default function DashboardSidebar() {
                       href={item.href}
                       className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                         isActive
-                          ? "bg-amber-400 text-zinc-950 font-bold shadow-sm shadow-amber-400/20"
+                          ? "bg-[#5BB5BB] text-[#060D17] font-bold shadow-sm shadow-[#5BB5BB]/20"
                           : item.highlight
-                          ? "bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 border border-amber-400/30"
+                          ? "bg-amber-400/10 text-[#91D7D2] hover:bg-amber-400/20 border border-amber-400/30"
                           : "text-zinc-400 hover:text-white hover:bg-zinc-850"
                       }`}
                     >
@@ -253,7 +253,7 @@ export default function DashboardSidebar() {
       <div className="p-3 border-t border-zinc-800/80 bg-zinc-950/60">
         <a
           href="tel:+917506461004"
-          className="rounded-xl bg-zinc-900 border border-zinc-800 p-2.5 flex items-center justify-between text-xs hover:border-amber-400/60 transition-colors"
+          className="rounded-xl bg-zinc-900 border border-zinc-800 p-2.5 flex items-center justify-between text-xs hover:border-[#5BB5BB]/60 transition-colors"
         >
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">

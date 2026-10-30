@@ -186,11 +186,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        const savedAuthUser = localStorage.getItem("deku_auth_user");
+        if (savedAuthUser) {
+          try {
+            const parsed = JSON.parse(savedAuthUser);
+            setUser(parsed);
+          } catch {
+            localStorage.removeItem("deku_auth_user");
+          }
+        }
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
         if (session?.user) {
-          setUser({
+          const authUser = {
             id: session.user.id,
             email: session.user.email || "",
             full_name:
@@ -198,7 +208,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               session.user.email?.split("@")[0],
             avatar_url: session.user.user_metadata?.avatar_url,
             is_demo: false,
-          });
+          };
+          setUser(authUser);
+          localStorage.setItem("deku_auth_user", JSON.stringify(authUser));
+          if (session.access_token) {
+            localStorage.setItem("deku_auth_token", session.access_token);
+          }
         }
       } catch (e) {
         console.error("Auth init error:", e);
@@ -213,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        setUser({
+        const authUser = {
           id: session.user.id,
           email: session.user.email || "",
           full_name:
@@ -221,8 +236,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             session.user.email?.split("@")[0],
           avatar_url: session.user.user_metadata?.avatar_url,
           is_demo: false,
-        });
+        };
+        setUser(authUser);
+        localStorage.setItem("deku_auth_user", JSON.stringify(authUser));
         localStorage.removeItem("deku_demo_user");
+        if (session.access_token) {
+          localStorage.setItem("deku_auth_token", session.access_token);
+        }
       }
     });
 
@@ -355,6 +375,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       "deku_active_license",
       JSON.stringify(activatedLicense)
     );
+    const ownerUser = {
+      id: crypto.randomUUID(),
+      email: cleanEmail,
+      full_name: cleanEmail.split("@")[0],
+      is_demo: false,
+    };
+    setUser(ownerUser);
+    localStorage.setItem("deku_auth_user", JSON.stringify(ownerUser));
+    localStorage.setItem("deku_auth_token", "deku-license-" + ownerUser.id);
 
     if (organisation) {
       const updatedOrg = { ...organisation, license: activatedLicense };
@@ -374,16 +403,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
+        if (error.message.toLowerCase().includes("email not confirmed")) {
+          return {
+            error: "Email verification is pending for this account. If you did not receive a confirmation email, check Spam or disable 'Confirm email' in Supabase Dashboard (Auth > Providers > Email).",
+          };
+        }
         return { error: error.message };
       }
 
       if (data.user) {
-        setUser({
+        const authUser = {
           id: data.user.id,
           email: data.user.email || email,
           full_name: data.user.user_metadata?.full_name || email.split("@")[0],
           is_demo: false,
-        });
+        };
+        setUser(authUser);
+        localStorage.setItem("deku_auth_user", JSON.stringify(authUser));
+        if (data.session?.access_token) {
+          localStorage.setItem("deku_auth_token", data.session.access_token);
+        } else {
+          localStorage.setItem("deku_auth_token", "deku-auth-" + data.user.id);
+        }
         localStorage.removeItem("deku_demo_user");
 
         // Automatically trigger activation email dispatch record for the logged in user
@@ -456,13 +497,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Dispatch activation email on signup
       await sendActivationEmail(email);
 
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || email,
-          full_name: fullName,
-          is_demo: false,
-        });
+      const authUser = {
+        id: data.user?.id || crypto.randomUUID(),
+        email: email,
+        full_name: fullName,
+        is_demo: false,
+      };
+      setUser(authUser);
+      localStorage.setItem("deku_auth_user", JSON.stringify(authUser));
+      if (data.session?.access_token) {
+        localStorage.setItem("deku_auth_token", data.session.access_token);
+      } else {
+        localStorage.setItem("deku_auth_token", "deku-user-" + authUser.id);
       }
       return {};
     } catch (err: unknown) {
@@ -543,6 +589,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLicense(demoLic);
     setOperatingModeState(demoOrg.operating_mode);
     localStorage.setItem("deku_demo_user", JSON.stringify(demoUser));
+    localStorage.setItem("deku_auth_user", JSON.stringify(demoUser));
+    localStorage.setItem("deku_auth_token", "deku-demo-" + type);
     localStorage.setItem("deku_active_org", JSON.stringify(demoOrg));
     localStorage.setItem("deku_active_license", JSON.stringify(demoLic));
     localStorage.setItem("deku_operating_mode", demoOrg.operating_mode);
@@ -556,6 +604,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn("Sign out err:", e);
     }
     setUser(null);
+    localStorage.removeItem("deku_auth_user");
+    localStorage.removeItem("deku_auth_token");
     localStorage.removeItem("deku_demo_user");
     localStorage.removeItem("deku_active_org");
     localStorage.removeItem("deku_active_license");

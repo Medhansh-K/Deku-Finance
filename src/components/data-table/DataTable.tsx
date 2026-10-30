@@ -131,16 +131,16 @@ export function DataTable<TData>({
               setCurrentPage(0);
             }}
             placeholder={searchPlaceholder}
-            className="w-full rounded border border-[#cbd5e1] bg-white pl-9 pr-4 py-1.5 text-xs text-[#0f172a] placeholder-[#94a3b8] focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB]"
+            className="w-full rounded border border-[#cbd5e1] dark:border-[#1A2E44] bg-white dark:bg-[#07101B] pl-9 pr-4 py-1.5 text-xs text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder-slate-500 focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB]"
           />
         </div>
-        <div className="text-xs text-slate-500 font-mono">
+        <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
           Showing {pageData.length} of {data.length} records
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded border border-[#3E4848] bg-white shadow-xs">
+      <div className="overflow-x-auto rounded border border-[#3E4848] dark:border-[#1A2E44] bg-white dark:bg-[#0B1522] shadow-xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr>
@@ -191,7 +191,7 @@ export function DataTable<TData>({
               })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-slate-200 dark:divide-[#182C40]">
             {isLoading ? (
               <tr>
                 <td
@@ -216,8 +216,8 @@ export function DataTable<TData>({
                     }}
                     className={`cursor-pointer transition-colors ${
                       isFocused
-                        ? "bg-[#5BB5BB]/15 text-[#0A0A0A] font-medium"
-                        : "hover:bg-slate-50 text-[#1e293b]"
+                        ? "bg-[#5BB5BB]/15 text-[#0A0A0A] dark:text-white font-medium"
+                        : "hover:bg-slate-50 dark:hover:bg-[#0F1A28] text-[#1e293b] dark:text-slate-200"
                     }`}
                   >
                     {columns.map((col, cIdx) => (
@@ -252,7 +252,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between text-xs text-slate-600 px-1">
+      <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 px-1">
         <div className="flex items-center gap-1 font-mono">
           Page {currentPage + 1} of {totalPages}
         </div>
@@ -261,7 +261,7 @@ export function DataTable<TData>({
             suppressHydrationWarning
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none"
+            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 dark:border-[#1A2E44] bg-white dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#15273C] disabled:opacity-40 disabled:pointer-events-none"
           >
             <ChevronLeft className="h-3.5 w-3.5" /> Previous
           </button>
@@ -269,7 +269,7 @@ export function DataTable<TData>({
             suppressHydrationWarning
             onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={currentPage >= totalPages - 1}
-            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none"
+            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 dark:border-[#1A2E44] bg-white dark:bg-[#0B1522] text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#15273C] disabled:opacity-40 disabled:pointer-events-none"
           >
             Next <ChevronRight className="h-3.5 w-3.5" />
           </button>

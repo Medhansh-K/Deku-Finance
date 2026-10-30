@@ -421,7 +421,7 @@ export function DebtorsDsoView() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm text-slate-900">{deb.customer_name}</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200">
                         {deb.credit_terms}
                       </span>
                     </div>
@@ -430,7 +430,7 @@ export function DebtorsDsoView() {
                       <span>•</span>
                       <span>{deb.city}, {deb.state}</span>
                       <span>•</span>
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
                         {deb.invoices.length} open {deb.invoices.length === 1 ? "invoice" : "invoices"}
                       </span>
                     </div>
@@ -470,7 +470,7 @@ export function DebtorsDsoView() {
               {isExpanded && (
                 <div className="border-t border-slate-200 bg-slate-50/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-[#2D7A7A]" />
                       <span>Outstanding Invoices Owed by {deb.customer_name}</span>
                     </span>
@@ -511,7 +511,7 @@ export function DebtorsDsoView() {
                             </td>
                             <td className="p-2.5 text-slate-600">{formatDateTally(inv.invoice_date)}</td>
                             <td className="p-2.5 text-slate-600">{formatDateTally(inv.due_date)}</td>
-                            <td className="p-2.5 text-right text-slate-700">{formatINR(inv.total_amount)}</td>
+                            <td className="p-2.5 text-right text-slate-700 dark:text-slate-300">{formatINR(inv.total_amount)}</td>
                             <td className="p-2.5 text-right font-bold text-amber-800">
                               {formatINR(inv.balance_due)}
                             </td>

@@ -58,3 +58,10 @@
   border-bottom: 1px solid #e2e8f0;
   border-right: 1px solid #e2e8f0;
 }
+
+
+.dark .deku-table-td {
+  border-bottom: 1px solid #182C40;
+  border-right: 1px solid #182C40;
+  color: #e2e8f0;
+}

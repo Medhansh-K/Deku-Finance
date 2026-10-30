@@ -77,7 +77,7 @@ export function TrialBalanceView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#0B1522] p-3 rounded border border-slate-200 dark:border-[#1A2E44]">
         <div className="flex items-center gap-2">
           <Badge variant={isEquilibrium ? "success" : "warning"}>
             {isEquilibrium ? "Equilibrium Verified" : "Verification Pending"}
@@ -124,7 +124,7 @@ export function TrialBalanceView() {
       )}
 
       {/* Trial Balance Statement Sheet */}
-      <div className="bg-white border border-[#3E4848] rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0B1522] border border-[#3E4848] dark:border-[#1A2E44] rounded-lg shadow-sm overflow-hidden">
         {/* Statement Header */}
         <div className="bg-[#1F2324] text-white p-4 border-b border-[#3E4848] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -144,7 +144,7 @@ export function TrialBalanceView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700">
+              <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                 <th className="py-2 px-4 w-24">Code</th>
                 <th className="py-2 px-4">Particulars / Account Title</th>
                 <th className="py-2 px-4 w-32">Classification</th>

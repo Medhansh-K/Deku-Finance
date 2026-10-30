@@ -93,10 +93,10 @@ export default function DashboardHeader() {
             </div>
           ) : (
             <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-amber-400 shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-[#5BB5BB] shadow-2xs"
               title="GST Registered Enterprise. Operates permanently on GST Module."
             >
-              <Building2 className="h-3.5 w-3.5 text-amber-400" />
+              <Building2 className="h-3.5 w-3.5 text-[#5BB5BB]" />
               <span>GST Registered</span>
               {organisation?.gstin && (
                 <span className="text-[10px] font-mono text-zinc-300 ml-1">
@@ -113,9 +113,9 @@ export default function DashboardHeader() {
         {/* License Pill */}
         <Link
           href="/dashboard/license"
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors shadow-2xs"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#5BB5BB]/15 border border-[#5BB5BB]/40 text-xs font-bold text-[#91D7D2] hover:bg-[#5BB5BB]/25 transition-colors shadow-2xs"
         >
-          <KeyRound className="h-3.5 w-3.5 text-amber-600" />
+          <KeyRound className="h-3.5 w-3.5 text-[#5BB5BB]" />
           <span>
             {isTemp ? (
               <>
@@ -123,11 +123,11 @@ export default function DashboardHeader() {
               </>
             ) : (
               <>
-                <span className="text-amber-700">PRO Plan Active</span>
+                <span className="text-[#91D7D2]">PRO Plan Active</span>
               </>
             )}
           </span>
-          <span className="text-[10px] bg-amber-400/30 text-amber-950 px-1.5 py-0.2 rounded font-extrabold uppercase">
+          <span className="text-[10px] bg-[#5BB5BB]/20 text-[#91D7D2] px-1.5 py-0.2 rounded font-extrabold uppercase">
             {isTemp ? "15d + 5d Grace" : "Active"}
           </span>
         </Link>
@@ -139,7 +139,7 @@ export default function DashboardHeader() {
           title="Send license key to email"
           className="p-2 rounded-xl border border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors flex items-center gap-1 text-xs font-semibold"
         >
-          <Mail className="h-4 w-4 text-amber-600" />
+          <Mail className="h-4 w-4 text-[#5BB5BB]" />
           <span className="hidden lg:inline">License Email</span>
         </button>
 
@@ -159,7 +159,7 @@ export default function DashboardHeader() {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1.5 rounded-xl border border-zinc-200 hover:bg-zinc-50 transition-colors"
           >
-            <div className="h-8 w-8 rounded-lg bg-amber-400 text-zinc-950 font-black flex items-center justify-center text-xs shadow-xs">
+            <div className="h-8 w-8 rounded-lg bg-[#5BB5BB] text-[#060D17] font-black flex items-center justify-center text-xs shadow-xs">
               {user?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
             <div className="hidden md:block text-left">
@@ -189,7 +189,7 @@ export default function DashboardHeader() {
                 onClick={() => setShowProfileMenu(false)}
                 className="w-full text-left p-2 rounded-lg hover:bg-zinc-100 flex items-center gap-2 text-zinc-700 font-semibold"
               >
-                <KeyRound className="h-4 w-4 text-amber-600" />
+                <KeyRound className="h-4 w-4 text-[#5BB5BB]" />
                 <span>Manage Licenses & Plans</span>
               </Link>
 

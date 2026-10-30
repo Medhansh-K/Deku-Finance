@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold uppercase tracking-wider text-[#3E4848]"
+            className="block text-xs font-semibold uppercase tracking-wider text-[#3E4848] dark:text-[#91D7D2]"
           >
             {label}
           </label>
@@ -44,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             suppressHydrationWarning
-            className={`w-full rounded border border-[#cbd5e1] bg-white text-sm text-[#0f172a] placeholder-[#94a3b8] transition-colors focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB] disabled:bg-[#f8fafc] disabled:text-[#94a3b8] ${
+            className={`w-full rounded border border-[#cbd5e1] dark:border-[#1A2E44] bg-white dark:bg-[#07101B] text-sm text-[#0f172a] dark:text-slate-100 placeholder-[#94a3b8] dark:placeholder-slate-500 transition-colors focus:border-[#5BB5BB] focus:outline-none focus:ring-1 focus:ring-[#5BB5BB] disabled:bg-[#f8fafc] disabled:text-[#94a3b8] ${
               prefixSymbol ? "pl-7" : "px-3"
             } ${suffixSymbol ? "pr-8" : "px-3"} py-1.5 ${
               isNumeric ? "text-right font-mono" : ""

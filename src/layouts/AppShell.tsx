@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 import { TopBar } from "@/components/navigation/TopBar";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
+import { Loader2 } from "lucide-react";
 
 // Create client once
 const queryClient = new QueryClient({
@@ -26,9 +28,17 @@ export interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, isLoading } = useAuth();
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  // Strict route guard: redirect to /login if unauthenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isLoading, router]);
 
   // Default active company context verified against backend
   const [activeCompany, setActiveCompany] = useState<{
@@ -129,20 +139,20 @@ export function AppShell({ children }: AppShellProps) {
         F8: "sales",
         F9: "purchase",
       };
-
       if (voucherKeyMap[e.key]) {
-        if (!pathname?.startsWith("/vouchers")) {
+        if (!isInput) {
           e.preventDefault();
           router.push(`/vouchers/${voucherKeyMap[e.key]}`);
           return;
         }
       }
 
-      // Esc -> If no modals open, return to Gateway
-      if (e.key === "Escape" && !isCommandPaletteOpen && !isHelpOpen && pathname !== "/gateway") {
-        if (!isInput) {
+      // Esc -> Navigate back to Gateway
+      if (e.key === "Escape") {
+        if (!isInput && !isCommandPaletteOpen && !isHelpOpen && pathname !== "/gateway") {
           e.preventDefault();
           router.push("/gateway");
+          return;
         }
       }
     };
@@ -151,9 +161,28 @@ export function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [router, pathname, isCommandPaletteOpen, isHelpOpen]);
 
+  // Loading state while auth initializes
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-white font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-7 w-7 animate-spin text-[#5BB5BB]" />
+          <span className="text-xs font-semibold text-slate-400 tracking-wide">
+            Authenticating Deku Workspace...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // If unauthenticated, render nothing while redirecting to /login
+  if (!user) {
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="app-shell-root flex flex-col h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] font-sans print:h-auto print:w-auto print:overflow-visible print:bg-white">
+      <div className="app-shell-root flex flex-col h-screen w-screen overflow-hidden bg-[#F8FAFC] dark:bg-[#101820] text-[#0F172A] dark:text-slate-200 font-sans print:h-auto print:w-auto print:overflow-visible print:bg-white">
         {/* Top Tally Navigation Bar */}
         <TopBar
           companyName={activeCompany.name}

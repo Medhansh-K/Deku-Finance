@@ -147,23 +147,23 @@ export function CompaniesView() {
             <div
               key={org.id}
               onClick={() => handleSelectOrg(org)}
-              className={`p-4 rounded-lg border cursor-pointer transition-all bg-white shadow-xs hover:border-[#5BB5BB] ${
+              className={`p-4 rounded-lg border cursor-pointer transition-all bg-white dark:bg-[#0B1522] shadow-xs hover:border-[#5BB5BB] ${
                 isActive
                   ? "border-[#5BB5BB] ring-2 ring-[#5BB5BB]/20"
-                  : "border-slate-300 hover:bg-slate-50"
+                  : "border-slate-300 dark:border-[#1A2E44] hover:bg-slate-50 dark:hover:bg-[#0F1A28]"
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-8 w-8 rounded flex items-center justify-center font-bold ${
-                      isActive ? "bg-[#5BB5BB] text-[#0A0A0A]" : "bg-slate-100 text-slate-600"
+                      isActive ? "bg-[#5BB5BB] text-[#0A0A0A]" : "bg-slate-100 dark:bg-[#07111E] text-slate-600 dark:text-slate-300"
                     }`}
                   >
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#0F172A]">{org.name}</h3>
+                    <h3 className="font-bold text-sm text-[#0F172A] dark:text-slate-100">{org.name}</h3>
                     <span className="font-mono text-[10px] text-slate-400">
                       Slug: {org.slug}
                     </span>
@@ -174,7 +174,7 @@ export function CompaniesView() {
                 )}
               </div>
 
-              <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-[#182C40] grid grid-cols-2 gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                 <div>
                   <span className="text-slate-400 text-[10px] block">Regime / GSTIN</span>
                   {org.gstin ? (
@@ -182,7 +182,7 @@ export function CompaniesView() {
                       GST: {org.gstin}
                     </span>
                   ) : (
-                    <span className="font-mono text-slate-700 block">
+                    <span className="font-mono text-slate-700 dark:text-slate-300 block">
                       Sec 22 Exempt
                     </span>
                   )}

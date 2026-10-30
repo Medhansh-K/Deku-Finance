@@ -1,9 +1,35 @@
+@custom-variant dark (&:where(.dark, .dark *));
 @import "tailwindcss";
 @import "../styles/tokens.css";
 
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+}
+
+/* Dark mode CSS variables — activated by .dark class on <html> */
+.dark {
+  --background: #101820;
+  --foreground: #e2e8f0;
+  --surface-primary: #162521;
+  --surface-elevated: #202D35;
+  --border-subtle: #3C474B;
+  --action-primary: #4F7CAC;
+  --accent-cyan: #9EEFE5;
+  color-scheme: dark;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #101820;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3C474B;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4F7CAC;
 }
 
 @theme inline {

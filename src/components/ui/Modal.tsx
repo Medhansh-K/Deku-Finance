@@ -54,7 +54,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-lg border border-[#3E4848] bg-white shadow-2xl overflow-hidden`}
+        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-lg border border-[#3E4848] bg-white dark:bg-[#0B1522] shadow-2xl overflow-hidden`}
       >
         {/* Header with Dark Obsidian Accent */}
         <div className="flex items-center justify-between border-b border-[#3E4848] bg-[#1F2324] px-4 py-3 text-white">
@@ -77,7 +77,7 @@ export function Modal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 bg-white max-h-[80vh] overflow-y-auto">
+        <div className="p-4 bg-white dark:bg-[#0B1522] max-h-[80vh] overflow-y-auto">
           {children}
         </div>
       </div>

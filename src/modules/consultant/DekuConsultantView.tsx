@@ -89,9 +89,9 @@ function FinancialTable({
   };
 
   return (
-    <div className="my-3 rounded-xl border border-[#CBD5E1] bg-white overflow-hidden shadow-xs">
+    <div className="my-3 rounded-xl border border-[#CBD5E1] dark:border-[#1A2E44] bg-white dark:bg-[#0B1522] overflow-hidden shadow-xs">
       {/* Top Table Toolbar (Matching Image 1 Dabby) */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 border-b border-[#CBD5E1]">
+      <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-50 dark:bg-[#07111E] border-b border-[#CBD5E1] dark:border-[#1A2E44]">
         <div className="flex items-center gap-2">
           {categoryNumber && (
             <span className="h-5 w-5 rounded bg-blue-600 text-white font-mono font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
@@ -643,7 +643,7 @@ export function DekuConsultantView() {
       {/* ========================================================================= */}
       {/* 1. LEFT SIDEBAR (WORKBENCHES, AUDITED HEALTH, SESSIONS)                   */}
       {/* ========================================================================= */}
-      <aside className="w-64 xl:w-72 bg-white border-r border-[#CBD5E1] flex flex-col justify-between shrink-0 shadow-xs">
+      <aside className="w-64 xl:w-72 bg-white dark:bg-[#0B1522] border-r border-[#CBD5E1] dark:border-[#1A2E44] flex flex-col justify-between shrink-0 shadow-xs">
         <div className="p-3.5 space-y-4 overflow-y-auto">
           {/* New Chat Button (Deku Charcoal with Teal Highlight) */}
           <button
@@ -679,7 +679,7 @@ export function DekuConsultantView() {
                     className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
                       isActive
                         ? "bg-emerald-50/80 text-emerald-950 border border-emerald-300 font-bold shadow-xs"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#15273C] border border-transparent"
                     }`}
                   >
                     <span className="truncate flex items-center gap-2">
@@ -709,7 +709,7 @@ export function DekuConsultantView() {
           </div>
 
           {/* Live Executive Snapshot (Audited Health) */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+          <div className="bg-slate-50 dark:bg-[#07111E] border border-slate-200 dark:border-[#1A2E44] rounded-xl p-3 space-y-2">
             <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 font-bold uppercase">
               <span>Audited Health</span>
               <span className="text-emerald-700 font-mono flex items-center gap-1 font-bold">

@@ -9,11 +9,23 @@ import {
   TrendingUp,
   Activity,
   ChevronDown,
-  ArrowRightLeft,
   ArrowUpRight,
   ArrowRight,
   Sparkles,
-  Bot,
+  BookOpen,
+  Users,
+  Package,
+  Receipt,
+  Calendar,
+  FileText,
+  BarChart3,
+  Scale,
+  ArrowUpDown,
+  PieChart,
+  ShieldCheck,
+  Settings,
+  History,
+  Users2,
 } from "lucide-react";
 import { organisationsApi, accountingApi, OrgSummary } from "@/api/endpoints";
 import {
@@ -62,7 +74,7 @@ export function GatewayLanding() {
     currency: "INR",
   });
 
-  const [lastEntryDate, setLastEntryDate] = useState<string>("18-Oct-2026");
+  const [lastEntryDate, setLastEntryDate] = useState<string>("20-Oct-2026");
   const [profile, setProfile] = useState<FormattedKpiProfile>(() =>
     getKpiProfile(activeOrg.id, activeOrg.name)
   );
@@ -157,7 +169,6 @@ export function GatewayLanding() {
     if (typeof window !== "undefined") {
       localStorage.setItem("deku_active_org_id", org.id);
       localStorage.setItem("deku_active_org_name", org.name);
-      // Notify AppShell's TopBar to sync immediately
       window.dispatchEvent(new Event("deku_active_org_changed"));
     }
   };
@@ -240,8 +251,6 @@ export function GatewayLanding() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
 
-
-
   const companyShortName = activeOrg.name.startsWith("All Might")
     ? "All Might"
     : activeOrg.name.startsWith("Endeavor")
@@ -251,26 +260,56 @@ export function GatewayLanding() {
     : activeOrg.name.split(" ")[0];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-2 sm:p-2.5 lg:px-4 lg:py-1 bg-[#F8FAFC] w-full min-h-0">
-      <div className="w-full max-w-[1480px] flex flex-col lg:flex-row gap-3 xl:gap-3.5 items-stretch">
+    <div className="w-full flex-1 flex flex-col justify-start items-center p-3 lg:px-5 lg:py-3.5 bg-[#F8FAFC] dark:bg-[#101820] font-sans transition-colors duration-200">
+      <div className="w-full max-w-[1400px] flex flex-col lg:flex-row gap-3.5 items-stretch">
+        
         {/* ========================================================================= */}
-        {/* Column 1 (Left): Company Status & Instant Shift Switcher */}
+        {/* Column 1 (Left): Company Identity & Status Panel                         */}
         {/* ========================================================================= */}
-        <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 bg-white border border-[#CBD5E1] rounded-lg p-3 shadow-xs flex flex-col justify-between">
-          <div className="space-y-2.5">
-            {/* Header with Company Selector Dropdown */}
-            <div className="border-b border-[#E2E8F0] pb-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848]">
-                  Current Active Company
+        <div className="w-full lg:w-[280px] xl:w-[290px] shrink-0 bg-white dark:bg-[#162521] border border-[#E2E8F0] dark:border-[#3C474B] rounded-xl p-3.5 shadow-xs flex flex-col justify-between transition-colors">
+          <div className="space-y-3">
+            
+            {/* Header: Active Workspace Status */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-[#E2E8F0] dark:border-[#3C474B]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+                  Active Workspace
                 </span>
-                <span className="text-[9px] font-mono font-bold text-[#5BB5BB] bg-[#1F2324] px-1.5 py-0.5 rounded">
-                  F3 Shift
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
                 </span>
               </div>
+              <Link
+                href="/companies"
+                className="text-[11px] font-medium text-[#4F7CAC] dark:text-[#9EEFE5] hover:underline transition-colors flex items-center gap-1"
+                title="Manage and switch companies (F3)"
+              >
+                <span>Shift</span>
+                <kbd className="font-mono text-[9px] bg-slate-100 dark:bg-[#202D35] text-slate-600 dark:text-slate-300 px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B]">
+                  F3
+                </kbd>
+              </Link>
+            </div>
 
-              {/* Instant Switcher Dropdown */}
-              <div className="relative mt-1.5">
+            {/* Company Identity */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-[#4F7CAC]/15 dark:bg-[#4F7CAC]/25 text-[#4F7CAC] dark:text-[#9EEFE5] flex items-center justify-center shrink-0">
+                  <Building2 className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {activeOrg.name}
+                  </h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                    GSTIN · <span className="text-slate-700 dark:text-slate-300 font-medium">{activeOrg.gstin}</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Company Switcher Select */}
+              <div className="relative">
                 <select
                   id="company-shift-select"
                   value={activeOrg.id}
@@ -278,660 +317,554 @@ export function GatewayLanding() {
                     const chosen = orgList.find((o) => o.id === e.target.value);
                     if (chosen) handleSwitchCompany(chosen);
                   }}
-                  className="w-full bg-[#1F2324] text-white font-bold text-xs py-1.5 px-2.5 rounded border border-[#3E4848] focus:border-[#5BB5BB] focus:outline-none cursor-pointer appearance-none pr-8 shadow-xs hover:border-[#5BB5BB] transition-colors"
-                  title="Select and switch active company workspace"
+                  className="w-full bg-slate-50 dark:bg-[#202D35] text-slate-800 dark:text-slate-200 text-xs font-medium py-1 px-2 pr-7 rounded-md border border-slate-300 dark:border-[#3C474B] focus:outline-none focus:border-[#4F7CAC] cursor-pointer appearance-none transition-colors"
+                  title="Switch workspace"
                 >
                   {orgList.map((org) => (
-                    <option key={org.id} value={org.id} className="bg-[#1F2324] text-white py-1">
+                    <option key={org.id} value={org.id} className="bg-white dark:bg-[#162521] text-slate-900 dark:text-white">
                       {org.name}
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="h-4 w-4 text-[#5BB5BB] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="text-[10px] font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
-                  GSTIN: {activeOrg.gstin}
-                </span>
-                <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 font-bold">
-                  {activeOrg.currency}
-                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
-            {/* Quick Shift Entities (Clickable Switcher Buttons) */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848]">
-                <span className="flex items-center gap-1">
-                  <ArrowRightLeft className="h-3 w-3 text-[#5BB5BB]" /> Shift Company
-                </span>
-                <Link
-                  href="/companies"
-                  className="text-[#2D7A7A] hover:text-[#5BB5BB] transition-colors"
-                  title="Manage and create companies (F3)"
-                >
-                  + Add (F3)
-                </Link>
+            {/* Technical Metadata Rows */}
+            <div className="divide-y divide-slate-100 dark:divide-[#3C474B]/40 text-xs pt-1">
+              <div className="py-1.5 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Financial Year</span>
+                <span className="font-mono font-medium text-slate-900 dark:text-slate-200 text-xs">2026–27</span>
               </div>
-
-              <div className="space-y-1">
-                {orgList.slice(0, 3).map((org) => {
-                  const isSelected = org.id === activeOrg.id;
-                  return (
-                    <button
-                      key={org.id}
-                      id={`shift-company-${org.id}`}
-                      type="button"
-                      onClick={() => handleSwitchCompany(org)}
-                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all flex items-center justify-between border cursor-pointer ${
-                        isSelected
-                          ? "bg-[#1F2324] text-[#91D7D2] border-[#3E4848] font-bold shadow-xs"
-                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 truncate">
-                        <Building2
-                          className={`h-3 w-3 shrink-0 ${
-                            isSelected ? "text-[#5BB5BB]" : "text-slate-400"
-                          }`}
-                        />
-                        <span className="truncate">{org.name}</span>
-                      </div>
-                      {isSelected ? (
-                        <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[#5BB5BB] text-[#0A0A0A] font-bold shrink-0">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-mono text-slate-400 hover:text-slate-700 shrink-0">
-                          Shift ➔
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="py-1.5 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Accounting Engine</span>
+                <span className="text-slate-800 dark:text-slate-200 font-medium text-xs">ALERX Double Entry</span>
               </div>
-            </div>
-
-            {/* Company Metadata Info */}
-            <div className="space-y-1 text-[11px] pt-1">
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Current Period:</span>
-                <span className="font-mono font-bold text-[#0F172A]">
-                  01-Apr-2026 to 31-Mar-2027
-                </span>
+              <div className="py-1.5 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Last Entry Recorded</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300 text-xs">{lastEntryDate}</span>
               </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Date of Last Entry:</span>
-                <span className="font-mono font-bold text-[#0F172A]">
-                  {lastEntryDate}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Accounting Standard:</span>
-                <span className="font-mono text-[#0F172A]">
-                  ALERX 4-Tier Double Entry
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-slate-500">Authoritative Ledger:</span>
-                <span className="font-mono text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+              <div className="py-1.5 flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400 text-[11px]">Authoritative Ledger</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium text-xs flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   PostgreSQL Active
                 </span>
               </div>
             </div>
+
           </div>
 
-          <div className="pt-2 mt-1.5 border-t border-[#E2E8F0] text-[10px] text-slate-500">
-            <p className="font-mono text-[9px] text-slate-400">
-              Press <strong>F3</strong> or click above to shift company. Highlighted keys open menu items directly.
-            </p>
+          <div className="pt-2 mt-2 border-t border-[#E2E8F0] dark:border-[#3C474B] text-[10px] text-slate-400 dark:text-slate-500">
+            Press <strong className="text-slate-600 dark:text-slate-300">F3</strong> to switch company entities.
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* Column 2 (Center): Gateway of Deku Navigation Menu (Enlarged & Focused)  */}
+        {/* Columns 2 & 3: Perfectly Matched Size (Equal 50/50 Width & Stretched Height)*/}
         {/* ========================================================================= */}
-        <div className="flex-1 bg-white border border-[#3E4848] rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[340px]">
-          <div>
-            {/* Menu Title Header */}
-            <div className="bg-[#1F2324] px-3.5 py-1.5 border-b border-[#3E4848] flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-[#5BB5BB]" />
-                <span className="text-xs font-mono font-black tracking-wider uppercase">
-                  Gateway of Deku
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3.5 items-stretch">
+          
+          {/* ======================================================================= */}
+          {/* Column 2: Gateway Workspace Panel                                      */}
+          {/* ======================================================================= */}
+          <div className="bg-white dark:bg-[#162521] border border-[#E2E8F0] dark:border-[#3C474B] rounded-xl shadow-xs overflow-hidden flex flex-col justify-between h-full transition-colors">
+            <div>
+              {/* Header */}
+              <div className="px-3.5 py-2.5 border-b border-[#E2E8F0] dark:border-[#3C474B] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-[#4F7CAC] dark:text-[#9EEFE5]" />
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                    Gateway of Deku
+                  </h2>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[180px]">
+                  {companyShortName} Workspace
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-[#91D7D2] truncate max-w-[220px] bg-white/10 px-2 py-0.5 rounded border border-[#5BB5BB]/30">
-                🏢 {companyShortName} Workspace
-              </span>
-            </div>
 
-            <div className="p-2.5 space-y-1.5 divide-y divide-slate-100 text-xs font-sans">
-              {/* EXECUTIVE DASHBOARD & DEKU KONSULTANT SPOTLIGHT */}
-              <div className="pb-0.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] mb-1 px-1.5 flex items-center justify-between">
-                  <span>Executive Overview</span>
-                  <span className="text-[9px] font-mono text-[#00F5A0] bg-[#141C1E] px-1.5 py-0.5 rounded border border-[#233134] font-bold">
-                    AI CFO Live
-                  </span>
-                </div>
+              {/* Navigation Body */}
+              <div className="p-3 space-y-2.5 text-xs">
+                
+                {/* Executive Highlight */}
                 <Link
                   href="/consultant"
-                  style={{
-                    backgroundColor: "#141C1E",
-                    border: "1px solid #233134",
-                    color: "#FFFFFF",
-                  }}
-                  className="flex items-center justify-between px-2.5 py-2 rounded hover:border-[#00F5A0]/60 shadow-xs group transition-all"
-                  title="Launch Deku Konsultant Executive Dashboard & Sovereign AI CFO (K or E)"
+                  className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-[#202D35] border border-slate-200/80 dark:border-[#3C474B] hover:border-[#4F7CAC] dark:hover:border-[#4F7CAC] transition-colors group"
+                  title="Launch Deku Konsultant Executive Dashboard (K or E)"
                 >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-6 w-6 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform shrink-0"
-                      style={{
-                        backgroundColor: "rgba(0, 245, 160, 0.15)",
-                        border: "1px solid rgba(0, 245, 160, 0.4)",
-                        color: "#00F5A0",
-                      }}
-                    >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-6 w-6 rounded-md bg-[#4F7CAC]/15 dark:bg-[#4F7CAC]/25 text-[#4F7CAC] dark:text-[#9EEFE5] flex items-center justify-center shrink-0">
                       <Sparkles className="h-3.5 w-3.5" />
-                    </span>
-                    <div>
-                      <span className="font-bold text-xs block text-white group-hover:text-[#00F5A0] transition-colors">
-                        Deku <u>K</u>onsultant (<u>E</u>xecutive Dashboard)
+                    </div>
+                    <div className="truncate">
+                      <span className="font-semibold text-slate-900 dark:text-white group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs block truncate">
+                        Deku Konsultant (AI CFO)
                       </span>
-                      <span className="text-[10px] text-slate-400 block font-mono">
-                        {companyShortName} Sovereign AI CFO &amp; Real-time Ledger Intelligence
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
+                        Real-time ledger intelligence
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <kbd
-                      className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded shadow-xs"
-                      style={{ backgroundColor: "#00F5A0", color: "#000000" }}
-                    >
+                  <div className="flex items-center gap-1 shrink-0 ml-2">
+                    <kbd className="font-mono text-[9px] font-semibold bg-white dark:bg-[#162521] text-slate-700 dark:text-slate-300 px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B]">
                       K
                     </kbd>
-                    <kbd
-                      className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border"
-                      style={{
-                        backgroundColor: "rgba(0,0,0,0.4)",
-                        borderColor: "#3E4848",
-                        color: "#CBD5E1",
-                      }}
-                    >
+                    <kbd className="font-mono text-[9px] font-semibold bg-white dark:bg-[#162521] text-slate-700 dark:text-slate-300 px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B]">
                       E
                     </kbd>
                   </div>
                 </Link>
-              </div>
 
-              {/* MASTERS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] mb-0.5 px-1.5">
-                  Masters
+                {/* Masters */}
+                <div>
+                  <h3 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-1.5 mb-1 uppercase tracking-wider">
+                    Masters
+                  </h3>
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/masters/chart-of-accounts"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <BookOpen className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Chart of Accounts (ALERX Ledgers)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        A
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/masters/parties"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Users className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Parties (Customers &amp; Vendors)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        P
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/masters/products-services"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Package className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Stock &amp; Services Items</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        I
+                      </kbd>
+                    </Link>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/masters/chart-of-accounts"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>C</u>hart of <u>A</u>ccounts (ALERX Ledgers)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      A
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/masters/parties"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>P</u>arties (Customers &amp; Vendors Master)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      P
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/masters/products-services"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      Stock &amp; Services <u>I</u>tems
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      I
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
 
-              {/* TRANSACTIONS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] mb-0.5 px-1.5">
-                  Transactions &amp; Registers
+                {/* Transactions */}
+                <div>
+                  <h3 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-1.5 mb-1 uppercase tracking-wider">
+                    Transactions &amp; Registers
+                  </h3>
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/vouchers"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Receipt className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Accounting Vouchers (F4–F9)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] font-semibold text-white bg-[#4F7CAC] px-1.5 py-0.2 rounded shrink-0">
+                        V
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/day-book"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Calendar className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Day Book (Chronological Register)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        D
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/builder"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <FileText className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Builder (Docs, Quotes &amp; Coupons)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        Shift+B
+                      </kbd>
+                    </Link>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/vouchers"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      Accounting <u>V</u>ouchers (F4-F9)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      V
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/day-book"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>D</u>ay Book (Chronological Register)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      D
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/builder"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span><u>B</u>uilder (Docs, Quotes &amp; Coupons)</span>
-                      <span className="text-[9px] px-1 py-0.1 rounded bg-teal-100 text-[#0A0A0A] font-bold">New</span>
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      Shift+B
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
 
-              {/* FINANCIAL REPORTS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] mb-0.5 px-1.5">
-                  Financial Reports
+                {/* Financial Reports */}
+                <div>
+                  <h3 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-1.5 mb-1 uppercase tracking-wider">
+                    Financial Reports
+                  </h3>
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/reports/balance-sheet"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Scale className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Balance Sheet</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        B
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/reports/profit-loss"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <TrendingUp className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Profit &amp; Loss A/c</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        O
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/reports/trial-balance"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <BarChart3 className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Trial Balance</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        T
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/reports/cash-flow"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <ArrowUpDown className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Cash Flow (WCM)</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        C
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/reports/fpa"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <PieChart className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">FP&amp;A Intelligence</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        F
+                      </kbd>
+                    </Link>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/reports/balance-sheet"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>B</u>alance Sheet
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      B
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/profit-loss"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      Pr<u>o</u>fit &amp; Loss A/c
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      O
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/trial-balance"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>T</u>rial Balance
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      T
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/cash-flow"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>C</u>ash Flow (WCM)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#5BB5BB] bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      C
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/fpa"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>F</u>P&amp;A Intelligence
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#5BB5BB] bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      F
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/consultant"
-                    className="flex items-center justify-between px-2 py-0.5 rounded bg-teal-500/10 hover:bg-teal-500/20 text-teal-950 hover:text-teal-900 transition-colors font-bold border border-teal-500/30"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span>Deku <u>K</u>onsultant</span>
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-teal-800 px-1.5 py-0.2 rounded border border-teal-700">
-                      K
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
 
-              {/* UTILITIES & STATUTORY */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] mb-0.5 px-1.5">
-                  Utilities &amp; Statutory
+                {/* Utilities */}
+                <div>
+                  <h3 className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-1.5 mb-1 uppercase tracking-wider">
+                    Utilities &amp; Statutory
+                  </h3>
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/gst"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <ShieldCheck className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">GST Returns &amp; Tax Breakdown</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        G
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/departments-members"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Users2 className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Departments &amp; Members</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        M
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/audit"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <History className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">User Activity &amp; Audit Logs</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        L
+                      </kbd>
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[#202D35] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Settings className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="truncate">Settings &amp; Accounting Preferences</span>
+                      </div>
+                      <kbd className="font-mono text-[9px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-[#202D35] px-1 py-0.2 rounded border border-slate-200 dark:border-[#3C474B] shrink-0">
+                        S
+                      </kbd>
+                    </Link>
+                  </div>
                 </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/gst"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>G</u>ST Returns &amp; Tax Breakdown
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      G
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/departments-members"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      Departments &amp; <u>M</u>embers
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      M
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/audit"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      User Activity &amp; Audit <u>L</u>ogs
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-[#1F2324] px-1.5 py-0.2 rounded border border-[#3E4848]">
-                      L
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-[#5BB5BB]/10 text-slate-800 hover:text-[#0A0A0A] transition-colors font-medium"
-                  >
-                    <span>
-                      <u>S</u>ettings &amp; Accounting Preferences
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-[#3E4848] bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
-                      S
-                    </kbd>
-                  </Link>
 
-                </div>
               </div>
             </div>
-          </div>
 
-          {/* Balanced Card Footer */}
-          <div className="px-3.5 py-1.5 bg-slate-50 border-t border-[#E2E8F0] flex items-center justify-between text-xs">
-            <span className="text-[10px] font-mono text-slate-500">
-              Press highlighted key to navigate
-            </span>
-            <span className="text-[10px] font-mono text-[#2D7A7A] font-semibold">
-              ALERX Double-Entry
-            </span>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* Column 3 (Right): Quick KPI Table (Dynamically Synced with Company)       */}
-        {/* ========================================================================= */}
-        <div className="flex-1 bg-white border border-[#3E4848] rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[350px]">
-          <div>
-            {/* KPI Title Header */}
-            <div className="bg-[#1F2324] px-3.5 py-1.5 border-b border-[#3E4848] flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[#5BB5BB]" />
-                <span className="text-xs font-mono font-black tracking-wider uppercase">
-                  Quick Business KPIs
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                Live Audited ({companyShortName})
+            {/* Footer */}
+            <div className="px-3.5 py-2 bg-slate-50 dark:bg-[#202D35]/50 border-t border-[#E2E8F0] dark:border-[#3C474B] flex items-center justify-between text-[11px]">
+              <span className="text-slate-400 dark:text-slate-500">
+                Press highlighted key to navigate
+              </span>
+              <span className="font-mono text-[#4F7CAC] dark:text-[#9EEFE5] font-medium">
+                ALERX Double-Entry
               </span>
             </div>
+          </div>
 
-            {/* Top Revenue & Margin Highlight Strip with Direct Drilldown */}
-            <div className="p-2.5 bg-[#F8FAFC] border-b border-slate-200 grid grid-cols-2 gap-2">
-              <Link
-                href="/invoices"
-                className="p-1.5 rounded bg-white hover:bg-[#5BB5BB]/10 border border-slate-200/80 hover:border-[#5BB5BB] block shadow-2xs group transition-all cursor-pointer"
-                title="View Sales Invoices & Billed Turnover Register"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
-                    Turnover (FY 26-27)
-                  </span>
-                  <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#5BB5BB] transition-colors" />
+          {/* ======================================================================= */}
+          {/* Column 3: Quick Business KPIs Panel (Exact Match in Size & Stretched)   */}
+          {/* ======================================================================= */}
+          <div className="bg-white dark:bg-[#162521] border border-[#E2E8F0] dark:border-[#3C474B] rounded-xl shadow-xs overflow-hidden flex flex-col justify-between h-full transition-colors">
+            <div>
+              {/* Header */}
+              <div className="px-3.5 py-2.5 border-b border-[#E2E8F0] dark:border-[#3C474B] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-[#4F7CAC] dark:text-[#9EEFE5]" />
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                    Quick Business KPIs
+                  </h2>
                 </div>
-                <span className="text-base font-black font-mono text-[#0A0A0A] group-hover:text-[#2D7A7A] transition-colors">
-                  {profile.turnover}
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Audited
                 </span>
-              </Link>
-              <Link
-                href="/reports/profit-loss"
-                className="p-1.5 rounded bg-white hover:bg-[#5BB5BB]/10 border border-slate-200/80 hover:border-[#5BB5BB] text-right block shadow-2xs group transition-all cursor-pointer"
-                title="View Profit & Loss Account & Net Profit Statement (O)"
-              >
-                <div className="flex items-center justify-end gap-1">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
-                    Net Profit (EBITDA)
-                  </span>
-                  <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#5BB5BB] transition-colors" />
-                </div>
-                <span className="text-base font-black font-mono text-emerald-700 group-hover:text-emerald-600 transition-colors">
-                  {profile.profit}
-                </span>
-              </Link>
-            </div>
-
-            {/* Quick KPI Table: Numerical Business Metrics with Direct Drilldown */}
-            <div className="p-2.5 space-y-1.5 text-xs">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3E4848] px-1 flex items-center justify-between">
-                <span>Business Metric (Click to view details)</span>
-                <span>Position / Amount</span>
               </div>
 
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded overflow-hidden bg-white text-xs">
-                {/* 1. Billed Turnover & Invoices Hub -> /invoices */}
+              {/* Hero Numbers */}
+              <div className="p-3 grid grid-cols-2 gap-2.5 border-b border-[#E2E8F0] dark:border-[#3C474B]">
                 <Link
                   href="/invoices"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open Sales Invoices Register, Issuance & Conversion Tracking"
+                  className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#202D35] border border-slate-200/80 dark:border-[#3C474B] hover:border-[#4F7CAC] dark:hover:border-[#4F7CAC] transition-colors group block"
+                  title="View Sales Invoices & Turnover"
                 >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        Billed Turnover
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.billedLimit}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-[#5BB5BB] block transition-colors text-xs">
-                      {profile.billed}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                      Turnover
                     </span>
-                    <span
-                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded border font-bold ${
-                        profile.sec22Variant === "safe"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : profile.sec22Variant === "warn"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
-                          : "bg-blue-50 text-blue-800 border-blue-200"
-                      }`}
-                    >
-                      {profile.sec22Badge}
-                    </span>
+                    <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors" />
                   </div>
+                  <div className="text-lg font-mono font-bold text-slate-900 dark:text-white mt-0.5 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors">
+                    {profile.turnover}
+                  </div>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">
+                    FY 2026–27
+                  </span>
                 </Link>
 
-                {/* 2. Liquid Funds (Cash & Bank) -> /masters/chart-of-accounts?group=asset&filter=liquid */}
                 <Link
-                  href="/masters/chart-of-accounts?group=asset&filter=liquid"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open Chart of Accounts: Liquid Cash & Bank Asset Units and Values"
+                  href="/reports/profit-loss"
+                  className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#202D35] border border-slate-200/80 dark:border-[#3C474B] hover:border-emerald-500/60 dark:hover:border-emerald-500/60 transition-colors group block"
+                  title="View Profit & Loss Account"
                 >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        Liquid Funds
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.liquidBank}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-emerald-700 group-hover:text-emerald-600 block transition-colors text-xs">
-                      {profile.liquid}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                      Net Profit
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">Instant Liquidity</span>
+                    <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-emerald-500 transition-colors" />
                   </div>
-                </Link>
-
-                {/* 3. Trade Debtors (AR DSO Tracking) -> /reports/debtors */}
-                <Link
-                  href="/reports/debtors"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open Trade Debtors (AR) DSO Analysis & Customer Outstanding Invoices"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        Trade Debtors (AR)
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.debtorsCount}</span>
+                  <div className="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {profile.profit}
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-[#5BB5BB] block transition-colors text-xs">
-                      {profile.debtors}
-                    </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
-                      {profile.debtorsAging}
-                    </span>
-                  </div>
-                </Link>
-
-                {/* 4. Trade Creditors (AP DPO Tracking) -> /reports/creditors */}
-                <Link
-                  href="/reports/creditors"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open Trade Creditors (AP) DPO Analysis & Vendor Bills Tracker"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        Trade Creditors (AP)
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.creditorsCount}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-[#5BB5BB] block transition-colors text-xs">
-                      {profile.creditors}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.creditorsTerms}</span>
-                  </div>
-                </Link>
-
-                {/* 5. Operating Expenses & Payment Vouchers -> /reports/operating-expenses */}
-                <Link
-                  href="/reports/operating-expenses"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open Operating Expenses Hub: Payment Vouchers & Department-wise Tracking"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        Operating Expenses
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.expensesHeads}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-[#5BB5BB] block transition-colors text-xs">
-                      {profile.expenses}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.expenseRatio}</span>
-                  </div>
-                </Link>
-
-                {/* 6. GST Net Liability -> /gst */}
-                <Link
-                  href="/gst"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-[#5BB5BB]/10 transition-colors group cursor-pointer"
-                  title="Open GST Returns & Tax Breakdown Hub (G)"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-[#0A0A0A] block text-xs">
-                        GST Net Payable
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-[#3E4848] opacity-40 group-hover:opacity-100 group-hover:text-[#5BB5BB] transition-all" />
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.gstBreakdown}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-rose-700 group-hover:text-rose-600 block transition-colors text-xs">
-                      {profile.gst}
-                    </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                      {profile.gstStatus}
-                    </span>
-                  </div>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">
+                    EBITDA
+                  </span>
                 </Link>
               </div>
+
+              {/* Business Metrics Breakdown */}
+              <div className="p-3 space-y-2">
+                <div className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 px-1 flex items-center justify-between uppercase tracking-wider">
+                  <span>Business Metric</span>
+                  <span>Position / Amount</span>
+                </div>
+
+                <div className="divide-y divide-slate-100 dark:divide-[#3C474B]/40 border border-slate-200/80 dark:border-[#3C474B] rounded-lg overflow-hidden bg-white dark:bg-[#162521] text-xs">
+                  
+                  {/* 1. Billed Turnover */}
+                  <Link
+                    href="/invoices"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>Billed Turnover</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.billedLimit}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 block text-xs">
+                        {profile.billed}
+                      </span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                        {profile.sec22Badge}
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* 2. Liquid Funds (Green for positive safe reserves) */}
+                  <Link
+                    href="/masters/chart-of-accounts?group=asset&filter=liquid"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>Liquid Funds</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.liquidBank}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400 block text-xs">
+                        {profile.liquid}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">Instant Liquidity</span>
+                    </div>
+                  </Link>
+
+                  {/* 3. Trade Debtors (AR) */}
+                  <Link
+                    href="/reports/debtors"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>Trade Debtors (AR)</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.debtorsCount}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 block text-xs">
+                        {profile.debtors}
+                      </span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded font-medium bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
+                        {profile.debtorsAging}
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* 4. Trade Creditors (AP) */}
+                  <Link
+                    href="/reports/creditors"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>Trade Creditors (AP)</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.creditorsCount}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 block text-xs">
+                        {profile.creditors}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.creditorsTerms}</span>
+                    </div>
+                  </Link>
+
+                  {/* 5. Operating Expenses */}
+                  <Link
+                    href="/reports/operating-expenses"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>Operating Expenses</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.expensesHeads}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-slate-900 dark:text-slate-100 block text-xs">
+                        {profile.expenses}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.expenseRatio}</span>
+                    </div>
+                  </Link>
+
+                  {/* 6. GST Net Payable (Red for liability movement) */}
+                  <Link
+                    href="/gst"
+                    className="flex items-center justify-between px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-[#202D35] transition-colors group cursor-pointer"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1 font-medium text-slate-900 dark:text-slate-200 group-hover:text-[#4F7CAC] dark:group-hover:text-[#9EEFE5] transition-colors text-xs">
+                        <span>GST Net Payable</span>
+                        <ArrowUpRight className="h-3 w-3 text-slate-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{profile.gstBreakdown}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-mono font-semibold text-rose-600 dark:text-rose-400 block text-xs">
+                        {profile.gst}
+                      </span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded font-medium bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40">
+                        {profile.gstStatus}
+                      </span>
+                    </div>
+                  </Link>
+
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-3.5 py-2 bg-slate-50 dark:bg-[#202D35]/50 border-t border-[#E2E8F0] dark:border-[#3C474B] flex items-center justify-between text-[11px]">
+              <Link
+                href="/consultant"
+                className="inline-flex items-center gap-1.5 font-medium text-[#4F7CAC] dark:text-[#9EEFE5] hover:underline transition-colors"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Deku Konsultant (K)</span>
+              </Link>
+              <Link
+                href="/consultant"
+                className="inline-flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300 hover:text-[#4F7CAC] dark:hover:text-[#9EEFE5] transition-colors"
+              >
+                <span>Executive Dashboard</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
 
-          {/* Bottom Card Footer with Direct Drilldown to Executive Dashboard & Deku Consultant */}
-          <div className="px-3.5 py-1.5 bg-slate-50 border-t border-[#E2E8F0] flex items-center justify-between text-xs">
-            <Link
-              href="/consultant"
-              className="inline-flex items-center gap-1.5 font-bold text-teal-800 hover:text-teal-600 transition-colors"
-              title="Launch Deku Consultant AI Advisor (K)"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Deku Konsultant (K)</span>
-            </Link>
-            <Link
-              href="/consultant"
-              className="inline-flex items-center gap-1 font-bold text-[#1F2324] hover:text-[#5BB5BB] transition-colors"
-              title="Open Executive Dashboard & AI CFO (E)"
-            >
-              <span>Executive Dashboard (E)</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
         </div>
+
       </div>
     </div>
   );

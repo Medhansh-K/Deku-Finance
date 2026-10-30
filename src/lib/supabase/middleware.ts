@@ -6,6 +6,12 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  // Demo sandbox session bypass: if demo session cookie exists, allow access to workspace
+  const hasDemoSession = Boolean(request.cookies.get("deku_demo_session")?.value);
+  if (hasDemoSession) {
+    return supabaseResponse;
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 

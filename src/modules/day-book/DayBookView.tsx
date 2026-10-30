@@ -640,7 +640,7 @@ export function DayBookView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Top Bar with Organisation Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#0B1522] p-3 rounded-xl border border-slate-200 dark:border-[#1A2E44]">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-[#5BB5BB]/20 border border-[#5BB5BB]/50 flex items-center justify-center text-[#5BB5BB]">
             <BookOpen className="h-4 w-4" />
@@ -675,7 +675,7 @@ export function DayBookView() {
             <select
               value={orgId}
               onChange={(e) => handleSwitchOrg(e.target.value)}
-              className="bg-white text-slate-800 font-semibold text-xs py-1.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-[#5BB5BB] cursor-pointer"
+              className="bg-white dark:bg-[#07101B] text-slate-800 dark:text-slate-100 font-semibold text-xs py-1.5 px-3 rounded-lg border border-slate-300 dark:border-[#1A2E44] focus:outline-none focus:border-[#5BB5BB] cursor-pointer"
             >
               {orgList.map((org) => (
                 <option key={org.id} value={org.id}>
@@ -718,7 +718,7 @@ export function DayBookView() {
       )}
 
       {/* Filters Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0B1522] p-3 rounded-xl border border-slate-200 dark:border-[#1A2E44] text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Tabs */}
           <div className="flex items-center gap-1">
@@ -729,7 +729,7 @@ export function DayBookView() {
                 className={`px-3 py-1 font-semibold rounded text-xs capitalize transition-colors cursor-pointer ${
                   statusFilter === st
                     ? "bg-[#1F2324] text-white font-bold"
-                    : "text-slate-600 hover:bg-slate-100"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#15273C]"
                 }`}
               >
                 {st}
@@ -743,7 +743,7 @@ export function DayBookView() {
           <select
             value={voucherTypeFilter}
             onChange={(e) => setVoucherTypeFilter(e.target.value)}
-            className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800 font-medium cursor-pointer"
+            className="bg-white dark:bg-[#07101B] border border-slate-300 dark:border-[#1A2E44] rounded px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 font-medium cursor-pointer"
           >
             <option value="all">All Voucher Types</option>
             <option value="sales">Sales Invoice / BOS (F8)</option>
@@ -761,7 +761,7 @@ export function DayBookView() {
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800"
+              className="bg-white dark:bg-[#07101B] border border-slate-300 dark:border-[#1A2E44] rounded px-2 py-1 text-xs text-slate-800 dark:text-slate-200"
             />
             {dateFilter && (
               <button
@@ -782,7 +782,7 @@ export function DayBookView() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search party, LF folio, or voucher..."
-            className="w-full bg-white border border-slate-300 rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-slate-400 focus:outline-none focus:border-[#5BB5BB]"
+            className="w-full bg-white dark:bg-[#07101B] border border-slate-300 dark:border-[#1A2E44] rounded-md py-1 pl-8 pr-3 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#5BB5BB]"
           />
         </div>
       </div>
@@ -824,7 +824,7 @@ export function DayBookView() {
         >
           <div className="space-y-4 font-sans text-xs">
             {/* Header Meta */}
-            <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-[#07111E] rounded-lg border border-slate-200 dark:border-[#1A2E44]">
               <div>
                 <span className="text-slate-400 block text-[10px] font-mono uppercase">
                   Voucher / Invoice No.
@@ -870,7 +870,7 @@ export function DayBookView() {
               <span className="text-slate-400 block text-[10px] font-mono uppercase mb-1">
                 Particulars / Party / Narration
               </span>
-              <div className="bg-white p-2.5 rounded border border-slate-200 text-slate-800 space-y-1">
+              <div className="bg-white dark:bg-[#0B1522] p-2.5 rounded border border-slate-200 dark:border-[#1A2E44] text-slate-800 dark:text-slate-200 space-y-1">
                 <span className="font-bold text-slate-900 block">
                   {selectedEntry.party_name}
                 </span>

@@ -70,7 +70,7 @@ export function BalanceSheetView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#0B1522] p-3 rounded border border-slate-200 dark:border-[#1A2E44]">
         <div className="flex items-center gap-2">
           <Badge variant={isBalanced ? "success" : "warning"}>
             {isBalanced ? "Balance Sheet Equated" : `Difference: ${formatINR(difference)}`}
@@ -119,7 +119,7 @@ export function BalanceSheetView() {
       {/* T-Account Two Column Balance Sheet */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left Side: Liabilities & Equity */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0B1522] border border-[#3E4848] dark:border-[#1A2E44] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
             <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
               <span>Capital & Liabilities</span>
@@ -129,7 +129,7 @@ export function BalanceSheetView() {
             </div>
 
             {/* Equity Section */}
-            <div className="p-2 bg-slate-50 border-b border-slate-200 font-mono text-[11px] font-bold text-slate-700">
+            <div className="p-2 bg-slate-50 dark:bg-[#07111E] border-b border-slate-200 dark:border-[#182C40] font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300">
               Shareholders&apos; Funds & Capital (Equity)
             </div>
             <table className="w-full text-left border-collapse text-xs">
@@ -140,9 +140,9 @@ export function BalanceSheetView() {
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-slate-50 dark:hover:bg-[#0F1A28] text-slate-800 dark:text-slate-200 cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-slate-700 dark:text-slate-300 w-20">
                       {acc.account_code}
                     </td>
                     <td className="py-2 px-3 font-medium text-slate-900">
@@ -157,7 +157,7 @@ export function BalanceSheetView() {
             </table>
 
             {/* Liabilities Section */}
-            <div className="p-2 bg-slate-50 border-y border-slate-200 font-mono text-[11px] font-bold text-slate-700 mt-2">
+            <div className="p-2 bg-slate-50 dark:bg-[#07111E] border-y border-slate-200 dark:border-[#182C40] font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">
               Current & Non-Current Liabilities
             </div>
             <table className="w-full text-left border-collapse text-xs">
@@ -168,9 +168,9 @@ export function BalanceSheetView() {
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-slate-50 dark:hover:bg-[#0F1A28] text-slate-800 dark:text-slate-200 cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-slate-700 dark:text-slate-300 w-20">
                       {acc.account_code}
                     </td>
                     <td className="py-2 px-3 font-medium text-slate-900">
@@ -194,7 +194,7 @@ export function BalanceSheetView() {
         </div>
 
         {/* Right Side: Assets */}
-        <div className="bg-white border border-[#3E4848] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#0B1522] border border-[#3E4848] dark:border-[#1A2E44] rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
             <div className="bg-[#1F2324] px-4 py-2 border-b border-[#3E4848] text-white flex items-center justify-between font-mono">
               <span>Assets (Property & Liquid Capital)</span>
@@ -203,7 +203,7 @@ export function BalanceSheetView() {
               </span>
             </div>
 
-            <div className="p-2 bg-slate-50 border-b border-slate-200 font-mono text-[11px] font-bold text-slate-700">
+            <div className="p-2 bg-slate-50 dark:bg-[#07111E] border-b border-slate-200 dark:border-[#182C40] font-mono text-[11px] font-bold text-slate-700 dark:text-slate-300">
               Current & Fixed Assets
             </div>
             <table className="w-full text-left border-collapse text-xs">
@@ -214,9 +214,9 @@ export function BalanceSheetView() {
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-slate-50 dark:hover:bg-[#0F1A28] text-slate-800 dark:text-slate-200 cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-slate-700 dark:text-slate-300 w-20">
                       {acc.account_code}
                     </td>
                     <td className="py-2 px-3 font-medium text-slate-900">

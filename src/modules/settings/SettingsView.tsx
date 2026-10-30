@@ -81,10 +81,10 @@ export function SettingsView() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
       {/* Fiscal Periods Management */}
-      <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-[#0B1522] border border-[#CBD5E1] dark:border-[#1A2E44] rounded-lg p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono">
+            <h3 className="text-sm font-bold uppercase text-[#0A0A0A] dark:text-slate-100 font-mono">
               Fiscal Accounting Periods
             </h3>
             <p className="text-[11px] text-slate-500">
@@ -118,14 +118,14 @@ export function SettingsView() {
                 <th className="py-2 px-3 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 dark:divide-[#182C40]">
               {fiscalPeriods.map((fp) => (
-                <tr key={fp.id} className="hover:bg-slate-50">
-                  <td className="py-2 px-3 font-bold text-slate-900">{fp.name}</td>
-                  <td className="py-2 px-3 font-mono text-slate-600">
+                <tr key={fp.id} className="hover:bg-slate-50 dark:hover:bg-[#0F1A28]">
+                  <td className="py-2 px-3 font-bold text-slate-900 dark:text-slate-100">{fp.name}</td>
+                  <td className="py-2 px-3 font-mono text-slate-600 dark:text-slate-400">
                     {formatDateTally(fp.start_date)}
                   </td>
-                  <td className="py-2 px-3 font-mono text-slate-600">
+                  <td className="py-2 px-3 font-mono text-slate-600 dark:text-slate-400">
                     {formatDateTally(fp.end_date)}
                   </td>
                   <td className="py-2 px-3 text-right">
@@ -141,24 +141,24 @@ export function SettingsView() {
       </div>
 
       {/* Accounting Standards & Engine Info */}
-      <div className="bg-white border border-[#CBD5E1] rounded-lg p-5 shadow-xs space-y-3">
-        <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono border-b border-slate-200 pb-2">
+      <div className="bg-white dark:bg-[#0B1522] border border-[#CBD5E1] dark:border-[#1A2E44] rounded-lg p-5 shadow-xs space-y-3">
+        <h3 className="text-sm font-bold uppercase text-[#0A0A0A] font-mono border-b border-slate-200 dark:border-[#1A2E44] pb-2">
           Accounting Standard & Enforcement
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-3 bg-slate-50 rounded border border-slate-200">
-            <span className="font-bold text-slate-900 block mb-1">
+          <div className="p-3 bg-slate-50 dark:bg-[#07111E] rounded border border-slate-200 dark:border-[#1A2E44]">
+            <span className="font-bold text-slate-900 dark:text-slate-100 block mb-1">
               ALERX 4-Tier Hierarchy
             </span>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-slate-600 dark:text-slate-400 text-[11px]">
               Vouchers are strictly restricted to postable leaf accounts. Group summaries roll up naturally without manual balance cache corruptions.
             </p>
           </div>
-          <div className="p-3 bg-slate-50 rounded border border-slate-200">
-            <span className="font-bold text-slate-900 block mb-1">
+          <div className="p-3 bg-slate-50 dark:bg-[#07111E] rounded border border-slate-200 dark:border-[#1A2E44]">
+            <span className="font-bold text-slate-900 dark:text-slate-100 block mb-1">
               Immutable Reversal Integrity
             </span>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-slate-600 dark:text-slate-400 text-[11px]">
               Posted vouchers cannot be silently modified or dropped. Controlled reversals create symmetric counter-entries for full statutory compliance.
             </p>
           </div>

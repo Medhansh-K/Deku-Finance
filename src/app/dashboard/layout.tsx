@@ -25,7 +25,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#5BB5BB]" />
           <span className="text-xs font-semibold text-zinc-400">
             Initializing Deku Finance Workspace...
           </span>
