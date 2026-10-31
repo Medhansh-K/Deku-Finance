@@ -25,22 +25,22 @@ Browser ──HTTPS──> frontend (Next.js, Cloud Run, public)
 - **Access token** claims: `{ sub: <user uuid>, role: "authenticated", email, aud: "deku", iat, exp: iat + 3600 }`.
 - **Service token** (backend-internal only, never leaves the backend): `{ role: "service_role", aud: "deku", iat, exp: iat + 60 }`. Used only to call the `auth_*` functions below.
 - PostgREST: `PGRST_JWT_AUD=deku`, `PGRST_DB_ANON_ROLE=anon`, `PGRST_DB_SCHEMAS=public`.
-- In SQL, `auth.uid()` = `(current_setting('request.jwt.claims', true)::json->>'sub')::uuid`; `auth.jwt()` = the claims JSON; `auth.role()` = the `role` claim (default `current_user`).
+- In SQL, `auth.uid()` = `(current_setting('request.jwt.claims', true)::json->>'sub')::uuid`; `auth.jwt()` = the claims as `jsonb`; `auth.role()` = the `role` claim (default `current_user`). Both fall back to the legacy `request.jwt.claim.sub` / `.role` settings, which SQL tests use to impersonate.
 
 ### Database identity layer (migration `20261018000000_platform_auth.sql`, runs before 001)
-- Roles: `anon`, `authenticated`, `service_role` (BYPASSRLS), all NOLOGIN; `authenticator` LOGIN NOINHERIT granted the three. The password is set by the migrate job from env `AUTHENTICATOR_PASSWORD`, never in SQL files.
+- Roles: `anon`, `authenticated`, `service_role` (BYPASSRLS where the server allows it; Cloud SQL may not, which is harmless because service_role only calls the SECURITY DEFINER `auth_*` functions), all NOLOGIN; `authenticator` LOGIN NOINHERIT granted the three. The password is set by the migrate job from env `AUTHENTICATOR_PASSWORD`, never in SQL files.
 - Schema `auth`:
   - `auth.users` (columns compatible with `supabase/seed.sql`: id, email unique, encrypted_password, email_confirmed_at, raw_user_meta_data, raw_app_meta_data, created_at, updated_at, plus legacy columns the seed fills);
   - `auth.identities` (kept for seed compatibility);
   - `auth.refresh_tokens` (id, user_id, token_hash unique, expires_at, revoked_at, created_at).
 - Schema `storage`: `buckets` and `objects` (metadata only, needed by migration 008; file bytes go to GCS later).
 - Grants: table privileges on `public` for `anon` (none), `authenticated` (SELECT/INSERT/UPDATE/DELETE) and `service_role` (ALL), plus matching `ALTER DEFAULT PRIVILEGES`. RLS policies remain the real gate.
-- Functions callable **only by `service_role`** (`REVOKE ... FROM PUBLIC, anon, authenticated`):
-  - `public.auth_register(p_email text, p_password_hash text, p_meta jsonb) returns uuid`: inserts into auth.users with email lowercased, raising `email_taken` if it exists.
+- Functions callable **only by `service_role`** (`REVOKE ... FROM PUBLIC, anon, authenticated`; migration 026 re-revokes after migration 018's `GRANT EXECUTE ON ALL FUNCTIONS`, so no later migration may grant on all functions again):
+  - `public.auth_register(p_email text, p_password_hash text, p_meta jsonb) returns uuid`: inserts into auth.users with email lowercased and trimmed, raising exactly `RAISE EXCEPTION 'email_taken'` (PostgREST error body `message`) if it exists. `is_demo` is stripped from `p_meta`; only the seed creates demo users.
   - `public.auth_credentials(p_email text) returns table(id uuid, password_hash text, email text, meta jsonb)`.
   - `public.auth_user(p_id uuid) returns table(id uuid, email text, meta jsonb)`.
   - `public.auth_store_refresh(p_user uuid, p_token_hash text, p_expires timestamptz) returns void`.
-  - `public.auth_rotate_refresh(p_old_hash text, p_new_hash text, p_expires timestamptz) returns uuid`: revokes the old token, inserts the new one and returns the user id; raises `invalid_refresh` if the old token is unknown, revoked or expired. Reuse of a revoked token revokes all of that user's tokens.
+  - `public.auth_rotate_refresh(p_old_hash text, p_new_hash text, p_expires timestamptz) returns uuid`: revokes the old token, inserts the new one and returns the user id. It **returns NULL** (never raises) if the old token is unknown, revoked or expired; the backend maps NULL to `401 invalid_refresh`. Reuse of a revoked token revokes all of that user's tokens (raising would roll that back).
   - `public.auth_revoke_refresh(p_token_hash text) returns void`.
 - Refresh tokens: 32 random bytes, base64url; only their SHA-256 hex is stored. Lifetime 30 days, rotated on every refresh.
 - Passwords: **bcrypt** (cost 12). `$2a$`/`$2b$` hashes from pgcrypto `crypt(.., gen_salt('bf'))` in `seed.sql` verify with the same code.
@@ -78,7 +78,7 @@ Browser ──HTTPS──> frontend (Next.js, Cloud Run, public)
 |---|---|---|
 | `deku-frontend` | `Dockerfile` (repo root) | Next `output: "standalone"`, node:22-alpine, port 3000 |
 | `deku-backend` | `backend/Dockerfile` | multi-stage rust → debian bookworm-slim, port 8080 |
-| `deku-migrate` | `db/Dockerfile` | postgres:16-alpine + `db/migrate.sh`; applies `supabase/migrations/*.sql` in order, records them in `public.schema_migrations`, optional demo seed (`DEKU_SEED_DEMO=true`) |
+| `deku-migrate` | `db/Dockerfile` | postgres:16-alpine + `db/migrate.sh`; applies `supabase/migrations/*.sql` in order (one psql run per file, no single transaction), records them with a SHA-256 in `public.schema_migrations` (RLS on, no policies) and refuses to run if an applied file changed; sets the authenticator password; optional demo seed (`DEKU_SEED_DEMO=true`); ends with `NOTIFY pgrst, 'reload schema'` |
 | PostgREST | `postgrest/postgrest:v12.2.3` | configured purely by env |
 
 Local: `docker compose up --build` (postgres, migrate, postgrest, backend, frontend).

@@ -32,6 +32,14 @@ DECLARE
 BEGIN
   RAISE NOTICE 'Setting up test tenants and fixtures...';
 
+  -- Users first: profiles, organisations and memberships reference auth.users
+  INSERT INTO auth.users (id, email)
+  VALUES
+    (v_user_a, 'owner@tenant1.com'),
+    (v_user_b, 'owner@tenant2.com'),
+    (v_user_c, 'viewer@tenant1.com')
+  ON CONFLICT (id) DO NOTHING;
+
   -- Create profiles
   INSERT INTO public.profiles (id, email, full_name)
   VALUES

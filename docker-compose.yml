@@ -1,0 +1,67 @@
+# Local stack: docker compose up --build, then open http://localhost:3000.
+# Defaults match .env.example and are for local development only.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: deku
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-only-postgres-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      # TCP check: the image's init-time server listens on the socket only.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d deku"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-dev-only-postgres-password}@postgres:5432/deku
+      AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}
+      DEKU_SEED_DEMO: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgrest:
+    image: postgrest/postgrest:v12.2.3
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}@postgres:5432/deku
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      PGRST_JWT_AUD: deku
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: "8080"
+      POSTGREST_URL: http://postgrest:3000
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - postgrest
+
+  frontend:
+    build: .
+    environment:
+      BACKEND_URL: http://backend:8080
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
