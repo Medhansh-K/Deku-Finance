@@ -26,6 +26,8 @@ export interface ReminderInput {
   amountDuePaise: number;
   dueDate: string | null;
   upiId?: string | null;
+  /** Razorpay payment link for the invoice, when one is open. */
+  paymentLink?: string | null;
   msme45: boolean;
 }
 
@@ -37,6 +39,8 @@ export function reminderMessage(m: ReminderInput): string {
   ];
   const upi = m.upiId?.trim();
   if (upi && UPI_RE.test(upi)) lines.push(`You can pay by UPI to ${upi}.`);
+  const link = m.paymentLink?.trim();
+  if (link && /^https:\/\/\S+$/.test(link)) lines.push(`Pay online: ${link}`);
   if (m.msme45)
     lines.push(
       "Under Sec 43B(h) of the Income-tax Act, amounts owed to a micro or small enterprise for more than 45 days can be deducted by the buyer only when paid."

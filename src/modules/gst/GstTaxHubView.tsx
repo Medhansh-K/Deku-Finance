@@ -16,6 +16,7 @@ import { SALES_CHANNELS, settlementFromOrg } from "@/lib/invoices/settlement";
 import { useAuth } from "@/context/AuthContext";
 import { SalesInvoiceEditor } from "./SalesInvoiceEditor";
 import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
+import { InvoicePaymentLink } from "./InvoicePaymentLink";
 
 export function GstTaxHubView() {
   const { organisation } = useAuth();
@@ -376,6 +377,7 @@ export function GstTaxHubView() {
               amountPaise={toPaise(selectedInvoice.total_amount)}
               invoiceNumber={selectedInvoice.invoice_number}
             />
+            <InvoicePaymentLink orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
 
             <div className="flex justify-between items-center pt-2 border-t border-line">
               <Button

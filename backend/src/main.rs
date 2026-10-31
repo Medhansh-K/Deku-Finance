@@ -5,6 +5,7 @@ mod error;
 mod gst;
 mod models;
 mod postgrest;
+mod razorpay;
 mod routes;
 
 use axum::http::HeaderValue;
@@ -39,6 +40,7 @@ async fn main() {
         jwt_secret: config.jwt_secret.clone(),
         cron_secret: config.cron_secret.clone(),
         cipher: config.data_encryption_key.as_deref().and_then(crypto::Cipher::from_base64),
+        razorpay: razorpay::Razorpay::from_config(&config),
     };
     if config.data_encryption_key.is_some() && state.cipher.is_none() {
         panic!("DATA_ENCRYPTION_KEY must be base64 of exactly 32 bytes");

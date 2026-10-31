@@ -14,6 +14,8 @@ pub enum AppError {
     Conflict(String),
     Database(String),
     Internal(String),
+    /// 503: a switched-off integration.
+    Unavailable(String),
 }
 
 impl IntoResponse for AppError {
@@ -25,6 +27,7 @@ impl IntoResponse for AppError {
             AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
             AppError::Database(msg) => (StatusCode::BAD_GATEWAY, msg),
             AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::Unavailable(msg) => (StatusCode::SERVICE_UNAVAILABLE, msg),
         };
 
         let body = Json(json!({

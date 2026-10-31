@@ -8,6 +8,8 @@ substitutions:
   _REPO: deku
   _INSTANCE: deku-pg
   _POSTGREST_IMAGE: docker.io/postgrest/postgrest:v12.2.3
+  # Optional integration secrets for the backend, each as ",ENV=SECRET:latest" (deploy/gcp/README.md, section 11).
+  _BACKEND_EXTRA_SECRETS: ""
 
 options:
   logging: CLOUD_LOGGING_ONLY
@@ -89,7 +91,7 @@ steps:
           --service-account=deku-backend@${PROJECT_ID}.iam.gserviceaccount.com \
           --allow-unauthenticated --port=8080 \
           --network=default --subnet=default --vpc-egress=all-traffic \
-          --set-secrets=JWT_SECRET=JWT_SECRET:latest,CRON_SECRET=CRON_SECRET:latest \
+          --set-secrets=JWT_SECRET=JWT_SECRET:latest,CRON_SECRET=CRON_SECRET:latest${_BACKEND_EXTRA_SECRETS} \
           --set-env-vars=POSTGREST_URL=$$postgrest_url
 
   - id: deploy-frontend
