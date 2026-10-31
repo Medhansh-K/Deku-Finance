@@ -91,8 +91,7 @@ steps:
           --service-account=deku-backend@${PROJECT_ID}.iam.gserviceaccount.com \
           --allow-unauthenticated --port=8080 \
           --network=default --subnet=default --vpc-egress=all-traffic \
-          --set-secrets=JWT_SECRET=JWT_SECRET:latest,CRON_SECRET=CRON_SECRET:latest${_BACKEND_EXTRA_SECRETS} \
-          --set-env-vars=POSTGREST_URL=$$postgrest_url
+          --set-secrets=JWT_SECRET=JWT_SECRET:latest,CRON_SECRET=CRON_SECRET:latest,DATA_ENCRYPTION_KEY=DATA_ENCRYPTION_KEY:latest${_BACKEND_EXTRA_SECRETS} \n          --set-env-vars=POSTGREST_URL=$$postgrest_url,DEKU_ENV=production
 
   - id: deploy-frontend
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim

@@ -57,6 +57,10 @@ services:
       RAZORPAY_CLIENT_SECRET: ${RAZORPAY_CLIENT_SECRET:-}
       RAZORPAY_REDIRECT_URI: ${RAZORPAY_REDIRECT_URI:-}
       RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      # Off unless set; GSP_PROVIDER=sandbox / KYC_PROVIDER=sandbox for a labelled local demo.
+      GSP_PROVIDER: ${GSP_PROVIDER:-}
+      KYC_PROVIDER: ${KYC_PROVIDER:-}
+      DEKU_ENV: ${DEKU_ENV:-development}
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:

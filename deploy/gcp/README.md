@@ -57,6 +57,8 @@ CRON_SECRET=$(openssl rand -hex 32)
 printf %s "$JWT_SECRET" | gcloud secrets create JWT_SECRET --data-file=-
 printf %s "$AUTHENTICATOR_PASSWORD" | gcloud secrets create AUTHENTICATOR_PASSWORD --data-file=-
 printf %s "$CRON_SECRET" | gcloud secrets create CRON_SECRET --data-file=-
+# Encrypts third-party credentials at rest (Razorpay, GSP, KYC). Never rotate it in place (see §11).
+printf %s "$(openssl rand -base64 32)" | gcloud secrets create DATA_ENCRYPTION_KEY --data-file=-
 printf %s "postgresql://deku_migrator:$MIGRATOR_PASSWORD@/deku?host=/cloudsql/$CONN" \
   | gcloud secrets create MIGRATE_DATABASE_URL --data-file=-
 printf %s "postgres://authenticator:$AUTHENTICATOR_PASSWORD@/deku?host=/cloudsql/$CONN" \
@@ -97,6 +99,7 @@ grant PGRST_DB_URI deku-postgrest
 grant JWT_SECRET deku-postgrest
 grant JWT_SECRET deku-backend
 grant CRON_SECRET deku-backend
+grant DATA_ENCRYPTION_KEY deku-backend
 grant JWT_SECRET deku-frontend
 
 # Cloud Build: push images, deploy Cloud Run, act as the runtime accounts, write logs.
@@ -121,6 +124,18 @@ gcloud compute networks subnets update default --region="$REGION" --enable-priva
 
 With `all-traffic` the backend has no direct internet egress. Add Cloud NAT on `default` when an
 integration (GSP, KYC, Razorpay) needs to call out (steps in §11, "Cloud NAT for Razorpay calls").
+integration (GSP, KYC, Razorpay) needs to call out: provider calls fail with a 502 until it exists.
+GSPs usually allow-list caller IPs, so reserve a static address and give it to the provider:
+
+```bash
+gcloud compute addresses create deku-nat-ip --region="$REGION"
+gcloud compute routers create deku-router --network=default --region="$REGION"
+gcloud compute routers nats create deku-nat --router=deku-router --region="$REGION"   --nat-all-subnet-ip-ranges --nat-external-ip-pool=deku-nat-ip
+```
+
+Integrations stay off until configured (docs/INTEGRATIONS.md). The backend runs with `DEKU_ENV=production`,
+which refuses `GSP_PROVIDER=sandbox` / `KYC_PROVIDER=sandbox` at startup. Storing GSP credentials uses
+`DATA_ENCRYPTION_KEY`, which every release loads from Secret Manager (§3).
 
 ## 6. Cloud Run Job and services
 
@@ -231,12 +246,11 @@ support) with:
   `account.app.authorization_revoked`.
 
 ```bash
-printf %s "$(openssl rand -base64 32)" | gcloud secrets create DATA_ENCRYPTION_KEY --data-file=-
+# DATA_ENCRYPTION_KEY already exists (§3).
 for s in RAZORPAY_CLIENT_ID RAZORPAY_CLIENT_SECRET RAZORPAY_REDIRECT_URI RAZORPAY_WEBHOOK_SECRET; do
   read -r -p "$s: " v && printf %s "$v" | gcloud secrets create "$s" --data-file=-
   grant "$s" deku-backend
 done
-grant DATA_ENCRYPTION_KEY deku-backend
 ```
 
 `cloudbuild.yaml` replaces the backend's secrets on every release, so pass them through
@@ -245,7 +259,7 @@ grant DATA_ENCRYPTION_KEY deku-backend
 ```bash
 gcloud builds submit --config deploy/gcp/cloudbuild.yaml \
   --service-account="projects/$PROJECT_ID/serviceAccounts/deku-build@$PROJECT_ID.iam.gserviceaccount.com" \
-  --substitutions="^;^_REGION=$REGION;_REPO=$REPO;_INSTANCE=$INSTANCE;_BACKEND_EXTRA_SECRETS=,DATA_ENCRYPTION_KEY=DATA_ENCRYPTION_KEY:latest,RAZORPAY_CLIENT_ID=RAZORPAY_CLIENT_ID:latest,RAZORPAY_CLIENT_SECRET=RAZORPAY_CLIENT_SECRET:latest,RAZORPAY_REDIRECT_URI=RAZORPAY_REDIRECT_URI:latest,RAZORPAY_WEBHOOK_SECRET=RAZORPAY_WEBHOOK_SECRET:latest"
+  --substitutions="^;^_REGION=$REGION;_REPO=$REPO;_INSTANCE=$INSTANCE;_BACKEND_EXTRA_SECRETS=,RAZORPAY_CLIENT_ID=RAZORPAY_CLIENT_ID:latest,RAZORPAY_CLIENT_SECRET=RAZORPAY_CLIENT_SECRET:latest,RAZORPAY_REDIRECT_URI=RAZORPAY_REDIRECT_URI:latest,RAZORPAY_WEBHOOK_SECRET=RAZORPAY_WEBHOOK_SECRET:latest"
 ```
 
 Never rotate `DATA_ENCRYPTION_KEY` in place: stored tokens can't be decrypted with a new key, and every

@@ -11,7 +11,11 @@ pub enum AppError {
     NotFound(String),
     BadRequest(String),
     Unauthorized(String),
+    /// Signed in but not allowed (a 401 would send the browser to the login page).
+    Forbidden(String),
     Conflict(String),
+    /// A switched-off integration: the message is a stable code such as "gsp_not_configured".
+    ServiceUnavailable(String),
     Database(String),
     Internal(String),
     /// 503: a switched-off integration.
@@ -24,7 +28,9 @@ impl IntoResponse for AppError {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),
+            AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, msg),
             AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
+            AppError::ServiceUnavailable(msg) => (StatusCode::SERVICE_UNAVAILABLE, msg),
             AppError::Database(msg) => (StatusCode::BAD_GATEWAY, msg),
             AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             AppError::Unavailable(msg) => (StatusCode::SERVICE_UNAVAILABLE, msg),

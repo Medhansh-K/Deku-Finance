@@ -13,6 +13,8 @@ import { logUserActivity } from "@/lib/logging/activity-logger";
 import { CompanyControlsCard } from "./CompanyControlsCard";
 import { CompanyProfileCard } from "./CompanyProfileCard";
 import { PaymentsCard } from "./PaymentsCard";
+import { GspCard } from "./GspCard";
+import { KycCard } from "./KycCard";
 
 export function SettingsView() {
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
@@ -87,6 +89,8 @@ export function SettingsView() {
       <CompanyProfileCard />
       {orgId && <CompanyControlsCard orgId={orgId} />}
       {orgId && <PaymentsCard orgId={orgId} />}
+      {orgId && <GspCard orgId={orgId} />}
+      {orgId && <KycCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
       <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">

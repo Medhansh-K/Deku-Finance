@@ -15,6 +15,11 @@ pub struct Config {
     pub razorpay_client_secret: Option<String>,
     pub razorpay_redirect_uri: Option<String>,
     pub razorpay_webhook_secret: Option<String>,
+    /// GSP_PROVIDER / KYC_PROVIDER; unset keeps that integration switched off.
+    pub gsp_provider: Option<String>,
+    pub kyc_provider: Option<String>,
+    /// DEKU_ENV=production refuses the sandbox providers.
+    pub deku_env: Option<String>,
 }
 
 impl Config {
@@ -49,8 +54,12 @@ impl Config {
         let data_encryption_key = env::var("DATA_ENCRYPTION_KEY").ok().filter(|s| !s.trim().is_empty());
 
         let optional = |name: &str| env::var(name).ok().map(|s| s.trim().to_string()).filter(|s| !s.is_empty());
+        let opt = |k: &str| env::var(k).ok().filter(|s| !s.trim().is_empty());
 
         Self {
+            gsp_provider: opt("GSP_PROVIDER"),
+            kyc_provider: opt("KYC_PROVIDER"),
+            deku_env: opt("DEKU_ENV"),
             port,
             postgrest_url,
             jwt_secret,

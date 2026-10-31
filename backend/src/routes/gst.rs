@@ -37,7 +37,7 @@ fn is_empty_array(v: &Value) -> bool {
 }
 
 /// "gstr1" / "gstr3b" in the path to the stored return_type.
-fn return_type(path: &str) -> Result<&'static str, AppError> {
+pub(crate) fn return_type(path: &str) -> Result<&'static str, AppError> {
     match path.to_ascii_lowercase().as_str() {
         "gstr1" => Ok("GSTR1"),
         "gstr3b" => Ok("GSTR3B"),

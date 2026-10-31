@@ -22,6 +22,7 @@ const typeLabel = (inv: SalesInvoice) =>
   INVOICE_TYPES.find((t) => t.value === (inv.invoice_type ?? "tax_invoice"))?.label ?? "Tax invoice";
 import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
 import { InvoicePaymentLink } from "./InvoicePaymentLink";
+import { InvoiceEInvoiceBlock } from "./InvoiceEInvoiceBlock";
 
 export function GstTaxHubView() {
   const { organisation } = useAuth();
@@ -534,6 +535,7 @@ export function GstTaxHubView() {
               invoiceNumber={selectedInvoice.invoice_number}
             />
             <InvoicePaymentLink orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
+            <InvoiceEInvoiceBlock orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
 
             <div className="flex justify-between items-center pt-2 border-t border-line">
               <Button
