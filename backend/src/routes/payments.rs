@@ -393,7 +393,7 @@ async fn webhook(
                 )
                 // A database error propagates as 5xx so Razorpay retries instead of the payment being lost.
                 .await?;
-            tracing::info!("Razorpay {} {}: {}", name, payment_id, res.get("status").unwrap_or(&Value::Null));
+            tracing::info!("Razorpay {} {}: {}", name, payment_id, res.get("status").unwrap_or(&serde_json::Value::Null));
         }
         "account.app.authorization_revoked" => {
             if let Some(acc) = account_id {
