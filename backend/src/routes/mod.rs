@@ -20,6 +20,7 @@ pub mod marketplace;
 pub mod payments;
 pub mod gsp;
 pub mod kyc;
+pub mod imports;
 
 use std::sync::Arc;
 use axum::Router;
@@ -92,6 +93,7 @@ fn api_routes(state: AppState) -> Router {
         .nest("/organisations/:org_id/gst", gst::routes(state.clone()))
         .nest("/organisations/:org_id/gsp", gsp::routes(state.clone()))
         .nest("/organisations/:org_id/kyc", kyc::routes(state.clone()))
+        .nest("/organisations/:org_id/imports", imports::routes(state.clone()))
         .nest("/hsn", hsn::routes(state.clone()))
         .nest(
             "/organisations/:org_id/notifications",

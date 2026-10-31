@@ -803,3 +803,35 @@ export const gstApi = {
       body: JSON.stringify({ arn }),
     }),
 };
+
+export interface ImportJob {
+  id: string;
+  kind: import("@/lib/import/validate").ImportKind;
+  source: "tally_xml" | "csv";
+  filename: string | null;
+  status: "draft" | "validated" | "applied" | "failed";
+  row_count: number;
+  error_count: number;
+  errors: { row?: number; message: string }[];
+  created_at: string;
+  applied_at: string | null;
+}
+
+/** Files are parsed in the browser; only validated rows reach the backend. */
+export const importsApi = {
+  list: (orgId: string) => apiClient<ApiResponse<ImportJob[]>>(`/api/v1/organisations/${orgId}/imports`),
+  create: (
+    orgId: string,
+    payload: { kind: ImportJob["kind"]; source: ImportJob["source"]; filename: string; row_count: number; errors: unknown[]; allow_opening_difference?: boolean }
+  ) =>
+    apiClient<ApiResponse<ImportJob[]>>(`/api/v1/organisations/${orgId}/imports`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  /** All or nothing; a failed job comes back with status "failed" and the row that broke it. */
+  apply: (orgId: string, jobId: string, rows: unknown[]) =>
+    apiClient<ApiResponse<ImportJob>>(`/api/v1/organisations/${orgId}/imports/${jobId}/apply`, {
+      method: "POST",
+      body: JSON.stringify({ rows }),
+    }),
+};
