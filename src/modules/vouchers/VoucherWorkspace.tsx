@@ -36,7 +36,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, invoicesApi, organisationsApi, partiesApi } from "@/api/endpoints";
+import { accountingApi, businessDocumentsApi, invoicesApi, organisationsApi, partiesApi } from "@/api/endpoints";
 import { Account, CreateJournalRequest, FiscalPeriod, Party, SalesInvoice } from "@/types/accounting";
 import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
@@ -47,12 +47,8 @@ import {
   SAMPLE_DOCUMENTS,
 } from "@/lib/vouchers/document-extractor";
 import { BuilderDraftsInbox } from "./BuilderDraftsInbox";
-import {
-  BuilderLedgerDraft,
-  getBuilderDrafts,
-  markDraftFinalized,
-} from "@/lib/vouchers/builder-drafts";
-import { mapBuilderDraftToVoucher } from "@/lib/vouchers/builder-mapper";
+import type { BusinessDocument } from "@/lib/builder/business-documents";
+import { mapPurchaseOrderToVoucher } from "@/lib/vouchers/builder-mapper";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import {
   DocumentProofAttachment,
@@ -288,7 +284,7 @@ export function VoucherWorkspace({
 
   // Builder Drafts Queue State
   const [sidebarTab, setSidebarTab] = useState<"drafts" | "ocr">("drafts");
-  const [loadedBuilderDraft, setLoadedBuilderDraft] = useState<BuilderLedgerDraft | null>(null);
+  const [loadedBuilderDraft, setLoadedBuilderDraft] = useState<BusinessDocument | null>(null);
   const [pendingDraftsCount, setPendingDraftsCount] = useState<number>(0);
 
   // Document Proof & Verification State (Mandatory for final COA, P&L, and Balance Sheet posting)
@@ -299,9 +295,7 @@ export function VoucherWorkspace({
   const [proofRefInput, setProofRefInput] = useState<string>("");
   const proofFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Available Builder Invoices & Open Sales Invoices for Pairing / Settlement
-  const [builderInvoices, setBuilderInvoices] = useState<BuilderLedgerDraft[]>([]);
-  const [selectedBuilderDraftId, setSelectedBuilderDraftId] = useState<string>("");
+  // Open Sales Invoices for Settlement
   const [openInvoices, setOpenInvoices] = useState<SalesInvoice[]>([]);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>("");
 
@@ -357,23 +351,6 @@ export function VoucherWorkspace({
       });
   }, [orgId]);
 
-  // Synchronize builder invoices and open customer invoices
-  useEffect(() => {
-    const updateInvoices = () => {
-      const drafts = getBuilderDrafts();
-      setPendingDraftsCount(drafts.filter((d) => d.status === "draft").length);
-      setBuilderInvoices(drafts.filter((d) => d.documentType === "invoice"));
-    };
-
-    updateInvoices();
-    window.addEventListener("deku_builder_drafts_updated", updateInvoices);
-    window.addEventListener("storage", updateInvoices);
-    return () => {
-      window.removeEventListener("deku_builder_drafts_updated", updateInvoices);
-      window.removeEventListener("storage", updateInvoices);
-    };
-  }, [orgId]);
-
   useEffect(() => {
     if (!orgId) return;
     invoicesApi
@@ -385,45 +362,22 @@ export function VoucherWorkspace({
   const customerNameOf = (inv: SalesInvoice) =>
     inv.parties?.legal_name || parties.find((p) => p.id === inv.customer_id)?.legal_name || "Customer";
 
-  // Handle selecting and auto-populating a draft from the Builder
-  const handleSelectBuilderDraft = (draft: BuilderLedgerDraft) => {
-    setLoadedBuilderDraft(draft);
+  // Pre-fill a purchase voucher from a purchase order saved in the Document Builder.
+  const handleSelectBuilderDraft = (doc: BusinessDocument) => {
+    setLoadedBuilderDraft(doc);
     setExtractedData(null); // Clear OCR if any
 
-    const mapped = mapBuilderDraftToVoucher(draft, accounts, parties);
+    const mapped = mapPurchaseOrderToVoucher(doc, accounts);
     setActiveMode(mapped.mode);
-    setVoucherNumber(mapped.voucherNumber);
     setReference(mapped.reference);
     setEntryDate(mapped.date);
     setNarration(mapped.narration);
     setLines(mapped.lines);
-
-    // Auto-attach Document Builder proof if it is a sales invoice
-    if (mapped.mode === "sales" || draft.documentType === "invoice") {
-      setDocumentProof({
-        id: `proof-bld-${draft.id}`,
-        proofType: "sales_builder_paired",
-        categoryLabel: "Document Builder Invoice",
-        title: `Builder Invoice #${draft.docNumber}`,
-        refNumber: draft.docNumber,
-        uploadedAt: new Date().toISOString(),
-        verified: true,
-        linkedBuilderDraftId: draft.id,
-        notes: `Built in Document Builder for ${draft.partyName} (Total: ₹${draft.calculations.roundedTotal.toLocaleString("en-IN")})`,
-      });
-    } else {
-      // For purchase orders, an inward vendor tax invoice copy must be attached
-      setDocumentProof(null);
-    }
+    // A PO is not proof of a purchase: the supplier's bill must still be attached.
+    setDocumentProof(null);
 
     setSubmissionSuccess(null);
     setApiError(null);
-  };
-
-  const handlePairBuilderDraft = (draftId: string) => {
-    const draft = builderInvoices.find((d) => d.id === draftId);
-    if (!draft) return;
-    handleSelectBuilderDraft(draft);
   };
 
   const handleSelectInvoiceToSettle = (invNumber: string) => {
@@ -520,25 +474,20 @@ export function VoucherWorkspace({
     if (proofFileInputRef.current) proofFileInputRef.current.value = "";
   };
 
-  // Auto-detect incoming draft from Document Builder via query params or storage
+  // A purchase order opened from the Document Builder (?source=builder&docId=...)
   useEffect(() => {
-    if (typeof window !== "undefined" && accounts.length > 0) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const docNum = urlParams.get("docNumber");
-      const src = urlParams.get("source");
-
-      if (src === "builder" || docNum) {
-        setSidebarTab("drafts");
-        const drafts = getBuilderDrafts();
-        const target = docNum
-          ? drafts.find((d) => d.docNumber === docNum)
-          : drafts[0];
-        if (target) {
-          handleSelectBuilderDraft(target);
-        }
-      }
-    }
-  }, [accounts, parties]);
+    if (typeof window === "undefined" || !orgId || accounts.length === 0) return;
+    const docId = new URLSearchParams(window.location.search).get("docId");
+    if (!docId) return;
+    setSidebarTab("drafts");
+    businessDocumentsApi
+      .get(orgId, docId)
+      .then((res) => {
+        const doc = res.data?.[0];
+        if (doc?.doc_type === "purchase_order") handleSelectBuilderDraft(doc);
+      })
+      .catch((err) => setApiError(err.message || "Couldn't load the purchase order"));
+  }, [orgId, accounts]);
 
   // Switch voucher type
   const handleSwitchMode = (newMode: VoucherMode) => {
@@ -866,11 +815,6 @@ export function VoucherWorkspace({
         },
       });
 
-      // Mark builder draft as finalized & update local Day Book register
-      if (loadedBuilderDraft) {
-        markDraftFinalized(loadedBuilderDraft.id, createdEntryId || "bld-" + Date.now());
-      }
-
       // Day Book and reports re-read the ledger from the server.
       window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber, mode: activeMode } }));
 
@@ -880,7 +824,6 @@ export function VoucherWorkspace({
         setExtractedData(null);
         setDocumentProof(null);
         setSelectedInvoiceId("");
-        setSelectedBuilderDraftId("");
         setProofRefInput("");
         setVoucherNumber(
           `${activeConfig.prefix}-${new Date().getFullYear()}-${Math.floor(
@@ -1006,7 +949,7 @@ export function VoucherWorkspace({
             }`}
           >
             <FileSpreadsheet className="h-3.5 w-3.5 text-brand" />
-            <span>Builder Drafts</span>
+            <span>Purchase orders</span>
             {pendingDraftsCount > 0 && (
               <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-400 text-black font-black">
                 {pendingDraftsCount}
@@ -1031,8 +974,10 @@ export function VoucherWorkspace({
         {/* Tab 1: Builder Drafts Inbox */}
         {sidebarTab === "drafts" ? (
           <BuilderDraftsInbox
+            orgId={orgId}
             onSelectDraft={handleSelectBuilderDraft}
             selectedDraftId={loadedBuilderDraft?.id}
+            onCountChange={setPendingDraftsCount}
           />
         ) : (
           /* Tab 2: Document Auto-Extraction (OCR) */
@@ -1211,23 +1156,14 @@ export function VoucherWorkspace({
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-xs text-amber-950">
-                    Builder Draft Request: <span className="font-mono">{loadedBuilderDraft.docNumber}</span>
+                    Purchase order: <span className="font-mono">{loadedBuilderDraft.doc_number}</span>
                   </span>
                   <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 border border-amber-300">
-                    {loadedBuilderDraft.documentType.toUpperCase()}
+                    {loadedBuilderDraft.status.toUpperCase()}
                   </span>
-                  {loadedBuilderDraft.status === "posted" ? (
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-200 text-emerald-900 border border-emerald-300">
-                      ✓ ALREADY POSTED TO LEDGER
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 border border-amber-300 animate-pulse">
-                      ⏳ DRAFT • PENDING ACCOUNTANT CONFIRMATION
-                    </span>
-                  )}
                 </div>
                 <p className="text-[11px] text-amber-900 mt-0.5">
-                  Party: <strong>{loadedBuilderDraft.partyName}</strong> • Grand Total: <strong>{formatINR(loadedBuilderDraft.calculations.roundedTotal)}</strong>. Allocation table auto-populated. Confirm &amp; post below to update Day Book and Ledger.
+                  Supplier: <strong>{loadedBuilderDraft.parties?.legal_name ?? loadedBuilderDraft.party_snapshot?.name ?? "–"}</strong> • PO value: <strong>{formatINR(Number(loadedBuilderDraft.total_amount))}</strong>. Lines pre-filled from the PO; check them against the supplier&apos;s bill, attach the bill, then post.
                 </p>
               </div>
             </div>
@@ -1543,8 +1479,7 @@ export function VoucherWorkspace({
                 onClick={() => {
                   setDocumentProof(null);
                   setSelectedInvoiceId("");
-                  setSelectedBuilderDraftId("");
-                }}
+                          }}
                 className="text-[11px] h-7 px-2 border-line-strong text-rose-700 hover:bg-rose-50"
               >
                 <X className="h-3 w-3 mr-1" /> Detach Proof
@@ -1615,56 +1550,15 @@ export function VoucherWorkspace({
                   <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
                     <FileText className="h-4 w-4 text-blue-600 shrink-0" />
                     <span>
-                      <strong>Sales Voucher Proof:</strong> Either select/pair an invoice built in Document Builder, or upload a sales invoice generated from external ERP/billing.
+                      <strong>Sales Voucher Proof:</strong> Upload the sales invoice. Invoices raised in the GST hub post their own journal when issued.
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {/* Option 1: Pair Builder Invoice */}
-                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-ink text-xs flex items-center gap-1.5">
-                          <FileSpreadsheet className="h-3.5 w-3.5 text-brand" /> Option 1: Pair from Document Builder
-                        </span>
-                        <Badge variant="teal">{builderInvoices.length} Invoices Available</Badge>
-                      </div>
-                      <p className="text-[11px] text-ink-muted">
-                        Pair with an invoice drafted or finalized in the Document Builder desk.
-                      </p>
-                      {builderInvoices.length > 0 ? (
-                        <div className="space-y-1.5">
-                          <select
-                            value={selectedBuilderDraftId}
-                            onChange={(e) => setSelectedBuilderDraftId(e.target.value)}
-                            className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs"
-                          >
-                            <option value="">— Choose Builder Invoice to Pair —</option>
-                            {builderInvoices.map((d) => (
-                              <option key={d.id} value={d.id}>
-                                {d.docNumber} • {d.partyName} (₹{d.calculations.roundedTotal.toLocaleString("en-IN")})
-                              </option>
-                            ))}
-                          </select>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={!selectedBuilderDraftId}
-                            onClick={() => handlePairBuilderDraft(selectedBuilderDraftId)}
-                            className="w-full text-xs font-bold"
-                          >
-                            Pair Selected Builder Invoice
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="text-[11px] text-ink-subtle italic">No builder invoice drafts currently found.</div>
-                      )}
-                    </div>
-
-                    {/* Option 2: Upload External Invoice */}
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Upload External Invoice */}
                     <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
                       <span className="font-bold text-ink text-xs flex items-center gap-1.5">
-                        <UploadCloud className="h-3.5 w-3.5 text-brand" /> Option 2: Upload External Invoice
+                        <UploadCloud className="h-3.5 w-3.5 text-brand" /> Upload Sales Invoice
                       </span>
                       <p className="text-[11px] text-ink-muted">
                         Upload invoice copy (PDF/PNG/JPG) generated from external billing/ERP.

@@ -1,6 +1,6 @@
 "use client";
 
-import { organisationsApi } from "@/api/endpoints";
+import { businessDocumentsApi, partiesApi } from "@/api/endpoints";
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -34,24 +34,39 @@ import {
   ZoomIn,
   ZoomOut,
   GripVertical,
+  Save,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { formatINR } from "@/lib/formatters/currency";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
-import { saveBuilderDraft, BuilderLedgerDraft } from "@/lib/vouchers/builder-drafts";
 import { logUserActivity } from "@/lib/logging/activity-logger";
+import { useAuth } from "@/context/AuthContext";
+import { toISODateString } from "@/lib/formatters/date";
+import { GST_STATES, placeOfSupplyLabel, stateCodeOf } from "@/lib/invoices/tax-summary";
+import {
+  BusinessDocStatus,
+  BuilderForm,
+  BusinessDocType,
+  BusinessDocument,
+  blankLine,
+  formErrors,
+  formatAddress,
+  fromDocument,
+  snapshotFromParty,
+  summarise,
+  toSavePayload,
+} from "@/lib/builder/business-documents";
+import type { Party } from "@/types/accounting";
+import { BusinessDocumentsRegister } from "./BusinessDocumentsRegister";
 
-export type DocumentType =
-  | "invoice"
-  | "quote"
-  | "discount_coupon"
-  | "proforma"
-  | "delivery_challan"
-  | "credit_note"
-  | "debit_note"
-  | "purchase_order";
+// Invoices and credit/debit notes live in the GST hub (they post to the ledger); a coupon is print-only.
+export type DocumentType = BusinessDocType | "invoice" | "discount_coupon" | "credit_note" | "debit_note";
+const GST_HUB_TYPES: ReadonlyArray<DocumentType> = ["invoice", "credit_note", "debit_note"];
+const isBusinessType = (t: DocumentType): t is BusinessDocType =>
+  t === "quotation" || t === "proforma" || t === "purchase_order" || t === "delivery_challan";
 
 export interface DocumentLineItem {
   id: string;
@@ -77,13 +92,13 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
   {
     id: "invoice",
     title: "Tax Invoice",
-    subtitle: "Standard GST B2B / B2C tax billing invoice",
+    subtitle: "Raised in the GST hub so it reaches the ledger and returns",
     icon: FileText,
     badge: "GST Strict",
     badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
   },
   {
-    id: "quote",
+    id: "quotation",
     title: "Commercial Quote",
     subtitle: "Formal quotation & estimate with validity terms",
     icon: FileCheck,
@@ -117,7 +132,7 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
   {
     id: "credit_note",
     title: "Credit Note",
-    subtitle: "Sales return & downward value adjustment note",
+    subtitle: "Raised in the GST hub against an issued invoice",
     icon: FileMinus,
     badge: "Adjustment",
     badgeColor: "bg-rose-100 text-rose-800 border-rose-200",
@@ -125,7 +140,7 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
   {
     id: "debit_note",
     title: "Debit Note",
-    subtitle: "Upward supplementary billing & debit adjustment",
+    subtitle: "Raised in the GST hub against an issued invoice",
     icon: FilePlus,
     badge: "Adjustment",
     badgeColor: "bg-cyan-100 text-cyan-800 border-cyan-200",
@@ -142,13 +157,27 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
 
 export function DocumentBuilderView() {
   const router = useRouter();
-  const [activeDocType, setActiveDocType] = useState<DocumentType>("invoice");
-  const [orgId, setOrgId] = useState<string>("");
-  const [activeCompanyName, setActiveCompanyName] = useState<string>("");
-  const [activeGSTIN, setActiveGSTIN] = useState<string>("");
+  const { organisation } = useAuth();
+  const [activeDocType, setActiveDocType] = useState<DocumentType>("quotation");
+  // Issuer details printed on documents come from the company profile, never a placeholder.
+  const orgId = organisation?.id ?? "";
+  const activeCompanyName = organisation?.legal_name || organisation?.name || "";
+  const activeGSTIN = organisation?.gstin ?? "";
   // PAN and state code are embedded in the GSTIN (chars 3-12 and 1-2).
-  const activePAN = activeGSTIN.slice(2, 12);
-  const activeStateCode = activeGSTIN.slice(0, 2);
+  const activePAN = organisation?.pan || activeGSTIN.slice(2, 12);
+  const activeStateCode = stateCodeOf(activeGSTIN) || organisation?.state_code || "";
+  const activeStateLabel = placeOfSupplyLabel(activeStateCode) || activeStateCode;
+  const companyAddress = formatAddress(organisation?.registered_address);
+  const bankName = organisation?.bank_name ?? "";
+  const bankAccount = organisation?.bank_account_number ?? "";
+  const bankIFSC = organisation?.bank_ifsc ?? "";
+  const upiId = organisation?.upi_vpa ?? "";
+  const [docId, setDocId] = useState<string | null>(null);
+  const [docStatus, setDocStatus] = useState<BusinessDocStatus>("draft");
+  const [formErrs, setFormErrs] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [parties, setParties] = useState<Party[]>([]);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [isSuccessAction, setIsSuccessAction] = useState<string | null>(null);
 
@@ -173,14 +202,17 @@ export function DocumentBuilderView() {
   const downloadDropdownRef = useRef<HTMLDivElement>(null);
 
   // General Document Header
-  const [docNumber, setDocNumber] = useState<string>("INV-2026-089");
-  const [docDate, setDocDate] = useState<string>("2026-10-21");
-  const [dueDate, setDueDate] = useState<string>("2026-11-20");
-  const [placeOfSupply, setPlaceOfSupply] = useState<string>("27-Maharashtra");
-  const [isInterstate, setIsInterstate] = useState<boolean>(false);
-  const [reverseCharge, setReverseCharge] = useState<boolean>(false);
+  const [docNumber, setDocNumber] = useState<string>("");
+  const [docDate, setDocDate] = useState<string>(() => toISODateString());
+  const [dueDate, setDueDate] = useState<string>("");
+  const [placeOfSupply, setPlaceOfSupply] = useState<string>("");
+  // Same rule as the invoice editor: supplier state vs place of supply.
+  const posCode = stateCodeOf(placeOfSupply);
+  const isInterstate = !!activeStateCode && !!posCode && activeStateCode !== posCode;
+  const reverseCharge = false;
 
   // Counterparty / Party Details
+  const [partyId, setPartyId] = useState<string>("");
   const [partyName, setPartyName] = useState<string>("");
   const [partyGSTIN, setPartyGSTIN] = useState<string>("");
   const [partyAddress, setPartyAddress] = useState<string>("");
@@ -188,63 +220,37 @@ export function DocumentBuilderView() {
   const [partyPhone, setPartyPhone] = useState<string>("");
 
   // Discount Coupon Specific State
-  const [couponCode, setCouponCode] = useState<string>("FESTIVE20");
-  const [couponTitle, setCouponTitle] = useState<string>("Diwali Special Enterprise Grant");
+  const [couponCode, setCouponCode] = useState<string>("");
+  const [couponTitle, setCouponTitle] = useState<string>("");
   const [discountType, setDiscountType] = useState<"percentage" | "flat">("percentage");
-  const [discountValue, setDiscountValue] = useState<number>(20);
-  const [minOrderValue, setMinOrderValue] = useState<number>(25000);
-  const [maxDiscountCap, setMaxDiscountCap] = useState<number>(10000);
-  const [couponValidUntil, setCouponValidUntil] = useState<string>("2026-11-30");
-  const [couponUsageLimit, setCouponUsageLimit] = useState<string>("1 Time Per Customer");
-  const [couponEligibleScope, setCouponEligibleScope] = useState<string>(
-    "Applicable on All Enterprise ERP Subscriptions & Double-Entry Ledgers"
-  );
+  const [discountValue, setDiscountValue] = useState<number>(0);
+  const [minOrderValue, setMinOrderValue] = useState<number>(0);
+  const [maxDiscountCap, setMaxDiscountCap] = useState<number>(0);
+  const [couponValidUntil, setCouponValidUntil] = useState<string>("");
+  const [couponUsageLimit, setCouponUsageLimit] = useState<string>("");
+  const [couponEligibleScope, setCouponEligibleScope] = useState<string>("");
 
   // Delivery Challan Specific State
-  const [challanReason, setChallanReason] = useState<string>("Supply on Approval / Exhibition");
+  const [challanReason, setChallanReason] = useState<string>("");
   const [vehicleNumber, setVehicleNumber] = useState<string>("");
   const [transporterName, setTransporterName] = useState<string>("");
   const [ewayBillNo, setEwayBillNo] = useState<string>("");
 
   // Line Items
-  const [items, setItems] = useState<DocumentLineItem[]>([
-    { id: "line-1", description: "", hsn: "", qty: 1, unit: "Nos", rate: 0, discountPct: 0, gstRate: 18 },
-  ]);
+  const [items, setItems] = useState<DocumentLineItem[]>([blankLine("line-1")]);
 
 
   // Notes, Bank Details & Signatory
-  const [notes, setNotes] = useState<string>(
-    "1. Payment due strictly within 30 days of invoice date.\n2. In case of delayed payment, interest @ 18% p.a. will be levied.\n3. Goods / Services once supplied are subject to Deku OS Terms of Service."
-  );
-  const [bankName, setBankName] = useState<string>("");
-  const [bankAccount, setBankAccount] = useState<string>("");
-  const [bankIFSC, setBankIFSC] = useState<string>("");
-  const [signatoryName, setSignatoryName] = useState<string>("");
-  const [signatoryTitle, setSignatoryTitle] = useState<string>("Managing Director");
+  const [notes, setNotes] = useState<string>("");
+  const signatoryName = "";
+  const signatoryTitle = "";
 
-  // Synchronize company context
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedOrgId = localStorage.getItem("deku_active_org_id");
-      if (savedOrgId) setOrgId(savedOrgId);
-      const savedOrgName = localStorage.getItem("deku_active_org_name");
-      if (savedOrgName) setActiveCompanyName(savedOrgName);
-    }
-  }, []);
-
-  // The issuer GSTIN and bank details printed on documents come from the company profile, never a placeholder.
   useEffect(() => {
     if (!orgId) return;
-    organisationsApi
-      .get(orgId)
-      .then((res) => {
-        const org = res.data?.[0];
-        setActiveGSTIN(org?.gstin ?? "");
-        setBankName(org?.bank_name ?? "");
-        setBankAccount(org?.bank_account_number ?? "");
-        setBankIFSC(org?.bank_ifsc ?? "");
-      })
-      .catch(() => setActiveGSTIN(""));
+    partiesApi
+      .list(orgId)
+      .then((res) => setParties(res.data || []))
+      .catch(() => setParties([]));
   }, [orgId]);
 
   // Handle Dragging Sidebar Width
@@ -350,58 +356,77 @@ export function DocumentBuilderView() {
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Update document series prefix when document type changes
+  // Start a fresh, blank document of the chosen type. Statutory wording only, no sample terms.
   const applyPresetForDocType = (type: DocumentType) => {
-    setActiveDocType(type);
-    const rnd = Math.floor(100 + Math.random() * 900);
-    switch (type) {
-      case "invoice":
-        setDocNumber(`INV-2026-${rnd}`);
-        setNotes(
-          "1. Tax payable on reverse charge: No.\n2. Payment terms: Net 30 days via NEFT/RTGS.\n3. Subject to Mumbai Jurisdiction."
-        );
-        break;
-      case "quote":
-        setDocNumber(`QT-2026-${rnd}`);
-        setNotes(
-          "1. This commercial quotation is valid for 30 calendar days from issue.\n2. 50% advance upon contract signing, 50% upon deployment.\n3. Implementation timeline: 4 weeks."
-        );
-        break;
-      case "discount_coupon":
-        setDocNumber(`COUPON-${rnd}`);
-        setCouponCode(`DEKU${rnd}`);
-        break;
-      case "proforma":
-        setDocNumber(`PI-2026-${rnd}`);
-        setNotes(
-          "1. This is a Proforma Invoice for advance payment and not a final Tax Invoice.\n2. Final Tax Invoice will be issued upon realization of funds and shipment."
-        );
-        break;
-      case "delivery_challan":
-        setDocNumber(`DC-2026-${rnd}`);
-        setNotes(
-          "1. Delivered under Rule 55 of CGST Rules, 2017.\n2. Goods transported not for sale / on approval.\n3. Value declared solely for transit and road security purposes."
-        );
-        break;
-      case "credit_note":
-        setDocNumber(`CN-2026-${rnd}`);
-        setNotes(
-          "1. Issued in reference to original Tax Invoice INV-2026-089.\n2. Reason: Post-sale volume rebate and service tier adjustment."
-        );
-        break;
-      case "debit_note":
-        setDocNumber(`DN-2026-${rnd}`);
-        setNotes(
-          "1. Issued in reference to original Tax Invoice INV-2026-089.\n2. Supplementary charges for additional compute & migration hours."
-        );
-        break;
-      case "purchase_order":
-        setDocNumber(`PO-2026-${rnd}`);
-        setNotes(
-          "1. Please supply the items as per specifications agreed in NDA.\n2. Deliver to Deku Warehouse & Datacenter Facility, Mumbai.\n3. Payment Net 15 days upon quality acceptance."
-        );
-        break;
+    if (GST_HUB_TYPES.includes(type)) {
+      router.push("/gst");
+      return;
     }
+    setActiveDocType(type);
+    setDocId(null);
+    setDocStatus("draft");
+    setFormErrs([]);
+    setDocNumber("");
+    setDocDate(toISODateString());
+    setDueDate("");
+    setPlaceOfSupply("");
+    setPartyId("");
+    setPartyName("");
+    setPartyGSTIN("");
+    setPartyAddress("");
+    setPartyEmail("");
+    setPartyPhone("");
+    setChallanReason("");
+    setVehicleNumber("");
+    setTransporterName("");
+    setEwayBillNo("");
+    setItems([blankLine(`line-${Date.now()}`)]);
+    setNotes(
+      type === "proforma"
+        ? "This is a proforma invoice, not a tax invoice."
+        : type === "delivery_challan"
+          ? "Delivery challan under Rule 55 of the CGST Rules, 2017."
+          : ""
+    );
+  };
+
+  const loadDocument = (doc: BusinessDocument) => {
+    const f = fromDocument(doc);
+    setActiveDocType(f.docType);
+    setDocId(doc.id);
+    setDocStatus(doc.status);
+    setFormErrs([]);
+    setDocNumber(f.docNumber);
+    setDocDate(f.docDate);
+    setDueDate(f.dueDate);
+    setPlaceOfSupply(f.placeOfSupply);
+    setPartyId(f.partyId);
+    setPartyName(f.party.name ?? "");
+    setPartyGSTIN(f.party.gstin ?? "");
+    setPartyAddress(f.party.address ?? "");
+    setPartyPhone(f.party.phone ?? "");
+    setPartyEmail(f.party.email ?? "");
+    setChallanReason(f.details.reason ?? "");
+    setVehicleNumber(f.details.vehicle ?? "");
+    setTransporterName(f.details.transporter ?? "");
+    setEwayBillNo(f.details.eway_bill ?? "");
+    setNotes(f.notes);
+    setItems(f.items.length ? f.items : [blankLine("line-1")]);
+    setShowRegister(false);
+  };
+
+  const choosePartyRecord = (id: string) => {
+    setPartyId(id);
+    const p = parties.find((x) => x.id === id);
+    if (!p) return;
+    const snap = snapshotFromParty(p);
+    setPartyName(snap.name ?? "");
+    setPartyGSTIN(snap.gstin ?? "");
+    setPartyAddress(snap.address ?? "");
+    setPartyPhone(snap.phone ?? "");
+    setPartyEmail(snap.email ?? "");
+    const code = stateCodeOf(p.gstin);
+    if (code) setPlaceOfSupply(placeOfSupplyLabel(code));
   };
 
   // Line item helpers
@@ -416,16 +441,7 @@ export function DocumentBuilderView() {
   const handleAddItem = () => {
     setItems((prev) => [
       ...prev,
-      {
-        id: `line-${Date.now()}`,
-        description: "Standard Financial Ledger Module",
-        hsn: "998313",
-        qty: 1,
-        unit: "Nos",
-        rate: 25000,
-        discountPct: 0,
-        gstRate: 18,
-      },
+      blankLine(`line-${Date.now()}`),
     ]);
   };
 
@@ -434,54 +450,31 @@ export function DocumentBuilderView() {
     setItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // Calculation Math
+  // Calculation Math: the invoice editor's paise maths, so a converted quotation issues unchanged.
   const calculations = useMemo(() => {
-    let subtotal = 0;
-    let totalDiscount = 0;
-    let taxableAmount = 0;
-    let totalCgst = 0;
-    let totalSgst = 0;
-    let totalIgst = 0;
-
-    items.forEach((item) => {
-      const gross = (item.qty || 0) * (item.rate || 0);
-      const discount = gross * ((item.discountPct || 0) / 100);
-      const taxable = gross - discount;
-      const taxRate = item.gstRate || 0;
-
-      subtotal += gross;
-      totalDiscount += discount;
-      taxableAmount += taxable;
-
-      if (isInterstate) {
-        totalIgst += taxable * (taxRate / 100);
-      } else {
-        totalCgst += taxable * (taxRate / 2 / 100);
-        totalSgst += taxable * (taxRate / 2 / 100);
-      }
-    });
+    const t = summarise(items, isInterstate);
+    const subtotal = items.reduce((sum, i) => sum + (i.qty || 0) * (i.rate || 0), 0);
+    const taxableAmount = t.taxable / 100;
+    const totalTax = (t.cgst + t.sgst + t.igst + t.cess) / 100;
 
     let couponDiscount = 0;
     if (activeDocType === "discount_coupon") {
-      if (discountType === "percentage") {
-        couponDiscount = Math.min(taxableAmount * (discountValue / 100), maxDiscountCap);
-      } else {
-        couponDiscount = Math.min(discountValue, taxableAmount);
-      }
+      couponDiscount =
+        discountType === "percentage"
+          ? Math.min(taxableAmount * (discountValue / 100), maxDiscountCap)
+          : Math.min(discountValue, taxableAmount);
     }
-
-    const totalTax = totalCgst + totalSgst + totalIgst;
     const finalAmount = Math.max(0, taxableAmount + totalTax - couponDiscount);
-    const roundOff = Math.round(finalAmount) - finalAmount;
-    const roundedTotal = Math.round(finalAmount);
+    const roundedTotal = couponDiscount ? Math.round(finalAmount) : t.grandTotal / 100;
+    const roundOff = couponDiscount ? roundedTotal - finalAmount : t.roundOff / 100;
 
     return {
       subtotal,
-      totalDiscount,
+      totalDiscount: subtotal - taxableAmount,
       taxableAmount,
-      totalCgst,
-      totalSgst,
-      totalIgst,
+      totalCgst: t.cgst / 100,
+      totalSgst: t.sgst / 100,
+      totalIgst: t.igst / 100,
       totalTax,
       couponDiscount,
       roundOff,
@@ -537,7 +530,7 @@ export function DocumentBuilderView() {
         name: activeCompanyName,
         gstin: activeGSTIN,
         pan: activePAN,
-        address: "Plot 104, BKC Financial Center, Mumbai, Maharashtra 400051",
+        address: companyAddress,
       },
       party: {
         name: partyName,
@@ -602,7 +595,7 @@ export function DocumentBuilderView() {
     const lines = [
       border,
       `                      ${activeCompanyName.toUpperCase()}`,
-      `        Plot 104, BKC Financial Center, Mumbai, Maharashtra - 400051`,
+      `        ${companyAddress}`,
       `        GSTIN: ${activeGSTIN}  |  PAN: ${activePAN}  |  State: ${activeStateCode}`,
       border,
       ` DOCUMENT TYPE : ${activeDocType.toUpperCase().replace("_", " ")}`,
@@ -641,7 +634,7 @@ export function DocumentBuilderView() {
       ` GRAND TOTAL (INR)                : ${formatINR(calculations.roundedTotal)}`,
       ` Amount in Words: ${calculations.words}`,
       border,
-      ` Bank Settlement: ${bankName} | A/c: ${bankAccount} | IFSC: ${bankIFSC}`,
+      ` Bank Settlement: ${bankName} | A/c: ${bankAccount} | IFSC: ${bankIFSC}${upiId ? ` | UPI: ${upiId}` : ""}`,
       divider,
       ` Terms & Conditions:`,
       notes,
@@ -688,7 +681,7 @@ export function DocumentBuilderView() {
             <tr>
               <td style="border: none; vertical-align: top;">
                 <h1>${activeCompanyName}</h1>
-                <div>Plot 104, BKC Financial Center, Mumbai, Maharashtra — 400051</div>
+                <div>${companyAddress}</div>
                 <div>GSTIN: <b>${activeGSTIN}</b> | PAN: <b>${activePAN}</b> | State: <b>${activeStateCode}</b></div>
               </td>
               <td style="border: none; text-align: right; vertical-align: top;">
@@ -766,7 +759,7 @@ export function DocumentBuilderView() {
                 <b>Bank Settlement Details:</b><br/>
                 Bank: ${bankName}<br/>
                 Account: ${bankAccount}<br/>
-                IFSC: ${bankIFSC}
+                IFSC: ${bankIFSC}${upiId ? `<br/>UPI: ${upiId}` : ""}
               </div>
               <div style="font-size: 9pt; color: #555;">
                 <b>Commercial Terms:</b><br/>
@@ -827,60 +820,54 @@ export function DocumentBuilderView() {
     setTimeout(() => setIsSuccessAction(null), 3000);
   };
 
-  const handlePostToVoucher = () => {
-    let targetMode: "sales" | "purchase" | "journal" = "sales";
-    if (activeDocType === "purchase_order") {
-      targetMode = "purchase";
-    } else if (activeDocType === "debit_note" || activeDocType === "credit_note") {
-      targetMode = "journal";
-    }
-
-    const voucherDraft: BuilderLedgerDraft = {
-      id: `draft-${docNumber.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now()}`,
-      source: "builder",
-      documentType: activeDocType,
+  const handleSave = async () => {
+    if (!isBusinessType(activeDocType) || !orgId) return;
+    const form: BuilderForm = {
+      docType: activeDocType,
       docNumber,
       docDate,
       dueDate,
-      partyName,
-      partyGSTIN,
-      partyAddress,
-      partyPhone,
-      partyEmail,
+      partyId,
+      party: { name: partyName, gstin: partyGSTIN, address: partyAddress, phone: partyPhone, email: partyEmail },
       placeOfSupply,
-      isInterstate,
-      items,
-      calculations,
+      interState: isInterstate,
       notes,
-      settlementBank: { bankName, accountNumber: bankAccount, ifsc: bankIFSC },
-      authorizedSignatory: { name: signatoryName, title: signatoryTitle },
-      status: "draft",
-      createdAt: new Date().toISOString(),
+      details:
+        activeDocType === "delivery_challan"
+          ? { reason: challanReason, vehicle: vehicleNumber, transporter: transporterName, eway_bill: ewayBillNo }
+          : {},
+      items,
     };
+    const errs = formErrors(form);
+    setFormErrs(errs);
+    if (errs.length) return;
 
-    saveBuilderDraft(voucherDraft);
-
-    logUserActivity({
-      category: "DOCUMENT",
-      crud_type: "CREATE",
-      action: "Document Generated",
-      description: `Generated ${voucherDraft.documentType.toUpperCase()} #${voucherDraft.docNumber} for ₹${(voucherDraft.calculations.roundedTotal || voucherDraft.calculations.taxableAmount).toLocaleString("en-IN", { minimumFractionDigits: 2 })} to ${voucherDraft.partyName}`,
-      entity_type: "document",
-      entity_id: voucherDraft.docNumber,
-      organisation_id: orgId,
-      status: "success",
-      metadata: {
-        documentType: voucherDraft.documentType,
-        total: voucherDraft.calculations.roundedTotal || voucherDraft.calculations.taxableAmount,
-        partyName: voucherDraft.partyName,
-        lineItemCount: voucherDraft.items.length,
-      },
-    });
-
-    setIsSuccessAction(`✓ Ledger request sent as Draft (${docNumber}). Opening Voucher Desk...`);
-    setTimeout(() => {
-      router.push(`/vouchers?type=${targetMode}&source=builder&docNumber=${encodeURIComponent(docNumber)}`);
-    }, 450);
+    setIsSaving(true);
+    try {
+      const payload = toSavePayload(form);
+      const res = docId
+        ? await businessDocumentsApi.update(orgId, docId, payload)
+        : await businessDocumentsApi.create(orgId, payload);
+      const saved = res.data;
+      setDocId(saved.id);
+      setDocStatus(saved.status);
+      logUserActivity({
+        category: "DOCUMENT",
+        crud_type: docId ? "UPDATE" : "CREATE",
+        action: "Document Saved",
+        description: `Saved ${saved.doc_type} ${saved.doc_number}`,
+        entity_type: "business_document",
+        entity_id: saved.id,
+        organisation_id: orgId,
+        status: "success",
+      });
+      setIsSuccessAction(`✓ Saved ${saved.doc_number} as a draft.`);
+      setTimeout(() => setIsSuccessAction(null), 3000);
+    } catch (err) {
+      setFormErrs([err instanceof Error ? err.message : "Couldn't save the document."]);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -1032,8 +1019,9 @@ export function DocumentBuilderView() {
                   {activeDocType.replace("_", " ")} Specification
                 </h3>
                 <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 shrink-0">
-                  {docNumber}
+                  {docNumber || "unnumbered"}
                 </span>
+                {docId && <Badge variant={docStatus === "draft" ? "warning" : "teal"}>{docStatus}</Badge>}
               </div>
             </div>
           </div>
@@ -1205,19 +1193,34 @@ export function DocumentBuilderView() {
               )}
             </div>
 
-            {/* Post to Voucher Page Button */}
             <Button
               suppressHydrationWarning
-              variant="tally"
+              variant="outline"
               size="sm"
-              onClick={handlePostToVoucher}
-              className="gap-1.5 text-xs font-bold px-3 py-1.5 shadow-xs"
-              title="Stage document and navigate to Voucher Desk"
+              onClick={() => setShowRegister((v) => !v)}
+              className="gap-1.5 text-xs font-bold px-3 py-1.5"
+              title="Saved quotations, proformas, purchase orders and challans"
             >
-              <ArrowRightLeft className="h-3.5 w-3.5 text-brand" />
-              <span className="hidden sm:inline">Post to Voucher Page</span>
-              <span className="sm:hidden">Post</span>
+              <List className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{showRegister ? "Back to builder" : "Documents"}</span>
             </Button>
+
+            {isBusinessType(activeDocType) && (
+              <Button
+                suppressHydrationWarning
+                variant="tally"
+                size="sm"
+                onClick={handleSave}
+                isLoading={isSaving}
+                disabled={docStatus !== "draft" || !orgId}
+                className="gap-1.5 text-xs font-bold px-3 py-1.5 shadow-xs"
+                title={docStatus === "draft" ? "Save this document as a draft" : `This document is ${docStatus}; only drafts can be edited`}
+              >
+                <Save className="h-3.5 w-3.5 text-brand" />
+                <span className="hidden sm:inline">{docId ? "Save changes" : "Save draft"}</span>
+                <span className="sm:hidden">Save</span>
+              </Button>
+            )}
 
             {/* Copy Coupon Code if coupon */}
             {activeDocType === "discount_coupon" && (
@@ -1240,9 +1243,9 @@ export function DocumentBuilderView() {
               size="sm"
               onClick={() => applyPresetForDocType(activeDocType)}
               className="gap-1 text-[11px] h-7 px-2"
-              title="Reset with fresh sample data"
+              title="Start a new blank document"
             >
-              <RotateCcw className="h-3 w-3 text-slate-500" /> Reset
+              <RotateCcw className="h-3 w-3 text-slate-500" /> New
             </Button>
           </div>
         </header>
@@ -1250,7 +1253,19 @@ export function DocumentBuilderView() {
         {/* =================================================================== */}
         {/* WORKSPACE VIEWPORT (Unified, Resizable & Overlap-Free)              */}
         {/* =================================================================== */}
-        <div ref={mainWorkspaceRef} className="flex-1 overflow-hidden flex relative w-full h-full min-w-0 print:overflow-visible print:h-auto print:block">
+        {formErrs.length > 0 && !showRegister && (
+          <div role="alert" className="mx-4 mt-3 p-2.5 rounded border border-rose-200 bg-rose-50 text-xs text-rose-700 space-y-0.5 no-print">
+            {formErrs.map((m) => (
+              <div key={m}>{m}</div>
+            ))}
+          </div>
+        )}
+        {showRegister && (
+          <div className="flex-1 overflow-y-auto p-4 bg-canvas no-print">
+            <BusinessDocumentsRegister orgId={orgId} onOpen={loadDocument} />
+          </div>
+        )}
+        <div ref={mainWorkspaceRef} className={`flex-1 overflow-hidden flex relative w-full h-full min-w-0 print:overflow-visible print:h-auto print:block ${showRegister ? "hidden" : ""}`}>
           {/* ================================================================= */}
           {/* PANE 1: CREATE / EDIT FORM                                       */}
           {/* ================================================================= */}
@@ -1302,18 +1317,16 @@ export function DocumentBuilderView() {
                         <select
                           suppressHydrationWarning
                           value={placeOfSupply}
-                          onChange={(e) => {
-                            setPlaceOfSupply(e.target.value);
-                            setIsInterstate(e.target.value !== "27-Maharashtra");
-                          }}
+                          onChange={(e) => setPlaceOfSupply(e.target.value)}
                           className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
                         >
-                          <option value="27-Maharashtra">27 - Maharashtra (Intrastate CGST+SGST)</option>
-                          <option value="29-Karnataka">29 - Karnataka (Interstate IGST)</option>
-                          <option value="07-Delhi">07 - Delhi (Interstate IGST)</option>
-                          <option value="33-Tamil Nadu">33 - Tamil Nadu (Interstate IGST)</option>
-                          <option value="24-Gujarat">24 - Gujarat (Interstate IGST)</option>
-                          <option value="09-Uttar Pradesh">09 - Uttar Pradesh (Interstate IGST)</option>
+                          <option value="">Choose state</option>
+                          {GST_STATES.map(([code, name]) => (
+                            <option key={code} value={`${code}-${name}`}>
+                              {code} - {name}
+                              {activeStateCode ? (code === activeStateCode ? " (CGST + SGST)" : " (IGST)") : ""}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -1459,6 +1472,7 @@ export function DocumentBuilderView() {
                           onChange={(e) => setChallanReason(e.target.value)}
                           className="w-full rounded border border-indigo-300 bg-white px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-indigo-600"
                         >
+                          <option value="">Choose reason</option>
                           <option value="Supply on Approval / Return">Supply on Approval / Return</option>
                           <option value="Job Work / Processing">Job Work / Processing</option>
                           <option value="Inter-Branch Stock Transit">Inter-Branch Stock Transit</option>
@@ -1469,7 +1483,6 @@ export function DocumentBuilderView() {
 
                       <Input
                         label="Vehicle / Container No"
-                        placeholder="e.g. MH-02-EE-8822"
                         value={vehicleNumber}
                         onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
                         required
@@ -1500,6 +1513,31 @@ export function DocumentBuilderView() {
                     <span className="text-slate-400 font-mono">Consignee</span>
                   </div>
 
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                      Party from Parties
+                    </label>
+                    <select
+                      suppressHydrationWarning
+                      value={partyId}
+                      onChange={(e) => choosePartyRecord(e.target.value)}
+                      className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                    >
+                      <option value="">Not in Parties (type the details below)</option>
+                      {parties
+                        .filter((p) => (activeDocType === "purchase_order" ? p.type === "vendor" : p.type === "customer"))
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.legal_name}
+                            {p.gstin ? ` · ${p.gstin}` : ""}
+                          </option>
+                        ))}
+                    </select>
+                    {(activeDocType === "quotation" || activeDocType === "proforma") && !partyId && (
+                      <p className="text-[10px] text-ink-muted mt-1">Converting to an invoice needs a customer from Parties.</p>
+                    )}
+                  </div>
+
                   <Input
                     label="Recipient Legal Name"
                     value={partyName}
@@ -1510,7 +1548,6 @@ export function DocumentBuilderView() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Input
                       label="Recipient GSTIN"
-                      placeholder="27AABCE4567F1Z8"
                       value={partyGSTIN}
                       onChange={(e) => setPartyGSTIN(e.target.value.toUpperCase())}
                     />
@@ -1856,22 +1893,22 @@ export function DocumentBuilderView() {
                               {activeCompanyName}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-600 max-w-sm mt-1">
-                            Plot 104, Financial Center, Bandra Kurla Complex (BKC), Mumbai, Maharashtra — 400051
-                          </p>
+                          {companyAddress && (
+                            <p className="text-[11px] text-slate-600 max-w-sm mt-1">{companyAddress}</p>
+                          )}
                           <div className="text-[10px] font-mono text-slate-700 mt-1 flex items-center gap-3">
                             <span>GSTIN: <strong>{activeGSTIN}</strong></span>
                             <span>•</span>
                             <span>PAN: <strong>{activePAN}</strong></span>
                             <span>•</span>
-                            <span>State: <strong>27 - Maharashtra</strong></span>
+                            <span>State: <strong>{activeStateLabel || "–"}</strong></span>
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
                           <span className="inline-block px-3 py-1 font-mono font-black text-sm uppercase tracking-wider bg-slate-900 text-white rounded border border-slate-900">
                             {activeDocType === "invoice" && "TAX INVOICE"}
-                            {activeDocType === "quote" && "COMMERCIAL QUOTATION"}
+                            {activeDocType === "quotation" && "COMMERCIAL QUOTATION"}
                             {activeDocType === "proforma" && "PROFORMA INVOICE"}
                             {activeDocType === "delivery_challan" && "DELIVERY CHALLAN (RULE 55)"}
                             {activeDocType === "credit_note" && "GST CREDIT NOTE"}
@@ -1899,7 +1936,7 @@ export function DocumentBuilderView() {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-slate-500">
-                              {activeDocType === "quote" ? "Valid Until:" : "Due Date:"}
+                              {activeDocType === "quotation" ? "Valid Until:" : "Due Date:"}
                             </span>
                             <span className="font-mono text-slate-800">{dueDate}</span>
                           </div>
@@ -2023,7 +2060,7 @@ export function DocumentBuilderView() {
                               <div>Bank: <strong>{bankName}</strong></div>
                               <div>A/c No: <strong>{bankAccount}</strong></div>
                               <div>IFSC: <strong>{bankIFSC}</strong></div>
-                              <div>Branch: BKC Corporate Towers, Mumbai</div>
+                              {upiId && <div>UPI: <strong>{upiId}</strong></div>}
                             </div>
                           </div>
 
@@ -2096,8 +2133,6 @@ export function DocumentBuilderView() {
                     <div className="pt-6 border-t border-slate-300 mt-6 flex items-end justify-between text-xs">
                       <div className="text-[10px] text-slate-400 space-y-0.5 font-mono">
                         <div>Deku Financial Technologies Operating System</div>
-                        <div>Digitally verified against PostgreSQL Double-Entry Ledger</div>
-                        <div>This document is generated automatically under Rule 55 / Section 31 of CGST Act.</div>
                       </div>
 
                       <div className="text-right space-y-1">
