@@ -46,6 +46,11 @@ export async function apiClient<T>(
       }
     }
 
+    // The middleware already tried a refresh; a 401 here means the session is gone.
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+    }
+
     if (!response.ok) {
       const errorMsg =
         responseData?.message ||
