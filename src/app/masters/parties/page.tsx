@@ -18,7 +18,7 @@ export default function PartiesPage() {
           { label: "Parties", href: "/masters/parties" },
         ]}
       >
-        <React.Suspense fallback={<div className="p-4 text-xs text-slate-500 font-mono">Loading counterparty directory...</div>}>
+        <React.Suspense fallback={<div className="p-4 text-xs text-ink-muted font-mono">Loading counterparty directory...</div>}>
           <PartiesView />
         </React.Suspense>
       </WorkspaceLayout>

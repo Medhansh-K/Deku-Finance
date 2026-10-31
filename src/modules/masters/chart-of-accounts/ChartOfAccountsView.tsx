@@ -438,7 +438,7 @@ export function ChartOfAccountsView() {
       header: "Code",
       sortKey: (acc) => acc.code,
       cell: (acc) => (
-        <span className="font-mono font-bold text-slate-800">
+        <span className="font-mono font-bold text-ink">
           {acc.code}
         </span>
       ),
@@ -453,7 +453,7 @@ export function ChartOfAccountsView() {
             <div className="flex items-center gap-2">
               <span
                 className={`font-sans ${
-                  isHeader ? "font-bold text-ink" : "text-slate-900"
+                  isHeader ? "font-bold text-ink" : "text-ink"
                 }`}
               >
                 {acc.name}
@@ -465,7 +465,7 @@ export function ChartOfAccountsView() {
               )}
             </div>
             {acc.label && acc.label !== acc.name && (
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-[11px] text-ink-subtle font-mono">
                 {acc.label}
               </span>
             )}
@@ -492,7 +492,7 @@ export function ChartOfAccountsView() {
     {
       header: "Ledger",
       cell: (acc) => (
-        <span className="text-slate-600 font-mono text-[11px]">
+        <span className="text-ink-soft font-mono text-[11px]">
           {acc.ledger || "General"}
         </span>
       ),
@@ -500,7 +500,7 @@ export function ChartOfAccountsView() {
     {
       header: "Sub-Ledger",
       cell: (acc) => (
-        <span className="text-slate-600 text-[11px]">
+        <span className="text-ink-soft text-[11px]">
           {acc.sub_ledger || "—"}
         </span>
       ),
@@ -516,13 +516,13 @@ export function ChartOfAccountsView() {
             <span
               className={`text-xs font-bold ${
                 units > 0
-                  ? "text-ink bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200"
-                  : "text-slate-400"
+                  ? "text-ink bg-canvas-sunken px-1.5 py-0.5 rounded border border-line"
+                  : "text-ink-subtle"
               }`}
             >
               {units}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">
+            <span className="text-[10px] text-ink-subtle font-mono">
               {isHeader ? "total" : units === 1 ? "unit" : "units"}
             </span>
           </div>
@@ -553,12 +553,12 @@ export function ChartOfAccountsView() {
               <span
                 className={`text-xs font-bold ${
                   isHeader
-                    ? "font-black text-slate-900"
+                    ? "font-black text-ink"
                     : val > 0
                     ? "text-ink"
                     : val < 0
                     ? "text-rose-700"
-                    : "text-slate-400"
+                    : "text-ink-subtle"
                 }`}
               >
                 {formatINR(Math.abs(val))}
@@ -576,7 +576,7 @@ export function ChartOfAccountsView() {
               )}
             </div>
             {isHeader && (
-              <span className="text-[9px] text-slate-400 block font-mono">
+              <span className="text-[9px] text-ink-subtle block font-mono">
                 Group Rollup
               </span>
             )}
@@ -607,7 +607,7 @@ export function ChartOfAccountsView() {
               setIsDetailOpen(true);
             }}
             title="View Account Details"
-            className="p-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded transition-colors"
+            className="p-1 text-ink-muted hover:text-ink hover:bg-canvas-sunken rounded transition-colors"
           >
             <Eye className="h-3.5 w-3.5" />
           </button>
@@ -632,7 +632,7 @@ export function ChartOfAccountsView() {
   return (
     <div className="space-y-4">
       {/* Top Controls: Tab filters, Add Account, Refresh, and Seed */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         {/* ALERX Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
           {[
@@ -652,7 +652,7 @@ export function ChartOfAccountsView() {
               className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
                 activeGroup === tab.id
                   ? "bg-panel text-white font-bold"
-                  : "text-slate-600 hover:bg-slate-100"
+                  : "text-ink-soft hover:bg-canvas-sunken"
               }`}
             >
               {tab.label}
@@ -720,7 +720,7 @@ export function ChartOfAccountsView() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-emerald-950">Liquid Funds &amp; Immediate Liquidity</span>
-                <span className="text-[10px] font-mono font-bold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
+                <span className="text-[10px] font-mono font-bold bg-surface px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
                   ALERX Asset Sub-Ledger
                 </span>
               </div>
@@ -732,7 +732,7 @@ export function ChartOfAccountsView() {
           <div className="flex items-center gap-4 bg-white/80 px-4 py-2 rounded-lg border border-emerald-200">
             <div className="text-right">
               <div className="text-[10px] font-mono text-emerald-800 uppercase font-bold">Liquid Units</div>
-              <div className="text-sm font-black font-mono text-slate-900">{liquidTotalUnits} Active Accounts</div>
+              <div className="text-sm font-black font-mono text-ink">{liquidTotalUnits} Active Accounts</div>
             </div>
             <div className="h-8 w-px bg-emerald-200" />
             <div className="text-right">
@@ -801,7 +801,7 @@ export function ChartOfAccountsView() {
 
           {/* ALERX Classification Pills */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-soft mb-1.5">
               ALERX Account Group *
             </label>
             <div className="grid grid-cols-5 gap-1.5">
@@ -814,7 +814,7 @@ export function ChartOfAccountsView() {
                     className={`py-1.5 px-2 text-center rounded border text-xs font-semibold capitalize transition-all ${
                       newGroup === grp
                         ? "bg-panel text-white border-panel shadow-sm"
-                        : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                        : "bg-surface text-ink-soft border-line-strong hover:bg-canvas"
                     }`}
                   >
                     {grp}
@@ -835,7 +835,7 @@ export function ChartOfAccountsView() {
                 className="font-mono font-bold"
                 required
               />
-              <span className="text-[10px] text-slate-400 block mt-0.5">
+              <span className="text-[10px] text-ink-subtle block mt-0.5">
                 Numeric code for fast Tally-style voucher entry
               </span>
             </div>
@@ -856,7 +856,7 @@ export function ChartOfAccountsView() {
           {/* Ledger Group & Sub-Ledger */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-soft mb-1">
                 Parent Ledger Group
               </label>
               <input
@@ -865,7 +865,7 @@ export function ChartOfAccountsView() {
                 value={newLedger}
                 onChange={(e) => setNewLedger(e.target.value)}
                 placeholder="Select or enter ledger"
-                className="w-full rounded border border-line-strong bg-white text-sm text-ink px-3 py-1.5 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface text-sm text-ink px-3 py-1.5 focus:border-brand focus:outline-none"
               />
               <datalist id="ledger-options">
                 {COMMON_LEDGERS[newGroup]?.map((opt) => (
@@ -904,19 +904,19 @@ export function ChartOfAccountsView() {
           </div>
 
           {/* Postable Leaf Checkbox */}
-          <div className="flex items-start gap-2.5 p-2.5 rounded bg-slate-50 border border-slate-200">
+          <div className="flex items-start gap-2.5 p-2.5 rounded bg-canvas border border-line">
             <input
               type="checkbox"
               id="is-postable-toggle"
               checked={newIsPostable}
               onChange={(e) => setNewIsPostable(e.target.checked)}
-              className="mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500 h-4 w-4"
+              className="mt-0.5 rounded border-line-strong text-teal-600 focus:ring-teal-500 h-4 w-4"
             />
             <label htmlFor="is-postable-toggle" className="cursor-pointer select-none">
-              <span className="font-bold text-slate-800 block">
+              <span className="font-bold text-ink block">
                 Postable Leaf Account
               </span>
-              <span className="text-[11px] text-slate-500 block">
+              <span className="text-[11px] text-ink-muted block">
                 Allow journal entries, payment vouchers, and invoices to record lines directly
                 to this account. (Uncheck if this is a header rollup group).
               </span>
@@ -924,7 +924,7 @@ export function ChartOfAccountsView() {
           </div>
 
           {/* Modal Footer Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
             <Button
               type="button"
               variant="secondary"
@@ -997,22 +997,22 @@ export function ChartOfAccountsView() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded border border-slate-200 text-[11px]">
+            <div className="grid grid-cols-2 gap-2 p-2.5 bg-canvas rounded border border-line text-[11px]">
               <div>
-                <span className="text-slate-400 block font-mono uppercase">ALERX Group</span>
-                <span className="font-semibold text-slate-800 capitalize">
+                <span className="text-ink-subtle block font-mono uppercase">ALERX Group</span>
+                <span className="font-semibold text-ink capitalize">
                   {accountToDelete.account_group || accountToDelete.type}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block font-mono uppercase">Ledger Group</span>
-                <span className="font-semibold text-slate-800">
+                <span className="text-ink-subtle block font-mono uppercase">Ledger Group</span>
+                <span className="font-semibold text-ink">
                   {accountToDelete.ledger || "General Ledger"}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+            <div className="flex items-center justify-between pt-3 border-t border-line">
               <Button
                 type="button"
                 variant="secondary"
@@ -1066,9 +1066,9 @@ export function ChartOfAccountsView() {
           description={`ALERX Classification: ${selectedAccount.account_group || selectedAccount.type}`}
         >
           <div className="space-y-4 text-xs font-sans">
-            <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded border border-slate-200">
+            <div className="grid grid-cols-2 gap-3 p-3 bg-canvas rounded border border-line">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Account Code
                 </span>
                 <span className="font-mono font-bold text-sm text-ink">
@@ -1076,7 +1076,7 @@ export function ChartOfAccountsView() {
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Status
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -1089,7 +1089,7 @@ export function ChartOfAccountsView() {
                 </div>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Posting Status
                 </span>
                 <span className="font-bold text-ink">
@@ -1099,34 +1099,34 @@ export function ChartOfAccountsView() {
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Ledger Group
                 </span>
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-ink">
                   {selectedAccount.ledger || "General Ledger"}
                 </span>
               </div>
 
               {/* State Units and Monetary Value */}
-              <div className="p-2.5 bg-white rounded border border-slate-200">
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+              <div className="p-2.5 bg-surface rounded border border-line">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   State-Change Units
                 </span>
                 <div className="flex items-center gap-1.5 mt-0.5 font-mono">
-                  <span className="font-bold text-sm text-slate-900">
+                  <span className="font-bold text-sm text-ink">
                     {selectedAccount.units ?? 0}
                   </span>
-                  <span className="text-[10px] text-slate-500">
+                  <span className="text-[10px] text-ink-muted">
                     {(selectedAccount.units ?? 0) === 1 ? "state mutation" : "state mutations"}
                   </span>
                 </div>
               </div>
-              <div className="p-2.5 bg-white rounded border border-slate-200">
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+              <div className="p-2.5 bg-surface rounded border border-line">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Current Ledger Value
                 </span>
                 <div className="flex items-center gap-1.5 mt-0.5 font-mono">
-                  <span className="font-black text-sm text-slate-900">
+                  <span className="font-black text-sm text-ink">
                     {formatINR(Math.abs(selectedAccount.value ?? 0))}
                   </span>
                   <span className="text-[10px] text-emerald-700 font-bold">
@@ -1138,10 +1138,10 @@ export function ChartOfAccountsView() {
               </div>
 
               <div className="col-span-2">
-                <span className="text-slate-400 block text-[10px] uppercase font-mono">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
                   Sub-Ledger
                 </span>
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-ink">
                   {selectedAccount.sub_ledger || "—"}
                 </span>
               </div>
@@ -1149,16 +1149,16 @@ export function ChartOfAccountsView() {
 
             {selectedAccount.description && (
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-mono mb-1">
+                <span className="text-ink-subtle block text-[10px] uppercase font-mono mb-1">
                   Description & Purpose
                 </span>
-                <p className="text-slate-700 bg-white p-2.5 rounded border border-slate-200">
+                <p className="text-ink-soft bg-surface p-2.5 rounded border border-line">
                   {selectedAccount.description}
                 </p>
               </div>
             )}
 
-            <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-slate-200">
+            <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-line">
               <Button
                 variant="outline"
                 size="sm"
@@ -1179,7 +1179,7 @@ export function ChartOfAccountsView() {
                       size="sm"
                       onClick={() => handleToggleActive(selectedAccount)}
                       isLoading={isDeactivating}
-                      className="gap-1 text-slate-700"
+                      className="gap-1 text-ink-soft"
                     >
                       <Power className="h-3.5 w-3.5" />
                       {selectedAccount.is_active ? "Deactivate" : "Activate"}

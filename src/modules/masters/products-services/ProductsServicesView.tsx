@@ -123,7 +123,7 @@ export function ProductsServicesView() {
       header: "SKU",
       sortKey: (it) => it.sku,
       cell: (it) => (
-        <span className="font-mono font-bold text-slate-800">
+        <span className="font-mono font-bold text-ink">
           {it.sku}
         </span>
       ),
@@ -133,11 +133,11 @@ export function ProductsServicesView() {
       sortKey: (it) => it.name,
       cell: (it) => (
         <div>
-          <span className="font-bold text-slate-900 block">
+          <span className="font-bold text-ink block">
             {it.name}
           </span>
           {it.description && (
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-ink-muted">
               {it.description}
             </span>
           )}
@@ -156,7 +156,7 @@ export function ProductsServicesView() {
     {
       header: "HSN / SAC",
       cell: (it) => (
-        <span className="font-mono text-slate-700">
+        <span className="font-mono text-ink-soft">
           {it.hsn_sac_code || "—"}
         </span>
       ),
@@ -165,7 +165,7 @@ export function ProductsServicesView() {
       header: "Standard Price",
       sortKey: (it) => it.default_unit_price,
       cell: (it) => (
-        <span className="font-mono font-bold text-slate-900">
+        <span className="font-mono font-bold text-ink">
           {formatINR(it.default_unit_price)}
         </span>
       ),
@@ -181,7 +181,7 @@ export function ProductsServicesView() {
     {
       header: "Unit",
       cell: (it) => (
-        <span className="font-mono text-[11px] text-slate-500">
+        <span className="font-mono text-[11px] text-ink-muted">
           {it.unit_code}
         </span>
       ),
@@ -191,8 +191,8 @@ export function ProductsServicesView() {
   return (
     <div className="space-y-4">
       {/* Top Header */}
-      <div className="flex items-center justify-between bg-white p-3 rounded border border-slate-200">
-        <div className="text-xs font-semibold text-slate-600">
+      <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
+        <div className="text-xs font-semibold text-ink-soft">
           Product SKU & GST SAC Catalogue
         </div>
         <div className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export function ProductsServicesView() {
         <form onSubmit={handleCreate} className="space-y-3 font-sans text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Item Classification
               </label>
               <select
@@ -257,7 +257,7 @@ export function ProductsServicesView() {
                     type: e.target.value as CatalogueItemType,
                   })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="services">Services (SAC Code)</option>
                 <option value="goods">Goods / Products (HSN Code)</option>
@@ -336,7 +336,7 @@ export function ProductsServicesView() {
             isNumeric
           />
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-3 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import LicenseEmailToast from "@/components/auth/LicenseEmailToast";
 
 const geistSans = Geist({
@@ -34,14 +35,24 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/* Applies the stored or system theme before first paint, so dark mode never flashes light. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('deku_theme');if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-white text-zinc-900 selection:bg-amber-400/30 selection:text-amber-900"
+        className="min-h-full flex flex-col bg-surface text-ink selection:bg-amber-400/30 selection:text-amber-900"
       >
-        <AuthProvider>
-          {children}
-          <LicenseEmailToast />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <LicenseEmailToast />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

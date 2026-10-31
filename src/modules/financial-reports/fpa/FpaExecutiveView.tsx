@@ -87,7 +87,7 @@ export function FpaExecutiveView() {
             <h3 className="text-sm font-semibold text-slate-100">
               FP&A Strategic Intelligence & Corporate Health
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-subtle">
               Profitability margins, liquidity ratios, working capital gap, and departmental budget variances
             </p>
           </div>
@@ -120,8 +120,8 @@ export function FpaExecutiveView() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Total Topline Revenue</span>
-            <span className="text-xs text-slate-500">Gross</span>
+            <span className="text-xs font-medium text-ink-subtle">Total Topline Revenue</span>
+            <span className="text-xs text-ink-muted">Gross</span>
           </div>
           <div className="text-xl font-bold text-slate-100">
             {formatINR(prof.total_revenue)}
@@ -133,29 +133,29 @@ export function FpaExecutiveView() {
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Gross Margin %</span>
+            <span className="text-xs font-medium text-ink-subtle">Gross Margin %</span>
             <Badge variant="teal" size="sm">{num(prof.gross_margin_pct, "%")}</Badge>
           </div>
           <div className="text-xl font-bold text-teal-400">
             {formatINR(prof.gross_profit)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">Revenue minus COGS direct cost</div>
+          <div className="text-[11px] text-ink-subtle mt-1">Revenue minus COGS direct cost</div>
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Operating Expenses</span>
+            <span className="text-xs font-medium text-ink-subtle">Operating Expenses</span>
             <span className="text-xs text-amber-400">OPEX</span>
           </div>
           <div className="text-xl font-bold text-amber-400">
             {formatINR(prof.opex)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">SG&A, payroll, departmental burns</div>
+          <div className="text-[11px] text-ink-subtle mt-1">SG&A, payroll, departmental burns</div>
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Net Profit Margin</span>
+            <span className="text-xs font-medium text-ink-subtle">Net Profit Margin</span>
             <Badge variant={prof.net_profit >= 0 ? "teal" : "danger"} size="sm">
               {num(prof.net_margin_pct, "%")}
             </Badge>
@@ -163,7 +163,7 @@ export function FpaExecutiveView() {
           <div className={`text-xl font-bold ${prof.net_profit >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
             {formatINR(prof.net_profit)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">Net surplus to retained earnings</div>
+          <div className="text-[11px] text-ink-subtle mt-1">Net surplus to retained earnings</div>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ export function FpaExecutiveView() {
           <div className="text-2xl font-bold text-slate-100">
             {formatINR(liq.working_capital)}
           </div>
-          <div className="mt-3 space-y-1.5 text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+          <div className="mt-3 space-y-1.5 text-xs text-ink-subtle border-t border-slate-800/80 pt-3">
             <div className="flex justify-between">
               <span>Current Assets (Receivables, Cash, Bank):</span>
               <span className="text-slate-200 font-medium">{formatINR(liq.current_assets)}</span>
@@ -204,18 +204,18 @@ export function FpaExecutiveView() {
           </div>
           <div className="grid grid-cols-2 gap-4 mt-2">
             <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
-              <div className="text-xs text-slate-400">Current Ratio</div>
+              <div className="text-xs text-ink-subtle">Current Ratio</div>
               <div className="text-lg font-bold text-emerald-400 mt-1">
                 {num(liq.current_ratio, "x")}
               </div>
-              <div className="text-[10px] text-slate-500">Benchmark: &gt; 1.5x</div>
+              <div className="text-[10px] text-ink-muted">Benchmark: &gt; 1.5x</div>
             </div>
             <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
-              <div className="text-xs text-slate-400">Quick Ratio</div>
+              <div className="text-xs text-ink-subtle">Quick Ratio</div>
               <div className="text-lg font-bold text-cyan-400 mt-1">
                 {num(liq.quick_ratio, "x")}
               </div>
-              <div className="text-[10px] text-slate-500">Benchmark: &gt; 1.0x</div>
+              <div className="text-[10px] text-ink-muted">Benchmark: &gt; 1.0x</div>
             </div>
           </div>
         </div>
@@ -235,7 +235,7 @@ export function FpaExecutiveView() {
           <div className="text-2xl font-bold text-amber-400">
             {formatINR(runway.cash_and_bank_reserves)}
           </div>
-          <div className="mt-3 space-y-1.5 text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+          <div className="mt-3 space-y-1.5 text-xs text-ink-subtle border-t border-slate-800/80 pt-3">
             <div className="flex justify-between">
               <span>Trailing Monthly Burn:</span>
               <span className="text-slate-200 font-medium">{formatINR(runway.estimated_monthly_burn)} / mo</span>
@@ -257,7 +257,7 @@ export function FpaExecutiveView() {
               Departmental Budget vs. Actual Utilization Rollup
             </h4>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-ink-subtle">
             <span>Total Allocated: <strong className="text-slate-200">{formatINR(budgetVariance?.total_budget_allocated || 0)}</strong></span>
             <span>Total Utilized: <strong className="text-amber-400">{formatINR(budgetVariance?.total_budget_utilized || 0)}</strong></span>
           </div>
@@ -265,7 +265,7 @@ export function FpaExecutiveView() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/70 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-semibold">
+            <thead className="bg-slate-950/70 border-b border-slate-800 text-ink-subtle uppercase tracking-wider font-semibold">
               <tr>
                 <th className="py-3 px-4">Department</th>
                 <th className="py-3 px-4">Code</th>
@@ -279,7 +279,7 @@ export function FpaExecutiveView() {
             <tbody className="divide-y divide-slate-800/60">
               {depts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                  <td colSpan={7} className="py-8 text-center text-ink-muted">
                     No departments created yet. Seed departments in Settings to track budget variances.
                   </td>
                 </tr>
@@ -293,7 +293,7 @@ export function FpaExecutiveView() {
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
                         {d.name}
                       </td>
-                      <td className="py-3 px-4 text-slate-400 font-mono">{d.code}</td>
+                      <td className="py-3 px-4 text-ink-subtle font-mono">{d.code}</td>
                       <td className="py-3 px-4 text-right font-medium text-slate-200">
                         {formatINR(d.budget_allocated)}
                       </td>
@@ -320,7 +320,7 @@ export function FpaExecutiveView() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className="inline-flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded text-[11px] text-slate-300 border border-slate-800">
-                          <Users className="h-3 w-3 text-slate-500" />
+                          <Users className="h-3 w-3 text-ink-muted" />
                           {d.headcount || 0}
                         </span>
                       </td>

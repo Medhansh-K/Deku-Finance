@@ -185,9 +185,9 @@ export function ReconciliationView() {
     <div key={s.candidate.id} className="flex items-start justify-between gap-3 py-1">
       <div>
         <span className="font-mono font-bold">{s.candidate.entryNumber}</span>{" "}
-        <span className="text-slate-500">{formatDateTally(s.candidate.date)}</span>
-        <span className="ml-2 font-mono text-[10px] text-slate-500">score {s.score}</span>
-        <p className="text-[11px] text-slate-500">{s.reasons.join(" · ")}</p>
+        <span className="text-ink-muted">{formatDateTally(s.candidate.date)}</span>
+        <span className="ml-2 font-mono text-[10px] text-ink-muted">score {s.score}</span>
+        <p className="text-[11px] text-ink-muted">{s.reasons.join(" · ")}</p>
       </div>
       <Button size="sm" variant="outline" isLoading={busyId === s.candidate.id} onClick={() => confirm(line, s.candidate)}>
         <Check className="h-3.5 w-3.5" /> Confirm
@@ -200,7 +200,7 @@ export function ReconciliationView() {
       <td className="py-2 px-3 font-mono whitespace-nowrap align-top">{formatDateTally(line.date)}</td>
       <td className="py-2 px-3 align-top">
         <span className="block break-words">{line.narration || "—"}</span>
-        {line.reference && <span className="font-mono text-[10px] text-slate-500">Ref {line.reference}</span>}
+        {line.reference && <span className="font-mono text-[10px] text-ink-muted">Ref {line.reference}</span>}
         {line.balanceMismatch && (
           <Badge variant="warning" className="ml-2">Balance break</Badge>
         )}
@@ -214,13 +214,13 @@ export function ReconciliationView() {
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      <div className="flex flex-col md:flex-row md:items-end gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-end gap-3 bg-surface p-3 rounded border border-line">
         <label className="flex flex-col gap-1">
-          <span className="font-mono text-[11px] text-slate-500">Bank account</span>
+          <span className="font-mono text-[11px] text-ink-muted">Bank account</span>
           <select
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
-            className="border border-slate-300 rounded px-2 py-1.5 text-xs min-w-64 bg-white"
+            className="border border-line-strong rounded px-2 py-1.5 text-xs min-w-64 bg-surface"
           >
             <option value="">Select a bank account…</option>
             {accounts.map((a) => (
@@ -231,9 +231,9 @@ export function ReconciliationView() {
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="font-mono text-[11px] text-slate-500">Statement (CSV)</span>
-          <span className="inline-flex items-center gap-2 border border-dashed border-slate-300 rounded px-3 py-1.5 cursor-pointer hover:bg-slate-50">
-            <UploadCloud className="h-4 w-4 text-slate-500" />
+          <span className="font-mono text-[11px] text-ink-muted">Statement (CSV)</span>
+          <span className="inline-flex items-center gap-2 border border-dashed border-line-strong rounded px-3 py-1.5 cursor-pointer hover:bg-canvas">
+            <UploadCloud className="h-4 w-4 text-ink-muted" />
             {fileName || "Choose file"}
             <input
               type="file"
@@ -244,7 +244,7 @@ export function ReconciliationView() {
             />
           </span>
         </label>
-        <p className="text-[11px] text-slate-500 md:ml-auto max-w-sm">
+        <p className="text-[11px] text-ink-muted md:ml-auto max-w-sm">
           The statement is read in your browser and is not uploaded anywhere. Matches are only
           suggestions until you confirm them.
         </p>
@@ -278,20 +278,20 @@ export function ReconciliationView() {
       )}
 
       {statement && (
-        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-          <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 px-2">
+        <div className="bg-surface border border-line rounded-lg overflow-hidden">
+          <div className="flex flex-wrap items-center gap-1 border-b border-line px-2">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`px-3 py-2 text-xs font-medium border-b-2 -mb-px ${
-                  tab === t.id ? "border-[var(--deku-teal)] text-slate-900" : "border-transparent text-slate-500 hover:text-slate-800"
+                  tab === t.id ? "border-[var(--deku-teal)] text-ink" : "border-transparent text-ink-muted hover:text-ink"
                 }`}
               >
                 {t.label} <span className="font-mono">({t.lines.length})</span>
               </button>
             ))}
-            <div className="ml-auto py-2 px-2 font-mono text-[11px] text-slate-600">
+            <div className="ml-auto py-2 px-2 font-mono text-[11px] text-ink-soft">
               In {formatINR(activeTotals.inP / 100)} · Out {formatINR(activeTotals.outP / 100)}
             </div>
           </div>
@@ -299,7 +299,7 @@ export function ReconciliationView() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700">
+                <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
                   <th className="py-2 px-3 w-28">Date</th>
                   <th className="py-2 px-3">Statement narration</th>
                   <th className="py-2 px-3 text-right w-36">Amount (₹)</th>
@@ -308,10 +308,10 @@ export function ReconciliationView() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-line">
                 {isLoading && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-slate-500">Loading journal entries…</td>
+                    <td colSpan={4} className="py-8 text-center text-ink-muted">Loading journal entries…</td>
                   </tr>
                 )}
                 {!isLoading && tab === "matched" &&
@@ -324,7 +324,7 @@ export function ReconciliationView() {
                           <div className="flex items-start justify-between gap-3">
                             <span>
                               <span className="font-mono font-bold">{book?.entryNumber || rec.journal_entry_line_id}</span>
-                              <span className="block text-[11px] text-slate-500">
+                              <span className="block text-[11px] text-ink-muted">
                                 Reconciled {formatDateTally(rec.reconciled_at)}
                               </span>
                             </span>
@@ -358,7 +358,7 @@ export function ReconciliationView() {
                       <td className="py-2 px-3 align-top">
                         <Link
                           href={voucherHref(r.line, accountId)}
-                          className="inline-flex items-center gap-1.5 font-medium underline text-slate-800"
+                          className="inline-flex items-center gap-1.5 font-medium underline text-ink"
                         >
                           <FilePlus2 className="h-3.5 w-3.5" />
                           Create {r.line.direction === "in" ? "receipt" : "payment"} voucher
@@ -368,7 +368,7 @@ export function ReconciliationView() {
                   ))}
                 {!isLoading && activeTotals.count === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-slate-500">Nothing here.</td>
+                    <td colSpan={4} className="py-8 text-center text-ink-muted">Nothing here.</td>
                   </tr>
                 )}
               </tbody>

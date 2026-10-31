@@ -85,13 +85,13 @@ export function SettingsView() {
       {orgId && <CompanyControlsCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
-      <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+      <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
             <h3 className="text-sm font-bold uppercase text-ink font-mono">
               Fiscal Accounting Periods
             </h3>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-ink-muted">
               Only open fiscal periods permit journal posting and financial allocations
             </p>
           </div>
@@ -112,7 +112,7 @@ export function SettingsView() {
           </div>
         )}
 
-        <div className="rounded border border-slate-200 overflow-hidden">
+        <div className="rounded border border-line overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-panel text-white font-mono text-[11px]">
@@ -122,14 +122,14 @@ export function SettingsView() {
                 <th className="py-2 px-3 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-line">
               {fiscalPeriods.map((fp) => (
-                <tr key={fp.id} className="hover:bg-slate-50">
-                  <td className="py-2 px-3 font-bold text-slate-900">{fp.name}</td>
-                  <td className="py-2 px-3 font-mono text-slate-600">
+                <tr key={fp.id} className="hover:bg-canvas">
+                  <td className="py-2 px-3 font-bold text-ink">{fp.name}</td>
+                  <td className="py-2 px-3 font-mono text-ink-soft">
                     {formatDateTally(fp.start_date)}
                   </td>
-                  <td className="py-2 px-3 font-mono text-slate-600">
+                  <td className="py-2 px-3 font-mono text-ink-soft">
                     {formatDateTally(fp.end_date)}
                   </td>
                   <td className="py-2 px-3 text-right">
@@ -145,24 +145,24 @@ export function SettingsView() {
       </div>
 
       {/* Accounting Standards & Engine Info */}
-      <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
-        <h3 className="text-sm font-bold uppercase text-ink font-mono border-b border-slate-200 pb-2">
+      <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+        <h3 className="text-sm font-bold uppercase text-ink font-mono border-b border-line pb-2">
           Accounting Standard & Enforcement
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-3 bg-slate-50 rounded border border-slate-200">
-            <span className="font-bold text-slate-900 block mb-1">
+          <div className="p-3 bg-canvas rounded border border-line">
+            <span className="font-bold text-ink block mb-1">
               ALERX 4-Tier Hierarchy
             </span>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-ink-soft text-[11px]">
               Vouchers are strictly restricted to postable leaf accounts. Group summaries roll up naturally without manual balance cache corruptions.
             </p>
           </div>
-          <div className="p-3 bg-slate-50 rounded border border-slate-200">
-            <span className="font-bold text-slate-900 block mb-1">
+          <div className="p-3 bg-canvas rounded border border-line">
+            <span className="font-bold text-ink block mb-1">
               Immutable Reversal Integrity
             </span>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-ink-soft text-[11px]">
               Posted vouchers cannot be silently modified or dropped. Controlled reversals create symmetric counter-entries for full statutory compliance.
             </p>
           </div>
@@ -200,7 +200,7 @@ export function SettingsView() {
             />
           </div>
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-3 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"

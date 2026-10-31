@@ -18,7 +18,7 @@ export default function ChartOfAccountsPage() {
           { label: "Chart of Accounts", href: "/masters/chart-of-accounts" },
         ]}
       >
-        <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-slate-400">Loading Chart of Accounts...</div>}>
+        <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-ink-subtle">Loading Chart of Accounts...</div>}>
           <ChartOfAccountsView />
         </Suspense>
       </WorkspaceLayout>

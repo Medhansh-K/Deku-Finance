@@ -106,19 +106,19 @@ export function DebtorsDsoView() {
   return (
     <div className="space-y-4">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted font-mono mb-1">
             <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
-            <ChevronRight className="h-3 w-3 text-slate-400" />
-            <span className="font-semibold text-slate-900">Trade Debtors (AR) &amp; DSO Tracking</span>
+            <ChevronRight className="h-3 w-3 text-ink-subtle" />
+            <span className="font-semibold text-ink">Trade Debtors (AR) &amp; DSO Tracking</span>
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl font-black text-ink tracking-tight">
             Trade Debtors &amp; Days Sales Outstanding (DSO) Tracker
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             Accounts receivable aging analysis, customer exposure, outstanding invoices, and collection velocity
           </p>
         </div>
@@ -129,7 +129,7 @@ export function DebtorsDsoView() {
           </Button>
           <Link
             href="/vouchers/receipt"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-ink shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
             <span>Record Receipt (F6)</span>
@@ -139,8 +139,8 @@ export function DebtorsDsoView() {
 
       {/* DSO KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Days Sales Outstanding
             </span>
@@ -148,16 +148,16 @@ export function DebtorsDsoView() {
               <Clock className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {dso === null ? "–" : `${dso} Days`}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             {dso === null ? "No credit sales posted" : "Receivables ÷ credit sales, last 365 days"}
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Total Receivables (AR)
             </span>
@@ -165,16 +165,16 @@ export function DebtorsDsoView() {
               <DollarSign className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {hasLedger ? formatINR(toRupees(totalReceivablesPaise)) : "–"}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             {owing.length} {owing.length === 1 ? "customer owes" : "customers owe"}
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Past Invoice Due Date
             </span>
@@ -182,16 +182,16 @@ export function DebtorsDsoView() {
               <AlertTriangle className="h-3 w-3" />
             </span>
           </div>
-          <div className={`text-lg font-black font-mono ${overduePaise > 0 ? "text-rose-700" : "text-slate-900"}`}>
+          <div className={`text-lg font-black font-mono ${overduePaise > 0 ? "text-rose-700" : "text-ink"}`}>
             {hasLedger ? formatINR(toRupees(overduePaise)) : "–"}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             Only items posted from issued invoices have a due date
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Older Than 60 Days
             </span>
@@ -199,17 +199,17 @@ export function DebtorsDsoView() {
               <ShieldCheck className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {hasLedger ? formatINR(toRupees(buckets.d61_90 + buckets.d90_plus)) : "–"}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             Unpaid since the invoice date
           </span>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 bg-white p-2.5 rounded-lg border border-slate-200 text-xs font-semibold overflow-x-auto">
+      <div className="flex items-center gap-1 bg-surface p-2.5 rounded-lg border border-line text-xs font-semibold overflow-x-auto">
         {[
           { id: "all", label: `All Debtors (${debtors.length})` },
           ...BUCKETS.map((b) => ({ id: b.id, label: `Oldest invoice ${b.label}` })),
@@ -220,7 +220,7 @@ export function DebtorsDsoView() {
             className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap cursor-pointer ${
               activeBucket === tab.id
                 ? "bg-panel text-white font-bold"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-ink-soft hover:bg-canvas-sunken"
             }`}
           >
             {tab.label}
@@ -228,7 +228,7 @@ export function DebtorsDsoView() {
         ))}
       </div>
 
-      <p className="text-[11px] text-slate-500 font-mono px-1">
+      <p className="text-[11px] text-ink-muted font-mono px-1">
         Balances from posted entries on {receivablesAccount ? `${receivablesAccount.code} ${receivablesAccount.name}` : "the trade debtors ledger"}.
         Receipts are matched to each customer&apos;s oldest invoice first.
       </p>
@@ -236,7 +236,7 @@ export function DebtorsDsoView() {
       {/* Debtors List with Expandable Invoices Breakdown */}
       <div className="space-y-3">
         {filteredDebtors.length === 0 && (
-          <div className="bg-white rounded-lg border border-slate-200 p-6 text-center text-xs text-slate-500">
+          <div className="bg-surface rounded-lg border border-line p-6 text-center text-xs text-ink-muted">
             {isLoading ? "Loading…" : emptyMessage}
           </div>
         )}
@@ -247,12 +247,12 @@ export function DebtorsDsoView() {
           return (
             <div
               key={key}
-              className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden transition-all"
+              className="bg-surface rounded-lg border border-line shadow-2xs overflow-hidden transition-all"
             >
               {/* Customer Row Header */}
               <div
                 onClick={() => setExpandedId(isExpanded ? null : key)}
-                className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors select-none"
+                className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-canvas transition-colors select-none"
               >
                 <div className="flex items-start gap-3">
                   <div className="h-9 w-9 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center shrink-0 font-bold border border-amber-200">
@@ -260,14 +260,14 @@ export function DebtorsDsoView() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-slate-900">{name}</span>
+                      <span className="font-bold text-sm text-ink">{name}</span>
                       {deb.advancePaise > 0 && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-canvas-sunken text-ink-soft border border-line">
                           Advance {formatINR(toRupees(deb.advancePaise))}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 font-mono mt-0.5">
+                    <div className="flex items-center gap-2 text-xs text-ink-muted font-mono mt-0.5">
                       <span>GSTIN: {deb.gstin || "–"}</span>
                       {deb.billingAddress?.city && (
                         <>
@@ -276,25 +276,25 @@ export function DebtorsDsoView() {
                         </>
                       )}
                       <span>•</span>
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-ink-soft">
                         {deb.openItems.length} open {deb.openItems.length === 1 ? "invoice" : "invoices"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
+                <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-line">
                   <div className="text-left sm:text-right">
-                    <div className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
+                    <div className="text-[10px] font-mono text-ink-muted uppercase font-semibold">
                       Oldest Unpaid
                     </div>
-                    <div className="text-sm font-black font-mono text-slate-900">
+                    <div className="text-sm font-black font-mono text-ink">
                       {deb.oldestAgeDays === null ? "–" : `${deb.oldestAgeDays} Days`}
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
+                    <div className="text-[10px] font-mono text-ink-muted uppercase font-semibold">
                       Total Balance Owed
                     </div>
                     <div className="text-base font-black font-mono text-amber-800">
@@ -302,7 +302,7 @@ export function DebtorsDsoView() {
                     </div>
                   </div>
 
-                  <div className="h-7 w-7 rounded flex items-center justify-center bg-slate-100 text-slate-600">
+                  <div className="h-7 w-7 rounded flex items-center justify-center bg-canvas-sunken text-ink-soft">
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 ${
                         isExpanded ? "rotate-180 text-brand-strong" : ""
@@ -314,14 +314,14 @@ export function DebtorsDsoView() {
 
               {/* Expanded Invoices Section */}
               {isExpanded && (
-                <div className="border-t border-slate-200 bg-slate-50/60 p-4 space-y-3">
+                <div className="border-t border-line bg-canvas/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-ink-soft flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-brand-strong" />
                       <span>Outstanding Invoices Owed by {name}</span>
                     </span>
                     <Link
-                      href="/invoices"
+                      href="/gst"
                       className="text-xs text-brand-strong hover:underline font-bold flex items-center gap-1"
                     >
                       <span>View All Invoices</span>
@@ -329,7 +329,7 @@ export function DebtorsDsoView() {
                     </Link>
                   </div>
 
-                  <div className="overflow-x-auto border border-slate-200 rounded bg-white shadow-2xs">
+                  <div className="overflow-x-auto border border-line rounded bg-surface shadow-2xs">
                     <table className="w-full text-left text-xs font-mono">
                       <thead className="bg-panel text-white text-[11px]">
                         <tr>
@@ -342,25 +342,25 @@ export function DebtorsDsoView() {
                           <th className="p-2.5 text-center">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-line">
                         {deb.openItems.map((item) => {
                           const overdueDays = item.dueDate ? daysBetween(item.dueDate, asOf) : null;
                           return (
-                            <tr key={item.entryId} className="hover:bg-slate-50">
-                              <td className="p-2.5 font-bold text-slate-900">
+                            <tr key={item.entryId} className="hover:bg-canvas">
+                              <td className="p-2.5 font-bold text-ink">
                                 <span className="flex items-center gap-1">
-                                  <FileText className="h-3 w-3 text-slate-400" />
+                                  <FileText className="h-3 w-3 text-ink-subtle" />
                                   <span>{item.invoiceNumber ?? item.reference ?? item.entryNumber}</span>
                                 </span>
                               </td>
-                              <td className="p-2.5 text-slate-600">{formatDateTally(item.date)}</td>
-                              <td className="p-2.5 text-slate-600">{item.dueDate ? formatDateTally(item.dueDate) : "–"}</td>
-                              <td className="p-2.5 text-right text-slate-700">{formatINR(toRupees(item.amountPaise))}</td>
+                              <td className="p-2.5 text-ink-soft">{formatDateTally(item.date)}</td>
+                              <td className="p-2.5 text-ink-soft">{item.dueDate ? formatDateTally(item.dueDate) : "–"}</td>
+                              <td className="p-2.5 text-right text-ink-soft">{formatINR(toRupees(item.amountPaise))}</td>
                               <td className="p-2.5 text-right font-bold text-amber-800">
                                 {formatINR(toRupees(item.openPaise))}
                               </td>
                               <td className="p-2.5">
-                                <span className="font-bold text-slate-800 block">
+                                <span className="font-bold text-ink block">
                                   {item.ageDays} days ago
                                 </span>
                                 {overdueDays !== null && overdueDays > 0 && (
@@ -371,7 +371,7 @@ export function DebtorsDsoView() {
                               </td>
                               <td className="p-2.5 text-center">
                                 {overdueDays === null ? (
-                                  <span className="text-[10px] text-slate-500">No due date</span>
+                                  <span className="text-[10px] text-ink-muted">No due date</span>
                                 ) : overdueDays > 0 ? (
                                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
                                     OVERDUE

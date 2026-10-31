@@ -21,7 +21,7 @@ export default function PurchaseVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-slate-500">
+            <div className="p-6 text-xs font-mono text-ink-muted">
               Loading purchase voucher desk...
             </div>
           }

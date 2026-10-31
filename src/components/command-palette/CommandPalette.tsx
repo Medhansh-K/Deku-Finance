@@ -180,7 +180,7 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     title: "GST Returns (GSTR-1 / 3B)",
     subtitle: "Generate return JSON from posted invoices and ITC ledgers",
     category: "Reports",
-    route: "/dashboard/returns",
+    route: "/gst/returns",
     icon: FileSpreadsheetIcon,
   },
   {
@@ -341,6 +341,14 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Company preferences, operating mode and currencies",
     category: "Utilities",
     route: "/settings",
+    icon: Settings,
+  },
+  {
+    id: "license",
+    title: "License",
+    subtitle: "Plan, trial timeline and license activation",
+    category: "Utilities",
+    route: "/settings/license",
     icon: Settings,
   },
 ];

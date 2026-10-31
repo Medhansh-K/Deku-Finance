@@ -26,9 +26,9 @@ export interface KpiDefinition {
 }
 
 export const KPI_META: Record<KpiKey, KpiDefinition> = {
-  turnover: { key: "turnover", label: "Gross Turnover", detailRoute: "/invoices" },
+  turnover: { key: "turnover", label: "Gross Turnover", detailRoute: "/gst" },
   profit: { key: "profit", label: "Net Profit", detailRoute: "/reports/profit-loss" },
-  billed: { key: "billed", label: "Billed Turnover", detailRoute: "/invoices" },
+  billed: { key: "billed", label: "Billed Turnover", detailRoute: "/gst" },
   liquid: { key: "liquid", label: "Liquid Funds", detailRoute: "/masters/chart-of-accounts?group=asset&filter=liquid" },
   debtors: { key: "debtors", label: "Trade Debtors (AR)", detailRoute: "/reports/debtors" },
   creditors: { key: "creditors", label: "Trade Creditors (AP)", detailRoute: "/reports/creditors" },

@@ -78,12 +78,12 @@ export function TrialBalanceView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         <div className="flex items-center gap-2">
           <Badge variant={isEquilibrium ? "success" : "warning"}>
             {isEquilibrium ? "Equilibrium Verified" : "Verification Pending"}
           </Badge>
-          <span className="text-slate-500 font-mono text-[11px]">
+          <span className="text-ink-muted font-mono text-[11px]">
             ALERX Double-Entry Trial Balance
           </span>
         </div>
@@ -125,7 +125,7 @@ export function TrialBalanceView() {
       )}
 
       {/* Trial Balance Statement Sheet */}
-      <div className="bg-white border border-edge rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-surface border border-edge rounded-lg shadow-sm overflow-hidden">
         {/* Statement Header */}
         <div className="bg-panel text-white p-4 border-b border-edge flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
@@ -145,7 +145,7 @@ export function TrialBalanceView() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700">
+              <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
                 <th className="py-2 px-4 w-24">Code</th>
                 <th className="py-2 px-4">Particulars / Account Title</th>
                 <th className="py-2 px-4 w-32">Classification</th>
@@ -154,10 +154,10 @@ export function TrialBalanceView() {
                 <th className="py-2 px-4 text-right w-44">Natural Balance (₹)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-line">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-ink-muted">
                     Computing general ledger balances...
                   </td>
                 </tr>
@@ -172,8 +172,8 @@ export function TrialBalanceView() {
                       }
                       className={`cursor-pointer transition-colors ${
                         hasMovement
-                          ? "hover:bg-brand/10 font-medium text-slate-900"
-                          : "text-slate-400 hover:bg-slate-50"
+                          ? "hover:bg-brand/10 font-medium text-ink"
+                          : "text-ink-subtle hover:bg-canvas"
                       }`}
                     >
                       <td className="py-2 px-4 font-mono font-bold">
@@ -182,13 +182,13 @@ export function TrialBalanceView() {
                       <td className="py-2 px-4">
                         <span className="block">{row.account_name}</span>
                         {row.sub_ledger && (
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-ink-subtle font-mono">
                             {row.sub_ledger}
                           </span>
                         )}
                       </td>
                       <td className="py-2 px-4">
-                        <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">
+                        <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-canvas-sunken border border-line">
                           {row.account_type}
                         </span>
                       </td>
@@ -206,7 +206,7 @@ export function TrialBalanceView() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500 font-mono">
+                  <td colSpan={6} className="py-8 text-center text-ink-muted font-mono">
                     No account balance records available.
                   </td>
                 </tr>

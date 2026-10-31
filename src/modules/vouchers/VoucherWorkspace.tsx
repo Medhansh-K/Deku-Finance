@@ -1026,12 +1026,12 @@ export function VoucherWorkspace({
       {/* ============================================================ */}
       <div className="w-full lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-0 lg:self-start">
         {/* Card 1: Voucher Types Selector */}
-        <div className="bg-white border border-line-strong rounded-lg p-3 shadow-xs">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+        <div className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-line">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink">
               Voucher Type
             </span>
-            <span className="text-[10px] font-mono text-slate-500 font-bold">
+            <span className="text-[10px] font-mono text-ink-muted font-bold">
               F4 — F9
             </span>
           </div>
@@ -1059,15 +1059,15 @@ export function VoucherWorkspace({
                   className={`w-full flex items-center justify-between p-2 rounded transition-all text-left ${
                     isCurrent
                       ? "bg-panel text-white shadow-sm ring-1 ring-brand"
-                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
+                      : "bg-canvas hover:bg-canvas-sunken text-ink-soft border border-line"
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span
                       className={`font-mono font-bold text-[10px] px-1.5 py-0.5 rounded ${
                         isCurrent
-                          ? "bg-brand text-ink"
-                          : "bg-white border border-slate-300 text-slate-600"
+                          ? "bg-brand text-panel-deep"
+                          : "bg-surface border border-line-strong text-ink-soft"
                       }`}
                     >
                       {cfg.fKey}
@@ -1079,7 +1079,7 @@ export function VoucherWorkspace({
                       </div>
                       <div
                         className={`text-[10px] line-clamp-1 ${
-                          isCurrent ? "text-slate-300" : "text-slate-500"
+                          isCurrent ? "text-slate-300" : "text-ink-muted"
                         }`}
                       >
                         {cfg.subtitle}
@@ -1096,14 +1096,14 @@ export function VoucherWorkspace({
         </div>
 
         {/* Sidebar Sub-Tabs: Builder Drafts vs Smart OCR */}
-        <div className="flex items-center bg-slate-200/90 p-0.5 rounded-lg border border-slate-300">
+        <div className="flex items-center bg-line/90 p-0.5 rounded-lg border border-line-strong">
           <button
             type="button"
             onClick={() => setSidebarTab("drafts")}
             className={`flex-1 py-1.5 px-2 rounded-md font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
               sidebarTab === "drafts"
                 ? "bg-panel text-white shadow-xs"
-                : "text-slate-700 hover:text-slate-900"
+                : "text-ink-soft hover:text-ink"
             }`}
           >
             <FileSpreadsheet className="h-3.5 w-3.5 text-brand" />
@@ -1121,7 +1121,7 @@ export function VoucherWorkspace({
             className={`flex-1 py-1.5 px-2 rounded-md font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
               sidebarTab === "ocr"
                 ? "bg-panel text-white shadow-xs"
-                : "text-slate-700 hover:text-slate-900"
+                : "text-ink-soft hover:text-ink"
             }`}
           >
             <Sparkles className="h-3.5 w-3.5 text-brand" />
@@ -1137,8 +1137,8 @@ export function VoucherWorkspace({
           />
         ) : (
           /* Tab 2: Document Auto-Extraction (OCR) */
-          <div className="bg-white border border-edge rounded-lg p-3 shadow-xs">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+          <div className="bg-surface border border-edge rounded-lg p-3 shadow-xs">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-line">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5 text-brand" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-ink">
@@ -1150,7 +1150,7 @@ export function VoucherWorkspace({
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-500 mb-2.5 leading-snug">
+            <p className="text-[11px] text-ink-muted mb-2.5 leading-snug">
               Drop a GST invoice to pre-fill the voucher. It is read on this device and never
               uploaded. Anything it can&apos;t read is left blank for you.
             </p>
@@ -1176,14 +1176,14 @@ export function VoucherWorkspace({
               className={`border-2 border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors ${
                 isDragOver
                   ? "border-brand bg-brand/10"
-                  : "border-slate-300 hover:border-brand hover:bg-slate-50"
+                  : "border-line-strong hover:border-brand hover:bg-canvas"
               }`}
             >
-              <UploadCloud className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-              <div className="font-semibold text-slate-800 text-[11px]">
+              <UploadCloud className="h-6 w-6 text-ink-subtle mx-auto mb-1" />
+              <div className="font-semibold text-ink text-[11px]">
                 Upload Invoice or Bill
               </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">
+              <div className="text-[10px] text-ink-subtle mt-0.5">
                 PDF, PNG, JPG (Drag & drop or click)
               </div>
             </div>
@@ -1218,7 +1218,7 @@ export function VoucherWorkspace({
                   <button
                     suppressHydrationWarning
                     onClick={handleClearExtracted}
-                    className="text-slate-400 hover:text-rose-600 p-0.5"
+                    className="text-ink-subtle hover:text-rose-600 p-0.5"
                     title="Remove extracted data"
                   >
                     <X className="h-3 w-3" />
@@ -1227,20 +1227,20 @@ export function VoucherWorkspace({
 
                 <div className="grid grid-cols-2 gap-1 text-[10px] font-mono pt-1 border-t border-emerald-200/70">
                   <div>
-                    <span className="text-slate-500">Mode: </span>
-                    <span className="font-bold text-slate-900 uppercase">
+                    <span className="text-ink-muted">Mode: </span>
+                    <span className="font-bold text-ink uppercase">
                       {extractedData.detectedType}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-500">Invoice: </span>
-                    <span className="font-bold text-slate-900">
+                    <span className="text-ink-muted">Invoice: </span>
+                    <span className="font-bold text-ink">
                       {extractedData.reference ?? "not read"}
                     </span>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-slate-500">Total: </span>
-                    <span className="font-bold text-slate-900">
+                    <span className="text-ink-muted">Total: </span>
+                    <span className="font-bold text-ink">
                       {extractedData.totalAmount === null ? "not read" : formatINR(extractedData.totalAmount)}
                     </span>
                   </div>
@@ -1261,15 +1261,15 @@ export function VoucherWorkspace({
                     {w}
                   </div>
                 ))}
-                <div className="text-[9px] bg-white/70 px-1.5 py-0.5 rounded border border-slate-200 text-slate-600">
+                <div className="text-[9px] bg-white/70 px-1.5 py-0.5 rounded border border-line text-ink-soft">
                   Filled into the voucher form. Review every line before posting.
                 </div>
               </div>
             )}
 
             {/* Quick Sample Invoices */}
-            <div className="mt-3 pt-2.5 border-t border-slate-200">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+            <div className="mt-3 pt-2.5 border-t border-line">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1.5">
                 Try a sample (fictional data)
               </div>
               <div className="space-y-1">
@@ -1279,13 +1279,13 @@ export function VoucherWorkspace({
                     suppressHydrationWarning
                     onClick={() => handleSampleSelect(sample.id)}
                     disabled={isExtracting}
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left text-[10px] transition-colors disabled:opacity-50"
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded bg-canvas hover:bg-canvas-sunken border border-line text-left text-[10px] transition-colors disabled:opacity-50"
                   >
                     <div className="truncate pr-1">
-                      <span className="font-bold text-slate-800 block">
+                      <span className="font-bold text-ink block">
                         {sample.title}
                       </span>
-                      <span className="text-slate-500 font-mono text-[9px]">
+                      <span className="text-ink-muted font-mono text-[9px]">
                         {sample.type.toUpperCase()} • {sample.amountFormatted}
                       </span>
                     </div>
@@ -1375,8 +1375,8 @@ export function VoucherWorkspace({
         )}
 
         {/* Voucher Header Strip */}
-        <div className="bg-white border border-line-strong rounded-lg p-4 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
+        <div className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-line gap-2">
             <div className="flex items-center gap-2">
               <Badge variant="teal">{activeConfig.fKey}</Badge>
               <h2 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
@@ -1384,7 +1384,7 @@ export function VoucherWorkspace({
                 <span>{activeConfig.title}</span>
               </h2>
             </div>
-            <div className="flex items-center gap-2 text-slate-500 font-mono text-[11px]">
+            <div className="flex items-center gap-2 text-ink-muted font-mono text-[11px]">
               <span>Double-Entry Strict</span>
               <span>•</span>
               <span className="text-brand font-bold">ALERX Postable Only</span>
@@ -1415,11 +1415,11 @@ export function VoucherWorkspace({
         </div>
 
         {/* Line Items Table */}
-        <div className="bg-white border border-edge rounded-lg overflow-hidden shadow-xs">
+        <div className="bg-surface border border-edge rounded-lg overflow-hidden shadow-xs">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono text-[11px]">
             <div className="flex items-center gap-2">
               <span>Accounting Allocation Table</span>
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-ink-subtle">
                 ({activeConfig.shortLabel} Mode)
               </span>
             </div>
@@ -1429,7 +1429,7 @@ export function VoucherWorkspace({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700">
+                <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
                   <th className="py-2 px-3 w-16 text-center">Type</th>
                   <th className="py-2 px-3">Particulars / Account Label</th>
                   <th className="py-2 px-3 w-48">Counterparty (Optional)</th>
@@ -1438,9 +1438,9 @@ export function VoucherWorkspace({
                   <th className="py-2 px-2 w-10 text-center"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-line">
                 {lines.map((line, idx) => (
-                  <tr key={line.id} className="hover:bg-slate-50/70">
+                  <tr key={line.id} className="hover:bg-canvas/70">
                     {/* Dr / Cr Selector */}
                     <td className="py-2 px-3 text-center">
                       <select
@@ -1449,7 +1449,7 @@ export function VoucherWorkspace({
                         onChange={(e) =>
                           handleLineChange(idx, "dr_cr", e.target.value as "Dr" | "Cr")
                         }
-                        className="font-mono font-bold text-xs bg-slate-100 border border-slate-300 rounded px-1.5 py-1 text-slate-900 focus:border-brand focus:outline-none"
+                        className="font-mono font-bold text-xs bg-canvas-sunken border border-line-strong rounded px-1.5 py-1 text-ink focus:border-brand focus:outline-none"
                       >
                         <option value="Dr">Dr</option>
                         <option value="Cr">To (Cr)</option>
@@ -1464,7 +1464,7 @@ export function VoucherWorkspace({
                         onChange={(e) =>
                           handleLineChange(idx, "account_id", e.target.value)
                         }
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-900 focus:border-brand focus:outline-none"
+                        className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs text-ink focus:border-brand focus:outline-none"
                       >
                         <option value="">— Select Postable Leaf Account —</option>
                         {accounts.map((acc) => (
@@ -1483,7 +1483,7 @@ export function VoucherWorkspace({
                         onChange={(e) =>
                           handleLineChange(idx, "party_id", e.target.value)
                         }
-                        className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-700 focus:border-brand focus:outline-none"
+                        className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs text-ink-soft focus:border-brand focus:outline-none"
                       >
                         <option value="self">🏢 Self ({activeCompanyName})</option>
                         <option value="">(None / General)</option>
@@ -1507,10 +1507,10 @@ export function VoucherWorkspace({
                           }
                           onKeyDown={(e) => handleLineKeyDown(e, idx, "amount")}
                           placeholder="0.00"
-                          className="w-full text-right font-mono font-semibold text-xs border border-slate-300 rounded px-2 py-1 focus:border-brand focus:outline-none"
+                          className="w-full text-right font-mono font-semibold text-xs border border-line-strong rounded px-2 py-1 focus:border-brand focus:outline-none"
                         />
                       ) : (
-                        <span className="text-slate-400 font-mono select-none">—</span>
+                        <span className="text-ink-subtle font-mono select-none">—</span>
                       )}
                     </td>
 
@@ -1526,10 +1526,10 @@ export function VoucherWorkspace({
                           }
                           onKeyDown={(e) => handleLineKeyDown(e, idx, "amount")}
                           placeholder="0.00"
-                          className="w-full text-right font-mono font-semibold text-xs border border-slate-300 rounded px-2 py-1 focus:border-brand focus:outline-none"
+                          className="w-full text-right font-mono font-semibold text-xs border border-line-strong rounded px-2 py-1 focus:border-brand focus:outline-none"
                         />
                       ) : (
-                        <span className="text-slate-400 font-mono select-none">—</span>
+                        <span className="text-ink-subtle font-mono select-none">—</span>
                       )}
                     </td>
 
@@ -1538,7 +1538,7 @@ export function VoucherWorkspace({
                       <button
                         suppressHydrationWarning
                         onClick={() => handleRemoveLine(idx)}
-                        className="text-slate-400 hover:text-rose-600 p-1"
+                        className="text-ink-subtle hover:text-rose-600 p-1"
                         title="Remove line"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1548,7 +1548,7 @@ export function VoucherWorkspace({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-slate-50 border-t-2 border-slate-300 font-mono font-bold text-xs">
+                <tr className="bg-canvas border-t-2 border-line-strong font-mono font-bold text-xs">
                   <td colSpan={3} className="py-2.5 px-3">
                     <Button
                       type="button"
@@ -1560,10 +1560,10 @@ export function VoucherWorkspace({
                       <Plus className="h-3.5 w-3.5" /> Add Row
                     </Button>
                   </td>
-                  <td className="py-2.5 px-3 text-right text-slate-900">
+                  <td className="py-2.5 px-3 text-right text-ink">
                     {formatINR(totalDebit)}
                   </td>
-                  <td className="py-2.5 px-3 text-right text-slate-900">
+                  <td className="py-2.5 px-3 text-right text-ink">
                     {formatINR(totalCredit)}
                   </td>
                   <td></td>
@@ -1601,8 +1601,8 @@ export function VoucherWorkspace({
         {/* ============================================================ */}
         {/* MANDATORY DOCUMENT PROOF & STATUTORY VERIFICATION */}
         {/* ============================================================ */}
-        <div className="bg-white border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-200 gap-2">
+        <div className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-line gap-2">
             <div className="flex items-center gap-2">
               <div
                 className={`h-7 w-7 rounded-lg flex items-center justify-center font-bold ${
@@ -1630,7 +1630,7 @@ export function VoucherWorkspace({
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-500 font-mono">
+                <p className="text-[11px] text-ink-muted font-mono">
                   Indian GAAP compliance: final COA posting and financial statements (P&amp;L, Balance Sheet) require verifiable proof.
                 </p>
               </div>
@@ -1646,7 +1646,7 @@ export function VoucherWorkspace({
                   setSelectedInvoiceId("");
                   setSelectedBuilderDraftId("");
                 }}
-                className="text-[11px] h-7 px-2 border-slate-300 text-rose-700 hover:bg-rose-50"
+                className="text-[11px] h-7 px-2 border-line-strong text-rose-700 hover:bg-rose-50"
               >
                 <X className="h-3 w-3 mr-1" /> Detach Proof
               </Button>
@@ -1702,7 +1702,7 @@ export function VoucherWorkspace({
               </div>
 
               <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                <span className="text-[10px] font-mono text-emerald-700 font-bold bg-white px-2 py-1 rounded border border-emerald-300">
+                <span className="text-[10px] font-mono text-emerald-700 font-bold bg-surface px-2 py-1 rounded border border-emerald-300">
                   ✓ READY FOR COA POSTING
                 </span>
               </div>
@@ -1722,14 +1722,14 @@ export function VoucherWorkspace({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Option 1: Pair Builder Invoice */}
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                        <span className="font-bold text-ink text-xs flex items-center gap-1.5">
                           <FileSpreadsheet className="h-3.5 w-3.5 text-brand" /> Option 1: Pair from Document Builder
                         </span>
                         <Badge variant="teal">{builderInvoices.length} Invoices Available</Badge>
                       </div>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-ink-muted">
                         Pair with an invoice drafted or finalized in the Document Builder desk.
                       </p>
                       {builderInvoices.length > 0 ? (
@@ -1737,7 +1737,7 @@ export function VoucherWorkspace({
                           <select
                             value={selectedBuilderDraftId}
                             onChange={(e) => setSelectedBuilderDraftId(e.target.value)}
-                            className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                            className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                           >
                             <option value="">— Choose Builder Invoice to Pair —</option>
                             {builderInvoices.map((d) => (
@@ -1758,16 +1758,16 @@ export function VoucherWorkspace({
                           </Button>
                         </div>
                       ) : (
-                        <div className="text-[11px] text-slate-400 italic">No builder invoice drafts currently found.</div>
+                        <div className="text-[11px] text-ink-subtle italic">No builder invoice drafts currently found.</div>
                       )}
                     </div>
 
                     {/* Option 2: Upload External Invoice */}
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                      <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
+                      <span className="font-bold text-ink text-xs flex items-center gap-1.5">
                         <UploadCloud className="h-3.5 w-3.5 text-brand" /> Option 2: Upload External Invoice
                       </span>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-ink-muted">
                         Upload invoice copy (PDF/PNG/JPG) generated from external billing/ERP.
                       </p>
                       <div className="flex items-center gap-2">
@@ -1776,7 +1776,7 @@ export function VoucherWorkspace({
                           value={proofRefInput}
                           onChange={(e) => setProofRefInput(e.target.value)}
                           placeholder="External Invoice No (e.g. EXT-8819)"
-                          className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                         />
                         <Button
                           type="button"
@@ -1789,7 +1789,7 @@ export function VoucherWorkspace({
                         </Button>
                       </div>
                       <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[10px] text-slate-400">Or quick test:</span>
+                        <span className="text-[10px] text-ink-subtle">Or quick test:</span>
                         <button
                           type="button"
                           onClick={() => handleAttachSampleProof(0)}
@@ -1813,9 +1813,9 @@ export function VoucherWorkspace({
                     </span>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="contraSlipType"
@@ -1825,7 +1825,7 @@ export function VoucherWorkspace({
                         />
                         <span>Bank Deposit Slip (Cash Deposited into Bank)</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="contraSlipType"
@@ -1847,7 +1847,7 @@ export function VoucherWorkspace({
                             ? "Deposit Ack No. (e.g. HDFC-DEP-99482)"
                             : "Cheque / Slip No. (e.g. CHQ-004921)"
                         }
-                        className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                       />
                       <Button
                         type="button"
@@ -1882,9 +1882,9 @@ export function VoucherWorkspace({
                     </span>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="paymentMethod"
@@ -1894,7 +1894,7 @@ export function VoucherWorkspace({
                         />
                         <span>Digital Payment (NEFT / RTGS / UPI / Netbanking)</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="paymentMethod"
@@ -1913,7 +1913,7 @@ export function VoucherWorkspace({
                           value={proofRefInput}
                           onChange={(e) => setProofRefInput(e.target.value)}
                           placeholder="Bank UTR / Transaction ID (e.g. UTR-HDFC261023941)"
-                          className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                         />
                         <Button
                           type="button"
@@ -1948,7 +1948,7 @@ export function VoucherWorkspace({
                             value={proofRefInput}
                             onChange={(e) => setProofRefInput(e.target.value)}
                             placeholder="CFO Sanction Memo Ref # (e.g. CFO-AUTH-2026-081)"
-                            className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                            className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                           />
                           <Button
                             type="button"
@@ -1987,14 +1987,14 @@ export function VoucherWorkspace({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Bill-wise Matching */}
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                        <span className="font-bold text-ink text-xs flex items-center gap-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5 text-brand" /> Option 1: Settle Open Sales Invoice
                         </span>
                         <Badge variant="teal">{openInvoices.length} Open Invoices</Badge>
                       </div>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-ink-muted">
                         Directly match against an open customer invoice to clear receivables and update DSO balances.
                       </p>
                       {openInvoices.length > 0 ? (
@@ -2002,7 +2002,7 @@ export function VoucherWorkspace({
                           <select
                             value={selectedInvoiceId}
                             onChange={(e) => handleSelectInvoiceToSettle(e.target.value)}
-                            className="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                            className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                           >
                             <option value="">— Choose Open Invoice to Settle —</option>
                             {openInvoices.map((inv) => (
@@ -2013,16 +2013,16 @@ export function VoucherWorkspace({
                           </select>
                         </div>
                       ) : (
-                        <div className="text-[11px] text-slate-400 italic">No open customer invoices currently found.</div>
+                        <div className="text-[11px] text-ink-subtle italic">No open customer invoices currently found.</div>
                       )}
                     </div>
 
                     {/* Remittance Advice Upload */}
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
-                      <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
+                      <span className="font-bold text-ink text-xs flex items-center gap-1.5">
                         <UploadCloud className="h-3.5 w-3.5 text-brand" /> Option 2: Upload Remittance Advice / Invoice Copy
                       </span>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-ink-muted">
                         Attach invoice received from vendor or customer remittance slip.
                       </p>
                       <div className="flex items-center gap-2">
@@ -2031,7 +2031,7 @@ export function VoucherWorkspace({
                           value={proofRefInput}
                           onChange={(e) => setProofRefInput(e.target.value)}
                           placeholder="Remittance Ref # (e.g. REMIT-8832)"
-                          className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                         />
                         <Button
                           type="button"
@@ -2044,7 +2044,7 @@ export function VoucherWorkspace({
                         </Button>
                       </div>
                       <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[10px] text-slate-400">Or quick test:</span>
+                        <span className="text-[10px] text-ink-subtle">Or quick test:</span>
                         <button
                           type="button"
                           onClick={() => handleAttachSampleProof(0)}
@@ -2068,9 +2068,9 @@ export function VoucherWorkspace({
                     </span>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="journalProofType"
@@ -2080,7 +2080,7 @@ export function VoucherWorkspace({
                         />
                         <span>Bill of Purchase for Adjustment / Capitalization</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-slate-800">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
                         <input
                           type="radio"
                           name="journalProofType"
@@ -2102,7 +2102,7 @@ export function VoucherWorkspace({
                             ? "Purchase Bill / Docket # (e.g. PUR-ASSET-7721)"
                             : "Schedule Ref # (e.g. DEP-SCHED-FY26-Q3)"
                         }
-                        className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                       />
                       <Button
                         type="button"
@@ -2137,14 +2137,14 @@ export function VoucherWorkspace({
                     </span>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
                         value={proofRefInput}
                         onChange={(e) => setProofRefInput(e.target.value)}
                         placeholder="Vendor Tax Invoice No. (e.g. SUPP-INV-2026-904)"
-                        className="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs"
+                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
                       />
                       <Button
                         type="button"
@@ -2173,8 +2173,8 @@ export function VoucherWorkspace({
         </div>
 
         {/* Narration Memo Field */}
-        <div className="bg-white border border-line-strong rounded-lg p-3">
-          <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+        <div className="bg-surface border border-line-strong rounded-lg p-3">
+          <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
             Narration (Mandatory Accounting Memo)
           </label>
           <textarea
@@ -2182,7 +2182,7 @@ export function VoucherWorkspace({
             value={narration}
             onChange={(e) => setNarration(e.target.value)}
             placeholder="Detailed transaction memo and business purpose..."
-            className="w-full rounded border border-slate-300 p-2 text-xs text-slate-900 focus:border-brand focus:outline-none"
+            className="w-full rounded border border-line-strong p-2 text-xs text-ink focus:border-brand focus:outline-none"
             required
           />
         </div>
@@ -2206,7 +2206,7 @@ export function VoucherWorkspace({
               variant="outline"
               size="sm"
               onClick={() => router.push("/day-book")}
-              className="text-xs h-7 px-2.5 font-bold border-emerald-400 bg-white hover:bg-emerald-100 text-emerald-900 self-end sm:self-center shrink-0"
+              className="text-xs h-7 px-2.5 font-bold border-emerald-400 bg-surface hover:bg-emerald-100 text-emerald-900 self-end sm:self-center shrink-0"
             >
               Open in Day Book →
             </Button>

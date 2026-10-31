@@ -16,7 +16,7 @@
   --workspace-border: #e5e7eb;
   --workspace-border-strong: #d1d5db;
   --workspace-text-main: #0b1220;
-  --workspace-text-muted: #64748b;
+  --workspace-text-muted: #5f6e82;
   --workspace-text-subtle: #94a3b8;
 
   --deku-focus-ring: 0 0 0 2px rgb(42 179 166 / 0.85);
@@ -31,21 +31,21 @@
 }
 
 .deku-table-th {
-  background-color: #f3f5f8;
-  color: #475569;
+  background-color: var(--color-canvas-sunken, #f3f5f8);
+  color: var(--color-ink-soft, #475569);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 9px 12px;
   font-weight: 600;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-line, #e5e7eb);
   text-align: left;
 }
 
 .deku-table-td {
   padding: 8px 12px;
   font-size: 13px;
-  color: #0b1220;
-  border-bottom: 1px solid #eef1f5;
+  color: var(--color-ink, #0b1220);
+  border-bottom: 1px solid var(--color-canvas-sunken, #eef1f5);
   font-variant-numeric: tabular-nums;
 }

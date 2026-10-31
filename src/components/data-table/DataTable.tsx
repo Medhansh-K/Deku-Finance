@@ -121,7 +121,7 @@ export function DataTable<TData>({
       {/* Search & Actions Bar */}
       <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-subtle" />
           <input
             type="text"
             suppressHydrationWarning
@@ -131,16 +131,16 @@ export function DataTable<TData>({
               setCurrentPage(0);
             }}
             placeholder={searchPlaceholder}
-            className="w-full rounded border border-line-strong bg-white pl-9 pr-4 py-1.5 text-xs text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            className="w-full rounded border border-line-strong bg-surface pl-9 pr-4 py-1.5 text-xs text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
-        <div className="text-xs text-slate-500 font-mono">
+        <div className="text-xs text-ink-muted font-mono">
           Showing {pageData.length} of {data.length} records
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto rounded border border-edge bg-white shadow-xs">
+      <div className="overflow-x-auto rounded border border-edge bg-surface shadow-xs">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr>
@@ -181,7 +181,7 @@ export function DataTable<TData>({
                               <ArrowDown className="h-3 w-3 text-brand" />
                             )
                           ) : (
-                            <ChevronsUpDown className="h-3 w-3 text-slate-400" />
+                            <ChevronsUpDown className="h-3 w-3 text-ink-subtle" />
                           )}
                         </span>
                       )}
@@ -191,12 +191,12 @@ export function DataTable<TData>({
               })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-line">
             {isLoading ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-12 text-center text-slate-500"
+                  className="py-12 text-center text-ink-muted"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-5 w-5 animate-spin text-brand" />
@@ -217,7 +217,7 @@ export function DataTable<TData>({
                     className={`cursor-pointer transition-colors ${
                       isFocused
                         ? "bg-brand/15 text-ink font-medium"
-                        : "hover:bg-slate-50 text-[#1e293b]"
+                        : "hover:bg-canvas text-ink"
                     }`}
                   >
                     {columns.map((col, cIdx) => (
@@ -241,7 +241,7 @@ export function DataTable<TData>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="py-8 text-center text-slate-500 font-mono text-xs"
+                  className="py-8 text-center text-ink-muted font-mono text-xs"
                 >
                   {emptyMessage}
                 </td>
@@ -252,7 +252,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between text-xs text-slate-600 px-1">
+      <div className="flex items-center justify-between text-xs text-ink-soft px-1">
         <div className="flex items-center gap-1 font-mono">
           Page {currentPage + 1} of {totalPages}
         </div>
@@ -261,7 +261,7 @@ export function DataTable<TData>({
             suppressHydrationWarning
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none"
+            className="flex items-center gap-1 px-2.5 py-1 rounded border border-line-strong bg-surface hover:bg-canvas disabled:opacity-40 disabled:pointer-events-none"
           >
             <ChevronLeft className="h-3.5 w-3.5" /> Previous
           </button>
@@ -269,7 +269,7 @@ export function DataTable<TData>({
             suppressHydrationWarning
             onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={currentPage >= totalPages - 1}
-            className="flex items-center gap-1 px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none"
+            className="flex items-center gap-1 px-2.5 py-1 rounded border border-line-strong bg-surface hover:bg-canvas disabled:opacity-40 disabled:pointer-events-none"
           >
             Next <ChevronRight className="h-3.5 w-3.5" />
           </button>

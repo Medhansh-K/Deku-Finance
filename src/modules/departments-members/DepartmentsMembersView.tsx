@@ -400,7 +400,7 @@ export function DepartmentsMembersView() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm tracking-wide">{primeOwner?.name}</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand text-ink">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand text-panel-deep">
                 Prime License Owner
               </span>
               <span className="text-[11px] text-brand-soft">• {primeOwner?.designation}</span>
@@ -444,41 +444,41 @@ export function DepartmentsMembersView() {
 
       {/* Top 4 KPI Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-xs">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-surface border border-line rounded-lg p-3 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1 flex items-center justify-between">
             <span>Departments</span>
             <Building2 className="h-3.5 w-3.5 text-blue-600" />
           </div>
-          <div className="text-xl font-bold font-mono text-slate-900">{departments.length} Units</div>
-          <div className="text-[10px] text-slate-500 mt-1">100% Leads Assigned</div>
+          <div className="text-xl font-bold font-mono text-ink">{departments.length} Units</div>
+          <div className="text-[10px] text-ink-muted mt-1">100% Leads Assigned</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-xs">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-surface border border-line rounded-lg p-3 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1 flex items-center justify-between">
             <span>Firm Personnel</span>
             <Users className="h-3.5 w-3.5 text-emerald-600" />
           </div>
-          <div className="text-xl font-bold font-mono text-slate-900">{totalHeadcount} Members</div>
+          <div className="text-xl font-bold font-mono text-ink">{totalHeadcount} Members</div>
           <div className="text-[10px] text-emerald-600 font-semibold mt-1">All Assigned to Depts</div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-xs">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-surface border border-line rounded-lg p-3 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1 flex items-center justify-between">
             <span>Operating Budgets</span>
             <CreditCard className="h-3.5 w-3.5 text-purple-600" />
           </div>
-          <div className="text-xl font-bold font-mono text-slate-900">{formatINR(totalAllocatedBudget)}</div>
-          <div className="text-[10px] text-slate-500 mt-1">
+          <div className="text-xl font-bold font-mono text-ink">{formatINR(totalAllocatedBudget)}</div>
+          <div className="text-[10px] text-ink-muted mt-1">
             Utilized: {formatINR(totalUtilizedBudget)} ({Math.round((totalUtilizedBudget / totalAllocatedBudget) * 100)}%)
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-xs">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+        <div className="bg-surface border border-line rounded-lg p-3 shadow-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1 flex items-center justify-between">
             <span>Monthly Payroll Run</span>
             <DollarSign className="h-3.5 w-3.5 text-teal-600" />
           </div>
-          <div className="text-xl font-bold font-mono text-slate-900">{formatINR(totalMonthlyPayroll)}</div>
+          <div className="text-xl font-bold font-mono text-ink">{formatINR(totalMonthlyPayroll)}</div>
           <div className="text-[10px] text-amber-700 font-semibold mt-1">
             Pending Claims: {formatINR(totalPendingReimbursements)}
           </div>
@@ -486,7 +486,7 @@ export function DepartmentsMembersView() {
       </div>
 
       {/* Tab Navigation Strip */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+      <div className="flex items-center justify-between border-b border-line pb-1">
         <div className="flex items-center gap-1">
           <button
             id="tab-departments"
@@ -495,7 +495,7 @@ export function DepartmentsMembersView() {
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "departments"
                 ? "bg-panel text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-ink-soft hover:bg-canvas-sunken"
             }`}
           >
             <Building2 className="h-3.5 w-3.5 text-brand" />
@@ -509,7 +509,7 @@ export function DepartmentsMembersView() {
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "members"
                 ? "bg-panel text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-ink-soft hover:bg-canvas-sunken"
             }`}
           >
             <Users className="h-3.5 w-3.5 text-brand" />
@@ -522,7 +522,7 @@ export function DepartmentsMembersView() {
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "payroll"
                 ? "bg-panel text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-ink-soft hover:bg-canvas-sunken"
             }`}
           >
             <DollarSign className="h-3.5 w-3.5 text-brand" />
@@ -535,7 +535,7 @@ export function DepartmentsMembersView() {
             className={`px-3 py-1.5 font-bold rounded text-xs transition-colors flex items-center gap-1.5 ${
               activeTab === "governance"
                 ? "bg-panel text-white"
-                : "text-slate-600 hover:bg-slate-100"
+                : "text-ink-soft hover:bg-canvas-sunken"
             }`}
           >
             <ShieldCheck className="h-3.5 w-3.5 text-brand" />
@@ -578,19 +578,19 @@ export function DepartmentsMembersView() {
             return (
               <div
                 key={dept.id}
-                className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-3 flex flex-col justify-between"
+                className="bg-surface border border-line rounded-lg p-4 shadow-xs space-y-3 flex flex-col justify-between"
               >
                 <div>
                   {/* Department Header */}
-                  <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-200">
+                  <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-line">
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-sm text-slate-900">{dept.name}</h3>
-                        <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300">
+                        <h3 className="font-bold text-sm text-ink">{dept.name}</h3>
+                        <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-canvas-sunken text-ink-soft border border-line-strong">
                           {dept.code}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{dept.description}</p>
+                      <p className="text-[11px] text-ink-muted mt-0.5">{dept.description}</p>
                     </div>
 
                     <Button
@@ -608,27 +608,27 @@ export function DepartmentsMembersView() {
                   </div>
 
                   {/* Department Lead & Members */}
-                  <div className="grid grid-cols-2 gap-2 my-3 text-[11px] bg-slate-50 p-2.5 rounded border border-slate-200">
+                  <div className="grid grid-cols-2 gap-2 my-3 text-[11px] bg-canvas p-2.5 rounded border border-line">
                     <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">
+                      <span className="text-[10px] font-bold uppercase text-ink-subtle block mb-0.5">
                         Departmental Lead
                       </span>
-                      <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                      <div className="font-bold text-ink flex items-center gap-1.5">
                         <Briefcase className="h-3.5 w-3.5 text-brand" />
                         <span>{dept.lead_name}</span>
                       </div>
-                      <div className="text-[10px] text-slate-500">{dept.lead_designation}</div>
+                      <div className="text-[10px] text-ink-muted">{dept.lead_designation}</div>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">
+                      <span className="text-[10px] font-bold uppercase text-ink-subtle block mb-0.5">
                         Headcount in Dept
                       </span>
-                      <div className="font-mono font-bold text-slate-800 flex items-center gap-1.5">
+                      <div className="font-mono font-bold text-ink flex items-center gap-1.5">
                         <Users className="h-3.5 w-3.5 text-blue-600" />
                         <span>{deptMembers.length} Employees</span>
                       </div>
-                      <div className="text-[10px] text-slate-500 truncate">
+                      <div className="text-[10px] text-ink-muted truncate">
                         {deptMembers.map((m) => m.name.split(" ")[0]).join(", ")}
                       </div>
                     </div>
@@ -637,14 +637,14 @@ export function DepartmentsMembersView() {
                   {/* Departmental Budget Bar */}
                   <div className="space-y-1 mb-3">
                     <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-slate-500">
+                      <span className="text-ink-muted">
                         Budget Utilized: <strong>{formatINR(dept.budget_utilized)}</strong>
                       </span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold text-ink">
                         Total: {formatINR(dept.budget_allocated)} ({utilizationPercent}%)
                       </span>
                     </div>
-                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-line h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
                           utilizationPercent > 85 ? "bg-rose-500" : "bg-brand"
@@ -656,20 +656,20 @@ export function DepartmentsMembersView() {
 
                   {/* Inter / Intra Department Tasks */}
                   <div className="space-y-1.5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted flex items-center justify-between">
                       <span>Inter / Intra Departmental Tasks ({dept.tasks.length})</span>
-                      <span className="text-slate-400 font-normal">Click status to advance</span>
+                      <span className="text-ink-subtle font-normal">Click status to advance</span>
                     </div>
 
                     {dept.tasks.length === 0 ? (
-                      <div className="p-3 text-center text-slate-400 italic text-[11px] bg-slate-50 rounded border border-dashed border-slate-200">
+                      <div className="p-3 text-center text-ink-subtle italic text-[11px] bg-canvas rounded border border-dashed border-line">
                         No active tasks assigned yet.
                       </div>
                     ) : (
                       dept.tasks.map((task) => (
                         <div
                           key={task.id}
-                          className="p-2 rounded bg-white border border-slate-200 hover:border-slate-300 transition-colors flex items-center justify-between gap-2"
+                          className="p-2 rounded bg-surface border border-line hover:border-line-strong transition-colors flex items-center justify-between gap-2"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -689,20 +689,20 @@ export function DepartmentsMembersView() {
                                     ? "bg-rose-100 text-rose-700"
                                     : task.priority === "high"
                                     ? "bg-amber-100 text-amber-800"
-                                    : "bg-slate-100 text-slate-600"
+                                    : "bg-canvas-sunken text-ink-soft"
                                 }`}
                               >
                                 {task.priority}
                               </span>
 
-                              <span className="font-semibold text-slate-900 truncate text-[11px]">
+                              <span className="font-semibold text-ink truncate text-[11px]">
                                 {task.title}
                               </span>
                             </div>
 
-                            <div className="text-[10px] text-slate-500 mt-1 flex items-center justify-between gap-2 flex-wrap">
+                            <div className="text-[10px] text-ink-muted mt-1 flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-slate-400 font-semibold">Assignee:</span>
+                                <span className="text-[10px] text-ink-subtle font-semibold">Assignee:</span>
                                 <select
                                   suppressHydrationWarning
                                   value={task.assigned_to_id || ""}
@@ -720,7 +720,7 @@ export function DepartmentsMembersView() {
                                       refreshData();
                                     }
                                   }}
-                                  className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
+                                  className="text-[10px] font-semibold text-ink bg-canvas-sunken hover:bg-line border border-line-strong rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
                                   title="Click to assign or reassign task to any member"
                                 >
                                   <option value="">— Unassigned —</option>
@@ -731,7 +731,7 @@ export function DepartmentsMembersView() {
                                   ))}
                                 </select>
                               </div>
-                              <span className="text-slate-400 font-mono text-[10px]">Due: {task.due_date}</span>
+                              <span className="text-ink-subtle font-mono text-[10px]">Due: {task.due_date}</span>
                             </div>
                           </div>
 
@@ -769,18 +769,18 @@ export function DepartmentsMembersView() {
       {/* TAB 2: MEMBERS DIRECTORY & ACCESS ROLES                      */}
       {/* ============================================================ */}
       {activeTab === "members" && (
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-3">
+        <div className="bg-surface border border-line rounded-lg p-4 shadow-xs space-y-3">
           {/* Search & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-ink-subtle" />
               <input
                 suppressHydrationWarning
                 type="text"
                 placeholder="Search member by name, designation, email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded border border-slate-300 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong pl-8 pr-3 py-1.5 text-xs text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none"
               />
             </div>
 
@@ -789,7 +789,7 @@ export function DepartmentsMembersView() {
                 suppressHydrationWarning
                 value={selectedDeptFilter}
                 onChange={(e) => setSelectedDeptFilter(e.target.value)}
-                className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="all">All Departments ({members.length})</option>
                 {departments.map((d) => (
@@ -812,10 +812,10 @@ export function DepartmentsMembersView() {
           </div>
 
           {/* Members Table */}
-          <div className="overflow-x-auto rounded border border-slate-200">
+          <div className="overflow-x-auto rounded border border-line">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-300 text-[11px] font-mono text-slate-700">
+                <tr className="bg-canvas-sunken border-b border-line-strong text-[11px] font-mono text-ink-soft">
                   <th className="py-2.5 px-3">Employee &amp; Identity</th>
                   <th className="py-2.5 px-3">Assigned Department</th>
                   <th className="py-2.5 px-3">Platform Role</th>
@@ -826,20 +826,20 @@ export function DepartmentsMembersView() {
                   <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-line">
                 {filteredMembers.map((member) => (
-                  <tr key={member.id} className="hover:bg-slate-50/70">
+                  <tr key={member.id} className="hover:bg-canvas/70">
                     {/* Employee & Identity */}
                     <td className="py-2.5 px-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs shrink-0">
+                        <div className="h-8 w-8 rounded-full bg-canvas-sunken border border-line-strong flex items-center justify-center font-bold text-ink-soft text-xs shrink-0">
                           {member.name.charAt(0)}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                          <div className="font-bold text-ink flex items-center gap-1.5">
                             <span>{member.name}</span>
                             {member.is_owner && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-ink">
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-panel-deep">
                                 👑 Prime Owner
                               </span>
                             )}
@@ -849,16 +849,16 @@ export function DepartmentsMembersView() {
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500">{member.designation}</div>
-                          <div className="text-[10px] text-slate-400 font-mono">{member.email}</div>
+                          <div className="text-[11px] text-ink-muted">{member.designation}</div>
+                          <div className="text-[10px] text-ink-subtle font-mono">{member.email}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* Department */}
-                    <td className="py-2.5 px-3 font-medium text-slate-800">
+                    <td className="py-2.5 px-3 font-medium text-ink">
                       <div className="flex items-center gap-1.5">
-                        <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                        <Building2 className="h-3.5 w-3.5 text-ink-subtle" />
                         <span>{member.department_name}</span>
                       </div>
                     </td>
@@ -868,7 +868,7 @@ export function DepartmentsMembersView() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider uppercase border ${
                           member.role === "owner"
-                            ? "bg-brand/15 text-[#2A7575] border-brand/40"
+                            ? "bg-brand/15 text-brand-strong border-brand/40"
                             : member.role === "cfo"
                             ? "bg-indigo-50 text-indigo-700 border-indigo-200"
                             : member.role === "admin"
@@ -879,7 +879,7 @@ export function DepartmentsMembersView() {
                             ? "bg-purple-50 text-purple-700 border-purple-200"
                             : member.role === "auditor"
                             ? "bg-rose-50 text-rose-700 border-rose-200"
-                            : "bg-slate-100 text-slate-600 border-slate-300"
+                            : "bg-canvas-sunken text-ink-soft border-line-strong"
                         }`}
                       >
                         {member.role.toUpperCase()}
@@ -916,7 +916,7 @@ export function DepartmentsMembersView() {
                         )}
                         {!member.permissions.can_view_vouchers &&
                           !member.permissions.can_view_financial_reports && (
-                            <span className="text-[9px] font-mono bg-slate-100 text-slate-500 px-1 rounded">
+                            <span className="text-[9px] font-mono bg-canvas-sunken text-ink-muted px-1 rounded">
                               Limited Member Scope
                             </span>
                           )}
@@ -965,7 +965,7 @@ export function DepartmentsMembersView() {
                               setTaskForm((prev) => ({ ...prev, assigned_to_id: member.id }));
                               setIsAddTaskModalOpen(true);
                             }}
-                            className="text-[10px] text-slate-400 hover:text-brand hover:underline flex items-center gap-1 font-medium"
+                            className="text-[10px] text-ink-subtle hover:text-brand hover:underline flex items-center gap-1 font-medium"
                           >
                             <Plus className="h-3 w-3" /> Assign Task
                           </button>
@@ -974,7 +974,7 @@ export function DepartmentsMembersView() {
                     </td>
 
                     {/* CTC */}
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">
                       {formatINR(member.compensation.ctc_annual)}
                     </td>
 
@@ -998,7 +998,7 @@ export function DepartmentsMembersView() {
                             setTaskForm((prev) => ({ ...prev, assigned_to_id: member.id }));
                             setIsAddTaskModalOpen(true);
                           }}
-                          className="gap-1 text-[11px] text-slate-700 hover:text-slate-900"
+                          className="gap-1 text-[11px] text-ink-soft hover:text-ink"
                           title="Assign task directly to this member"
                         >
                           <Plus className="h-3 w-3 text-blue-600" /> Task
@@ -1029,24 +1029,24 @@ export function DepartmentsMembersView() {
       {/* TAB 3: PAYROLL, CTC, REIMBURSEMENTS & BONUSES                */}
       {/* ============================================================ */}
       {activeTab === "payroll" && (
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="bg-surface border border-line rounded-lg p-4 shadow-xs space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div>
-              <h3 className="font-bold text-sm text-slate-900">Personnel Financial Records &amp; Compensation</h3>
-              <p className="text-[11px] text-slate-500">
+              <h3 className="font-bold text-sm text-ink">Personnel Financial Records &amp; Compensation</h3>
+              <p className="text-[11px] text-ink-muted">
                 Authoritative breakdown of Annual CTC, Monthly Gross, TDS/EPF deductions, pending reimbursements, and accrued bonuses.
               </p>
             </div>
             <div className="text-right font-mono text-[11px]">
-              <span className="text-slate-500">Total Monthly Disbursement: </span>
-              <span className="font-bold text-slate-900">{formatINR(totalMonthlyPayroll)}</span>
+              <span className="text-ink-muted">Total Monthly Disbursement: </span>
+              <span className="font-bold text-ink">{formatINR(totalMonthlyPayroll)}</span>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded border border-slate-200">
+          <div className="overflow-x-auto rounded border border-line">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-300 text-[11px] font-mono text-slate-700">
+                <tr className="bg-canvas-sunken border-b border-line-strong text-[11px] font-mono text-ink-soft">
                   <th className="py-2.5 px-3">Employee Name</th>
                   <th className="py-2.5 px-3">Department</th>
                   <th className="py-2.5 px-3 text-right">Annual CTC</th>
@@ -1058,34 +1058,34 @@ export function DepartmentsMembersView() {
                   <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-line">
                 {members.map((m) => (
-                  <tr key={m.id} className="hover:bg-slate-50/70">
+                  <tr key={m.id} className="hover:bg-canvas/70">
                     <td className="py-2.5 px-3">
-                      <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <div className="font-bold text-ink flex items-center gap-1.5">
                         <span>{m.name}</span>
                         {m.is_owner && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-ink">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-brand text-panel-deep">
                             👑 Owner
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
+                      <div className="text-[10px] text-ink-muted font-mono">
                         PAN: {m.compensation.pan} • {m.compensation.bank_account_masked}
                       </div>
                     </td>
 
-                    <td className="py-2.5 px-3 text-slate-700">{m.department_name}</td>
+                    <td className="py-2.5 px-3 text-ink-soft">{m.department_name}</td>
 
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">
                       {formatINR(m.compensation.ctc_annual)}
                     </td>
 
-                    <td className="py-2.5 px-3 text-right font-mono text-slate-800">
+                    <td className="py-2.5 px-3 text-right font-mono text-ink">
                       {formatINR(m.compensation.monthly_gross)}
                     </td>
 
-                    <td className="py-2.5 px-3 text-right font-mono text-slate-500">
+                    <td className="py-2.5 px-3 text-right font-mono text-ink-muted">
                       -{formatINR(m.compensation.tds_deduction_monthly + m.compensation.epf_monthly)}
                     </td>
 
@@ -1111,7 +1111,7 @@ export function DepartmentsMembersView() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-slate-400 font-mono text-[11px]">Cleared (0.00)</span>
+                        <span className="text-ink-subtle font-mono text-[11px]">Cleared (0.00)</span>
                       )}
                     </td>
 
@@ -1145,14 +1145,14 @@ export function DepartmentsMembersView() {
       {/* TAB 4: OWNER ACCESS & GOVERNANCE MATRIX                      */}
       {/* ============================================================ */}
       {activeTab === "governance" && (
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs space-y-4">
-          <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-200">
+        <div className="bg-surface border border-line rounded-lg p-4 shadow-xs space-y-4">
+          <div className="flex items-start justify-between gap-3 pb-3 border-b border-line">
             <div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-brand" />
-                <h3 className="font-bold text-sm text-slate-900">Owner Access &amp; Role Privilege Governance</h3>
+                <h3 className="font-bold text-sm text-ink">Owner Access &amp; Role Privilege Governance</h3>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1 max-w-2xl leading-relaxed">
+              <p className="text-[11px] text-ink-muted mt-1 max-w-2xl leading-relaxed">
                 By architectural decree, the license holder (<strong>{primeOwner?.name}</strong>) is the prime employee with non-revocable root authority. 
                 Regular employees are granted selective access only to modules designated by the Owner.
               </p>
@@ -1163,10 +1163,10 @@ export function DepartmentsMembersView() {
           </div>
 
           {/* Governance Matrix Table */}
-          <div className="overflow-x-auto rounded border border-slate-200">
+          <div className="overflow-x-auto rounded border border-line">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-700">
+                <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
                   <th className="py-2.5 px-3 w-48">Employee / Role</th>
                   <th className="py-2.5 px-2 text-center">Accounting Vouchers</th>
                   <th className="py-2.5 px-2 text-center">Bank &amp; Liquidity</th>
@@ -1178,15 +1178,15 @@ export function DepartmentsMembersView() {
                   <th className="py-2.5 px-3 text-right">Modify</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-line">
                 {members.map((m) => (
-                  <tr key={m.id} className="hover:bg-slate-50/70">
+                  <tr key={m.id} className="hover:bg-canvas/70">
                     <td className="py-2.5 px-3">
-                      <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <div className="font-bold text-ink flex items-center gap-1.5">
                         <span>{m.name}</span>
                         {m.is_owner && <span className="text-[9px] text-amber-600 font-bold">👑</span>}
                       </div>
-                      <div className="text-[10px] text-slate-500">{m.department_name}</div>
+                      <div className="text-[10px] text-ink-muted">{m.department_name}</div>
                       <Badge variant={m.role === "owner" ? "teal" : "default"}>{m.role.toUpperCase()}</Badge>
                     </td>
 
@@ -1298,14 +1298,14 @@ export function DepartmentsMembersView() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+            <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
               Departmental Lead (Must be a registered Member)
             </label>
             <select
               suppressHydrationWarning
               value={newDeptForm.lead_id}
               onChange={(e) => setNewDeptForm({ ...newDeptForm, lead_id: e.target.value })}
-              className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+              className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               required
             >
               <option value="">— Select Departmental Lead —</option>
@@ -1335,7 +1335,7 @@ export function DepartmentsMembersView() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+            <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
               Department Description &amp; Scope
             </label>
             <textarea
@@ -1343,11 +1343,11 @@ export function DepartmentsMembersView() {
               placeholder="Outline mandate, objectives and responsibilities..."
               value={newDeptForm.description}
               onChange={(e) => setNewDeptForm({ ...newDeptForm, description: e.target.value })}
-              className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 focus:border-brand focus:outline-none"
+              className="w-full rounded border border-line-strong p-2 text-xs text-ink focus:border-brand focus:outline-none"
             />
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-2 flex justify-end gap-2 border-t border-line">
             <Button
               suppressHydrationWarning
               type="button"
@@ -1410,14 +1410,14 @@ export function DepartmentsMembersView() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Assign to Department
               </label>
               <select
                 suppressHydrationWarning
                 value={newMemberForm.department_id}
                 onChange={(e) => setNewMemberForm({ ...newMemberForm, department_id: e.target.value })}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
                 required
               >
                 <option value="">— Select Department —</option>
@@ -1430,7 +1430,7 @@ export function DepartmentsMembersView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Platform Role
               </label>
               <select
@@ -1439,7 +1439,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setNewMemberForm({ ...newMemberForm, role: e.target.value as EmployeeMember["role"] })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="owner">Owner (Founder / License Holder)</option>
                 <option value="cfo">CFO (Finance Manager &amp; Sign-Off)</option>
@@ -1478,8 +1478,8 @@ export function DepartmentsMembersView() {
           </div>
 
           {/* Selective Permissions Checkboxes */}
-          <div className="p-3 rounded bg-slate-50 border border-slate-200 space-y-2">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
+          <div className="p-3 rounded bg-canvas border border-line space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-ink-soft">
               Selective Platform Permissions (Owner Granted)
             </div>
             <div className="grid grid-cols-2 gap-2 text-[11px]">
@@ -1575,7 +1575,7 @@ export function DepartmentsMembersView() {
             </div>
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-2 flex justify-end gap-2 border-t border-line">
             <Button
               suppressHydrationWarning
               type="button"
@@ -1617,7 +1617,7 @@ export function DepartmentsMembersView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-ink-soft mb-1">
                 Shareable Invitation URL (Valid for 7 Days)
               </label>
               <div className="flex items-center gap-2">
@@ -1625,7 +1625,7 @@ export function DepartmentsMembersView() {
                   type="text"
                   readOnly
                   value={createdInviteInfo.inviteUrl}
-                  className="flex-1 bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-2 text-[11px] font-mono text-slate-800 select-all"
+                  className="flex-1 bg-canvas-sunken border border-line-strong rounded-lg px-2.5 py-2 text-[11px] font-mono text-ink select-all"
                 />
                 <Button
                   type="button"
@@ -1653,7 +1653,7 @@ export function DepartmentsMembersView() {
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[10px] text-slate-500 space-y-1">
+            <div className="p-2.5 rounded-lg bg-canvas border border-line text-[10px] text-ink-muted space-y-1">
               <p>
                 <strong>Token:</strong> <span className="font-mono">{createdInviteInfo.token}</span>
               </p>
@@ -1696,7 +1696,7 @@ export function DepartmentsMembersView() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Task Scope Type
               </label>
               <select
@@ -1705,7 +1705,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, type: e.target.value as "intra" | "inter" })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="intra">Intra-Department (Internal Team)</option>
                 <option value="inter">Inter-Department (Cross-Team Collaboration)</option>
@@ -1713,7 +1713,7 @@ export function DepartmentsMembersView() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Priority Level
               </label>
               <select
@@ -1722,7 +1722,7 @@ export function DepartmentsMembersView() {
                 onChange={(e) =>
                   setTaskForm({ ...taskForm, priority: e.target.value as DepartmentTask["priority"] })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -1741,7 +1741,7 @@ export function DepartmentsMembersView() {
                 suppressHydrationWarning
                 value={taskForm.target_department_id}
                 onChange={(e) => setTaskForm({ ...taskForm, target_department_id: e.target.value })}
-                className="w-full rounded border border-purple-300 bg-purple-50/40 px-2.5 py-1.5 text-xs text-slate-800 focus:border-purple-500 focus:outline-none"
+                className="w-full rounded border border-purple-300 bg-purple-50/40 px-2.5 py-1.5 text-xs text-ink focus:border-purple-500 focus:outline-none"
                 required
               >
                 <option value="">— Select Target Department —</option>
@@ -1758,14 +1758,14 @@ export function DepartmentsMembersView() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Assigned Employee
               </label>
               <select
                 suppressHydrationWarning
                 value={taskForm.assigned_to_id}
                 onChange={(e) => setTaskForm({ ...taskForm, assigned_to_id: e.target.value })}
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
                 required
               >
                 <option value="">— Select Assignee —</option>
@@ -1786,7 +1786,7 @@ export function DepartmentsMembersView() {
             />
           </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-2 flex justify-end gap-2 border-t border-line">
             <Button
               suppressHydrationWarning
               type="button"
@@ -1814,10 +1814,10 @@ export function DepartmentsMembersView() {
           description="Owner-decided granular platform rights and security visibility"
         >
           <div className="space-y-3 font-sans text-xs">
-            <div className="p-2.5 rounded bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div className="p-2.5 rounded bg-canvas border border-line flex items-center justify-between">
               <div>
-                <span className="font-bold text-slate-900 block">{selectedMemberForAccess.name}</span>
-                <span className="text-[11px] text-slate-500">
+                <span className="font-bold text-ink block">{selectedMemberForAccess.name}</span>
+                <span className="text-[11px] text-ink-muted">
                   {selectedMemberForAccess.designation} • {selectedMemberForAccess.department_name}
                 </span>
               </div>
@@ -1836,7 +1836,7 @@ export function DepartmentsMembersView() {
             ) : (
               <div className="space-y-2">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                  <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                     Assign Platform Role
                   </label>
                   <select
@@ -1848,7 +1848,7 @@ export function DepartmentsMembersView() {
                         role: e.target.value as EmployeeMember["role"],
                       })
                     }
-                    className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
                   >
                     <option value="member">Regular Member (Minimal Scope)</option>
                     <option value="accountant">Accountant (General Ledger &amp; GST)</option>
@@ -1858,7 +1858,7 @@ export function DepartmentsMembersView() {
                 </div>
 
                 <div className="space-y-1.5 pt-2">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-soft">
                     Selective Module Access Toggles
                   </div>
 
@@ -1874,9 +1874,9 @@ export function DepartmentsMembersView() {
                   ].map((perm) => (
                     <label
                       key={perm.key}
-                      className="flex items-center justify-between p-2 rounded hover:bg-slate-50 border border-slate-200 cursor-pointer"
+                      className="flex items-center justify-between p-2 rounded hover:bg-canvas border border-line cursor-pointer"
                     >
-                      <span className="text-slate-800 font-medium">{perm.label}</span>
+                      <span className="text-ink font-medium">{perm.label}</span>
                       <input
                         type="checkbox"
                         checked={
@@ -1897,7 +1897,7 @@ export function DepartmentsMembersView() {
                   ))}
                 </div>
 
-                <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
+                <div className="pt-3 flex justify-end gap-2 border-t border-line">
                   <Button
                     suppressHydrationWarning
                     type="button"
@@ -1940,11 +1940,11 @@ export function DepartmentsMembersView() {
           description="Accrue performance incentive to employee's compensation ledger"
         >
           <form onSubmit={handleGrantBonus} className="space-y-3 font-sans text-xs">
-            <div className="p-2.5 rounded bg-slate-50 border border-slate-200">
-              <div className="text-[11px] text-slate-500">
+            <div className="p-2.5 rounded bg-canvas border border-line">
+              <div className="text-[11px] text-ink-muted">
                 Department: <strong>{selectedMemberForBonus.department_name}</strong>
               </div>
-              <div className="text-[11px] text-slate-500">
+              <div className="text-[11px] text-ink-muted">
                 Current Accrued Bonus:{" "}
                 <strong className="text-purple-700">
                   {formatINR(selectedMemberForBonus.compensation.bonuses_accrued)}
@@ -1960,7 +1960,7 @@ export function DepartmentsMembersView() {
               required
             />
 
-            <div className="pt-2 flex justify-end gap-2 border-t border-slate-200">
+            <div className="pt-2 flex justify-end gap-2 border-t border-line">
               <Button
                 suppressHydrationWarning
                 type="button"
@@ -1998,7 +1998,7 @@ export function DepartmentsMembersView() {
 
               if (assignedTasks.length === 0) {
                 return (
-                  <div className="p-6 text-center text-slate-400 italic bg-slate-50 rounded border border-dashed border-slate-200">
+                  <div className="p-6 text-center text-ink-subtle italic bg-canvas rounded border border-dashed border-line">
                     No active tasks assigned to this employee.
                   </div>
                 );
@@ -2009,12 +2009,12 @@ export function DepartmentsMembersView() {
                   {assignedTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="p-3 rounded border border-slate-200 bg-white hover:border-slate-300 space-y-2 shadow-2xs"
+                      className="p-3 rounded border border-line bg-surface hover:border-line-strong space-y-2 shadow-2xs"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="font-mono text-[9px] font-bold px-1.5 py-0.2 rounded bg-canvas-sunken text-ink-soft border border-line">
                               {task.deptCode}
                             </span>
                             <span
@@ -2032,15 +2032,15 @@ export function DepartmentsMembersView() {
                                   ? "bg-rose-100 text-rose-700"
                                   : task.priority === "high"
                                   ? "bg-amber-100 text-amber-800"
-                                  : "bg-slate-100 text-slate-600"
+                                  : "bg-canvas-sunken text-ink-soft"
                               }`}
                             >
                               {task.priority}
                             </span>
                           </div>
-                          <h4 className="font-bold text-slate-900 text-xs mt-1">{task.title}</h4>
+                          <h4 className="font-bold text-ink text-xs mt-1">{task.title}</h4>
                           {task.description && (
-                            <p className="text-[11px] text-slate-500 mt-0.5">{task.description}</p>
+                            <p className="text-[11px] text-ink-muted mt-0.5">{task.description}</p>
                           )}
                         </div>
 
@@ -2066,9 +2066,9 @@ export function DepartmentsMembersView() {
                         </button>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <div className="pt-2 border-t border-line flex items-center justify-between text-[11px] text-ink-muted">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-slate-400">Reassign:</span>
+                          <span className="text-ink-subtle">Reassign:</span>
                           <select
                             suppressHydrationWarning
                             value={task.assigned_to_id || ""}
@@ -2086,7 +2086,7 @@ export function DepartmentsMembersView() {
                                 refreshData();
                               }
                             }}
-                            className="text-[10px] font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
+                            className="text-[10px] font-semibold text-ink bg-canvas-sunken hover:bg-line border border-line-strong rounded px-1.5 py-0.5 focus:border-brand focus:outline-none cursor-pointer"
                           >
                             {members.map((m) => (
                               <option key={m.id} value={m.id}>
@@ -2103,7 +2103,7 @@ export function DepartmentsMembersView() {
               );
             })()}
 
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+            <div className="pt-3 border-t border-line flex items-center justify-between">
               <Button
                 suppressHydrationWarning
                 variant="outline"

@@ -41,7 +41,7 @@ export default function CommonVouchersPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-slate-500">
+            <div className="p-6 text-xs font-mono text-ink-muted">
               Loading accounting voucher desk...
             </div>
           }

@@ -19,7 +19,7 @@ const STEPS = ["Period", "Readiness", "Review", "Download"];
 /** Where the user can fix a blocking error, by the wording returns.ts uses. */
 function fixLink(error: string): { href: string; label: string } | null {
   if (error.startsWith("Company GSTIN")) return { href: "/settings", label: "Fix in Settings" };
-  if (error.startsWith("Invoice ")) return { href: "/invoices", label: "Open invoices" };
+  if (error.startsWith("Invoice ")) return { href: "/gst", label: "Open invoices" };
   if (error.includes("chart of accounts has no")) return { href: "/masters/chart-of-accounts", label: "Open chart of accounts" };
   return null;
 }
@@ -49,7 +49,7 @@ export default function GstFilePage() {
                   onClick={() => setStep(i)}
                   aria-current={step === i ? "step" : undefined}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                    step === i ? "bg-ink text-white" : "bg-surface text-ink-muted border border-line hover:text-ink"
+                    step === i ? "bg-panel text-white" : "bg-surface text-ink-muted border border-line hover:text-ink"
                   }`}
                 >
                   {i + 1}. {s}
