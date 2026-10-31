@@ -27,6 +27,8 @@ import {
   settlementFromOrg,
 } from "@/lib/invoices/settlement";
 import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
+import { HsnCombobox } from "@/modules/hsn/HsnCombobox";
+import { hsnCodeError } from "@/modules/hsn/hsn";
 
 interface EditorLine {
   item_name: string;
@@ -120,6 +122,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
     lines.forEach((l, i) => {
       const n = i + 1;
       if (!l.item_name.trim()) msgs.push(`Line ${n}: enter the item or service.`);
+      if (hsnCodeError(l.hsn_sac_code)) msgs.push(`Line ${n}: ${hsnCodeError(l.hsn_sac_code)}`);
       if (!(Number(l.quantity) > 0)) msgs.push(`Line ${n}: quantity must be more than zero.`);
       if (l.unit_price.trim() === "" || !(Number(l.unit_price) >= 0)) msgs.push(`Line ${n}: enter a rate.`);
     });
@@ -306,8 +309,9 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                           onChange={(e) => updateLine(idx, "item_name", e.target.value)} className={cellClass} />
                       </td>
                       <td className="px-2 py-1.5">
-                        <input data-grid-field aria-label={`Line ${n} HSN or SAC`} value={line.hsn_sac_code} inputMode="numeric"
-                          onChange={(e) => updateLine(idx, "hsn_sac_code", e.target.value)} className={`${cellClass} font-mono`} />
+                        <HsnCombobox ariaLabel={`Line ${n} HSN or SAC`} value={line.hsn_sac_code}
+                          onChange={(code) => updateLine(idx, "hsn_sac_code", code)} inputClassName={cellClass}
+                          inputProps={{ "data-grid-field": true }} />
                       </td>
                       <td className="px-2 py-1.5">
                         <input data-grid-field aria-label={`Line ${n} quantity`} type="number" min="0" step="any" value={line.quantity}

@@ -177,6 +177,23 @@ export const catalogueApi = {
     ),
 };
 
+export interface HsnMatch {
+  code: string;
+  description: string;
+  kind: "goods" | "service";
+  chapter: string;
+  match: "code" | "description";
+}
+
+export const hsnApi = {
+  // `loaded` is false while nobody has imported the HSN master yet.
+  search: (q: string, limit = 10, signal?: AbortSignal) =>
+    apiClient<ApiResponse<HsnMatch[]> & { loaded: boolean }>(
+      `/api/v1/hsn?${new URLSearchParams({ q, limit: String(limit) })}`,
+      { signal }
+    ),
+};
+
 export const accountingApi = {
   // Chart of Accounts
   listAccounts: (orgId: string) =>

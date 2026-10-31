@@ -11,6 +11,8 @@ import { catalogueApi } from "@/api/endpoints";
 import { CatalogueItem, CatalogueItemType } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { logUserActivity } from "@/lib/logging/activity-logger";
+import { HsnCombobox } from "@/modules/hsn/HsnCombobox";
+import { hsnCodeError } from "@/modules/hsn/hsn";
 
 export function ProductsServicesView() {
   const [items, setItems] = useState<CatalogueItem[]>([]);
@@ -25,7 +27,7 @@ export function ProductsServicesView() {
     name: "",
     sku: "",
     description: "",
-    hsn_sac_code: "998315",
+    hsn_sac_code: "",
     unit_code: "OTH",
     default_unit_price: 10000,
     default_gst_rate: 18,
@@ -63,6 +65,11 @@ export function ProductsServicesView() {
     e.preventDefault();
     if (!formData.name.trim() || !formData.sku.trim()) {
       alert("Name and SKU are required");
+      return;
+    }
+    const hsnError = hsnCodeError(formData.hsn_sac_code);
+    if (hsnError) {
+      alert(hsnError);
       return;
     }
 
@@ -104,7 +111,7 @@ export function ProductsServicesView() {
         name: "",
         sku: "",
         description: "",
-        hsn_sac_code: "998315",
+        hsn_sac_code: "",
         unit_code: "OTH",
         default_unit_price: 10000,
         default_gst_rate: 18,
@@ -292,13 +299,12 @@ export function ProductsServicesView() {
           />
 
           <div className="grid grid-cols-3 gap-3">
-            <Input
+            <HsnCombobox
               label="HSN / SAC Code"
               value={formData.hsn_sac_code}
-              onChange={(e) =>
-                setFormData({ ...formData, hsn_sac_code: e.target.value })
-              }
-              placeholder="998315"
+              onChange={(code) => setFormData({ ...formData, hsn_sac_code: code })}
+              inputClassName="w-full h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
+              inputProps={{ placeholder: "Code or description" }}
             />
             <Input
               label="Unit (UQC)"
