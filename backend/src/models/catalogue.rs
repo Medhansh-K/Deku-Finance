@@ -11,6 +11,13 @@ pub struct CreateCatalogueItemRequest {
     pub default_unit_price: f64,
     pub default_gst_rate: f64,
     pub is_taxable: Option<bool>,
+    /// Goods only; the database refuses it for services.
+    pub track_inventory: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UpdateCatalogueItemRequest {
+    pub track_inventory: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

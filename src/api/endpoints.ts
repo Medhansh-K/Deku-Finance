@@ -39,6 +39,7 @@ export interface OrgSummary {
   pan?: string | null;
   financial_year_start_month: number;
   require_journal_approval?: boolean;
+  allow_negative_stock?: boolean;
   operating_mode?: "gst" | "pure";
   state_code?: string | null;
   registered_address?: RegisteredAddress | null;
@@ -57,6 +58,7 @@ export interface OrgSummary {
 /** Fields PATCH /organisations/:id/settings accepts; blank text clears a column. */
 export interface OrgSettingsUpdate {
   require_journal_approval?: boolean;
+  allow_negative_stock?: boolean;
   gstin?: string;
   operating_mode?: "gst" | "pure";
   state_code?: string;
@@ -177,6 +179,11 @@ export const catalogueApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }
+    ),
+  setTrackInventory: (orgId: string, itemId: string, trackInventory: boolean) =>
+    apiClient<ApiResponse<CatalogueItem[]>>(
+      `/api/v1/organisations/${orgId}/catalogue/${itemId}`,
+      { method: "PATCH", body: JSON.stringify({ track_inventory: trackInventory }) }
     ),
 };
 
@@ -801,5 +808,44 @@ export const gstApi = {
     apiClient<ApiResponse<unknown[]>>(`/api/v1/organisations/${orgId}/gst/${period}/${type}/filed`, {
       method: "PATCH",
       body: JSON.stringify({ arn }),
+    }),
+};
+
+type InventoryWarehouse = import("@/lib/inventory/stock").Warehouse;
+
+export const inventoryApi = {
+  summary: (orgId: string, asOf?: string) =>
+    apiClient<ApiResponse<import("@/lib/inventory/stock").StockSummaryRow[]>>(
+      `/api/v1/organisations/${orgId}/inventory/summary${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`
+    ),
+  ledger: (orgId: string, itemId: string, period?: { from?: string; to?: string }) => {
+    const q = new URLSearchParams();
+    if (period?.from) q.set("from", period.from);
+    if (period?.to) q.set("to", period.to);
+    const qs = q.toString();
+    return apiClient<ApiResponse<import("@/lib/inventory/stock").StockLedgerRow[]>>(
+      `/api/v1/organisations/${orgId}/inventory/items/${itemId}/ledger${qs ? `?${qs}` : ""}`
+    );
+  },
+  adjust: (orgId: string, payload: import("@/lib/inventory/stock").AdjustmentPayload) =>
+    apiClient<ApiResponse<{ movement_id: string; value: number | null; journal_entry_id: string | null; journal_status: string | null }>>(
+      `/api/v1/organisations/${orgId}/inventory/adjustments`,
+      { method: "POST", body: JSON.stringify(payload) }
+    ),
+  warehouses: (orgId: string) =>
+    apiClient<ApiResponse<InventoryWarehouse[]>>(`/api/v1/organisations/${orgId}/inventory/warehouses`),
+  createWarehouse: (orgId: string, payload: { name: string; code: string; is_default?: boolean }) =>
+    apiClient<ApiResponse<InventoryWarehouse[]>>(`/api/v1/organisations/${orgId}/inventory/warehouses`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  updateWarehouse: (orgId: string, id: string, payload: { name?: string; code?: string; is_default?: boolean }) =>
+    apiClient<ApiResponse<InventoryWarehouse[]>>(`/api/v1/organisations/${orgId}/inventory/warehouses/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  removeWarehouse: (orgId: string, id: string) =>
+    apiClient<ApiResponse<InventoryWarehouse[]>>(`/api/v1/organisations/${orgId}/inventory/warehouses/${id}`, {
+      method: "DELETE",
     }),
 };

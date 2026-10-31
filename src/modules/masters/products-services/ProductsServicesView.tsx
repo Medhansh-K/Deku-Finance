@@ -32,6 +32,7 @@ export function ProductsServicesView() {
     default_unit_price: 10000,
     default_gst_rate: 18,
     is_taxable: true,
+    track_inventory: false,
   });
 
   const [orgId, setOrgId] = useState<string>("");
@@ -85,6 +86,7 @@ export function ProductsServicesView() {
         default_unit_price: Number(formData.default_unit_price),
         default_gst_rate: Number(formData.default_gst_rate),
         is_taxable: formData.is_taxable,
+        track_inventory: formData.type === "goods" && formData.track_inventory,
       });
 
       logUserActivity({
@@ -116,12 +118,22 @@ export function ProductsServicesView() {
         default_unit_price: 10000,
         default_gst_rate: 18,
         is_taxable: true,
+        track_inventory: false,
       });
       await fetchItems();
     } catch (err: any) {
       alert(err.message || "Failed to create catalogue item");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const toggleTracking = async (item: CatalogueItem, on: boolean) => {
+    try {
+      await catalogueApi.setTrackInventory(orgId, item.id, on);
+      setItems((prev) => prev.map((it) => (it.id === item.id ? { ...it, track_inventory: on } : it)));
+    } catch (err: any) {
+      alert(err.message || "Failed to change inventory tracking");
     }
   };
 
@@ -192,6 +204,22 @@ export function ProductsServicesView() {
           {it.unit_code}
         </span>
       ),
+    },
+    {
+      header: "Track inventory",
+      cell: (it) =>
+        it.type === "goods" ? (
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label={`Track inventory for ${it.name}`}
+            checked={!!it.track_inventory}
+            onChange={(e) => toggleTracking(it, e.target.checked)}
+            className="h-4 w-4 accent-brand"
+          />
+        ) : (
+          <span className="text-ink-subtle">—</span>
+        ),
     },
   ];
 
@@ -341,6 +369,20 @@ export function ProductsServicesView() {
             prefixSymbol="₹"
             isNumeric
           />
+
+          {formData.type === "goods" && (
+            <label className="flex items-center gap-2 text-ink">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={formData.track_inventory}
+                onChange={(e) => setFormData({ ...formData, track_inventory: e.target.checked })}
+                className="h-4 w-4 accent-brand"
+              />
+              <span className="font-semibold">Track inventory</span>
+              <span className="text-ink-muted">Issued invoices and purchase bills move its stock.</span>
+            </label>
+          )}
 
           <div className="pt-3 flex justify-end gap-2 border-t border-line">
             <Button
