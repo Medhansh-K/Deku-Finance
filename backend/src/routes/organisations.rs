@@ -110,6 +110,7 @@ async fn get_organisation(
 #[derive(Debug, Deserialize)]
 pub struct UpdateSettingsRequest {
     pub require_journal_approval: Option<bool>,
+    pub allow_negative_stock: Option<bool>,
     pub gstin: Option<String>,
     pub operating_mode: Option<String>,
     pub state_code: Option<String>,
@@ -229,6 +230,9 @@ fn settings_body(p: UpdateSettingsRequest, now: &str) -> Result<serde_json::Map<
     }
     if let Some(v) = p.require_journal_approval {
         body.insert("require_journal_approval".into(), json!(v));
+    }
+    if let Some(v) = p.allow_negative_stock {
+        body.insert("allow_negative_stock".into(), json!(v));
     }
     if p.onboarded == Some(true) {
         body.insert("onboarded_at".into(), json!(now));

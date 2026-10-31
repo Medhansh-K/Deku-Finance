@@ -43,6 +43,15 @@ pub struct CreatePurchaseBillRequest {
     pub itc_eligibility: String,
     pub blocked_reason: Option<String>,
     pub journal_entry_id: Option<String>,
+    /// Optional item lines (migration 42); tracked items enter stock when the voucher is linked.
+    pub lines: Option<Vec<PurchaseBillLineRequest>>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PurchaseBillLineRequest {
+    pub item_id: String,
+    pub quantity: f64,
+    pub rate: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -103,6 +112,9 @@ async fn create_purchase_bill(
         return Err(AppError::BadRequest("supplier_gstin is required".into()));
     }
 
+    let lines = payload.lines.unwrap_or_default();
+    // Lines can only be added while the bill has no voucher, so link it after inserting them.
+    let initial_journal = if lines.is_empty() { payload.journal_entry_id.clone() } else { None };
     // Tax split, totals and GSTIN format are enforced by the table's CHECK constraints;
     // created_by is filled by the database from the caller's token.
     let body = json!({
@@ -121,12 +133,62 @@ async fn create_purchase_bill(
         "total_amount": payload.total_amount,
         "itc_eligibility": payload.itc_eligibility,
         "blocked_reason": payload.blocked_reason,
-        "journal_entry_id": payload.journal_entry_id,
+        "journal_entry_id": initial_journal,
     });
     let res = state
         .db
         .insert_table("purchase_bills", &body, token)
         .await?;
+    if lines.is_empty() {
+        return Ok(Json(json!({ "success": true, "data": res })));
+    }
+
+    let bill_id = res
+        .as_array()
+        .and_then(|arr| arr.first())
+        .and_then(|obj| obj.get("id"))
+        .and_then(|id| id.as_str())
+        .ok_or_else(|| AppError::Internal("Failed to extract created bill id".to_string()))?
+        .to_string();
+    let id_filter = format!("eq.{}", bill_id);
+    let lines_body: Vec<Value> = lines
+        .iter()
+        .map(|l| {
+            json!({
+                "organisation_id": org_id,
+                "bill_id": bill_id,
+                "item_id": l.item_id,
+                "quantity": l.quantity,
+                "rate": l.rate,
+            })
+        })
+        .collect();
+    if let Err(e) = state
+        .db
+        .insert_table("purchase_bill_lines", &json!(lines_body), token)
+        .await
+    {
+        // Don't leave a bill without its lines; the user retries with the same bill number.
+        let _ = state
+            .db
+            .delete_table("purchase_bills", &[("id", id_filter.as_str())], token)
+            .await;
+        return Err(e);
+    }
+    let res = match payload.journal_entry_id {
+        Some(journal_entry_id) => {
+            state
+                .db
+                .update_table(
+                    "purchase_bills",
+                    &[("id", id_filter.as_str())],
+                    &json!({ "journal_entry_id": journal_entry_id }),
+                    token,
+                )
+                .await?
+        }
+        None => res,
+    };
 
     Ok(Json(json!({ "success": true, "data": res })))
 }

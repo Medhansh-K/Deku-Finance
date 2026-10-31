@@ -93,6 +93,8 @@ export interface CatalogueItem {
   default_unit_price: number;
   default_gst_rate: number;
   is_taxable: boolean;
+  /** Goods only (migration 42): issued invoices and linked purchase bills move its stock. */
+  track_inventory?: boolean;
   is_active?: boolean;
   created_at?: string;
 }
