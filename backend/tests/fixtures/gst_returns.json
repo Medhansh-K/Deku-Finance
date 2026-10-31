@@ -531,7 +531,380 @@
       "itc_eligibility": "blocked_17_5",
       "blocked_reason": null,
       "journal_entry_id": null
-    }
+    },
+    "zero_rated_invoices": [
+      {
+        "invoice_number": "EXP-001",
+        "invoice_date": "2026-10-08",
+        "status": "issued",
+        "supply_type": "export",
+        "invoice_type": "export_with_payment",
+        "place_of_supply": "96-Other Countries",
+        "taxable_amount": 1000,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 180,
+        "cess_amount": 0,
+        "total_amount": 1180,
+        "parties": {
+          "gstin": null
+        },
+        "sales_invoice_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 1000,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 180,
+            "cess_amount": 0,
+            "total_amount": 1180
+          }
+        ],
+        "shipping_bill_number": "1234567",
+        "shipping_bill_date": "2026-10-09",
+        "port_code": "INNSA1"
+      },
+      {
+        "invoice_number": "EXP-002",
+        "invoice_date": "2026-10-09",
+        "status": "issued",
+        "supply_type": "export",
+        "invoice_type": "export_without_payment",
+        "place_of_supply": "96",
+        "taxable_amount": 500,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 500,
+        "parties": {
+          "gstin": null
+        },
+        "sales_invoice_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 2,
+            "taxable_amount": 500,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 500
+          }
+        ]
+      },
+      {
+        "invoice_number": "SEZ-001",
+        "invoice_date": "2026-10-11",
+        "status": "issued",
+        "supply_type": "inter_state",
+        "invoice_type": "sez_with_payment",
+        "place_of_supply": "29-Karnataka",
+        "taxable_amount": 2000,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 360,
+        "cess_amount": 0,
+        "total_amount": 2360,
+        "parties": {
+          "gstin": "29AABCT1332L1ZA"
+        },
+        "sales_invoice_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "9983",
+            "unit_code": "OTH",
+            "quantity": 1,
+            "taxable_amount": 2000,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 360,
+            "cess_amount": 0,
+            "total_amount": 2360
+          }
+        ]
+      },
+      {
+        "invoice_number": "SEZ-002",
+        "invoice_date": "2026-10-12",
+        "status": "issued",
+        "supply_type": "inter_state",
+        "invoice_type": "sez_without_payment",
+        "place_of_supply": "29",
+        "taxable_amount": 800,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 800,
+        "parties": {
+          "gstin": "29AABCT1332L1ZA"
+        },
+        "sales_invoice_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "9983",
+            "unit_code": "OTH",
+            "quantity": 1,
+            "taxable_amount": 800,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 800
+          }
+        ]
+      }
+    ],
+    "notes": [
+      {
+        "note_number": "CN-001",
+        "note_date": "2026-10-20",
+        "note_type": "credit",
+        "status": "issued",
+        "supply_type": "intra_state",
+        "place_of_supply": "27-Maharashtra",
+        "taxable_amount": 500,
+        "cgst_amount": 45,
+        "sgst_amount": 45,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 590,
+        "parties": {
+          "gstin": "29AABCT1332L1ZA"
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 500,
+            "gst_rate": 18,
+            "cgst_amount": 45,
+            "sgst_amount": 45,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 590
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "INV-001",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "tax_invoice",
+          "total_amount": 1994
+        }
+      },
+      {
+        "note_number": "DN-001",
+        "note_date": "2026-10-21",
+        "note_type": "debit",
+        "status": "issued",
+        "supply_type": "inter_state",
+        "place_of_supply": "07-Delhi",
+        "taxable_amount": 1000,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 180,
+        "cess_amount": 0,
+        "total_amount": 1180,
+        "parties": {
+          "gstin": null
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 1000,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 180,
+            "cess_amount": 0,
+            "total_amount": 1180
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "INV-090",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "tax_invoice",
+          "total_amount": 150000
+        }
+      },
+      {
+        "note_number": "CN-002",
+        "note_date": "2026-10-22",
+        "note_type": "credit",
+        "status": "issued",
+        "supply_type": "intra_state",
+        "place_of_supply": "27",
+        "taxable_amount": 100,
+        "cgst_amount": 9,
+        "sgst_amount": 9,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 118,
+        "parties": {
+          "gstin": null
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 100,
+            "gst_rate": 18,
+            "cgst_amount": 9,
+            "sgst_amount": 9,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 118
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "INV-003",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "tax_invoice",
+          "total_amount": 354.12
+        }
+      },
+      {
+        "note_number": "CN-003",
+        "note_date": "2026-10-23",
+        "note_type": "credit",
+        "status": "issued",
+        "supply_type": "export",
+        "place_of_supply": "96",
+        "taxable_amount": 200,
+        "cgst_amount": 0,
+        "sgst_amount": 0,
+        "igst_amount": 36,
+        "cess_amount": 0,
+        "total_amount": 236,
+        "parties": {
+          "gstin": null
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 200,
+            "gst_rate": 18,
+            "cgst_amount": 0,
+            "sgst_amount": 0,
+            "igst_amount": 36,
+            "cess_amount": 0,
+            "total_amount": 236
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "EXP-001",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "export_with_payment",
+          "total_amount": 1180
+        }
+      },
+      {
+        "note_number": "CN-004",
+        "note_date": "2026-10-24",
+        "note_type": "credit",
+        "status": "cancelled",
+        "supply_type": "intra_state",
+        "place_of_supply": "27",
+        "taxable_amount": 100,
+        "cgst_amount": 9,
+        "sgst_amount": 9,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 118,
+        "parties": {
+          "gstin": null
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 100,
+            "gst_rate": 18,
+            "cgst_amount": 9,
+            "sgst_amount": 9,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 118
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "INV-003",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "tax_invoice",
+          "total_amount": 354.12
+        }
+      },
+      {
+        "note_number": "CN-005",
+        "note_date": "2026-10-25",
+        "note_type": "credit",
+        "status": "draft",
+        "supply_type": "intra_state",
+        "place_of_supply": "27",
+        "taxable_amount": 100,
+        "cgst_amount": 9,
+        "sgst_amount": 9,
+        "igst_amount": 0,
+        "cess_amount": 0,
+        "total_amount": 118,
+        "parties": {
+          "gstin": null
+        },
+        "sales_note_lines": [
+          {
+            "line_number": 1,
+            "item_name": "item",
+            "hsn_sac_code": "8471",
+            "unit_code": "NOS",
+            "quantity": 1,
+            "taxable_amount": 100,
+            "gst_rate": 18,
+            "cgst_amount": 9,
+            "sgst_amount": 9,
+            "igst_amount": 0,
+            "cess_amount": 0,
+            "total_amount": 118
+          }
+        ],
+        "sales_invoices": {
+          "invoice_number": "INV-003",
+          "invoice_date": "2026-09-15",
+          "invoice_type": "tax_invoice",
+          "total_amount": 354.12
+        }
+      }
+    ]
   },
   "expected": {
     "gstr1": {
@@ -744,6 +1117,305 @@
           "csamt": 0
         }
       ]
+    },
+    "gstr1_zero_rated_and_notes": {
+      "gstin": "27AAPFU0939F1ZV",
+      "fp": "102026",
+      "b2b": [
+        {
+          "ctin": "29AABCT1332L1ZA",
+          "inv": [
+            {
+              "inum": "SEZ-001",
+              "idt": "11-10-2026",
+              "val": 2360,
+              "pos": "29",
+              "rchrg": "N",
+              "inv_typ": "SEWP",
+              "itms": [
+                {
+                  "num": 1801,
+                  "itm_det": {
+                    "rt": 18,
+                    "txval": 2000,
+                    "iamt": 360,
+                    "camt": 0,
+                    "samt": 0,
+                    "csamt": 0
+                  }
+                }
+              ]
+            },
+            {
+              "inum": "SEZ-002",
+              "idt": "12-10-2026",
+              "val": 800,
+              "pos": "29",
+              "rchrg": "N",
+              "inv_typ": "SEWOP",
+              "itms": [
+                {
+                  "num": 1801,
+                  "itm_det": {
+                    "rt": 18,
+                    "txval": 800,
+                    "iamt": 0,
+                    "camt": 0,
+                    "samt": 0,
+                    "csamt": 0
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "b2cs": [
+        {
+          "sply_ty": "INTRA",
+          "pos": "27",
+          "typ": "OE",
+          "rt": 18,
+          "txval": -100,
+          "iamt": 0,
+          "camt": -9,
+          "samt": -9,
+          "csamt": 0
+        }
+      ],
+      "nil": {
+        "inv": []
+      },
+      "hsn": {
+        "hsn_b2b": [
+          {
+            "num": 1,
+            "hsn_sc": "9983",
+            "uqc": "NA",
+            "qty": 0,
+            "rt": 18,
+            "txval": 2800,
+            "iamt": 360,
+            "camt": 0,
+            "samt": 0,
+            "csamt": 0
+          },
+          {
+            "num": 2,
+            "hsn_sc": "8471",
+            "uqc": "NOS",
+            "qty": -1,
+            "rt": 18,
+            "txval": -500,
+            "iamt": 0,
+            "camt": -45,
+            "samt": -45,
+            "csamt": 0
+          }
+        ],
+        "hsn_b2c": [
+          {
+            "num": 1,
+            "hsn_sc": "8471",
+            "uqc": "NOS",
+            "qty": 2,
+            "rt": 18,
+            "txval": 2200,
+            "iamt": 324,
+            "camt": -9,
+            "samt": -9,
+            "csamt": 0
+          }
+        ]
+      },
+      "doc_issue": {
+        "doc_det": [
+          {
+            "doc_num": 1,
+            "docs": [
+              {
+                "num": 1,
+                "from": "EXP-001",
+                "to": "EXP-002",
+                "totnum": 2,
+                "cancel": 0,
+                "net_issue": 2
+              },
+              {
+                "num": 2,
+                "from": "SEZ-001",
+                "to": "SEZ-002",
+                "totnum": 2,
+                "cancel": 0,
+                "net_issue": 2
+              }
+            ]
+          },
+          {
+            "doc_num": 4,
+            "docs": [
+              {
+                "num": 1,
+                "from": "DN-001",
+                "to": "DN-001",
+                "totnum": 1,
+                "cancel": 0,
+                "net_issue": 1
+              }
+            ]
+          },
+          {
+            "doc_num": 5,
+            "docs": [
+              {
+                "num": 1,
+                "from": "CN-001",
+                "to": "CN-004",
+                "totnum": 4,
+                "cancel": 1,
+                "net_issue": 3
+              }
+            ]
+          }
+        ]
+      },
+      "exp": [
+        {
+          "exp_typ": "WPAY",
+          "inv": [
+            {
+              "inum": "EXP-001",
+              "idt": "08-10-2026",
+              "val": 1180,
+              "sbpcode": "INNSA1",
+              "sbnum": "1234567",
+              "sbdt": "09-10-2026",
+              "itms": [
+                {
+                  "txval": 1000,
+                  "rt": 18,
+                  "iamt": 180,
+                  "csamt": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "exp_typ": "WOPAY",
+          "inv": [
+            {
+              "inum": "EXP-002",
+              "idt": "09-10-2026",
+              "val": 500,
+              "itms": [
+                {
+                  "txval": 500,
+                  "rt": 18,
+                  "iamt": 0,
+                  "csamt": 0
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "cdnr": [
+        {
+          "ctin": "29AABCT1332L1ZA",
+          "nt": [
+            {
+              "ntty": "C",
+              "nt_num": "CN-001",
+              "nt_dt": "20-10-2026",
+              "val": 590,
+              "pos": "27",
+              "rchrg": "N",
+              "inv_typ": "R",
+              "itms": [
+                {
+                  "num": 1801,
+                  "itm_det": {
+                    "rt": 18,
+                    "txval": 500,
+                    "iamt": 0,
+                    "camt": 45,
+                    "samt": 45,
+                    "csamt": 0
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "cdnur": [
+        {
+          "ntty": "D",
+          "nt_num": "DN-001",
+          "nt_dt": "21-10-2026",
+          "val": 1180,
+          "typ": "B2CL",
+          "pos": "07",
+          "itms": [
+            {
+              "num": 1801,
+              "itm_det": {
+                "rt": 18,
+                "txval": 1000,
+                "iamt": 180,
+                "csamt": 0
+              }
+            }
+          ]
+        },
+        {
+          "ntty": "C",
+          "nt_num": "CN-003",
+          "nt_dt": "23-10-2026",
+          "val": 236,
+          "typ": "EXPWP",
+          "itms": [
+            {
+              "num": 1801,
+              "itm_det": {
+                "rt": 18,
+                "txval": 200,
+                "iamt": 36,
+                "csamt": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "gstr3b_zero_rated_and_notes_sup": {
+      "sup_details": {
+        "osup_det": {
+          "txval": 12400.2,
+          "iamt": 1980.02,
+          "camt": 120.01,
+          "samt": 120.01,
+          "csamt": 0
+        },
+        "osup_zero": {
+          "txval": 4100,
+          "iamt": 504,
+          "csamt": 0
+        },
+        "osup_nil_exmp": {
+          "txval": 0
+        }
+      },
+      "inter_sup": {
+        "unreg_details": [
+          {
+            "pos": "07",
+            "txval": 11000.1,
+            "iamt": 1980.02
+          }
+        ]
+      }
     }
   }
 }

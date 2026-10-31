@@ -3,6 +3,7 @@ import { buildGstr1, buildGstr3b, ReturnInvoice } from "@/lib/gst/returns";
 import type { Account, JournalEntry } from "@/types/accounting";
 import type { PurchaseBill } from "@/lib/purchases/bills";
 // Shared with the Rust port (backend/src/gst/mod.rs tests), so both must produce the same JSON.
+// The fixture's zero-rated invoice and credit/debit note cases are tested in Rust only, the authority.
 import fixture from "../backend/tests/fixtures/gst_returns.json";
 
 const f = fixture as unknown as {

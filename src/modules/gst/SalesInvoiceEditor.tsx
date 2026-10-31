@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { invoicesApi } from "@/api/endpoints";
 import { useAuth } from "@/context/AuthContext";
-import { CreateInvoiceRequest, Party } from "@/types/accounting";
+import { CreateInvoiceRequest, InvoiceType, Party } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
@@ -38,6 +38,18 @@ interface EditorLine {
   gst_rate: string;
 }
 
+export const INVOICE_TYPES: ReadonlyArray<{ value: InvoiceType; label: string }> = [
+  { value: "tax_invoice", label: "Tax invoice" },
+  { value: "bill_of_supply", label: "Bill of supply" },
+  { value: "export_with_payment", label: "Export with payment of IGST" },
+  { value: "export_without_payment", label: "Export under LUT/bond (no IGST)" },
+  { value: "sez_with_payment", label: "SEZ supply with payment of IGST" },
+  { value: "sez_without_payment", label: "SEZ supply under LUT/bond (no IGST)" },
+];
+// Same list as chk_sales_invoices_untaxed_types (migration 32).
+const UNTAXED: ReadonlyArray<InvoiceType> = ["bill_of_supply", "export_without_payment", "sez_without_payment"];
+const EXPORT_POS = "96-Other Countries";
+
 const blankLine = (): EditorLine => ({ item_name: "", hsn_sac_code: "", quantity: "1", unit_price: "", gst_rate: "18" });
 const GST_RATES = ["0", "0.25", "3", "5", "12", "18", "28"];
 const rs = (paise: number) => formatINR(paise / 100);
@@ -63,6 +75,13 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   const [dueDate, setDueDate] = useState(() => toISODateString());
   const [posCode, setPosCode] = useState("");
   const [salesChannel, setSalesChannel] = useState<SalesChannel>("direct");
+  // A company outside GST ('pure' mode) can't charge tax, so it issues bills of supply.
+  const [invoiceType, setInvoiceType] = useState<InvoiceType>(() =>
+    organisation?.operating_mode === "pure_accounting" ? "bill_of_supply" : "tax_invoice"
+  );
+  const [shippingBillNumber, setShippingBillNumber] = useState("");
+  const [shippingBillDate, setShippingBillDate] = useState("");
+  const [portCode, setPortCode] = useState("");
   const [roundToRupee, setRoundToRupee] = useState(true);
   const [lines, setLines] = useState<EditorLine[]>([blankLine()]);
   const [errors, setErrors] = useState<string[]>([]);
@@ -81,17 +100,26 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   const settlement = settlementFromOrg(organisation);
   const customer = customers.find((c) => c.id === customerId);
   const companyGstin = organisation?.gstin ?? "";
-  const companyState = isValidGstin(companyGstin) ? stateCodeOf(companyGstin) : "";
-  const interState = !!companyState && !!posCode && isInterState(companyState, posCode);
+  const isExport = invoiceType.startsWith("export");
+  const isSez = invoiceType.startsWith("sez");
+  const untaxed = UNTAXED.includes(invoiceType);
+  // A bill of supply needs no GSTIN; its state comes from the company profile.
+  const companyState = isValidGstin(companyGstin)
+    ? stateCodeOf(companyGstin)
+    : invoiceType === "bill_of_supply"
+      ? (organisation?.state_code ?? "")
+      : "";
+  // Exports and SEZ supplies are inter-state by law (IGST Act s.7(5)).
+  const interState = isExport || isSez || (!!companyState && !!posCode && isInterState(companyState, posCode));
   const payee = settlement.beneficiaryName || organisation?.legal_name || organisation?.name || "";
 
   const summary = useMemo(
     () =>
       computeTaxSummary(
-        lines.map((l) => ({ quantity: Number(l.quantity), unitPrice: Number(l.unit_price), gstRate: Number(l.gst_rate) })),
+        lines.map((l) => ({ quantity: Number(l.quantity), unitPrice: Number(l.unit_price), gstRate: untaxed ? 0 : Number(l.gst_rate) })),
         { interState, roundToRupee }
       ),
-    [lines, interState, roundToRupee]
+    [lines, interState, roundToRupee, untaxed]
   );
 
   const settlementErrs = settlementErrors(settlement);
@@ -117,8 +145,15 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
     if (!dueDate) msgs.push("Enter the due date.");
     else if (invoiceDate && dueDate < invoiceDate) msgs.push("Due date can't be before the invoice date.");
     if (!companyState)
-      msgs.push("Your company has no valid GSTIN, so CGST/SGST or IGST can't be decided. Add it to the company first.");
-    if (!posCode) msgs.push("Choose the place of supply.");
+      msgs.push(
+        invoiceType === "bill_of_supply"
+          ? "Add your company's state to the company profile first."
+          : "Your company has no valid GSTIN, so CGST/SGST or IGST can't be decided. Add it to the company first."
+      );
+    if (!isExport && !posCode) msgs.push("Choose the place of supply.");
+    if (isSez && !customer?.gstin) msgs.push("An SEZ supply needs the SEZ unit's GSTIN on the customer.");
+    if (portCode.trim() && !/^[A-Z0-9]{6}$/.test(portCode.trim()))
+      msgs.push("Port code is six letters or digits, e.g. INNSA1.");
     lines.forEach((l, i) => {
       const n = i + 1;
       if (!l.item_name.trim()) msgs.push(`Line ${n}: enter the item or service.`);
@@ -142,9 +177,15 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
       invoice_number: invoiceNumber.trim(),
       invoice_date: invoiceDate,
       due_date: dueDate,
-      supply_type: interState ? "inter_state" : "intra_state",
-      place_of_supply: placeOfSupplyLabel(posCode),
+      supply_type: isExport ? "export" : interState ? "inter_state" : "intra_state",
+      place_of_supply: isExport ? EXPORT_POS : placeOfSupplyLabel(posCode),
       sales_channel: salesChannel,
+      invoice_type: invoiceType,
+      ...(isExport && {
+        shipping_bill_number: shippingBillNumber.trim() || undefined,
+        shipping_bill_date: shippingBillDate || undefined,
+        port_code: portCode.trim() || undefined,
+      }),
       taxable_amount: summary.taxable / 100,
       round_off: summary.roundOff / 100,
       total_amount: summary.grandTotal / 100,
@@ -160,12 +201,13 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
           unit_price: toPaise(Number(l.unit_price)) / 100,
           discount_amount: 0,
           taxable_amount: t.taxable / 100,
-          gst_rate: rate,
-          cgst_rate: cgstRate(rate),
+          // A bill of supply has no rate; LUT/bond supplies keep the applicable rate with no tax.
+          gst_rate: invoiceType === "bill_of_supply" ? 0 : rate,
+          cgst_rate: untaxed ? 0 : cgstRate(rate),
           cgst_amount: t.cgst / 100,
-          sgst_rate: cgstRate(rate),
+          sgst_rate: untaxed ? 0 : cgstRate(rate),
           sgst_amount: t.sgst / 100,
-          igst_rate: interState ? rate : 0,
+          igst_rate: interState && !untaxed ? rate : 0,
           igst_amount: t.igst / 100,
           cess_rate: 0,
           cess_amount: t.cess / 100,
@@ -207,7 +249,12 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
     }
   };
 
-  const supplyNote = !companyState
+  const typeLabel = INVOICE_TYPES.find((t) => t.value === invoiceType)?.label ?? "Invoice";
+  const supplyNote = untaxed
+    ? `${typeLabel}: no tax is charged.`
+    : isExport
+      ? "Export with payment: IGST"
+      : !companyState
     ? "Add your company GSTIN to decide CGST/SGST or IGST."
     : !posCode
       ? "Choose a place of supply."
@@ -220,7 +267,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
       <div className="rounded-lg border border-line bg-surface p-5 shadow-card space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-2 border-b border-line pb-3">
           <div>
-            <h3 className="text-sm font-semibold text-ink">New sales invoice</h3>
+            <h3 className="text-sm font-semibold text-ink">New {typeLabel.toLowerCase()}</h3>
             <p className="text-xs text-ink-muted">Saved as a draft. Issuing it posts the journal to your ledger.</p>
           </div>
           <p className="text-[11px] text-ink-muted" aria-label="Keyboard shortcuts">
@@ -231,6 +278,26 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="space-y-1">
+            <label htmlFor="inv-type" className="block text-xs font-medium text-ink-soft">Invoice type</label>
+            <select id="inv-type" value={invoiceType} onChange={(e) => setInvoiceType(e.target.value as InvoiceType)} className={selectClass}>
+              {INVOICE_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          {isExport && (
+            <>
+              <Input id="inv-sb-number" label="Shipping bill number (optional)" value={shippingBillNumber}
+                onChange={(e) => setShippingBillNumber(e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <Input id="inv-sb-date" label="Shipping bill date" type="date" value={shippingBillDate}
+                  onChange={(e) => setShippingBillDate(e.target.value)} />
+                <Input id="inv-port" label="Port code" value={portCode} maxLength={6}
+                  onChange={(e) => setPortCode(e.target.value.toUpperCase())} />
+              </div>
+            </>
+          )}
           <div className="space-y-1">
             <label htmlFor="inv-customer" className="block text-xs font-medium text-ink-soft">Customer</label>
             <select id="inv-customer" value={customerId} onChange={(e) => chooseCustomer(e.target.value)} className={selectClass}>
@@ -250,8 +317,9 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
           </div>
           <div className="space-y-1">
             <label htmlFor="inv-pos" className="block text-xs font-medium text-ink-soft">Place of supply</label>
-            <select id="inv-pos" value={posCode} onChange={(e) => setPosCode(e.target.value)} className={selectClass}>
-              <option value="">Select a state</option>
+            <select id="inv-pos" value={isExport ? "" : posCode} onChange={(e) => setPosCode(e.target.value)} className={selectClass}
+              disabled={isExport}>
+              <option value="">{isExport ? "96 Other Countries (export)" : "Select a state"}</option>
               {GST_STATES.map(([code, name]) => (
                 <option key={code} value={code}>
                   {code} {name}

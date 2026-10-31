@@ -57,9 +57,12 @@ pub struct InvoiceLine {
 }
 
 /// A sales invoice (migration 7) with `parties(gstin)` and `sales_invoice_lines(*)` embedded.
+/// A sales note row (migration 31) reads into the same shape through the aliases.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Invoice {
+    #[serde(alias = "note_number")]
     pub invoice_number: String,
+    #[serde(alias = "note_date")]
     pub invoice_date: String,
     pub status: String,
     pub supply_type: String,
@@ -77,7 +80,32 @@ pub struct Invoice {
     #[serde(default, deserialize_with = "de_num")]
     pub total_amount: f64,
     pub parties: Option<Party>,
+    #[serde(alias = "sales_note_lines")]
     pub sales_invoice_lines: Option<Vec<InvoiceLine>>,
+    /// Migration 32; rows from before it read as "tax_invoice".
+    pub invoice_type: Option<String>,
+    pub shipping_bill_number: Option<String>,
+    pub shipping_bill_date: Option<String>,
+    pub port_code: Option<String>,
+}
+
+/// The invoice a note adjusts, embedded as `sales_invoices(...)`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct NoteInvoice {
+    pub invoice_number: String,
+    pub invoice_type: Option<String>,
+    #[serde(default, deserialize_with = "de_num")]
+    pub total_amount: f64,
+}
+
+/// A credit or debit note (migration 31) with `parties(gstin)`, `sales_note_lines(*)` and its
+/// original `sales_invoices(...)` embedded.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Note {
+    #[serde(flatten)]
+    pub doc: Invoice,
+    pub note_type: String,
+    pub sales_invoices: Option<NoteInvoice>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -147,6 +175,9 @@ pub struct Books {
     /// The purchase register; when it has bills for the period, Table 4 comes from them.
     #[serde(default)]
     pub purchase_bills: Vec<PurchaseBill>,
+    /// Credit and debit notes dated in the period, any status.
+    #[serde(default)]
+    pub notes: Vec<Note>,
 }
 
 // ---------- Output ----------
@@ -195,6 +226,18 @@ impl Amounts {
             "samt": rupee(self.samt),
             "csamt": rupee(self.csamt),
         })
+    }
+    fn scaled(&self, k: i64) -> Amounts {
+        Amounts {
+            txval: self.txval * k,
+            iamt: self.iamt * k,
+            camt: self.camt * k,
+            samt: self.samt * k,
+            csamt: self.csamt * k,
+        }
+    }
+    fn negative(&self) -> bool {
+        self.txval < 0 || self.iamt < 0 || self.camt < 0 || self.samt < 0 || self.csamt < 0
     }
     fn tax_only(&self) -> Value {
         json!({
@@ -350,6 +393,8 @@ struct Checked<'a> {
     ctin: Option<String>,
     pos: String,
     total: Amounts,
+    /// invoice_type of the invoice, or of the original invoice for a note.
+    typ: &'a str,
 }
 
 fn period_invoices<'a>(invoices: &'a [Invoice], p: &str) -> impl Iterator<Item = &'a Invoice> + 'a {
@@ -357,6 +402,124 @@ fn period_invoices<'a>(invoices: &'a [Invoice], p: &str) -> impl Iterator<Item =
     invoices
         .iter()
         .filter(move |i| i.status != "draft" && i.status != "cancelled" && in_period(&i.invoice_date, &p))
+}
+
+fn invoice_type(t: Option<&str>) -> &str {
+    t.unwrap_or("tax_invoice")
+}
+
+/// Rule 49 bill of supply, and exports / SEZ supplies under LUT or bond: no tax is charged.
+fn untaxed_type(t: &str) -> bool {
+    matches!(t, "bill_of_supply" | "export_without_payment" | "sez_without_payment")
+}
+
+/// Exports and SEZ supplies (3.1(b), GSTR-1 6A/6B).
+fn zero_rated(c: &Checked) -> bool {
+    c.inv.supply_type == "export" || c.typ.starts_with("sez_")
+}
+
+fn exempt(c: &Checked) -> bool {
+    c.inv.supply_type == "exempt" || c.typ == "bill_of_supply"
+}
+
+/// One invoice or note: every reason it can't be reported, or the figures that are.
+fn check_doc<'a>(inv: &'a Invoice, typ: &'a str, own_state: &str) -> Result<Checked<'a>, Vec<String>> {
+    let mut errs: Vec<String> = Vec::new();
+    let pos = pos_code(inv.place_of_supply.as_deref().unwrap_or(""));
+    // 96 is GSTN's code for "Other Countries", the place of supply of an export.
+    if !is_state_code(&pos) && !(inv.supply_type == "export" && pos == "96") {
+        errs.push("place of supply is missing or has no valid state code".into());
+    }
+
+    let ctin = upper_trim(inv.parties.as_ref().and_then(|p| p.gstin.as_deref()));
+    if let Some(c) = &ctin {
+        if !is_valid_gstin(c) {
+            errs.push(format!("customer GSTIN {} is not valid", c));
+        }
+    }
+
+    let lines = inv.sales_invoice_lines.as_deref().unwrap_or(&[]);
+    if lines.is_empty() {
+        errs.push("has no line items".into());
+    }
+    // Zero-rated under LUT/bond keeps the applicable rate on the line but charges no tax.
+    let untaxed = untaxed_type(typ) || (inv.supply_type == "export" && typ != "export_with_payment");
+    let mut total = Amounts::default();
+    for l in lines {
+        let a = line_amounts(l);
+        total.add(&a);
+        if !is_hsn(l.hsn_sac_code.as_deref().unwrap_or("").trim()) {
+            errs.push(format!("line {} has no valid HSN/SAC code", l.line_number));
+        }
+        let expected = (a.txval as f64 * l.gst_rate / 100.0).round() as i64;
+        // GSTN tolerates up to ₹1 difference between tax and taxable value x rate.
+        if !untaxed && (a.iamt + a.camt + a.samt - expected).abs() > 100 {
+            errs.push(format!(
+                "line {} tax does not match {}% of the taxable value",
+                l.line_number,
+                num(l.gst_rate)
+            ));
+        }
+    }
+
+    if !lines.is_empty() {
+        let header = [
+            (paise(inv.taxable_amount), total.txval, "taxable value"),
+            (paise(inv.cgst_amount), total.camt, "CGST"),
+            (paise(inv.sgst_amount), total.samt, "SGST"),
+            (paise(inv.igst_amount), total.iamt, "IGST"),
+            (paise(inv.cess_amount), total.csamt, "cess"),
+        ];
+        for (h, t, label) in header {
+            if h != t {
+                errs.push(format!("{} {} does not equal the sum of its lines {}", label, inr(h), inr(t)));
+            }
+        }
+    }
+
+    match inv.supply_type.as_str() {
+        "intra_state" => {
+            if total.iamt != 0 {
+                errs.push("is intra-state but carries IGST".into());
+            }
+            if total.camt != total.samt {
+                errs.push("is intra-state but CGST and SGST differ".into());
+            }
+            if !own_state.is_empty() && !pos.is_empty() && pos != own_state {
+                errs.push(format!(
+                    "is intra-state but place of supply {} differs from the company's state {}",
+                    pos, own_state
+                ));
+            }
+        }
+        "inter_state" => {
+            if total.camt != 0 || total.samt != 0 {
+                errs.push("is inter-state but carries CGST/SGST".into());
+            }
+            if !own_state.is_empty() && pos == own_state {
+                errs.push(format!("is inter-state but place of supply {} is the company's own state", pos));
+            }
+        }
+        "export" | "exempt" => {
+            let igst_ok = typ == "export_with_payment";
+            if (total.iamt != 0 && !igst_ok) || total.camt != 0 || total.samt != 0 {
+                errs.push(format!("is {} but carries tax", inv.supply_type));
+            }
+        }
+        other => errs.push(format!("has unknown supply type \"{}\"", other)),
+    }
+    if untaxed_type(typ) && total.iamt + total.camt + total.samt + total.csamt != 0 {
+        errs.push(format!("is a {} but carries tax", typ.replace('_', " ")));
+    }
+    if typ.starts_with("sez_") && ctin.is_none() {
+        errs.push("is an SEZ supply but the customer has no GSTIN".into());
+    }
+
+    if errs.is_empty() {
+        Ok(Checked { inv, ctin, pos, total, typ })
+    } else {
+        Err(errs)
+    }
 }
 
 /// Validations shared by both returns: (errors, company GSTIN, invoices that passed).
@@ -380,94 +543,41 @@ fn check(b: &Books) -> (Vec<String>, String, Vec<Checked<'_>>) {
     }
 
     for inv in period_invoices(&b.invoices, &b.ret_period) {
-        let mut errs: Vec<String> = Vec::new();
-        let pos = pos_code(inv.place_of_supply.as_deref().unwrap_or(""));
-        if !is_state_code(&pos) {
-            errs.push("place of supply is missing or has no valid state code".into());
-        }
-
-        let ctin = upper_trim(inv.parties.as_ref().and_then(|p| p.gstin.as_deref()));
-        if let Some(c) = &ctin {
-            if !is_valid_gstin(c) {
-                errs.push(format!("customer GSTIN {} is not valid", c));
-            }
-        }
-
-        let lines = inv.sales_invoice_lines.as_deref().unwrap_or(&[]);
-        if lines.is_empty() {
-            errs.push("has no line items".into());
-        }
-        let mut total = Amounts::default();
-        for l in lines {
-            let a = line_amounts(l);
-            total.add(&a);
-            if !is_hsn(l.hsn_sac_code.as_deref().unwrap_or("").trim()) {
-                errs.push(format!("line {} has no valid HSN/SAC code", l.line_number));
-            }
-            let expected = (a.txval as f64 * l.gst_rate / 100.0).round() as i64;
-            // GSTN tolerates up to ₹1 difference between tax and taxable value x rate.
-            if (a.iamt + a.camt + a.samt - expected).abs() > 100 {
-                errs.push(format!(
-                    "line {} tax does not match {}% of the taxable value",
-                    l.line_number,
-                    num(l.gst_rate)
-                ));
-            }
-        }
-
-        if !lines.is_empty() {
-            let header = [
-                (paise(inv.taxable_amount), total.txval, "taxable value"),
-                (paise(inv.cgst_amount), total.camt, "CGST"),
-                (paise(inv.sgst_amount), total.samt, "SGST"),
-                (paise(inv.igst_amount), total.iamt, "IGST"),
-                (paise(inv.cess_amount), total.csamt, "cess"),
-            ];
-            for (h, t, label) in header {
-                if h != t {
-                    errs.push(format!("{} {} does not equal the sum of its lines {}", label, inr(h), inr(t)));
-                }
-            }
-        }
-
-        match inv.supply_type.as_str() {
-            "intra_state" => {
-                if total.iamt != 0 {
-                    errs.push("is intra-state but carries IGST".into());
-                }
-                if total.camt != total.samt {
-                    errs.push("is intra-state but CGST and SGST differ".into());
-                }
-                if !own_state.is_empty() && !pos.is_empty() && pos != own_state {
-                    errs.push(format!(
-                        "is intra-state but place of supply {} differs from the company's state {}",
-                        pos, own_state
-                    ));
-                }
-            }
-            "inter_state" => {
-                if total.camt != 0 || total.samt != 0 {
-                    errs.push("is inter-state but carries CGST/SGST".into());
-                }
-                if !own_state.is_empty() && pos == own_state {
-                    errs.push(format!("is inter-state but place of supply {} is the company's own state", pos));
-                }
-            }
-            "export" | "exempt" => {
-                if total.iamt != 0 || total.camt != 0 || total.samt != 0 {
-                    errs.push(format!("is {} but carries tax", inv.supply_type));
-                }
-            }
-            other => errs.push(format!("has unknown supply type \"{}\"", other)),
-        }
-
-        if errs.is_empty() {
-            checked.push(Checked { inv, ctin, pos, total });
-        } else {
-            errors.extend(errs.iter().map(|e| format!("Invoice {}: {}.", inv.invoice_number, e)));
+        match check_doc(inv, invoice_type(inv.invoice_type.as_deref()), &own_state) {
+            Ok(c) => checked.push(c),
+            Err(errs) => errors.extend(errs.iter().map(|e| format!("Invoice {}: {}.", inv.invoice_number, e))),
         }
     }
     (errors, gstin, checked)
+}
+
+/// Issued notes dated in the period, checked like invoices but with their original's invoice type.
+fn check_notes<'a>(b: &'a Books, errors: &mut Vec<String>) -> Vec<(Checked<'a>, &'a Note)> {
+    let mut out = Vec::new();
+    if !is_ret_period(&b.ret_period) {
+        return out;
+    }
+    let own_state = first2(&upper_trim(b.gstin.as_deref()).unwrap_or_default());
+    let issued = b.notes.iter().filter(|n| n.doc.status == "issued" && in_period(&n.doc.invoice_date, &b.ret_period));
+    for n in issued {
+        let label = |e: &str| format!("Note {}: {}.", n.doc.invoice_number, e);
+        let Some(orig) = &n.sales_invoices else {
+            errors.push(label("its original invoice is not readable"));
+            continue;
+        };
+        if n.note_type != "credit" && n.note_type != "debit" {
+            errors.push(label(format!("has unknown note type \"{}\"", n.note_type).as_str()));
+            continue;
+        }
+        match check_doc(&n.doc, invoice_type(orig.invoice_type.as_deref()), &own_state) {
+            Ok(c) if exempt(&c) => {
+                errors.push(label("notes against exempt or bill-of-supply invoices are not supported yet"))
+            }
+            Ok(c) => out.push((c, n)),
+            Err(errs) => errors.extend(errs.iter().map(|e| label(e.as_str()))),
+        }
+    }
+    out
 }
 
 // ---------- GSTR-1 ----------
@@ -506,25 +616,91 @@ struct HsnKey {
     rt: f64,
 }
 
+type HsnRows = Vec<(HsnKey, (Amounts, i64))>;
+
+/// Table 12 rows; a credit note (sign -1) takes its lines back out.
+fn add_hsn(hsn: &mut HsnRows, lines: &[InvoiceLine], b2b: bool, sign: i64) {
+    for l in lines {
+        let code = l.hsn_sac_code.as_deref().unwrap_or("").trim().to_string();
+        let service = code.starts_with("99");
+        // Services have no quantity: GSTN wants UQC "NA" and qty 0.
+        let uqc = if service { "NA".to_string() } else { l.unit_code.clone().unwrap_or_default() };
+        let h = bucket(hsn, HsnKey { b2b, code, uqc, rt: l.gst_rate });
+        h.0.add(&line_amounts(l).scaled(sign));
+        if !service {
+            h.1 += sign * (l.quantity * 10000.0).round() as i64;
+        }
+    }
+}
+
+fn by_rate(lines: &[InvoiceLine]) -> Vec<(f64, Amounts)> {
+    let mut out: Vec<(f64, Amounts)> = Vec::new();
+    for l in lines {
+        bucket(&mut out, l.gst_rate).add(&line_amounts(l));
+    }
+    out
+}
+
+/// b2b / cdnr items: `{ num, itm_det: { rt, txval, iamt, camt, samt, csamt } }`.
+fn b2b_items(rates: &[(f64, Amounts)]) -> Vec<Value> {
+    rates
+        .iter()
+        .map(|(rt, a)| json!({ "num": item_num(*rt), "itm_det": merge(json!({ "rt": num(*rt) }), a.rupees()) }))
+        .collect()
+}
+
+fn b2b_inv_typ(typ: &str) -> &'static str {
+    match typ {
+        "sez_with_payment" => "SEWP",
+        "sez_without_payment" => "SEWOP",
+        _ => "R",
+    }
+}
+
+/// Table 13 rows, one per series: the number without its trailing digits (INV-0001 -> INV-).
+fn doc_rows<'a>(docs: impl Iterator<Item = (&'a str, bool)>) -> Vec<Value> {
+    let mut series: Vec<(String, Vec<(&'a str, bool)>)> = Vec::new();
+    for (n, cancelled) in docs {
+        bucket(&mut series, n.trim_end_matches(|c: char| c.is_ascii_digit()).to_string()).push((n, cancelled));
+    }
+    series
+        .iter()
+        .enumerate()
+        .map(|(idx, (_, nums))| {
+            let mut sorted: Vec<&str> = nums.iter().map(|(n, _)| *n).collect();
+            sorted.sort_by(|a, b| doc_order(a, b));
+            let cancel = nums.iter().filter(|(_, c)| *c).count();
+            json!({
+                "num": idx + 1,
+                "from": sorted[0],
+                "to": sorted[sorted.len() - 1],
+                "totnum": nums.len(),
+                "cancel": cancel,
+                "net_issue": nums.len() - cancel,
+            })
+        })
+        .collect()
+}
+
 pub fn build_gstr1(b: &Books) -> ReturnResult {
     let (mut errors, gstin, checked) = check(b);
+    let notes = check_notes(b, &mut errors);
     let own_state = first2(&gstin);
 
     let mut b2b: Vec<(String, Vec<Value>)> = Vec::new();
     let mut b2cs: Vec<((&str, String, f64), Amounts)> = Vec::new();
     let mut nil: Vec<(String, i64)> = Vec::new();
-    let mut hsn: Vec<(HsnKey, (Amounts, i64))> = Vec::new();
+    let mut hsn: HsnRows = Vec::new();
+    let mut exp: Vec<(&str, Vec<Value>)> = Vec::new();
+    let mut cdnr: Vec<(String, Vec<Value>)> = Vec::new();
+    let mut cdnur: Vec<Value> = Vec::new();
     let (mut sum_b2b, mut sum_b2cs, mut sum_nil) = (Amounts::default(), Amounts::default(), Amounts::default());
+    let (mut sum_exp, mut sum_sez) = (Amounts::default(), Amounts::default());
+    let (mut sum_cdnr, mut sum_cdnur) = (Amounts::default(), Amounts::default());
 
-    for Checked { inv, ctin, pos, total } in &checked {
+    for c in &checked {
+        let Checked { inv, ctin, pos, total, typ } = c;
         let lines = inv.sales_invoice_lines.as_deref().unwrap_or(&[]);
-        if inv.supply_type == "export" {
-            errors.push(format!(
-                "Invoice {}: export invoices (Table 6A) are not supported yet.",
-                inv.invoice_number
-            ));
-            continue;
-        }
         if ctin.is_none() && inv.supply_type == "inter_state" && paise(inv.total_amount) > B2CL_LIMIT {
             errors.push(format!(
                 "Invoice {}: inter-state B2C invoice above ₹1 lakh (B2CL) is not supported yet.",
@@ -533,21 +709,37 @@ pub fn build_gstr1(b: &Books) -> ReturnResult {
             continue;
         }
 
-        for l in lines {
-            let code = l.hsn_sac_code.as_deref().unwrap_or("").trim().to_string();
-            let service = code.starts_with("99");
-            // Services have no quantity: GSTN wants UQC "NA" and qty 0.
-            let uqc = if service { "NA".to_string() } else { l.unit_code.clone().unwrap_or_default() };
-            let key = HsnKey { b2b: ctin.is_some(), code, uqc, rt: l.gst_rate };
-            let h = bucket(&mut hsn, key);
-            h.0.add(&line_amounts(l));
-            if !service {
-                h.1 += (l.quantity * 10000.0).round() as i64;
+        add_hsn(&mut hsn, lines, ctin.is_some(), 1);
+        let rates = by_rate(lines);
+
+        if inv.supply_type == "export" {
+            let mut row = json!({
+                "inum": inv.invoice_number,
+                "idt": iso_to_gst_date(&inv.invoice_date),
+                "val": rupee(paise(inv.total_amount)),
+                "itms": rates.iter().map(|(rt, a)| json!({
+                    "txval": rupee(a.txval), "rt": num(*rt), "iamt": rupee(a.iamt), "csamt": rupee(a.csamt)
+                })).collect::<Vec<_>>(),
+            });
+            // The shipping bill often arrives after the invoice; the schema leaves it optional.
+            let shipping = [
+                ("sbpcode", inv.port_code.clone()),
+                ("sbnum", inv.shipping_bill_number.clone()),
+                ("sbdt", inv.shipping_bill_date.as_deref().map(iso_to_gst_date)),
+            ];
+            for (key, v) in shipping {
+                if let Some(v) = v.filter(|v| !v.trim().is_empty()) {
+                    row[key] = json!(v);
+                }
             }
+            let exp_typ = if *typ == "export_with_payment" { "WPAY" } else { "WOPAY" };
+            bucket(&mut exp, exp_typ).push(row);
+            sum_exp.add(total);
+            continue;
         }
 
         let inter = inv.supply_type == "inter_state" || *pos != own_state;
-        if inv.supply_type == "exempt" {
+        if exempt(c) {
             let key = format!(
                 "{}{}",
                 if inter { "INTR" } else { "INTRA" },
@@ -558,47 +750,77 @@ pub fn build_gstr1(b: &Books) -> ReturnResult {
             continue;
         }
 
-        let mut by_rate: Vec<(f64, Amounts)> = Vec::new();
-        for l in lines {
-            bucket(&mut by_rate, l.gst_rate).add(&line_amounts(l));
-        }
-
         if let Some(ctin) = ctin {
-            let itms: Vec<Value> = by_rate
-                .iter()
-                .map(|(rt, a)| json!({ "num": item_num(*rt), "itm_det": merge(json!({ "rt": num(*rt) }), a.rupees()) }))
-                .collect();
+            let inv_typ = b2b_inv_typ(typ);
             bucket(&mut b2b, ctin.clone()).push(json!({
                 "inum": inv.invoice_number,
                 "idt": iso_to_gst_date(&inv.invoice_date),
                 "val": rupee(paise(inv.total_amount)),
                 "pos": pos,
                 "rchrg": "N",
-                "inv_typ": "R",
-                "itms": itms,
+                "inv_typ": inv_typ,
+                "itms": b2b_items(&rates),
             }));
-            sum_b2b.add(total);
+            if inv_typ == "R" {
+                sum_b2b.add(total);
+            } else {
+                sum_sez.add(total);
+            }
         } else {
-            for (rt, a) in &by_rate {
+            for (rt, a) in &rates {
                 bucket(&mut b2cs, (if inter { "INTER" } else { "INTRA" }, pos.clone(), *rt)).add(a);
             }
             sum_b2cs.add(total);
         }
     }
 
-    // Document series = invoice number without its trailing digits (INV-0001 -> INV-).
-    let mut docs: Vec<(String, Vec<String>)> = Vec::new();
-    let mut cancelled: HashSet<&str> = HashSet::new();
-    if is_ret_period(&b.ret_period) {
-        for i in &b.invoices {
-            if i.status == "draft" || !in_period(&i.invoice_date, &b.ret_period) {
-                continue;
+    // Table 9B. A credit note reduces, a debit note adds; small B2C notes net into B2CS.
+    for (c, n) in &notes {
+        let Checked { inv, ctin, pos, total, typ } = c;
+        let credit = n.note_type == "credit";
+        let sign = if credit { -1 } else { 1 };
+        let lines = inv.sales_invoice_lines.as_deref().unwrap_or(&[]);
+        add_hsn(&mut hsn, lines, ctin.is_some(), sign);
+        let rates = by_rate(lines);
+        let head = json!({
+            "ntty": if credit { "C" } else { "D" },
+            "nt_num": inv.invoice_number,
+            "nt_dt": iso_to_gst_date(&inv.invoice_date),
+            "val": rupee(paise(inv.total_amount)),
+        });
+        let original_total = n.sales_invoices.as_ref().map_or(0, |o| paise(o.total_amount));
+        let export = inv.supply_type == "export";
+
+        if export || (ctin.is_none() && inv.supply_type == "inter_state" && original_total > B2CL_LIMIT) {
+            let itms: Vec<Value> = rates
+                .iter()
+                .map(|(rt, a)| json!({ "num": item_num(*rt), "itm_det": {
+                    "rt": num(*rt), "txval": rupee(a.txval), "iamt": rupee(a.iamt), "csamt": rupee(a.csamt)
+                }}))
+                .collect();
+            let note_typ = match (export, *typ == "export_with_payment") {
+                (true, true) => "EXPWP",
+                (true, false) => "EXPWOP",
+                _ => "B2CL",
+            };
+            let mut row = merge(head, json!({ "typ": note_typ, "itms": itms }));
+            if !export {
+                row["pos"] = json!(pos);
             }
-            let series = i.invoice_number.trim_end_matches(|c: char| c.is_ascii_digit()).to_string();
-            bucket(&mut docs, series).push(i.invoice_number.clone());
-            if i.status == "cancelled" {
-                cancelled.insert(&i.invoice_number);
+            cdnur.push(row);
+            sum_cdnur.add(&total.scaled(sign));
+        } else if let Some(ctin) = ctin {
+            bucket(&mut cdnr, ctin.clone()).push(merge(
+                head,
+                json!({ "pos": pos, "rchrg": "N", "inv_typ": b2b_inv_typ(typ), "itms": b2b_items(&rates) }),
+            ));
+            sum_cdnr.add(&total.scaled(sign));
+        } else {
+            let inter = inv.supply_type == "inter_state" || *pos != own_state;
+            for (rt, a) in &rates {
+                bucket(&mut b2cs, (if inter { "INTER" } else { "INTRA" }, pos.clone(), *rt)).add(&a.scaled(sign));
             }
+            sum_b2cs.add(&total.scaled(sign));
         }
     }
 
@@ -606,6 +828,10 @@ pub fn build_gstr1(b: &Books) -> ReturnResult {
         SummaryRow { section: "B2B (4A)".into(), amounts: Some(sum_b2b.rupees()) },
         SummaryRow { section: "B2C small (7)".into(), amounts: Some(sum_b2cs.rupees()) },
         SummaryRow { section: "Nil / exempt (8)".into(), amounts: Some(sum_nil.rupees()) },
+        SummaryRow { section: "Exports (6A)".into(), amounts: Some(sum_exp.rupees()) },
+        SummaryRow { section: "SEZ supplies (6B)".into(), amounts: Some(sum_sez.rupees()) },
+        SummaryRow { section: "Notes, registered (9B CDNR)".into(), amounts: Some(sum_cdnr.rupees()) },
+        SummaryRow { section: "Notes, unregistered (9B CDNUR)".into(), amounts: Some(sum_cdnur.rupees()) },
     ];
     if !errors.is_empty() {
         return ReturnResult { json: None, errors, summary, table6: None };
@@ -630,25 +856,27 @@ pub fn build_gstr1(b: &Books) -> ReturnResult {
             .collect()
     };
 
-    let doc_rows: Vec<Value> = docs
+    // The period is valid here (an invalid one is an error above).
+    let p = &b.ret_period;
+    let invoice_docs = b
+        .invoices
         .iter()
-        .enumerate()
-        .map(|(idx, (_, nums))| {
-            let mut sorted: Vec<&String> = nums.iter().collect();
-            sorted.sort_by(|a, b| doc_order(a, b));
-            let cancel = nums.iter().filter(|n| cancelled.contains(n.as_str())).count();
-            json!({
-                "num": idx + 1,
-                "from": sorted[0],
-                "to": sorted[sorted.len() - 1],
-                "totnum": nums.len(),
-                "cancel": cancel,
-                "net_issue": nums.len() - cancel,
-            })
-        })
-        .collect();
+        .filter(|i| i.status != "draft" && in_period(&i.invoice_date, p))
+        .map(|i| (i.invoice_number.as_str(), i.status == "cancelled"));
+    let mut doc_det = vec![json!({ "doc_num": 1, "docs": doc_rows(invoice_docs) })]; // 1: invoices for outward supply
+    for (doc_num, kind) in [(4, "debit"), (5, "credit")] {
+        let docs = doc_rows(
+            b.notes
+                .iter()
+                .filter(|n| n.note_type == kind && n.doc.status != "draft" && in_period(&n.doc.invoice_date, p))
+                .map(|n| (n.doc.invoice_number.as_str(), n.doc.status == "cancelled")),
+        );
+        if !docs.is_empty() {
+            doc_det.push(json!({ "doc_num": doc_num, "docs": docs }));
+        }
+    }
 
-    let json = json!({
+    let mut json = json!({
         "gstin": gstin,
         "fp": b.ret_period,
         "b2b": b2b.iter().map(|(ctin, inv)| json!({ "ctin": ctin, "inv": inv })).collect::<Vec<_>>(),
@@ -662,8 +890,18 @@ pub fn build_gstr1(b: &Books) -> ReturnResult {
             })).collect::<Vec<_>>(),
         },
         "hsn": { "hsn_b2b": hsn_rows(true), "hsn_b2c": hsn_rows(false) },
-        "doc_issue": { "doc_det": [{ "doc_num": 1, "docs": doc_rows }] }, // doc_num 1: invoices for outward supply
+        "doc_issue": { "doc_det": doc_det },
     });
+    // Sections with nothing to report are left out.
+    if !exp.is_empty() {
+        json["exp"] = json!(exp.iter().map(|(t, inv)| json!({ "exp_typ": t, "inv": inv })).collect::<Vec<_>>());
+    }
+    if !cdnr.is_empty() {
+        json["cdnr"] = json!(cdnr.iter().map(|(ctin, nt)| json!({ "ctin": ctin, "nt": nt })).collect::<Vec<_>>());
+    }
+    if !cdnur.is_empty() {
+        json["cdnur"] = json!(cdnur);
+    }
     ReturnResult { json: Some(json), errors, summary, table6: None }
 }
 
@@ -936,19 +1174,39 @@ impl Table6 {
 
 pub fn build_gstr3b(b: &Books) -> ReturnResult {
     let (mut errors, gstin, checked) = check(b);
+    let notes = check_notes(b, &mut errors);
 
     let (mut osup, mut zero, mut nil_exempt) = (Amounts::default(), Amounts::default(), Amounts::default());
     let mut unreg: Vec<(String, Amounts)> = Vec::new();
-    for Checked { inv, ctin, pos, total } in &checked {
-        match inv.supply_type.as_str() {
-            "export" => zero.add(total),
-            "exempt" => nil_exempt.add(total),
-            _ => {
-                osup.add(total);
-                if inv.supply_type == "inter_state" && ctin.is_none() {
-                    bucket(&mut unreg, pos.clone()).add(total);
-                }
+    // Net of the notes dated in the period: a credit note reduces its original's row, a debit note adds.
+    let signed = checked
+        .iter()
+        .map(|c| (c, 1))
+        .chain(notes.iter().map(|(c, n)| (c, if n.note_type == "credit" { -1 } else { 1 })));
+    for (c, sign) in signed {
+        let total = c.total.scaled(sign);
+        if zero_rated(c) {
+            zero.add(&total);
+        } else if exempt(c) {
+            nil_exempt.add(&total);
+        } else {
+            osup.add(&total);
+            if c.inv.supply_type == "inter_state" && c.ctin.is_none() {
+                bucket(&mut unreg, c.pos.clone()).add(&total);
             }
+        }
+    }
+    let negative = [
+        ("3.1(a)", osup.negative()),
+        ("3.1(b)", zero.negative()),
+        ("3.2", unreg.iter().any(|(_, a)| a.negative())),
+    ];
+    for (label, neg) in negative {
+        if neg {
+            errors.push(format!(
+                "{} is negative after this period's credit notes; GSTN does not accept negative values.",
+                label
+            ));
         }
     }
 
@@ -1195,6 +1453,62 @@ mod tests {
         assert_eq!(t.by_cess, amounts(0, 0, 0, 20));
         assert_eq!(t.cash, amounts(300, 0, 50, 30));
         assert_eq!(t.carried_forward, Amounts::default());
+    }
+
+    /// The exports, SEZ supplies and notes from the fixture, optionally on top of its base invoices.
+    fn zero_rated_books(f: &Value, with_base_invoices: bool) -> Books {
+        let mut v = f.clone();
+        let mut invoices = if with_base_invoices { f["invoices"].as_array().unwrap().clone() } else { Vec::new() };
+        invoices.extend(f["cases"]["zero_rated_invoices"].as_array().unwrap().iter().cloned());
+        v["invoices"] = json!(invoices);
+        v["notes"] = f["cases"]["notes"].clone();
+        books(&v)
+    }
+
+    #[test]
+    fn gstr1_reports_exports_sez_and_notes() {
+        let f = fixture();
+        let r = build_gstr1(&zero_rated_books(&f, false));
+        assert_eq!(r.errors, Vec::<String>::new());
+        let section = |s: &str| r.summary.iter().find(|x| x.section == s).unwrap().amounts.clone().unwrap();
+        assert_eq!(section("SEZ supplies (6B)")["txval"], json!(2800));
+        // DN-001 (+1000, B2CL) and CN-003 (-200, export with payment).
+        assert_eq!(section("Notes, unregistered (9B CDNUR)")["txval"], json!(800));
+        assert_eq!(r.json.unwrap(), f["expected"]["gstr1_zero_rated_and_notes"]);
+    }
+
+    #[test]
+    fn gstr3b_nets_notes_and_reports_zero_rated_supplies() {
+        let f = fixture();
+        let r = build_gstr3b(&zero_rated_books(&f, true));
+        assert_eq!(r.errors, Vec::<String>::new());
+        let j = r.json.unwrap();
+        let e = &f["expected"]["gstr3b_zero_rated_and_notes_sup"];
+        assert_eq!(j["sup_details"], e["sup_details"]);
+        assert_eq!(j["inter_sup"], e["inter_sup"]);
+    }
+
+    #[test]
+    fn gstr3b_blocks_when_credit_notes_exceed_the_period() {
+        let mut f = fixture();
+        f["invoices"] = json!([]);
+        f["notes"] = json!([f["cases"]["notes"][2].clone()]);
+        let r = build_gstr3b(&books(&f));
+        assert!(r.json.is_none());
+        assert!(r.errors.contains(
+            &"3.1(a) is negative after this period's credit notes; GSTN does not accept negative values.".to_string()
+        ));
+    }
+
+    #[test]
+    fn sez_supply_needs_customer_gstin() {
+        let mut f = fixture();
+        let mut sez = f["cases"]["zero_rated_invoices"][2].clone();
+        sez["parties"] = json!({ "gstin": null });
+        f["invoices"] = json!([sez]);
+        let r = build_gstr1(&books(&f));
+        assert!(r.json.is_none());
+        assert!(r.errors.contains(&"Invoice SEZ-001: is an SEZ supply but the customer has no GSTIN.".to_string()));
     }
 
     #[test]

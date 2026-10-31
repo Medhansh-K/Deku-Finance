@@ -33,6 +33,12 @@ pub struct CreateInvoiceRequest {
     pub supply_type: String, // intra_state, inter_state, export, exempt
     pub place_of_supply: String,
     pub sales_channel: Option<String>,
+    /// tax_invoice (default), bill_of_supply, export_with_payment, export_without_payment,
+    /// sez_with_payment, sez_without_payment; the database enforces the tax rules per type.
+    pub invoice_type: Option<String>,
+    pub shipping_bill_number: Option<String>,
+    pub shipping_bill_date: Option<String>,
+    pub port_code: Option<String>,
     pub taxable_amount: f64,
     pub round_off: Option<f64>,
     pub total_amount: f64,
