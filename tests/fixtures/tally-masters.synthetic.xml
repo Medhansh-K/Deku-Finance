@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SYNTHETIC FIXTURE, hand-written for Deku's tests. Not exported from Tally; every name, number and
+     GSTIN is made up. It follows the shape of Tally's "All Masters" XML export as far as we know it. -->
+<ENVELOPE>
+  <HEADER>
+    <TALLYREQUEST>Import Data</TALLYREQUEST>
+  </HEADER>
+  <BODY>
+    <IMPORTDATA>
+      <REQUESTDESC>
+        <REPORTNAME>All Masters</REPORTNAME>
+        <STATICVARIABLES>
+          <SVCURRENTCOMPANY>Synthetic Traders</SVCURRENTCOMPANY>
+        </STATICVARIABLES>
+      </REQUESTDESC>
+      <REQUESTDATA>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <GROUP NAME="Office Overheads" ACTION="Create">
+            <PARENT>Indirect Expenses</PARENT>
+          </GROUP>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <GROUP NAME="Partners Drawings" ACTION="Create">
+            <PARENT>&#4; Primary</PARENT>
+          </GROUP>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Cash" ACTION="Create">
+            <NAME.LIST><NAME>Cash</NAME></NAME.LIST>
+            <PARENT>Cash-in-Hand</PARENT>
+            <OPENINGBALANCE>-25000.00</OPENINGBALANCE>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Synthetic Bank A/c" ACTION="Create">
+            <PARENT>Bank Accounts</PARENT>
+            <OPENINGBALANCE>-1,10,000.50</OPENINGBALANCE>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Owner Capital" ACTION="Create">
+            <PARENT>Capital Account</PARENT>
+            <OPENINGBALANCE>150000.00</OPENINGBALANCE>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Alpha Retail" ACTION="Create">
+            <PARENT>Sundry Debtors</PARENT>
+            <OPENINGBALANCE>-15000.00</OPENINGBALANCE>
+            <PARTYGSTIN>27AAPFU0939F1ZV</PARTYGSTIN>
+            <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
+            <LEDSTATENAME>Maharashtra</LEDSTATENAME>
+            <INCOMETAXNUMBER>AAPFU0939F</INCOMETAXNUMBER>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Beta Supplies" ACTION="Create">
+            <PARENT>Sundry Creditors</PARENT>
+            <OPENINGBALANCE>9999.50</OPENINGBALANCE>
+            <PARTYGSTIN>29AABCU9603R1ZM</PARTYGSTIN>
+            <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Sales @ 18%" ACTION="Create">
+            <PARENT>Sales Accounts</PARENT>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Output IGST" ACTION="Create">
+            <PARENT>Duties &amp; Taxes</PARENT>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Stationery" ACTION="Create">
+            <PARENT>Office Overheads</PARENT>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <LEDGER NAME="Drawings - Partner A" ACTION="Create">
+            <PARENT>Partners Drawings</PARENT>
+            <OPENINGBALANCE>-500.00</OPENINGBALANCE>
+          </LEDGER>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <STOCKITEM NAME="Synthetic Widget" ACTION="Create">
+            <BASEUNITS>Nos</BASEUNITS>
+            <GSTDETAILS.LIST>
+              <HSNCODE>84713010</HSNCODE>
+            </GSTDETAILS.LIST>
+          </STOCKITEM>
+        </TALLYMESSAGE>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <STOCKITEM NAME="Synthetic Cable" ACTION="Create">
+            <BASEUNITS>Mtr</BASEUNITS>
+          </STOCKITEM>
+        </TALLYMESSAGE>
+      </REQUESTDATA>
+    </IMPORTDATA>
+  </BODY>
+</ENVELOPE>
