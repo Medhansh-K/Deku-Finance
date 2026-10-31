@@ -17,6 +17,7 @@ pub mod hsn;
 pub mod notifications;
 pub mod notes;
 pub mod marketplace;
+pub mod payments;
 
 use axum::Router;
 use crate::postgrest::PostgrestClient;
@@ -28,6 +29,8 @@ pub struct AppState {
     pub cron_secret: Option<String>,
     /// `None` when DATA_ENCRYPTION_KEY is missing or malformed: integrations report "not configured".
     pub cipher: Option<crate::crypto::Cipher>,
+    /// `None` unless every RAZORPAY_* setting is present.
+    pub razorpay: Option<crate::razorpay::Razorpay>,
 }
 
 pub fn create_router(state: AppState) -> Router {
@@ -91,4 +94,6 @@ fn api_routes(state: AppState) -> Router {
             "/organisations/:org_id/marketplace",
             marketplace::routes(state.clone()),
         )
+        // Full paths: they sit beside the organisation and invoice routes.
+        .merge(payments::routes(state.clone()))
 }

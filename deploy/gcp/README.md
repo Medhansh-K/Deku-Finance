@@ -120,7 +120,7 @@ gcloud compute networks subnets update default --region="$REGION" --enable-priva
 ```
 
 With `all-traffic` the backend has no direct internet egress. Add Cloud NAT on `default` when an
-integration (GSP, KYC, Razorpay) needs to call out.
+integration (GSP, KYC, Razorpay) needs to call out (steps in §11, "Cloud NAT for Razorpay calls").
 
 ## 6. Cloud Run Job and services
 
@@ -214,3 +214,54 @@ it is created. After rotating `CRON_SECRET`, redeploy the backend (§8) and upda
 
 The GST due days in `compliance_calendar` (GSTR-1 on the 11th, GSTR-3B on the 20th, monthly filers)
 are data: check them against the current CBIC notifications and change them with a migration.
+
+## 11. Online payments (Razorpay, optional)
+
+Off until configured: without all of `RAZORPAY_CLIENT_ID`, `RAZORPAY_CLIENT_SECRET`,
+`RAZORPAY_REDIRECT_URI`, `RAZORPAY_WEBHOOK_SECRET` and `DATA_ENCRYPTION_KEY` every payment route
+returns 503 `payments_not_configured` and Settings says so. Each company connects its **own** Razorpay
+account through OAuth, so Deku needs a Razorpay Technology Partner app (apply through Razorpay
+support) with:
+
+- **Redirect URI:** the frontend's proxy path, `https://APP_DOMAIN/api/backend/api/v1/payments/razorpay/callback`.
+  The callback must arrive with the user's session cookie: the backend checks that the OAuth `state`
+  belongs to the signed-in user who started the connection.
+- **Webhook URL:** the backend directly, `$BACKEND_URL/api/v1/webhooks/razorpay` (Razorpay signs it;
+  no session), with the events `payment_link.paid`, `payment.captured` and
+  `account.app.authorization_revoked`.
+
+```bash
+printf %s "$(openssl rand -base64 32)" | gcloud secrets create DATA_ENCRYPTION_KEY --data-file=-
+for s in RAZORPAY_CLIENT_ID RAZORPAY_CLIENT_SECRET RAZORPAY_REDIRECT_URI RAZORPAY_WEBHOOK_SECRET; do
+  read -r -p "$s: " v && printf %s "$v" | gcloud secrets create "$s" --data-file=-
+  grant "$s" deku-backend
+done
+grant DATA_ENCRYPTION_KEY deku-backend
+```
+
+`cloudbuild.yaml` replaces the backend's secrets on every release, so pass them through
+`_BACKEND_EXTRA_SECRETS` (the `^;^` prefix changes the substitution separator, because the value has commas):
+
+```bash
+gcloud builds submit --config deploy/gcp/cloudbuild.yaml \
+  --service-account="projects/$PROJECT_ID/serviceAccounts/deku-build@$PROJECT_ID.iam.gserviceaccount.com" \
+  --substitutions="^;^_REGION=$REGION;_REPO=$REPO;_INSTANCE=$INSTANCE;_BACKEND_EXTRA_SECRETS=,DATA_ENCRYPTION_KEY=DATA_ENCRYPTION_KEY:latest,RAZORPAY_CLIENT_ID=RAZORPAY_CLIENT_ID:latest,RAZORPAY_CLIENT_SECRET=RAZORPAY_CLIENT_SECRET:latest,RAZORPAY_REDIRECT_URI=RAZORPAY_REDIRECT_URI:latest,RAZORPAY_WEBHOOK_SECRET=RAZORPAY_WEBHOOK_SECRET:latest"
+```
+
+Never rotate `DATA_ENCRYPTION_KEY` in place: stored tokens can't be decrypted with a new key, and every
+company would have to reconnect.
+
+### Cloud NAT for Razorpay calls
+
+The backend's egress is `all-traffic` through the VPC (§5), so it reaches `auth.razorpay.com` and
+`api.razorpay.com` only through Cloud NAT. One router and NAT on `default` serve every integration
+(Razorpay, GSP, KYC); skip these commands if another integration already created them.
+
+```bash
+gcloud compute routers create deku-nat-router --network=default --region="$REGION"
+gcloud compute addresses create deku-nat-ip --region="$REGION"   # static egress IP, if a partner allow-lists IPs
+gcloud compute routers nats create deku-nat --router=deku-nat-router --region="$REGION" \
+  --nat-custom-subnet-ip-ranges=default --nat-external-ip-pool=deku-nat-ip
+```
+
+A "Razorpay unreachable" error on "Create payment link" means the NAT is missing.

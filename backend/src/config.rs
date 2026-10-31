@@ -10,6 +10,11 @@ pub struct Config {
     pub cron_secret: Option<String>,
     /// Base64 32-byte key for third-party credentials; unset keeps integrations switched off.
     pub data_encryption_key: Option<String>,
+    /// Razorpay partner app; payments stay switched off unless all four are set.
+    pub razorpay_client_id: Option<String>,
+    pub razorpay_client_secret: Option<String>,
+    pub razorpay_redirect_uri: Option<String>,
+    pub razorpay_webhook_secret: Option<String>,
 }
 
 impl Config {
@@ -43,6 +48,8 @@ impl Config {
 
         let data_encryption_key = env::var("DATA_ENCRYPTION_KEY").ok().filter(|s| !s.trim().is_empty());
 
+        let optional = |name: &str| env::var(name).ok().map(|s| s.trim().to_string()).filter(|s| !s.is_empty());
+
         Self {
             port,
             postgrest_url,
@@ -50,6 +57,10 @@ impl Config {
             cors_allowed_origins,
             cron_secret,
             data_encryption_key,
+            razorpay_client_id: optional("RAZORPAY_CLIENT_ID"),
+            razorpay_client_secret: optional("RAZORPAY_CLIENT_SECRET"),
+            razorpay_redirect_uri: optional("RAZORPAY_REDIRECT_URI"),
+            razorpay_webhook_secret: optional("RAZORPAY_WEBHOOK_SECRET"),
         }
     }
 }

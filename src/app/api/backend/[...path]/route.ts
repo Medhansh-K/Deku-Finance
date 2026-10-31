@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ACCESS_COOKIE, proxyTarget } from "@/lib/auth/session";
 
-const PASS_RESPONSE_HEADERS = ["content-type", "content-disposition", "cache-control"];
+// location: the Razorpay OAuth callback answers with a same-origin redirect to /settings.
+const PASS_RESPONSE_HEADERS = ["content-type", "content-disposition", "cache-control", "location"];
 
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const target = proxyTarget((await params).path, request.nextUrl.search);

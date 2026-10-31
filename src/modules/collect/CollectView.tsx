@@ -24,6 +24,7 @@ import {
   OVERDUE_ALERT_DAYS,
 } from "@/lib/collect/receivables";
 import { checkIndianMobile, reminderMessage, whatsappUrl } from "@/lib/collect/whatsapp";
+import { linkForInvoice, paymentsApi, PaymentLink } from "@/api/payments";
 
 interface Books {
   companyName: string | null;
@@ -31,6 +32,8 @@ interface Books {
   /** null when the chart of accounts has no trade debtors ledger. */
   debtors: PartyBalance[] | null;
   parties: Party[];
+  /** Empty when online payments are switched off or not connected. */
+  paymentLinks: PaymentLink[];
   asOf: string;
 }
 
@@ -77,14 +80,17 @@ export function CollectView() {
       reportsApi.getKpis(orgId, asOf, asOf),
       partiesApi.list(orgId),
       organisationsApi.get(orgId),
+      // 503 when payments are switched off: reminders then simply carry no link.
+      paymentsApi.links(orgId).then((r) => r.data ?? [], () => [] as PaymentLink[]),
     ])
-      .then(([inv, ageing, kpis, pa, org]) => {
+      .then(([inv, ageing, kpis, pa, org, links]) => {
         if (stale) return;
         setBooks({
           companyName: org.data?.[0]?.name ?? null,
           invoices: (inv.data ?? []) as CollectInvoice[],
           debtors: kpis.data?.debtors_account ? toPartyBalances(ageing.data ?? []) : null,
           parties: pa.data ?? [],
+          paymentLinks: links,
           asOf,
         });
       })
@@ -253,7 +259,13 @@ export function CollectView() {
               </thead>
               <tbody>
                 {visible.map((r) => (
-                  <Row key={r.invoice.id} r={r} companyName={books.companyName} upiId={upiId} />
+                  <Row
+                    key={r.invoice.id}
+                    r={r}
+                    companyName={books.companyName}
+                    upiId={upiId}
+                    paymentLink={linkForInvoice(books.paymentLinks, r.invoice.id)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -274,7 +286,17 @@ function Stat({ label, value, note }: { label: string; value: string; note: stri
   );
 }
 
-function Row({ r, companyName, upiId }: { r: CollectRow; companyName: string | null; upiId: string | null }) {
+function Row({
+  r,
+  companyName,
+  upiId,
+  paymentLink,
+}: {
+  r: CollectRow;
+  companyName: string | null;
+  upiId: string | null;
+  paymentLink: PaymentLink | null;
+}) {
   const msme = msmeFlag(r);
   const owed = (r.openPaise ?? 0) > 0;
   const phone = checkIndianMobile(r.phone);
@@ -327,6 +349,8 @@ function Row({ r, companyName, upiId }: { r: CollectRow; companyName: string | n
                   amountDuePaise: r.openPaise!,
                   dueDate: r.invoice.due_date || null,
                   upiId,
+                  // A paid link is history, not something to pay again.
+                  paymentLink: paymentLink?.status === "created" ? paymentLink.short_url : null,
                   msme45: msme,
                 })
               )}
