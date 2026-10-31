@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { isPublicPath, safeNextPath } from "@/lib/supabase/middleware";
+import { isPublicPath, safeNextPath } from "@/lib/auth/session";
 
 describe("isPublicPath", () => {
   it("lets anyone see landing and auth pages but guards the app", () => {
-    expect(["/", "/login", "/signup", "/auth/callback", "/join"].every(isPublicPath)).toBe(true);
-    expect(["/gateway", "/vouchers/sales", "/reports/balance-sheet", "/loginx"].some(isPublicPath)).toBe(false);
+    expect(["/", "/login", "/signup", "/join", "/api/auth/login"].every(isPublicPath)).toBe(true);
+    expect(["/gateway", "/vouchers/sales", "/reports/balance-sheet", "/loginx", "/api/backend/api/v1/organisations", "/api/authx"].some(isPublicPath)).toBe(false);
   });
 });
 

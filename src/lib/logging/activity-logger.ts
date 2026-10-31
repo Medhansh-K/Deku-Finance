@@ -6,7 +6,6 @@
  */
 
 import { auditApi } from "@/api/endpoints";
-import { getAccessToken } from "@/lib/supabase/client";
 
 export type CrudOperation = "CREATE" | "READ" | "UPDATE" | "DELETE";
 
@@ -386,11 +385,7 @@ export async function downloadSecureAuditExport(
 
   try {
     const url = auditApi.exportUrl(orgId, format);
-    const token = await getAccessToken();
-    const headers: Record<string, string> = {};
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const res = await fetch(url, { headers });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
 
     const blob = await res.blob();

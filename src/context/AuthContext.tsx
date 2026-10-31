@@ -1,8 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
 import { organisationsApi, OrgSummary } from "@/api/endpoints";
 import {
   UserProfile,
@@ -98,7 +96,7 @@ export const createDefaultLicense = (
   };
 };
 
-// Sandbox accounts from supabase/seed.sql. They belong only to fictional demo companies,
+// Sandbox accounts from the demo seed (seed.sql). They belong only to fictional demo companies,
 // so row-level security keeps demo visitors out of every real tenant.
 const DEMO_ACCOUNTS = {
   owner: "demo-owner@deku.finance",
@@ -106,6 +104,36 @@ const DEMO_ACCOUNTS = {
   freelancer: "demo-freelancer@deku.finance",
 } as const;
 const DEMO_PASSWORD = "DekuDemo#2026";
+
+// The user object our /api/auth/* handlers return (tokens stay in httpOnly cookies).
+interface SessionUser {
+  id: string;
+  email: string;
+  full_name?: string;
+  is_demo?: boolean;
+  business_name?: string;
+}
+
+const AUTH_ERRORS: Record<string, string> = {
+  invalid_credentials: "Incorrect email or password.",
+  email_taken: "An account with this email already exists.",
+  backend_unavailable: "Deku Finance is unreachable right now. Please try again shortly.",
+};
+
+async function authRequest(
+  path: "login" | "signup" | "me" | "logout",
+  body?: unknown
+): Promise<{ user?: SessionUser; error?: string }> {
+  const res = await fetch(
+    `/api/auth/${path}`,
+    body === undefined && path === "me"
+      ? undefined
+      : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body ?? {}) }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (res.ok) return { user: data.user };
+  return { error: AUTH_ERRORS[data.error] || data.message || data.error || `Request failed (${res.status}).` };
+}
 
 const slugify = (name: string) =>
   `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${crypto.randomUUID().slice(0, 6)}`;
@@ -123,8 +151,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [emailNotification, setEmailNotification] =
     useState<EmailNotification | null>(null);
 
-  const supabase = createClient();
-
   const setOrganisation = (org: Organisation) => {
     setOrg(org);
     setOperatingModeState(org.operating_mode);
@@ -140,12 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new Event("deku_active_org_changed"));
   };
 
-  const toUser = (u: User): UserProfile => ({
+  const toUser = (u: SessionUser): UserProfile => ({
     id: u.id,
     email: u.email || "",
-    full_name: u.user_metadata?.full_name || u.email?.split("@")[0],
-    avatar_url: u.user_metadata?.avatar_url,
-    is_demo: u.user_metadata?.is_demo === true,
+    full_name: u.full_name || u.email?.split("@")[0],
+    is_demo: u.is_demo === true,
   });
 
   // Companies come from the database; row-level security returns only this user's.
@@ -187,28 +212,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user && (event === "INITIAL_SESSION" || event === "SIGNED_IN")) {
-        const u = session.user;
-        setUser(toUser(u));
-        // Supabase calls inside this callback can deadlock, so load after it returns.
-        setTimeout(() => {
-          loadOrganisations(u.email || "", u.user_metadata?.business_name).finally(() => setIsLoading(false));
-        }, 0);
-      } else if (event === "INITIAL_SESSION" || event === "SIGNED_OUT") {
-        setUser(null);
-        setOrg(null);
-        setOrganisations([]);
-        setIsLoading(false);
-      }
-    });
+  const startSession = async (u: SessionUser, businessName?: string) => {
+    setUser(toUser(u));
+    await loadOrganisations(u.email || "", businessName ?? u.business_name);
+  };
 
-    return () => {
-      subscription.unsubscribe();
-    };
+  useEffect(() => {
+    authRequest("me")
+      .then(({ user: u }) => (u ? startSession(u) : setUser(null)))
+      .catch(() => setUser(null))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const setOperatingMode = (mode: OperatingMode) => {
@@ -337,17 +350,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, pass: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: pass,
-      });
+      const { user: u, error } = await authRequest("login", { email, password: pass });
 
       if (error) {
-        return { error: error.message };
+        return { error };
       }
 
-      if (data.user) {
-        setUser(toUser(data.user));
+      if (u) {
+        await startSession(u);
 
         // Automatically trigger activation email dispatch record for the logged in user
         await sendActivationEmail(email);
@@ -373,30 +383,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { user: u, error } = await authRequest("signup", {
         email,
         password: pass,
-        options: {
-          data: {
-            full_name: fullName,
-            business_name: businessName,
-            initial_mode: mode,
-            operating_state: state,
-            plan_tier: plan,
-          },
-        },
+        full_name: fullName,
+        business_name: businessName,
+        operating_mode: mode,
+        state,
       });
 
       if (error) {
-        return { error: error.message };
+        return { error };
       }
       localStorage.setItem("deku_operating_mode", mode);
 
       // Dispatch activation email on signup
       await sendActivationEmail(email);
 
-      if (data.user) {
-        setUser(toUser(data.user));
+      if (u) {
+        // The company is created from the business name on this first load.
+        await startSession(u, businessName);
       }
       return {};
     } catch (err: unknown) {
@@ -409,11 +415,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginDemo = async (type: "owner" | "accountant" | "freelancer") => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { user: u, error } = await authRequest("login", {
         email: DEMO_ACCOUNTS[type],
         password: DEMO_PASSWORD,
       });
-      if (error) throw new Error(error.message);
+      if (error || !u) throw new Error(error || "Demo sign-in failed.");
+      await startSession(u);
     } finally {
       setIsLoading(false);
     }
@@ -421,7 +428,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await authRequest("logout");
     } catch (e) {
       console.warn("Sign out err:", e);
     }

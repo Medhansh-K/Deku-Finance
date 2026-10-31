@@ -1,31 +1,23 @@
 import { ApiError, NetworkError } from "./errors";
-import { getAccessToken } from "@/lib/supabase/client";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
+// Same-origin proxy: it attaches the httpOnly session cookie as a bearer token server-side.
+const API_BASE_URL = "/api/backend";
 
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
-  token?: string | null;
 }
 
 export async function apiClient<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { timeoutMs = 15000, token, headers: customHeaders, ...rest } = options;
+  const { timeoutMs = 15000, headers: customHeaders, ...rest } = options;
 
   const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
 
   const headers = new Headers(customHeaders);
   if (!headers.has("Content-Type") && !(rest.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
-  }
-
-  const activeToken = token || (await getAccessToken());
-
-  if (activeToken) {
-    headers.set("Authorization", `Bearer ${activeToken}`);
   }
 
   const controller = new AbortController();

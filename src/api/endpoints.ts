@@ -356,10 +356,8 @@ export const auditApi = {
         body: JSON.stringify(payload),
       }
     ),
-  exportUrl: (orgId: string, format: "csv" | "json" = "json") => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8080";
-    return `${baseUrl}/api/v1/organisations/${orgId}/audit-events/export?format=${format}`;
-  },
+  exportUrl: (orgId: string, format: "csv" | "json" = "json") =>
+    `/api/backend/api/v1/organisations/${orgId}/audit-events/export?format=${format}`,
 };
 
 export const departmentsApi = {
