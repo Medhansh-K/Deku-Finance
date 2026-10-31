@@ -64,11 +64,15 @@ export async function convertOrgToGst(
     return { success: false, error: validation.error };
   }
   try {
-    const res = await organisationsApi.updateSettings(orgId, { gstin: gstin.trim().toUpperCase() });
+    const clean = gstin.trim().toUpperCase();
+    const res = await organisationsApi.updateSettings(orgId, {
+      gstin: clean,
+      operating_mode: "gst",
+      state_code: clean.slice(0, 2),
+    });
     const org = res.data?.[0];
     if (!org?.gstin) return { success: false, error: "The company record was not updated." };
     const profile = taxProfileFor(org);
-    localStorage.setItem("deku_operating_mode", "gst_enterprise");
     window.dispatchEvent(new CustomEvent("deku_org_regime_changed", { detail: { orgId, profile } }));
     return { success: true, profile };
   } catch (e: any) {

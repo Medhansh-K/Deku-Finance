@@ -31,16 +31,10 @@ import { Badge } from "@/components/ui/Badge";
 import { auditApi } from "@/api/endpoints";
 import { AuditEvent } from "@/types/accounting";
 import {
-  UserActivityLog,
   ActivityCategory,
   ActivityStatus,
   CrudOperation,
   inferCrudType,
-  getUserActivities,
-  logUserActivity,
-  clearUserActivities,
-  exportActivitiesAsJson,
-  exportActivitiesAsCsv,
   downloadSecureAuditExport,
 } from "@/lib/logging/activity-logger";
 import Link from "next/link";
@@ -64,7 +58,6 @@ interface UnifiedLogItem {
 export function AuditTrailView() {
   const [orgId, setOrgId] = useState<string>("");
   const [orgName, setOrgName] = useState<string>("");
-  const [userLogs, setUserLogs] = useState<UserActivityLog[]>([]);
   const [dbEvents, setDbEvents] = useState<AuditEvent[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -90,12 +83,6 @@ export function AuditTrailView() {
     }
   }, []);
 
-  // Load user activity logs from localStorage
-  const loadUserLogs = () => {
-    const logs = getUserActivities(orgId);
-    setUserLogs(logs);
-  };
-
   // Fetch PostgreSQL audit_events from backend
   const fetchDbAudit = async () => {
     setIsLoadingDb(true);
@@ -104,8 +91,7 @@ export function AuditTrailView() {
       const res = await auditApi.list(orgId);
       setDbEvents(res.data || []);
     } catch (err: any) {
-      // Graceful fallback to rich local activity records
-      setDbError(err.message || "PostgreSQL audit logs synced via local append-only buffer");
+      setDbError(err.message || "Could not load the audit log");
     } finally {
       setIsLoadingDb(false);
     }
@@ -113,7 +99,6 @@ export function AuditTrailView() {
 
   useEffect(() => {
     if (!orgId) return;
-    loadUserLogs();
     fetchDbAudit();
   }, [orgId]);
 
@@ -121,7 +106,7 @@ export function AuditTrailView() {
   useEffect(() => {
     if (!orgId) return;
     const handleNewActivity = () => {
-      loadUserLogs();
+      fetchDbAudit();
     };
 
     window.addEventListener("deku_activity_logged", handleNewActivity);
@@ -137,30 +122,28 @@ export function AuditTrailView() {
   const unifiedLogs: UnifiedLogItem[] = useMemo(() => {
     const list: UnifiedLogItem[] = [];
 
-    // Add user activities (pure CRUD, strictly omitting any navigation remnants)
-    for (const u of userLogs) {
-      if ((u as any).category === "NAVIGATION" || u.action?.includes("Page Visit") || u.action?.includes("Shortcut Pressed")) {
-        continue;
-      }
-      list.push({
-        id: u.id,
-        timestamp: u.timestamp,
-        crudType: u.crud_type || inferCrudType(u.action),
-        category: u.category,
-        action: u.action,
-        description: u.description,
-        entityType: u.entity_type,
-        entityId: u.entity_id,
-        actor: u.actor_name,
-        role: u.actor_role,
-        status: u.status,
-        metadata: u.metadata,
-        source: u.source,
-      });
-    }
-
     // Add database audit events (map database structure to unified view)
     for (const db of dbEvents) {
+      // The API returns user_activity_logs rows when there are any, else raw audit_events.
+      const u = db as any;
+      if (typeof u.description === "string" && u.category) {
+        list.push({
+          id: u.id,
+          timestamp: u.created_at,
+          crudType: u.metadata?.crud_type || inferCrudType(u.action || ""),
+          category: u.category,
+          action: u.action,
+          description: u.description,
+          entityType: u.entity_type || "general",
+          entityId: u.entity_id || "-",
+          actor: u.actor_name || "-",
+          role: u.actor_role || "-",
+          status: u.status || "success",
+          metadata: u.metadata,
+          source: "database",
+        });
+        continue;
+      }
       let cat: ActivityCategory = "SETTING";
       const res = (db.resource_type || "").toLowerCase();
       if (res.includes("voucher") || res.includes("journal")) cat = "VOUCHER";
@@ -196,7 +179,7 @@ export function AuditTrailView() {
     return list.sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-  }, [userLogs, dbEvents]);
+  }, [dbEvents]);
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
@@ -261,73 +244,6 @@ export function AuditTrailView() {
 
     return { total, createCount, updateCount, deleteCount };
   }, [unifiedLogs]);
-
-  // Handle simulate user activity to easily verify reactivity
-  const handleSimulateActivity = () => {
-    const sampleActions = [
-      {
-        crud_type: "CREATE" as CrudOperation,
-        category: "VOUCHER" as ActivityCategory,
-        action: "Payment Voucher Recorded",
-        description: "Created and verified vendor payment voucher #PAY-2026-904 for ₹34,500.00 (Vendor: Stark Dynamics)",
-        entity_type: "voucher",
-        entity_id: "PAY-2026-904",
-      },
-      {
-        crud_type: "CREATE" as CrudOperation,
-        category: "MASTER" as ActivityCategory,
-        action: "Ledger Account Created",
-        description: "Added new account 'Razorpay Payment Gateway Clearing' under Current Assets (1105)",
-        entity_type: "account",
-        entity_id: "1105",
-      },
-      {
-        crud_type: "UPDATE" as CrudOperation,
-        category: "MASTER" as ActivityCategory,
-        action: "Counterparty Terms Updated",
-        description: "Updated credit terms for Wayne Enterprises to 30 days and ₹10,00,000 credit ceiling",
-        entity_type: "party",
-        entity_id: "PARTY-002",
-      },
-      {
-        crud_type: "CREATE" as CrudOperation,
-        category: "DOCUMENT" as ActivityCategory,
-        action: "Tax Invoice Generated",
-        description: "Generated GST Tax Invoice #INV-2026-088 with 18% IGST for ₹1,25,000.00 to Global Logistics Ltd",
-        entity_type: "document",
-        entity_id: "INV-2026-088",
-      },
-      {
-        crud_type: "UPDATE" as CrudOperation,
-        category: "DEPARTMENT" as ActivityCategory,
-        action: "Task Status Updated",
-        description: "Marked task 'Q3 MCA Audit Trail Compliance Filing' as COMPLETED",
-        entity_type: "task",
-        entity_id: "task-mca-q3",
-      },
-      {
-        crud_type: "DELETE" as CrudOperation,
-        category: "MASTER" as ActivityCategory,
-        action: "Catalogue Item Discarded",
-        description: "Deleted obsolete catalog SKU-884 'Legacy Testing Equipment' from active stock",
-        entity_type: "item",
-        entity_id: "SKU-884",
-      },
-    ];
-
-    const chosen = sampleActions[Math.floor(Math.random() * sampleActions.length)];
-    logUserActivity({
-      ...chosen,
-      status: "success",
-      metadata: { simulated: true, clientTimestamp: new Date().toISOString() },
-    });
-  };
-
-  const handleClearLogs = () => {
-    if (confirm("Reset local activity history for this company? Default compliance seed events will be restored.")) {
-      clearUserActivities(orgId);
-    }
-  };
 
   // Helper for relative time string
   const formatTimeAgo = (isoString: string) => {
@@ -461,20 +377,7 @@ export function AuditTrailView() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleSimulateActivity}
-            className="text-xs hover:border-brand hover:text-brand-strong"
-            title="Trigger a simulated user event to verify instant logging"
-          >
-            <Zap className="h-3 w-3 text-amber-500" /> Simulate Activity
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              loadUserLogs();
-              fetchDbAudit();
-            }}
+            onClick={fetchDbAudit}
             isLoading={isLoadingDb}
             title="Refresh activity logs"
           >
@@ -498,7 +401,7 @@ export function AuditTrailView() {
               >
                 <button
                   type="button"
-                  onClick={() => downloadSecureAuditExport(orgId, "json", userLogs, orgName)}
+                  onClick={() => downloadSecureAuditExport(orgId, "json", orgName)}
                   className="w-full text-left px-3 py-1.5 hover:bg-slate-100 flex items-center justify-between text-slate-700"
                 >
                   <span>Export Verified JSON</span>
@@ -506,7 +409,7 @@ export function AuditTrailView() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => downloadSecureAuditExport(orgId, "csv", userLogs, orgName)}
+                  onClick={() => downloadSecureAuditExport(orgId, "csv", orgName)}
                   className="w-full text-left px-3 py-1.5 hover:bg-slate-100 flex items-center justify-between text-slate-700"
                 >
                   <span>Export Verified CSV</span>
@@ -516,17 +419,14 @@ export function AuditTrailView() {
             )}
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearLogs}
-            className="text-xs text-rose-600 hover:bg-rose-50 hover:border-rose-300"
-            title="Reset user activity log history"
-          >
-            <Trash2 className="h-3 w-3" /> Clear
-          </Button>
         </div>
       </div>
+
+      {dbError && (
+        <p role="alert" className="text-xs text-rose-700 flex items-center gap-1.5">
+          <AlertCircle className="h-3.5 w-3.5" /> {dbError}
+        </p>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. Top Statistics Cards (Pure CRUD Operations)                           */}

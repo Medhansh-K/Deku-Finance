@@ -25,7 +25,6 @@ export default function DashboardHeader() {
     organisation,
     license,
     operatingMode,
-    setOperatingMode,
     logout,
     sendActivationEmail,
   } = useAuth();

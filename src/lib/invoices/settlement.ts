@@ -32,7 +32,7 @@ export type SalesChannel = (typeof SALES_CHANNELS)[number]["value"];
 
 export const isValidIfsc = (ifsc: string) => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc);
 
-export const isValidUpiId = (upiId: string) => /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{1,63}$/.test(upiId);
+export const isValidUpiId = (upiId: string) => /^[a-zA-Z0-9._-]{2,255}@[a-zA-Z][a-zA-Z0-9.-]{1,63}$/.test(upiId);
 
 /** Field-level errors; empty fields are fine because empty means "not printed". */
 export function settlementErrors(s: Settlement): Partial<Record<keyof Settlement, string>> {
@@ -55,21 +55,13 @@ export function buildUpiPayload(p: { vpa: string; payee: string; amountPaise: nu
   );
 }
 
-// shortcut: per-company defaults live in this browser's localStorage; move to an organisations column when settings sync is needed.
-const key = (orgId: string) => `deku_invoice_settlement_${orgId}`;
-
-export function loadSettlement(orgId: string): Settlement {
-  try {
-    return { ...EMPTY_SETTLEMENT, ...JSON.parse(localStorage.getItem(key(orgId)) || "{}") };
-  } catch {
-    return { ...EMPTY_SETTLEMENT };
-  }
-}
-
-export function saveSettlement(orgId: string, s: Settlement): void {
-  try {
-    localStorage.setItem(key(orgId), JSON.stringify(s));
-  } catch {
-    // storage blocked: defaults just won't persist
-  }
-}
+/** The company's bank and UPI details from its profile (Settings). */
+export const settlementFromOrg = (
+  org?: { upi_vpa?: string; bank_name?: string; bank_account_number?: string; bank_ifsc?: string; bank_beneficiary?: string } | null
+): Settlement => ({
+  upiId: org?.upi_vpa ?? "",
+  bankName: org?.bank_name ?? "",
+  accountNumber: org?.bank_account_number ?? "",
+  ifsc: org?.bank_ifsc ?? "",
+  beneficiaryName: org?.bank_beneficiary ?? "",
+});

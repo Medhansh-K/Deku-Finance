@@ -52,12 +52,24 @@ export interface Organisation {
   timezone: string;
   fy_start_month: number;
   operating_mode: OperatingMode;
-  operating_state?: string;
   state_code?: string;
+  registered_address?: RegisteredAddress;
   upi_vpa?: string;
-  turnover_limit?: number;
-  current_turnover?: number;
+  bank_account_number?: string;
+  bank_ifsc?: string;
+  bank_beneficiary?: string;
+  bank_name?: string;
+  udyam_number?: string;
+  composition_scheme?: boolean;
+  onboarded_at?: string;
   license?: OrganisationLicense;
+}
+
+export interface RegisteredAddress {
+  line1?: string;
+  line2?: string;
+  city?: string;
+  pincode?: string;
 }
 
 export interface FiscalPeriod {

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { organisationsApi, OrgSummary } from "@/api/endpoints";
+import { orgFromRow } from "@/lib/organisation/profile";
 import {
   UserProfile,
   Organisation,
@@ -30,8 +32,9 @@ interface AuthContextType {
   operatingMode: OperatingMode;
   emailNotification: EmailNotification | null;
   dismissEmailNotification: () => void;
-  setOperatingMode: (mode: OperatingMode) => void;
   setOrganisation: (org: Organisation) => void;
+  /** Re-reads the companies from the database, e.g. after the profile changed. */
+  refreshOrganisations: () => Promise<void>;
   login: (email: string, pass: string) => Promise<{ error?: string }>;
   signup: (
     email: string,
@@ -151,6 +154,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [emailNotification, setEmailNotification] =
     useState<EmailNotification | null>(null);
 
+  const router = useRouter();
+  const pathname = usePathname();
+
   const setOrganisation = (org: Organisation) => {
     setOrg(org);
     setOperatingModeState(org.operating_mode);
@@ -158,9 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLicense(org.license);
       localStorage.setItem("deku_active_license", JSON.stringify(org.license));
     }
-    localStorage.setItem("deku_active_org", JSON.stringify(org));
-    localStorage.setItem("deku_operating_mode", org.operating_mode);
-    // Screens read the active company id from here.
+    // Only the selected company (a per-browser choice) is remembered; its profile comes from the database.
     localStorage.setItem("deku_active_org_id", org.id);
     localStorage.setItem("deku_active_org_name", org.name);
     window.dispatchEvent(new Event("deku_active_org_changed"));
@@ -182,7 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await organisationsApi.create({ name: businessName, slug: slugify(businessName) });
         list = (await organisationsApi.list()).data || [];
       }
-      const savedMode = localStorage.getItem("deku_operating_mode") as OperatingMode | null;
       let savedLicense: OrganisationLicense | null = null;
       try {
         savedLicense = JSON.parse(localStorage.getItem("deku_active_license") || "null");
@@ -191,15 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       // shortcut: licenses are still issued client-side; move them to the backend licenses API.
       const orgs: Organisation[] = list.map((o) => ({
-        id: o.id,
-        name: o.name,
-        slug: o.slug,
-        gstin: o.gstin ?? undefined,
-        pan: o.pan ?? undefined,
-        currency: o.currency,
-        timezone: o.timezone,
-        fy_start_month: o.financial_year_start_month,
-        operating_mode: savedMode || (o.gstin ? "gst_enterprise" : "pure_accounting"),
+        ...orgFromRow(o),
         license:
           savedLicense?.organisation_id === o.id ? savedLicense : createDefaultLicense(o.id, email),
       }));
@@ -217,22 +212,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadOrganisations(u.email || "", businessName ?? u.business_name);
   };
 
+  const refreshOrganisations = async () => {
+    if (user) await loadOrganisations(user.email);
+  };
+
+  // A company that hasn't finished onboarding goes to the wizard first, whatever page was asked for.
+  useEffect(() => {
+    if (organisation && !organisation.onboarded_at && pathname !== "/onboarding") router.replace("/onboarding");
+  }, [organisation, pathname, router]);
+
+  useEffect(() => {
+    const onRegimeChanged = () => void refreshOrganisations();
+    window.addEventListener("deku_org_regime_changed", onRegimeChanged);
+    return () => window.removeEventListener("deku_org_regime_changed", onRegimeChanged);
+  });
+
   useEffect(() => {
     authRequest("me")
       .then(({ user: u }) => (u ? startSession(u) : setUser(null)))
       .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
   }, []);
-
-  const setOperatingMode = (mode: OperatingMode) => {
-    setOperatingModeState(mode);
-    localStorage.setItem("deku_operating_mode", mode);
-    if (organisation) {
-      const updated = { ...organisation, operating_mode: mode };
-      setOrg(updated);
-      localStorage.setItem("deku_active_org", JSON.stringify(updated));
-    }
-  };
 
   const dismissEmailNotification = () => {
     setEmailNotification(null);
@@ -339,9 +339,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     if (organisation) {
-      const updatedOrg = { ...organisation, license: activatedLicense };
-      setOrg(updatedOrg);
-      localStorage.setItem("deku_active_org", JSON.stringify(updatedOrg));
+      setOrg({ ...organisation, license: activatedLicense });
     }
 
     return { success: true };
@@ -395,8 +393,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         return { error };
       }
-      localStorage.setItem("deku_operating_mode", mode);
-
       // Dispatch activation email on signup
       await sendActivationEmail(email);
 
@@ -435,7 +431,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setOrg(null);
     setOrganisations([]);
-    for (const key of ["deku_active_org", "deku_active_license", "deku_active_org_id", "deku_active_org_name"]) {
+    for (const key of ["deku_active_org", "deku_active_license", "deku_active_org_id", "deku_active_org_name", "deku_operating_mode"]) {
       localStorage.removeItem(key);
     }
   };
@@ -451,8 +447,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         operatingMode,
         emailNotification,
         dismissEmailNotification,
-        setOperatingMode,
         setOrganisation,
+        refreshOrganisations,
         login,
         signup,
         activateLicense,

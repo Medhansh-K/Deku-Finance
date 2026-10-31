@@ -36,8 +36,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, organisationsApi, partiesApi } from "@/api/endpoints";
-import { Account, CreateJournalRequest, FiscalPeriod, Party } from "@/types/accounting";
+import { accountingApi, invoicesApi, organisationsApi, partiesApi } from "@/api/endpoints";
+import { Account, CreateJournalRequest, FiscalPeriod, Party, SalesInvoice } from "@/types/accounting";
 import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
 import {
@@ -53,12 +53,10 @@ import {
   markDraftFinalized,
 } from "@/lib/vouchers/builder-drafts";
 import { mapBuilderDraftToVoucher } from "@/lib/vouchers/builder-mapper";
-import { VoucherItem } from "@/lib/reports/vouchers";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import {
   DocumentProofAttachment,
   validateProofForVoucher,
-  SAMPLE_PROOFS,
   PROOF_REQUIREMENTS,
   ProofType,
 } from "@/lib/vouchers/document-proof";
@@ -304,7 +302,7 @@ export function VoucherWorkspace({
   // Available Builder Invoices & Open Sales Invoices for Pairing / Settlement
   const [builderInvoices, setBuilderInvoices] = useState<BuilderLedgerDraft[]>([]);
   const [selectedBuilderDraftId, setSelectedBuilderDraftId] = useState<string>("");
-  const [openInvoices, setOpenInvoices] = useState<any[]>([]);
+  const [openInvoices, setOpenInvoices] = useState<SalesInvoice[]>([]);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>("");
 
   // Document Extraction State
@@ -365,19 +363,6 @@ export function VoucherWorkspace({
       const drafts = getBuilderDrafts();
       setPendingDraftsCount(drafts.filter((d) => d.status === "draft").length);
       setBuilderInvoices(drafts.filter((d) => d.documentType === "invoice"));
-
-      if (typeof window !== "undefined") {
-        const invKey = `deku_invoices_${orgId}`;
-        const raw = localStorage.getItem(invKey);
-        if (raw) {
-          try {
-            const parsed = JSON.parse(raw);
-            setOpenInvoices(parsed.filter((inv: any) => inv.status !== "converted" && inv.status !== "paid"));
-          } catch (e) {
-            console.error("Failed to parse invoices", e);
-          }
-        }
-      }
     };
 
     updateInvoices();
@@ -388,6 +373,17 @@ export function VoucherWorkspace({
       window.removeEventListener("storage", updateInvoices);
     };
   }, [orgId]);
+
+  useEffect(() => {
+    if (!orgId) return;
+    invoicesApi
+      .list(orgId)
+      .then((res) => setOpenInvoices((res.data || []).filter((inv) => inv.status === "issued")))
+      .catch(() => setOpenInvoices([]));
+  }, [orgId]);
+
+  const customerNameOf = (inv: SalesInvoice) =>
+    inv.parties?.legal_name || parties.find((p) => p.id === inv.customer_id)?.legal_name || "Customer";
 
   // Handle selecting and auto-populating a draft from the Builder
   const handleSelectBuilderDraft = (draft: BuilderLedgerDraft) => {
@@ -436,13 +432,9 @@ export function VoucherWorkspace({
     if (!target) return;
 
     setReference(`RCP-${target.invoice_number}`);
-    setNarration(`Customer settlement received against Sales Invoice #${target.invoice_number} (${target.customer_name})`);
+    setNarration(`Customer settlement received against Sales Invoice #${target.invoice_number} (${customerNameOf(target)})`);
 
-    const matchedParty = parties.find(
-      (p) =>
-        p.legal_name.toLowerCase().includes(target.customer_name.toLowerCase()) ||
-        p.display_name?.toLowerCase().includes(target.customer_name.toLowerCase())
-    );
+    const matchedParty = parties.find((p) => p.id === target.customer_id);
 
     const amountStr = String(target.total_amount || 0);
     setLines((prev) => [
@@ -470,7 +462,7 @@ export function VoucherWorkspace({
       uploadedAt: new Date().toISOString(),
       verified: true,
       linkedInvoiceNumber: target.invoice_number,
-      notes: `Direct settlement for ${target.customer_name} (Amount: ₹${target.total_amount?.toLocaleString("en-IN")})`,
+      notes: `Direct settlement for ${customerNameOf(target)} (Amount: ₹${target.total_amount?.toLocaleString("en-IN")})`,
     });
   };
 
@@ -526,29 +518,6 @@ export function VoucherWorkspace({
     });
 
     if (proofFileInputRef.current) proofFileInputRef.current.value = "";
-  };
-
-  const handleAttachSampleProof = (sampleIdx = 0) => {
-    const list = SAMPLE_PROOFS[activeMode] || [];
-    let sample = list[sampleIdx] || list[0];
-    if (activeMode === "payment") {
-      sample = paymentMethod === "digital" ? list[0] : list[1] || list[0];
-    } else if (activeMode === "contra") {
-      sample = contraSlipType === "deposit" ? list[0] : list[1] || list[0];
-    } else if (activeMode === "journal") {
-      sample = journalProofType === "adjustment" ? list[0] : list[1] || list[0];
-    }
-
-    if (sample) {
-      setDocumentProof({
-        ...sample,
-        id: `proof-${Date.now()}`,
-        uploadedAt: new Date().toISOString(),
-      });
-      if (sample.refNumber && !reference) {
-        setReference(sample.refNumber);
-      }
-    }
   };
 
   // Auto-detect incoming draft from Document Builder via query params or storage
@@ -902,78 +871,8 @@ export function VoucherWorkspace({
         markDraftFinalized(loadedBuilderDraft.id, createdEntryId || "bld-" + Date.now());
       }
 
-      try {
-        const localDaybookEntry: VoucherItem = {
-          id: createdEntryId || `vch-bld-${Date.now()}`,
-          entry_number: voucherNumber,
-          voucher_type: activeMode,
-          f_key: activeConfig.fKey,
-          entry_date: entryDate,
-          entry_time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          party_name:
-            loadedBuilderDraft?.partyName ||
-            parties.find((p) => p.id === lines[0]?.party_id)?.legal_name ||
-            parties.find((p) => p.id === lines[0]?.party_id)?.display_name ||
-            "Direct Counterparty",
-          source_document: documentProof
-            ? documentProof.title
-            : loadedBuilderDraft
-            ? `${loadedBuilderDraft.documentType.toUpperCase()} (#${loadedBuilderDraft.docNumber})`
-            : `${activeConfig.title} (#${voucherNumber})`,
-          ledger_folio: activeMode === "sales" ? "LF-104" : activeMode === "purchase" ? "LF-305" : "LF-100",
-          reference: reference || voucherNumber,
-          narration: narration,
-          amount: totalDebit,
-          dr_cr: "Dr",
-          status: posted ? "posted" : "draft",
-          organisation_id: orgId,
-          document_proof: documentProof || undefined,
-          lines: lines.map((l, idx) => ({
-            dr_cr: l.dr_cr,
-            account_name:
-              accounts.find((a) => a.id === l.account_id)?.name || `Account (${l.account_id})`,
-            category: l.dr_cr === "Dr" ? "Asset" : "Revenue",
-            debit: l.dr_cr === "Dr" ? parseAmount(l.amount) : 0,
-            credit: l.dr_cr === "Cr" ? parseAmount(l.amount) : 0,
-            ledger_folio: `LF-${100 + idx * 5}`,
-            description: l.description,
-          })),
-        };
-
-        const existing = JSON.parse(
-          localStorage.getItem("deku_local_daybook_vouchers") || "[]"
-        );
-        localStorage.setItem(
-          "deku_local_daybook_vouchers",
-          JSON.stringify([localDaybookEntry, ...existing])
-        );
-
-        if (posted) {
-          // If bill-wise matching settled an open sales invoice, update invoice status in registry
-          if (documentProof?.linkedInvoiceNumber) {
-            const invKey = `deku_invoices_${orgId}`;
-            const invRaw = localStorage.getItem(invKey);
-            if (invRaw) {
-              const invs = JSON.parse(invRaw);
-              const updated = invs.map((inv: any) =>
-                inv.invoice_number === documentProof.linkedInvoiceNumber
-                  ? { ...inv, status: "converted", paid_amount: inv.total_amount }
-                  : inv
-              );
-              localStorage.setItem(invKey, JSON.stringify(updated));
-            }
-          }
-
-          // Broadcast reactive ledger invalidation event across system
-          window.dispatchEvent(
-            new CustomEvent("deku_ledger_updated", {
-              detail: { voucherNumber, mode: activeMode },
-            })
-          );
-        }
-      } catch (e) {
-        console.error("Local daybook record error:", e);
-      }
+      // Day Book and reports re-read the ledger from the server.
+      window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber, mode: activeMode } }));
 
       // Reset for next voucher entry
       setTimeout(() => {
@@ -1788,16 +1687,6 @@ export function VoucherWorkspace({
                           Upload Invoice File
                         </Button>
                       </div>
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[10px] text-slate-400">Or quick test:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleAttachSampleProof(0)}
-                          className="text-[11px] font-bold text-brand-strong hover:underline cursor-pointer"
-                        >
-                          ⚡ Use Sample External Invoice Proof
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1858,15 +1747,6 @@ export function VoucherWorkspace({
                       >
                         Upload Slip Scan / Photo
                       </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleAttachSampleProof(contraSlipType === "deposit" ? 0 : 1)}
-                        className="text-xs shrink-0 font-bold"
-                      >
-                        ⚡ Use Sample {contraSlipType === "deposit" ? "Deposit Slip" : "Cheque Slip"}
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1924,15 +1804,6 @@ export function VoucherWorkspace({
                         >
                           Upload Payment Screenshot / Advice
                         </Button>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleAttachSampleProof(0)}
-                          className="text-xs shrink-0 font-bold"
-                        >
-                          ⚡ Use Sample UTR Advice
-                        </Button>
                       </div>
                     ) : (
                       <div className="space-y-2 bg-amber-50/80 p-2.5 rounded border border-amber-300">
@@ -1958,15 +1829,6 @@ export function VoucherWorkspace({
                             className="text-xs shrink-0 border-amber-400 text-amber-950"
                           >
                             Upload Signed CFO Memo
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleAttachSampleProof(1)}
-                            className="text-xs shrink-0 font-bold"
-                          >
-                            ⚡ Use Sample CFO Sanction
                           </Button>
                         </div>
                       </div>
@@ -2007,7 +1869,7 @@ export function VoucherWorkspace({
                             <option value="">— Choose Open Invoice to Settle —</option>
                             {openInvoices.map((inv) => (
                               <option key={inv.id || inv.invoice_number} value={inv.invoice_number}>
-                                {inv.invoice_number} • {inv.customer_name} (Due: ₹{inv.total_amount?.toLocaleString("en-IN")})
+                                {inv.invoice_number} • {customerNameOf(inv)} (Due: ₹{inv.total_amount?.toLocaleString("en-IN")})
                               </option>
                             ))}
                           </select>
@@ -2042,16 +1904,6 @@ export function VoucherWorkspace({
                         >
                           Upload Advice
                         </Button>
-                      </div>
-                      <div className="pt-1 flex items-center justify-between">
-                        <span className="text-[10px] text-slate-400">Or quick test:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleAttachSampleProof(0)}
-                          className="text-[11px] font-bold text-brand-strong hover:underline cursor-pointer"
-                        >
-                          ⚡ Use Sample Remittance Advice
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -2113,15 +1965,6 @@ export function VoucherWorkspace({
                       >
                         Upload Supporting Document
                       </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleAttachSampleProof(journalProofType === "adjustment" ? 0 : 1)}
-                        className="text-xs shrink-0 font-bold"
-                      >
-                        ⚡ Use Sample {journalProofType === "adjustment" ? "Purchase Bill" : "Depreciation Memo"}
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -2154,15 +1997,6 @@ export function VoucherWorkspace({
                         className="text-xs shrink-0"
                       >
                         Upload Vendor Invoice
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleAttachSampleProof(0)}
-                        className="text-xs shrink-0 font-bold"
-                      >
-                        ⚡ Use Sample Vendor Invoice
                       </Button>
                     </div>
                   </div>

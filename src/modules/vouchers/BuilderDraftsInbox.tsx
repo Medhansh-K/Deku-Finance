@@ -10,14 +10,12 @@ import {
   Trash2,
   Sparkles,
   ExternalLink,
-  RotateCcw,
   Plus,
 } from "lucide-react";
 import {
   BuilderLedgerDraft,
   getBuilderDrafts,
   deleteBuilderDraft,
-  SAMPLE_BUILDER_DRAFTS,
 } from "@/lib/vouchers/builder-drafts";
 import { formatINR } from "@/lib/formatters/currency";
 
@@ -61,14 +59,6 @@ export function BuilderDraftsInbox({
   const handleDelete = (e: React.MouseEvent, draftId: string) => {
     e.stopPropagation();
     deleteBuilderDraft(draftId);
-    loadDrafts();
-  };
-
-  const handleResetSample = () => {
-    localStorage.setItem(
-      "deku_builder_ledger_drafts",
-      JSON.stringify(SAMPLE_BUILDER_DRAFTS)
-    );
     loadDrafts();
   };
 
@@ -146,13 +136,6 @@ export function BuilderDraftsInbox({
           <div className="p-4 text-center border border-dashed border-slate-200 rounded-lg space-y-2">
             <Clock className="h-6 w-6 text-slate-300 mx-auto" />
             <p className="text-xs text-slate-500">No {filter !== "all" ? filter : ""} requests found</p>
-            <button
-              type="button"
-              onClick={handleResetSample}
-              className="text-[10px] text-brand hover:underline font-bold"
-            >
-              Reload Sample Builder Requests
-            </button>
           </div>
         ) : (
           filteredDrafts.map((draft) => {
@@ -237,13 +220,6 @@ export function BuilderDraftsInbox({
       {/* Footer helper */}
       <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
         <span>Source: Document Builder</span>
-        <button
-          type="button"
-          onClick={handleResetSample}
-          className="hover:text-slate-900 hover:underline flex items-center gap-1"
-        >
-          <RotateCcw className="h-2.5 w-2.5" /> Reset Samples
-        </button>
       </div>
     </div>
   );

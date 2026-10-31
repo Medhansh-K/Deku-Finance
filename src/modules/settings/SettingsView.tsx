@@ -11,6 +11,7 @@ import { FiscalPeriod } from "@/types/accounting";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import { CompanyControlsCard } from "./CompanyControlsCard";
+import { CompanyProfileCard } from "./CompanyProfileCard";
 
 export function SettingsView() {
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
@@ -82,6 +83,7 @@ export function SettingsView() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
+      <CompanyProfileCard />
       {orgId && <CompanyControlsCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
