@@ -129,7 +129,7 @@ export function DepartmentsMembersView() {
     if (d.length > 0) setDepartments(d);
     if (m.length > 0) setMembers(m);
 
-    // 2. Fetch live data from backend APIs / Supabase
+    // 2. Fetch live data from backend APIs
     setIsSyncing(true);
     try {
       const [liveDepts, liveMembers] = await Promise.all([

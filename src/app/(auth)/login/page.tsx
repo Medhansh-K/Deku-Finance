@@ -64,7 +64,7 @@ function LoginForm() {
       const loginRes = await login(ownerEmail, ownerPassword);
       setIsLoading(false);
       if (loginRes.error) {
-        // If password login fails on Supabase, proceed with demo/activated session
+        // If password login fails, proceed with demo/activated session
         setSuccessMsg("License activated successfully! Entering workspace...");
         setTimeout(() => router.push("/gateway"), 1000);
       } else {

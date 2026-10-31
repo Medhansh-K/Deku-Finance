@@ -123,7 +123,7 @@ export default function AlerxLedgerSection() {
           groupCode: "X",
           ledger: "Operating Overheads & Admin",
           subLedger: "Tech & SaaS Infrastructure",
-          label: "AWS & Supabase Cloud Servers",
+          label: "Google Cloud Servers",
           isPostable: true,
           sampleUnit: 4,
           sampleValue: "₹68,500.00",
