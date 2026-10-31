@@ -150,11 +150,11 @@ export function PartiesView() {
       sortKey: (p) => p.legal_name,
       cell: (p) => (
         <div>
-          <span className="font-bold text-slate-900 block">
+          <span className="font-bold text-ink block">
             {p.legal_name}
           </span>
           {p.display_name && p.display_name !== p.legal_name && (
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-ink-muted">
               {p.display_name}
             </span>
           )}
@@ -165,7 +165,7 @@ export function PartiesView() {
       header: "GSTIN",
       sortKey: (p) => p.gstin || "",
       cell: (p) => (
-        <span className="font-mono text-slate-700">
+        <span className="font-mono text-ink-soft">
           {p.gstin || "Unregistered"}
         </span>
       ),
@@ -173,7 +173,7 @@ export function PartiesView() {
     {
       header: "PAN",
       cell: (p) => (
-        <span className="font-mono text-slate-700">{p.pan || "—"}</span>
+        <span className="font-mono text-ink-soft">{p.pan || "—"}</span>
       ),
     },
     {
@@ -181,7 +181,7 @@ export function PartiesView() {
       cell: (p) => {
         const addr = p.billing_address;
         return (
-          <span className="text-slate-600">
+          <span className="text-ink-soft">
             {addr?.city ? `${addr.city}, ` : ""}
             {addr?.state || "India"}
           </span>
@@ -191,7 +191,7 @@ export function PartiesView() {
     {
       header: "Contact",
       cell: (p) => (
-        <div className="text-[11px] text-slate-500">
+        <div className="text-[11px] text-ink-muted">
           <div>{p.email || "—"}</div>
           <div>{p.phone || ""}</div>
         </div>
@@ -202,7 +202,7 @@ export function PartiesView() {
   return (
     <div className="space-y-4">
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         <div className="flex items-center gap-1.5 flex-wrap">
           {(["all", "customer", "vendor"] as const).map((tab) => (
             <button
@@ -212,7 +212,7 @@ export function PartiesView() {
               className={`px-3 py-1.5 text-xs font-semibold rounded capitalize transition-colors ${
                 activeTab === tab
                   ? "bg-panel text-white font-bold"
-                  : "text-slate-600 hover:bg-slate-100"
+                  : "text-ink-soft hover:bg-canvas-sunken"
               }`}
             >
               {tab === "all" ? "All Parties" : `${tab}s`}
@@ -233,10 +233,10 @@ export function PartiesView() {
           {activeTab === "vendor" && (
             <Link
               href="/reports/creditors"
-              className="ml-2 text-xs font-mono font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded border border-slate-300 transition-colors flex items-center gap-1 shadow-2xs"
+              className="ml-2 text-xs font-mono font-bold text-ink bg-canvas-sunken hover:bg-line px-2.5 py-1 rounded border border-line-strong transition-colors flex items-center gap-1 shadow-2xs"
               title="Track Days Payable Outstanding (DPO) & vendor bills we owe"
             >
-              <Clock className="h-3 w-3 text-slate-700" />
+              <Clock className="h-3 w-3 text-ink-soft" />
               <span>Vendor DPO Bills Tracker →</span>
             </Link>
           )}
@@ -293,7 +293,7 @@ export function PartiesView() {
         <form onSubmit={handleCreate} className="space-y-3 font-sans text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
                 Party Type
               </label>
               <select
@@ -302,7 +302,7 @@ export function PartiesView() {
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value as PartyType })
                 }
-                className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
+                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
               >
                 <option value="customer">Customer (Debtor)</option>
                 <option value="vendor">Vendor / Supplier (Creditor)</option>
@@ -379,7 +379,7 @@ export function PartiesView() {
             />
           </div>
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-3 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"

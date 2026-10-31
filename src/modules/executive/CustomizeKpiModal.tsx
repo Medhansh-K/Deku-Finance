@@ -73,19 +73,19 @@ export function CustomizeKpiModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
         {/* Info Banner */}
-        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
+        <div className="p-3 bg-canvas border border-line rounded-lg flex items-center justify-between">
           <div>
-            <span className="font-bold text-slate-800 block text-xs">
+            <span className="font-bold text-ink block text-xs">
               KPI values come from your posted entries
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-ink-muted">
               Pick which ones the Gateway lists. Values can&apos;t be edited here.
             </span>
           </div>
           <button
             type="button"
             onClick={handleReset}
-            className="text-[11px] font-mono font-medium text-slate-600 hover:text-brand-strong flex items-center gap-1 px-2.5 py-1 rounded bg-white border border-slate-300 hover:border-brand transition-colors cursor-pointer"
+            className="text-[11px] font-mono font-medium text-ink-soft hover:text-brand-strong flex items-center gap-1 px-2.5 py-1 rounded bg-surface border border-line-strong hover:border-brand transition-colors cursor-pointer"
             title="Show the default KPI list"
           >
             <RotateCcw className="h-3 w-3" />
@@ -99,12 +99,12 @@ export function CustomizeKpiModal({
             <span className="font-mono font-bold uppercase tracking-wider text-[10px] text-ink-soft">
               Quick KPIs Selection (Listed in Gateway Column 3)
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">
+            <span className="text-[10px] text-ink-muted font-mono">
               Click individual KPI to open detail page
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-canvas p-2.5 rounded-lg border border-line">
             {(
               [
                 "billed",
@@ -122,8 +122,8 @@ export function CustomizeKpiModal({
                   key={kpiKey}
                   className={`flex items-center gap-2 p-2 rounded border cursor-pointer transition-colors ${
                     isChecked
-                      ? "bg-white border-brand text-slate-900 shadow-2xs"
-                      : "bg-slate-100/60 border-slate-200 text-slate-500"
+                      ? "bg-surface border-brand text-ink shadow-2xs"
+                      : "bg-canvas-sunken/60 border-line text-ink-muted"
                   }`}
                 >
                   <input
@@ -134,7 +134,7 @@ export function CustomizeKpiModal({
                   />
                   <div className="truncate">
                     <span className="font-bold text-[11px] block truncate">{meta.label}</span>
-                    <span className="text-[9px] text-slate-400 font-mono block truncate">
+                    <span className="text-[9px] text-ink-subtle font-mono block truncate">
                       ➔ {meta.detailRoute}
                     </span>
                   </div>
@@ -145,8 +145,8 @@ export function CustomizeKpiModal({
         </div>
 
         {/* Modal Actions */}
-        <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[10px] font-mono text-slate-400">
+        <div className="pt-3 border-t border-line flex items-center justify-between">
+          <span className="text-[10px] font-mono text-ink-subtle">
             {saveSuccess ? (
               <span className="text-emerald-700 font-bold flex items-center gap-1">
                 <Check className="h-3 w-3" /> Saved &amp; Synced!
@@ -160,7 +160,7 @@ export function CustomizeKpiModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-canvas-sunken hover:bg-line text-ink-soft font-bold text-xs transition-colors cursor-pointer"
             >
               Cancel
             </button>

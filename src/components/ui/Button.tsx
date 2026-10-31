@@ -31,7 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const variantStyles = {
-      primary: "bg-ink text-white hover:bg-panel-raised shadow-[0_1px_0_rgb(255_255_255/0.08)_inset,0_1px_2px_rgb(11_18_32/0.2)]",
+      primary: "bg-panel text-white hover:bg-panel-raised shadow-[0_1px_0_rgb(255_255_255/0.08)_inset,0_1px_2px_rgb(11_18_32/0.2)]",
       secondary: "bg-surface text-ink border border-line-strong hover:bg-canvas shadow-card",
       outline: "bg-transparent text-ink border border-line-strong hover:bg-canvas hover:border-ink-subtle",
       danger: "bg-rose-600 text-white hover:bg-rose-700 shadow-card",

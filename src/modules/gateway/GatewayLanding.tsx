@@ -213,7 +213,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 1 (Left): Company Status & Instant Shift Switcher */}
         {/* ========================================================================= */}
-        <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 bg-white border border-line-strong rounded-lg p-3 shadow-xs flex flex-col justify-between">
+        <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 bg-surface border border-line-strong rounded-lg p-3 shadow-xs flex flex-col justify-between">
           <div className="space-y-2.5">
             {/* Header with Company Selector Dropdown */}
             <div className="border-b border-line pb-2">
@@ -248,7 +248,7 @@ export function GatewayLanding() {
               </div>
 
               <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="text-[10px] font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-300">
+                <span className="text-[10px] font-mono bg-canvas-sunken text-ink-soft px-1.5 py-0.5 rounded border border-line-strong">
                   GSTIN: {activeOrg.gstin || "–"}
                 </span>
                 <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 font-bold">
@@ -284,23 +284,23 @@ export function GatewayLanding() {
                       className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all flex items-center justify-between border cursor-pointer ${
                         isSelected
                           ? "bg-panel text-brand-soft border-edge font-bold shadow-xs"
-                          : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                          : "bg-canvas hover:bg-canvas-sunken text-ink-soft border-line"
                       }`}
                     >
                       <div className="flex items-center gap-1.5 truncate">
                         <Building2
                           className={`h-3 w-3 shrink-0 ${
-                            isSelected ? "text-brand" : "text-slate-400"
+                            isSelected ? "text-brand" : "text-ink-subtle"
                           }`}
                         />
                         <span className="truncate">{org.name}</span>
                       </div>
                       {isSelected ? (
-                        <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-brand text-ink font-bold shrink-0">
+                        <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-brand text-panel-deep font-bold shrink-0">
                           Active
                         </span>
                       ) : (
-                        <span className="text-[9px] font-mono text-slate-400 hover:text-slate-700 shrink-0">
+                        <span className="text-[9px] font-mono text-ink-subtle hover:text-ink-soft shrink-0">
                           Shift ➔
                         </span>
                       )}
@@ -312,26 +312,26 @@ export function GatewayLanding() {
 
             {/* Company Metadata Info */}
             <div className="space-y-1 text-[11px] pt-1">
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Current Period:</span>
+              <div className="flex justify-between py-0.5 border-b border-line">
+                <span className="text-ink-muted">Current Period:</span>
                 <span className="font-mono font-bold text-ink">
                   {profile.periodLabel}
                 </span>
               </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Date of Last Entry:</span>
+              <div className="flex justify-between py-0.5 border-b border-line">
+                <span className="text-ink-muted">Date of Last Entry:</span>
                 <span className="font-mono font-bold text-ink">
                   {profile.lastEntry}
                 </span>
               </div>
-              <div className="flex justify-between py-0.5 border-b border-slate-100">
-                <span className="text-slate-500">Accounting Standard:</span>
+              <div className="flex justify-between py-0.5 border-b border-line">
+                <span className="text-ink-muted">Accounting Standard:</span>
                 <span className="font-mono text-ink">
                   ALERX 4-Tier Double Entry
                 </span>
               </div>
               <div className="flex justify-between py-0.5">
-                <span className="text-slate-500">Authoritative Ledger:</span>
+                <span className="text-ink-muted">Authoritative Ledger:</span>
                 <span className="font-mono text-emerald-700 font-semibold flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
                   PostgreSQL Active
@@ -340,8 +340,8 @@ export function GatewayLanding() {
             </div>
           </div>
 
-          <div className="pt-2 mt-1.5 border-t border-line text-[10px] text-slate-500">
-            <p className="font-mono text-[9px] text-slate-400">
+          <div className="pt-2 mt-1.5 border-t border-line text-[10px] text-ink-muted">
+            <p className="font-mono text-[9px] text-ink-subtle">
               Press <strong>F3</strong> or click above to shift company. Highlighted keys open menu items directly.
             </p>
           </div>
@@ -350,7 +350,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 2 (Center): Gateway of Deku Navigation Menu (Enlarged & Focused)  */}
         {/* ========================================================================= */}
-        <div className="flex-1 bg-white border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[340px]">
+        <div className="flex-1 bg-surface border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[340px]">
           <div>
             {/* Menu Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
@@ -365,7 +365,7 @@ export function GatewayLanding() {
               </span>
             </div>
 
-            <div className="p-2.5 space-y-1.5 divide-y divide-slate-100 text-xs font-sans">
+            <div className="p-2.5 space-y-1.5 divide-y divide-line text-xs font-sans">
               {/* EXECUTIVE DASHBOARD & DEKU KONSULTANT SPOTLIGHT */}
               <div className="pb-0.5">
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-1 px-1.5 flex items-center justify-between">
@@ -399,7 +399,7 @@ export function GatewayLanding() {
                       <span className="font-bold text-xs block text-white group-hover:text-[#00F5A0] transition-colors">
                         Deku <u>K</u>onsultant (<u>E</u>xecutive Dashboard)
                       </span>
-                      <span className="text-[10px] text-slate-400 block font-mono">
+                      <span className="text-[10px] text-ink-subtle block font-mono">
                         {companyShortName} Sovereign AI CFO &amp; Real-time Ledger Intelligence
                       </span>
                     </div>
@@ -433,34 +433,34 @@ export function GatewayLanding() {
                 <div className="space-y-0.5">
                   <Link
                     href="/masters/chart-of-accounts"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>C</u>hart of <u>A</u>ccounts (ALERX Ledgers)
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       A
                     </kbd>
                   </Link>
                   <Link
                     href="/masters/parties"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>P</u>arties (Customers &amp; Vendors Master)
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       P
                     </kbd>
                   </Link>
                   <Link
                     href="/masters/products-services"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       Stock &amp; Services <u>I</u>tems
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       I
                     </kbd>
                   </Link>
@@ -475,7 +475,7 @@ export function GatewayLanding() {
                 <div className="space-y-0.5">
                   <Link
                     href="/vouchers"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       Accounting <u>V</u>ouchers (F4-F9)
@@ -486,22 +486,22 @@ export function GatewayLanding() {
                   </Link>
                   <Link
                     href="/day-book"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>D</u>ay Book (Chronological Register)
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       D
                     </kbd>
                   </Link>
                   <Link
                     href="/builder"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span className="flex items-center gap-1.5">
                       <span><u>B</u>uilder (Docs, Quotes &amp; Coupons)</span>
-                      <span className="text-[9px] px-1 py-0.1 rounded bg-teal-100 text-ink font-bold">New</span>
+                      <span className="text-[9px] px-1 py-0.1 rounded bg-teal-100 text-teal-900 font-bold">New</span>
                     </span>
                     <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
                       Shift+B
@@ -518,40 +518,40 @@ export function GatewayLanding() {
                 <div className="space-y-0.5">
                   <Link
                     href="/reports/balance-sheet"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>B</u>alance Sheet
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       B
                     </kbd>
                   </Link>
                   <Link
                     href="/reports/profit-loss"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       Pr<u>o</u>fit &amp; Loss A/c
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       O
                     </kbd>
                   </Link>
                   <Link
                     href="/reports/trial-balance"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>T</u>rial Balance
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       T
                     </kbd>
                   </Link>
                   <Link
                     href="/reports/cash-flow"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>C</u>ash Flow (WCM)
@@ -562,7 +562,7 @@ export function GatewayLanding() {
                   </Link>
                   <Link
                     href="/reports/fpa"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>F</u>P&amp;A Intelligence
@@ -594,18 +594,18 @@ export function GatewayLanding() {
                 <div className="space-y-0.5">
                   <Link
                     href="/gst"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>G</u>ST Returns &amp; Tax Breakdown
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       G
                     </kbd>
                   </Link>
                   <Link
                     href="/departments-members"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       Departments &amp; <u>M</u>embers
@@ -616,7 +616,7 @@ export function GatewayLanding() {
                   </Link>
                   <Link
                     href="/audit"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       User Activity &amp; Audit <u>L</u>ogs
@@ -627,12 +627,12 @@ export function GatewayLanding() {
                   </Link>
                   <Link
                     href="/settings"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-slate-800 hover:text-ink transition-colors font-medium"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
                     <span>
                       <u>S</u>ettings &amp; Accounting Preferences
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-slate-100 px-1.5 py-0.2 rounded border border-slate-300">
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
                       S
                     </kbd>
                   </Link>
@@ -643,8 +643,8 @@ export function GatewayLanding() {
           </div>
 
           {/* Balanced Card Footer */}
-          <div className="px-3.5 py-1.5 bg-slate-50 border-t border-line flex items-center justify-between text-xs">
-            <span className="text-[10px] font-mono text-slate-500">
+          <div className="px-3.5 py-1.5 bg-canvas border-t border-line flex items-center justify-between text-xs">
+            <span className="text-[10px] font-mono text-ink-muted">
               Press highlighted key to navigate
             </span>
             <span className="text-[10px] font-mono text-brand-strong font-semibold">
@@ -656,7 +656,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 3 (Right): Quick KPI Table (Dynamically Synced with Company)       */}
         {/* ========================================================================= */}
-        <div className="flex-1 bg-white border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[350px]">
+        <div className="flex-1 bg-surface border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[350px]">
           <div>
             {/* KPI Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
@@ -673,17 +673,17 @@ export function GatewayLanding() {
             </div>
 
             {/* Top Revenue & Margin Highlight Strip with Direct Drilldown */}
-            <div className="p-2.5 bg-canvas border-b border-slate-200 grid grid-cols-2 gap-2">
+            <div className="p-2.5 bg-canvas border-b border-line grid grid-cols-2 gap-2">
               <Link
-                href="/invoices"
-                className="p-1.5 rounded bg-white hover:bg-brand/10 border border-slate-200/80 hover:border-brand block shadow-2xs group transition-all cursor-pointer"
+                href="/gst"
+                className="p-1.5 rounded bg-surface hover:bg-brand/10 border border-line/80 hover:border-brand block shadow-2xs group transition-all cursor-pointer"
                 title="View Sales Invoices & Billed Turnover Register"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
+                  <span className="text-[10px] font-mono text-ink-muted uppercase block font-semibold group-hover:text-ink transition-colors">
                     Turnover (FY to date)
                   </span>
-                  <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-brand transition-colors" />
+                  <ArrowUpRight className="h-3 w-3 text-ink-subtle group-hover:text-brand transition-colors" />
                 </div>
                 <span className="text-base font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
                   {profile.turnover}
@@ -691,14 +691,14 @@ export function GatewayLanding() {
               </Link>
               <Link
                 href="/reports/profit-loss"
-                className="p-1.5 rounded bg-white hover:bg-brand/10 border border-slate-200/80 hover:border-brand text-right block shadow-2xs group transition-all cursor-pointer"
+                className="p-1.5 rounded bg-surface hover:bg-brand/10 border border-line/80 hover:border-brand text-right block shadow-2xs group transition-all cursor-pointer"
                 title="View Profit & Loss Account & Net Profit Statement (O)"
               >
                 <div className="flex items-center justify-end gap-1">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase block font-semibold group-hover:text-slate-900 transition-colors">
+                  <span className="text-[10px] font-mono text-ink-muted uppercase block font-semibold group-hover:text-ink transition-colors">
                     Net Profit
                   </span>
-                  <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-brand transition-colors" />
+                  <ArrowUpRight className="h-3 w-3 text-ink-subtle group-hover:text-brand transition-colors" />
                 </div>
                 <span className="text-base font-black font-mono text-emerald-700 group-hover:text-emerald-600 transition-colors">
                   {profile.profit}
@@ -713,25 +713,25 @@ export function GatewayLanding() {
                 <span>Position / Amount</span>
               </div>
 
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded overflow-hidden bg-white text-xs">
-                {/* 1. Billed Turnover & Invoices Hub -> /invoices */}
+              <div className="divide-y divide-line border border-line rounded overflow-hidden bg-surface text-xs">
+                {/* 1. Billed Turnover & Invoices Hub -> /gst */}
                 {show("billed") && (
                 <Link
-                  href="/invoices"
+                  href="/gst"
                   className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
                   title="Open Sales Invoices Register, Issuance & Conversion Tracking"
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         Billed Turnover
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.billedLimit}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.billedLimit}</span>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-brand block transition-colors text-xs">
+                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
                       {profile.billed}
                     </span>
                     <span
@@ -758,18 +758,18 @@ export function GatewayLanding() {
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         Liquid Funds
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.liquidBank}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.liquidBank}</span>
                   </div>
                   <div className="text-right">
                     <span className="font-mono font-bold text-emerald-700 group-hover:text-emerald-600 block transition-colors text-xs">
                       {profile.liquid}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">Instant Liquidity</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Instant Liquidity</span>
                   </div>
                 </Link>
                 )}
@@ -783,15 +783,15 @@ export function GatewayLanding() {
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         Trade Debtors (AR)
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.debtorsCount}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.debtorsCount}</span>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-brand block transition-colors text-xs">
+                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
                       {profile.debtors}
                     </span>
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
@@ -810,18 +810,18 @@ export function GatewayLanding() {
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         Trade Creditors (AP)
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.creditorsCount}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.creditorsCount}</span>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-brand block transition-colors text-xs">
+                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
                       {profile.creditors}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.creditorsTerms}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.creditorsTerms}</span>
                   </div>
                 </Link>
                 )}
@@ -835,18 +835,18 @@ export function GatewayLanding() {
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         Operating Expenses
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.expensesHeads}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.expensesHeads}</span>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono font-bold text-slate-900 group-hover:text-brand block transition-colors text-xs">
+                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
                       {profile.expenses}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.expenseRatio}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.expenseRatio}</span>
                   </div>
                 </Link>
                 )}
@@ -860,18 +860,18 @@ export function GatewayLanding() {
                 >
                   <div>
                     <div className="flex items-center gap-1">
-                      <span className="font-semibold text-slate-800 group-hover:text-ink block text-xs">
+                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
                         GST Net Payable
                       </span>
                       <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
                     </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{profile.gstBreakdown}</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">{profile.gstBreakdown}</span>
                   </div>
                   <div className="text-right">
                     <span className="font-mono font-bold text-rose-700 group-hover:text-rose-600 block transition-colors text-xs">
                       {profile.gst}
                     </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-canvas-sunken text-ink-soft border border-line">
                       {profile.gstStatus}
                     </span>
                   </div>
@@ -882,7 +882,7 @@ export function GatewayLanding() {
           </div>
 
           {/* Bottom Card Footer with Direct Drilldown to Executive Dashboard & Deku Consultant */}
-          <div className="px-3.5 py-1.5 bg-slate-50 border-t border-line flex items-center justify-between text-xs">
+          <div className="px-3.5 py-1.5 bg-canvas border-t border-line flex items-center justify-between text-xs">
             <Link
               href="/consultant"
               className="inline-flex items-center gap-1.5 font-bold text-teal-800 hover:text-teal-600 transition-colors"

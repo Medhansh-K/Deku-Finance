@@ -117,11 +117,11 @@ export function OperatingExpensesView() {
           }}
           className="font-mono text-left group"
         >
-          <div className="font-bold text-slate-900 group-hover:text-brand group-hover:underline flex items-center gap-1">
+          <div className="font-bold text-ink group-hover:text-brand group-hover:underline flex items-center gap-1">
             <Receipt className="h-3.5 w-3.5 text-brand-strong" />
             <span>{v.entryNumber}</span>
           </div>
-          <span className="text-[10px] text-slate-400 block mt-0.5">
+          <span className="text-[10px] text-ink-subtle block mt-0.5">
             {formatDateTally(v.date)}
           </span>
         </button>
@@ -132,8 +132,8 @@ export function OperatingExpensesView() {
       sortKey: (v) => v.partyName ?? "",
       cell: (v) => (
         <div>
-          <span className="font-bold text-slate-900 block text-xs">{v.partyName ?? "–"}</span>
-          <span className="text-[10px] text-slate-500 font-mono mt-0.5 block truncate max-w-xs">
+          <span className="font-bold text-ink block text-xs">{v.partyName ?? "–"}</span>
+          <span className="text-[10px] text-ink-muted font-mono mt-0.5 block truncate max-w-xs">
             {v.narration}
           </span>
         </div>
@@ -144,7 +144,7 @@ export function OperatingExpensesView() {
       cell: (v) => (
         <div className="space-y-0.5">
           {v.heads.map((h) => (
-            <span key={h} className="font-semibold text-slate-800 block text-xs">{h}</span>
+            <span key={h} className="font-semibold text-ink block text-xs">{h}</span>
           ))}
         </div>
       ),
@@ -152,7 +152,7 @@ export function OperatingExpensesView() {
     {
       header: "Credited Account",
       cell: (v) => (
-        <span className="text-slate-600 font-mono text-[11px] block">
+        <span className="text-ink-soft font-mono text-[11px] block">
           {v.sources.join(", ") || "–"}
         </span>
       ),
@@ -163,7 +163,7 @@ export function OperatingExpensesView() {
       sortKey: (v) => v.amountPaise,
       cell: (v) => (
         <div className="text-right">
-          <span className="font-mono text-xs font-black text-slate-950 block">
+          <span className="font-mono text-xs font-black text-ink block">
             {formatINR(toRupees(v.amountPaise))}
           </span>
           <Badge variant={v.status === "reversed" ? "warning" : "success"}>
@@ -181,7 +181,7 @@ export function OperatingExpensesView() {
             e.stopPropagation();
             openVoucher(v);
           }}
-          className="p-1 text-slate-500 hover:text-brand hover:bg-slate-100 rounded transition-colors"
+          className="p-1 text-ink-muted hover:text-brand hover:bg-canvas-sunken rounded transition-colors"
           title="View Voucher Details & Double-Entry"
         >
           <Eye className="h-3.5 w-3.5" />
@@ -193,19 +193,19 @@ export function OperatingExpensesView() {
   return (
     <div className="space-y-4">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono mb-1">
+          <div className="flex items-center gap-1.5 text-xs text-ink-muted font-mono mb-1">
             <Link href="/gateway" className="hover:text-brand transition-colors">
               Gateway
             </Link>
-            <ChevronRight className="h-3 w-3 text-slate-400" />
-            <span className="font-semibold text-slate-900">Operating Expenses</span>
+            <ChevronRight className="h-3 w-3 text-ink-subtle" />
+            <span className="font-semibold text-ink">Operating Expenses</span>
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl font-black text-ink tracking-tight">
             Operating Expenses
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-ink-muted mt-0.5">
             Posted entries on expense ledgers (cost of sales excluded), {formatDateTally(from)} to {formatDateTally(asOf)}
           </p>
         </div>
@@ -216,7 +216,7 @@ export function OperatingExpensesView() {
           </Button>
           <Link
             href="/vouchers/payment"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-ink shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
             <span>Create Payment Voucher (F5)</span>
@@ -226,8 +226,8 @@ export function OperatingExpensesView() {
 
       {/* Top High-Level OPEX Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Total Operating Expenses
             </span>
@@ -235,16 +235,16 @@ export function OperatingExpensesView() {
               <TrendingDown className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {hasData ? formatINR(toRupees(report.totalPaise)) : "–"}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             Financial year to date
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Operating Expense Ratio
             </span>
@@ -252,16 +252,16 @@ export function OperatingExpensesView() {
               <PieChart className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {ratio === null || !hasData ? "–" : `${ratio}%`}
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             {revenuePaise > 0 ? "Of revenue this year" : "No revenue posted this year"}
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Expense Vouchers
             </span>
@@ -269,16 +269,16 @@ export function OperatingExpensesView() {
               <Receipt className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {report.vouchers.length} Vouchers
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             Posted entries touching expense heads
           </span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+        <div className="bg-surface p-3.5 rounded-lg border border-line shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-ink-muted mb-1">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
               Expense Heads Used
             </span>
@@ -286,24 +286,24 @@ export function OperatingExpensesView() {
               <Briefcase className="h-3 w-3" />
             </span>
           </div>
-          <div className="text-lg font-black font-mono text-slate-900">
+          <div className="text-lg font-black font-mono text-ink">
             {report.byHead.length} Heads
           </div>
-          <span className="text-[10px] text-slate-500 font-mono">
+          <span className="text-[10px] text-ink-muted font-mono">
             Departments and budgets are not linked to entries
           </span>
         </div>
       </div>
 
       {/* Expense-head breakdown */}
-      <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+      <div className="bg-surface p-4 rounded-lg border border-line shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-2">
           <div>
-            <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+            <h2 className="text-sm font-black text-ink flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-brand-strong" />
               <span>Expense Breakdown by Ledger Head</span>
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-ink-muted">
               Click a head to list only the vouchers posted to it
             </p>
           </div>
@@ -318,7 +318,7 @@ export function OperatingExpensesView() {
         </div>
 
         {report.byHead.length === 0 ? (
-          <p className="text-xs text-slate-500 py-4 text-center">
+          <p className="text-xs text-ink-muted py-4 text-center">
             {error ?? (isLoading ? "Loading…" : "No operating expenses posted this financial year.")}
           </p>
         ) : (
@@ -334,29 +334,29 @@ export function OperatingExpensesView() {
                   className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     isSelected
                       ? "border-brand bg-brand/10 shadow-xs ring-1 ring-brand"
-                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/70"
+                      : "border-line bg-canvas/50 hover:bg-canvas-sunken/70"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-700">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft">
                       {head.code}
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-slate-500">{pct}% OPEX</span>
+                    <span className="text-[10px] font-mono font-bold text-ink-muted">{pct}% OPEX</span>
                   </div>
-                  <div className="text-xs font-bold text-slate-900 truncate" title={head.name}>
+                  <div className="text-xs font-bold text-ink truncate" title={head.name}>
                     {head.name}
                   </div>
-                  <div className="text-sm font-black font-mono text-slate-950 mt-1">
+                  <div className="text-sm font-black font-mono text-ink mt-1">
                     {formatINR(toRupees(head.amountPaise))}
                   </div>
 
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                  <div className="w-full bg-line h-1.5 rounded-full mt-2 overflow-hidden">
                     <div
                       className="bg-brand-strong h-full rounded-full transition-all"
                       style={{ width: `${Math.max(0, pct)}%` }}
                     />
                   </div>
-                  <div className="flex justify-between text-[9px] text-slate-500 font-mono mt-1">
+                  <div className="flex justify-between text-[9px] text-ink-muted font-mono mt-1">
                     <span>{head.entries} {head.entries === 1 ? "voucher" : "vouchers"}</span>
                   </div>
                 </div>
@@ -366,8 +366,8 @@ export function OperatingExpensesView() {
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3 bg-white p-3 rounded-lg border border-slate-200">
-        <div className="text-xs font-mono text-slate-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3 bg-surface p-3 rounded-lg border border-line">
+        <div className="text-xs font-mono text-ink-muted">
           Showing <strong>{filteredVouchers.length}</strong> of {report.vouchers.length} expense vouchers
         </div>
       </div>
@@ -392,49 +392,49 @@ export function OperatingExpensesView() {
           description="Double-entry lines as posted to the ledger"
         >
           <div className="space-y-4 text-xs font-sans">
-            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 flex flex-col sm:flex-row justify-between gap-3">
+            <div className="bg-canvas p-3.5 rounded border border-line flex flex-col sm:flex-row justify-between gap-3">
               <div>
-                <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+                <span className="text-[10px] font-mono text-ink-subtle uppercase font-semibold">
                   Voucher Number
                 </span>
-                <div className="text-base font-black font-mono text-slate-900">
+                <div className="text-base font-black font-mono text-ink">
                   {selectedVoucher.entryNumber}
                 </div>
-                <div className="text-xs text-slate-600 font-mono mt-0.5">
+                <div className="text-xs text-ink-soft font-mono mt-0.5">
                   Dated: {formatDateTally(selectedVoucher.date)}
                 </div>
               </div>
               <div className="sm:text-right">
-                <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+                <span className="text-[10px] font-mono text-ink-subtle uppercase font-semibold">
                   Operating Expense
                 </span>
                 <div className="text-base font-black font-mono text-emerald-700">
                   {formatINR(toRupees(selectedVoucher.amountPaise))}
                 </div>
-                <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                <div className="text-[11px] font-mono text-ink-muted mt-0.5">
                   Credited: {selectedVoucher.sources.join(", ") || "–"}
                 </div>
               </div>
             </div>
 
-            <div className="p-3 bg-white rounded border border-slate-200">
-              <div className="text-xs text-slate-600">
+            <div className="p-3 bg-surface rounded border border-line">
+              <div className="text-xs text-ink-soft">
                 <strong>Party:</strong> {selectedVoucher.partyName ?? "–"}
               </div>
-              <div className="text-xs text-slate-600 mt-0.5">
+              <div className="text-xs text-ink-soft mt-0.5">
                 <strong>Expense Head:</strong> {selectedVoucher.heads.join(", ")}
               </div>
               {selectedVoucher.reference && (
-                <div className="text-xs text-slate-600 mt-0.5">
+                <div className="text-xs text-ink-soft mt-0.5">
                   <strong>Reference:</strong> {selectedVoucher.reference}
                 </div>
               )}
-              <div className="text-xs text-slate-600 mt-0.5">
+              <div className="text-xs text-ink-soft mt-0.5">
                 <strong>Narration:</strong> {selectedVoucher.narration}
               </div>
             </div>
 
-            <div className="border border-slate-200 rounded overflow-hidden">
+            <div className="border border-line rounded overflow-hidden">
               <table className="w-full text-left text-xs font-mono">
                 <thead className="bg-panel text-white text-[11px]">
                   <tr>
@@ -444,9 +444,9 @@ export function OperatingExpensesView() {
                     <th className="p-2 text-right">Credit (INR)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody className="divide-y divide-line bg-surface">
                   {selectedVoucher.lines.map((ln, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50">
+                    <tr key={idx} className="hover:bg-canvas">
                       <td className="p-2">
                         <span
                           className={`font-bold px-1.5 py-0.2 rounded text-[10px] ${
@@ -458,16 +458,16 @@ export function OperatingExpensesView() {
                           {ln.debitPaise > 0 ? "Dr" : "Cr"}
                         </span>
                       </td>
-                      <td className="p-2 font-sans font-medium text-slate-900">
+                      <td className="p-2 font-sans font-medium text-ink">
                         {ln.accountCode} {ln.accountName}
-                        <span className="text-[10px] text-slate-400 block font-mono capitalize">
+                        <span className="text-[10px] text-ink-subtle block font-mono capitalize">
                           {ln.group}
                         </span>
                       </td>
-                      <td className="p-2 text-right font-bold text-slate-800">
+                      <td className="p-2 text-right font-bold text-ink">
                         {ln.debitPaise > 0 ? formatINR(toRupees(ln.debitPaise)) : "—"}
                       </td>
-                      <td className="p-2 text-right font-bold text-slate-800">
+                      <td className="p-2 text-right font-bold text-ink">
                         {ln.creditPaise > 0 ? formatINR(toRupees(ln.creditPaise)) : "—"}
                       </td>
                     </tr>
@@ -476,17 +476,17 @@ export function OperatingExpensesView() {
               </table>
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+            <div className="flex items-center justify-between pt-2 border-t border-line">
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold rounded flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 bg-surface border border-line-strong text-ink-soft hover:bg-canvas font-bold rounded flex items-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 <Printer className="h-3.5 w-3.5" />
                 <span>Print Voucher</span>
               </button>
 
-              <span className="text-[11px] font-mono text-slate-500 font-bold">
+              <span className="text-[11px] font-mono text-ink-muted font-bold">
                 {selectedVoucher.status === "reversed" ? "Reversed by a later entry" : "Posted"}
               </span>
             </div>

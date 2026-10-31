@@ -60,12 +60,12 @@ export function ProfitLossView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         <div className="flex items-center gap-2">
           <Badge variant={isNetProfit ? "success" : "danger"}>
             {isNetProfit ? "Net Profit" : "Net Loss"}: {formatINR(Math.abs(netProfit))}
           </Badge>
-          <span className="text-slate-500 font-mono text-[11px]">
+          <span className="text-ink-muted font-mono text-[11px]">
             Fiscal Period FY 2026-27
           </span>
         </div>
@@ -108,8 +108,8 @@ export function ProfitLossView() {
 
       {/* Summary KPI Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white p-3.5 rounded border border-slate-200 shadow-xs">
-          <span className="text-slate-400 font-mono text-[10px] uppercase block">
+        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
+          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
             Operating Revenue & Income
           </span>
           <div className="flex items-center justify-between mt-1">
@@ -120,8 +120,8 @@ export function ProfitLossView() {
           </div>
         </div>
 
-        <div className="bg-white p-3.5 rounded border border-slate-200 shadow-xs">
-          <span className="text-slate-400 font-mono text-[10px] uppercase block">
+        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
+          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
             Operating Expenses & Overhead
           </span>
           <div className="flex items-center justify-between mt-1">
@@ -132,8 +132,8 @@ export function ProfitLossView() {
           </div>
         </div>
 
-        <div className="bg-white p-3.5 rounded border border-slate-200 shadow-xs">
-          <span className="text-slate-400 font-mono text-[10px] uppercase block">
+        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
+          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
             Net Result for Period
           </span>
           <div className="flex items-center justify-between mt-1">
@@ -155,20 +155,20 @@ export function ProfitLossView() {
       {/* Detailed Dual-Column Statement */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Expenses Side */}
-        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden">
+        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Expenses & Outflows</span>
             <span className="text-slate-300 font-bold">{formatINR(totalExpense)}</span>
           </div>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-200 font-mono text-[10px] text-slate-500">
+              <tr className="bg-canvas-sunken border-b border-line font-mono text-[10px] text-ink-muted">
                 <th className="py-2 px-3">Code</th>
                 <th className="py-2 px-3">Expense Head</th>
                 <th className="py-2 px-3 text-right">Amount (₹)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {expenseAccounts.length > 0 ? (
                 expenseAccounts.map((acc) => (
                   <tr
@@ -176,22 +176,22 @@ export function ProfitLossView() {
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-canvas cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700">
+                    <td className="py-2 px-3 font-mono font-bold text-ink-soft">
                       {acc.account_code}
                     </td>
-                    <td className="py-2 px-3 font-medium text-slate-900">
+                    <td className="py-2 px-3 font-medium text-ink">
                       {acc.account_name}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
                       {formatINR(acc.net_amount, { showCurrencySymbol: false })}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="py-6 text-center text-slate-400 font-mono">
+                  <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
                     No expense movements recorded.
                   </td>
                 </tr>
@@ -201,20 +201,20 @@ export function ProfitLossView() {
         </div>
 
         {/* Income / Revenue Side */}
-        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden">
+        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Income & Inflows</span>
             <span className="text-emerald-400 font-bold">{formatINR(totalIncome)}</span>
           </div>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-slate-200 font-mono text-[10px] text-slate-500">
+              <tr className="bg-canvas-sunken border-b border-line font-mono text-[10px] text-ink-muted">
                 <th className="py-2 px-3">Code</th>
                 <th className="py-2 px-3">Revenue Head</th>
                 <th className="py-2 px-3 text-right">Amount (₹)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {incomeAccounts.length > 0 ? (
                 incomeAccounts.map((acc) => (
                   <tr
@@ -222,22 +222,22 @@ export function ProfitLossView() {
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-canvas cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700">
+                    <td className="py-2 px-3 font-mono font-bold text-ink-soft">
                       {acc.account_code}
                     </td>
-                    <td className="py-2 px-3 font-medium text-slate-900">
+                    <td className="py-2 px-3 font-medium text-ink">
                       {acc.account_name}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
                       {formatINR(acc.net_amount, { showCurrencySymbol: false })}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="py-6 text-center text-slate-400 font-mono">
+                  <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
                     No revenue movements recorded.
                   </td>
                 </tr>

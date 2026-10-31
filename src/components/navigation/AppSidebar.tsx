@@ -17,6 +17,7 @@ import {
   Landmark,
   LayoutGrid,
   LogOut,
+  Moon,
   Network,
   Receipt,
   ScrollText,
@@ -24,10 +25,12 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Sun,
   Users,
   Wallet,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 interface NavItem {
   label: string;
@@ -84,7 +87,7 @@ const NAV: { title: string; items: NavItem[] }[] = [
     title: "Compliance",
     items: [
       { label: "File GST return", href: "/gst/file", icon: FileSpreadsheet },
-      { label: "GST returns", href: "/dashboard/returns", icon: FileSpreadsheet },
+      { label: "GST returns", href: "/gst/returns", icon: FileSpreadsheet },
       { label: "GST portal guide", href: "/gst/guide", icon: BookOpen },
       { label: "Audit trail", href: "/audit", icon: ScrollText },
       { label: "Activity log", href: "/logs", icon: ScrollText },
@@ -116,6 +119,7 @@ export interface AppSidebarProps {
 export function AppSidebar({ companyName, onOpenCommandPalette, onOpenHelp, onNavigate }: AppSidebarProps) {
   const pathname = usePathname() || "";
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   // "Today" must be read in the browser, not frozen into the prerendered page.
   const [financialYear, setFinancialYear] = useState("");
   useEffect(() => setFinancialYear(currentFinancialYear()), []);
@@ -200,6 +204,14 @@ export function AppSidebar({ companyName, onOpenCommandPalette, onOpenHelp, onNa
         </span>
         <button onClick={onOpenHelp} className="rounded-md p-1.5 text-slate-500 hover:bg-panel hover:text-slate-200" title="Keyboard shortcuts (F1)" aria-label="Keyboard shortcuts">
           <HelpCircle className="h-4 w-4" />
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="rounded-md p-1.5 text-slate-500 hover:bg-panel hover:text-slate-200"
+          title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <button
           onClick={() => logout().then(() => (window.location.href = "/login"))}

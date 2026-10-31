@@ -73,16 +73,16 @@ export function BuilderDraftsInbox({
   };
 
   return (
-    <div className="bg-white border border-line-strong rounded-lg p-3 shadow-xs space-y-3">
+    <div className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+      <div className="flex items-center justify-between pb-2 border-b border-line">
         <div className="flex items-center gap-1.5 min-w-0">
           <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
           <div>
-            <h3 className="text-xs font-bold text-slate-900 leading-tight">
+            <h3 className="text-xs font-bold text-ink leading-tight">
               Builder Ledger Requests
             </h3>
-            <p className="text-[10px] text-slate-500 font-mono">
+            <p className="text-[10px] text-ink-muted font-mono">
               Drafts Sent from Invoicing Suite
             </p>
           </div>
@@ -93,25 +93,25 @@ export function BuilderDraftsInbox({
             {pendingCount} Pending
           </span>
         ) : (
-          <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
+          <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-canvas-sunken text-ink-soft border border-line shrink-0">
             0 Pending
           </span>
         )}
       </div>
 
-      <p className="text-[11px] text-slate-600 leading-tight">
+      <p className="text-[11px] text-ink-soft leading-tight">
         Incoming draft transactions created in <strong>Document Builder</strong>. Click any draft to auto-populate the ledger allocation desk.
       </p>
 
       {/* Filter Tabs */}
-      <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 text-[10px] font-semibold">
+      <div className="flex items-center bg-canvas-sunken p-0.5 rounded border border-line text-[10px] font-semibold">
         <button
           type="button"
           onClick={() => setFilter("all")}
           className={`flex-1 py-1 rounded transition-colors ${
             filter === "all"
-              ? "bg-white text-slate-900 font-bold shadow-2xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-surface text-ink font-bold shadow-2xs"
+              : "text-ink-soft hover:text-ink"
           }`}
         >
           All ({drafts.length})
@@ -121,8 +121,8 @@ export function BuilderDraftsInbox({
           onClick={() => setFilter("draft")}
           className={`flex-1 py-1 rounded transition-colors ${
             filter === "draft"
-              ? "bg-white text-amber-900 font-bold shadow-2xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-surface text-amber-900 font-bold shadow-2xs"
+              : "text-ink-soft hover:text-ink"
           }`}
         >
           Drafts ({pendingCount})
@@ -132,8 +132,8 @@ export function BuilderDraftsInbox({
           onClick={() => setFilter("posted")}
           className={`flex-1 py-1 rounded transition-colors ${
             filter === "posted"
-              ? "bg-white text-emerald-900 font-bold shadow-2xs"
-              : "text-slate-600 hover:text-slate-900"
+              ? "bg-surface text-emerald-900 font-bold shadow-2xs"
+              : "text-ink-soft hover:text-ink"
           }`}
         >
           Posted ({postedCount})
@@ -143,9 +143,9 @@ export function BuilderDraftsInbox({
       {/* List of Drafts */}
       <div className="space-y-2 max-h-[380px] overflow-y-auto pr-0.5">
         {filteredDrafts.length === 0 ? (
-          <div className="p-4 text-center border border-dashed border-slate-200 rounded-lg space-y-2">
+          <div className="p-4 text-center border border-dashed border-line rounded-lg space-y-2">
             <Clock className="h-6 w-6 text-slate-300 mx-auto" />
-            <p className="text-xs text-slate-500">No {filter !== "all" ? filter : ""} requests found</p>
+            <p className="text-xs text-ink-muted">No {filter !== "all" ? filter : ""} requests found</p>
             <button
               type="button"
               onClick={handleResetSample}
@@ -171,13 +171,13 @@ export function BuilderDraftsInbox({
                 className={`p-2.5 rounded-lg border transition-all cursor-pointer relative group text-left ${
                   isSelected
                     ? "bg-panel text-white border-brand shadow-sm ring-1 ring-brand"
-                    : "bg-slate-50/80 hover:bg-slate-100 border-slate-200 text-slate-800"
+                    : "bg-canvas/80 hover:bg-canvas-sunken border-line text-ink"
                 }`}
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-white" : "text-slate-900"}`}>
+                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-white" : "text-ink"}`}>
                         {draft.docNumber}
                       </span>
                       <span className={`text-[9px] font-mono px-1 py-0.2 rounded border font-semibold ${typeBadgeClass}`}>
@@ -185,13 +185,13 @@ export function BuilderDraftsInbox({
                       </span>
                     </div>
 
-                    <p className={`text-[11px] font-semibold mt-1 truncate ${isSelected ? "text-slate-200" : "text-slate-800"}`}>
+                    <p className={`text-[11px] font-semibold mt-1 truncate ${isSelected ? "text-slate-200" : "text-ink"}`}>
                       {draft.partyName}
                     </p>
 
-                    <div className={`text-[10px] mt-0.5 flex items-center justify-between ${isSelected ? "text-slate-400" : "text-slate-500"}`}>
+                    <div className={`text-[10px] mt-0.5 flex items-center justify-between ${isSelected ? "text-ink-subtle" : "text-ink-muted"}`}>
                       <span>Date: {draft.docDate}</span>
-                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-brand" : "text-slate-900"}`}>
+                      <span className={`font-mono font-bold text-xs ${isSelected ? "text-brand" : "text-ink"}`}>
                         {formatINR(draft.calculations.roundedTotal)}
                       </span>
                     </div>
@@ -199,7 +199,7 @@ export function BuilderDraftsInbox({
                 </div>
 
                 {/* Status Bar & Action */}
-                <div className="mt-2 pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
+                <div className="mt-2 pt-1.5 border-t border-line/60 flex items-center justify-between text-[10px]">
                   {isPosted ? (
                     <span className="flex items-center gap-1 text-emerald-600 font-bold">
                       <CheckCircle2 className="h-3 w-3" /> Posted to Ledger
@@ -214,7 +214,7 @@ export function BuilderDraftsInbox({
                     <button
                       type="button"
                       onClick={(e) => handleDelete(e, draft.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-600 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-ink-subtle hover:text-rose-600 transition-opacity"
                       title="Delete draft request"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -235,12 +235,12 @@ export function BuilderDraftsInbox({
       </div>
 
       {/* Footer helper */}
-      <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+      <div className="pt-2 border-t border-line flex items-center justify-between text-[10px] text-ink-muted">
         <span>Source: Document Builder</span>
         <button
           type="button"
           onClick={handleResetSample}
-          className="hover:text-slate-900 hover:underline flex items-center gap-1"
+          className="hover:text-ink hover:underline flex items-center gap-1"
         >
           <RotateCcw className="h-2.5 w-2.5" /> Reset Samples
         </button>

@@ -185,7 +185,7 @@ export function RecentlyAddedVouchers({
   const shortOrgName = activeOrgName.split(" ")[0];
 
   return (
-    <div className="bg-white border border-line-strong rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-surface border border-line-strong rounded-xl shadow-xs overflow-hidden">
       {/* Table Header Strip */}
       <div className="bg-panel px-4 py-3.5 border-b border-edge flex flex-col md:flex-row md:items-center justify-between gap-3 text-white">
         <div className="flex items-start sm:items-center gap-3">
@@ -204,16 +204,16 @@ export function RecentlyAddedVouchers({
                 🏢 {shortOrgName} Day Book
               </span>
               {!activeRegime ? null : activeRegime === "sec22" ? (
-                <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/40">
                   Sec 22 Bill of Supply
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40">
+                <span className="text-[10px] font-mono text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/40">
                   GST Tax Engine Active
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+            <p className="text-[11px] text-ink-subtle font-mono mt-0.5">
               Book of Prime Entry • Chronological daily log before totals are posted to the ledger
             </p>
           </div>
@@ -225,7 +225,7 @@ export function RecentlyAddedVouchers({
           <div className="relative">
             <button
               onClick={() => setIsNewVoucherMenuOpen(!isNewVoucherMenuOpen)}
-              className="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-soft text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-brand hover:bg-brand-soft text-panel-deep font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
               title="Record transaction voucher (F4-F9)"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -244,7 +244,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>{activeRegime === "sec22" ? "Bill of Supply" : "Sales Invoice"}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-ink-subtle font-mono">
                       {activeRegime === "sec22" ? "Sec 22 Exempt" : "GST Tax Invoice"}
                     </span>
                   </div>
@@ -256,7 +256,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>Payment (Vendor)</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Cash / Bank payout</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Cash / Bank payout</span>
                   </div>
                   <kbd className="font-mono text-[10px] text-rose-400 font-bold">F5</kbd>
                 </Link>
@@ -266,7 +266,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>Receipt (Customer)</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Bank NEFT / Cash</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Bank NEFT / Cash</span>
                   </div>
                   <kbd className="font-mono text-[10px] text-blue-400 font-bold">F6</kbd>
                 </Link>
@@ -276,7 +276,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>Purchase Bill</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Inward vendor bill</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Inward vendor bill</span>
                   </div>
                   <kbd className="font-mono text-[10px] text-amber-400 font-bold">F9</kbd>
                 </Link>
@@ -286,7 +286,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>Contra (Bank/Cash)</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Internal transfers</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Internal transfers</span>
                   </div>
                   <kbd className="font-mono text-[10px] text-cyan-400 font-bold">F4</kbd>
                 </Link>
@@ -296,7 +296,7 @@ export function RecentlyAddedVouchers({
                 >
                   <div className="flex flex-col">
                     <span>Journal Entry</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Adjustments / Folio</span>
+                    <span className="text-[10px] text-ink-subtle font-mono">Adjustments / Folio</span>
                   </div>
                   <kbd className="font-mono text-[10px] text-purple-400 font-bold">F7</kbd>
                 </Link>
@@ -317,12 +317,12 @@ export function RecentlyAddedVouchers({
 
       {/* Authoritative Accounting Definition Banner */}
       {showDefinitionHelp && (
-        <div className="bg-[#F0FDF4] border-b border-emerald-200 px-4 py-2.5 flex items-start justify-between gap-3 text-xs">
+        <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2.5 flex items-start justify-between gap-3 text-xs">
           <div className="flex items-start gap-2.5">
             <span className="p-1 rounded bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
               <Info className="h-3.5 w-3.5" />
             </span>
-            <div className="text-slate-800 leading-relaxed font-sans">
+            <div className="text-ink leading-relaxed font-sans">
               <span className="font-bold text-emerald-950 font-mono uppercase text-[11px] mr-1.5">
                 Accounting Definition:
               </span>
@@ -333,7 +333,7 @@ export function RecentlyAddedVouchers({
           </div>
           <button
             onClick={() => setShowDefinitionHelp(false)}
-            className="text-slate-400 hover:text-slate-600 text-xs font-mono font-bold shrink-0 ml-2 cursor-pointer"
+            className="text-ink-subtle hover:text-ink-soft text-xs font-mono font-bold shrink-0 ml-2 cursor-pointer"
             title="Dismiss definition"
           >
             ✕
@@ -342,7 +342,7 @@ export function RecentlyAddedVouchers({
       )}
 
       {/* Filter Tabs & Search Bar */}
-      <div className="p-3 bg-canvas border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="p-3 bg-canvas border-b border-line flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Type Filter Pills */}
         <div className="flex flex-wrap items-center gap-1">
           {(
@@ -364,13 +364,13 @@ export function RecentlyAddedVouchers({
                 className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 border ${
                   isSelected
                     ? "bg-panel text-brand-soft border-edge shadow-xs"
-                    : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+                    : "bg-surface hover:bg-canvas-sunken text-ink-soft border-line"
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
                   className={`text-[10px] font-mono px-1 rounded ${
-                    isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                    isSelected ? "bg-white/20 text-white" : "bg-canvas-sunken text-ink-muted"
                   }`}
                 >
                   {tab.count}
@@ -382,13 +382,13 @@ export function RecentlyAddedVouchers({
 
         {/* Search input */}
         <div className="relative min-w-[240px]">
-          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="h-3.5 w-3.5 text-ink-subtle absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search voucher, party, LF folio, or doc..."
-            className="w-full bg-white border border-slate-300 rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-slate-400 focus:outline-none focus:border-brand"
+            className="w-full bg-surface border border-line-strong rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-ink-subtle focus:outline-none focus:border-brand"
           />
         </div>
       </div>
@@ -397,7 +397,7 @@ export function RecentlyAddedVouchers({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-100 border-b border-slate-200 text-[10px] font-mono uppercase tracking-wider text-slate-600">
+            <tr className="bg-canvas-sunken border-b border-line text-[10px] font-mono uppercase tracking-wider text-ink-soft">
               <th className="py-2.5 px-3 font-bold">Date &amp; Time</th>
               <th className="py-2.5 px-3 font-bold">Voucher / Invoice No.</th>
               <th className="py-2.5 px-3 font-bold">Type &amp; Source Document</th>
@@ -411,10 +411,10 @@ export function RecentlyAddedVouchers({
               <th className="py-2.5 px-3 font-bold text-right">Folio Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-line">
             {filteredVouchers.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-10 text-center text-slate-500 text-xs">
+                <td colSpan={9} className="py-10 text-center text-ink-muted text-xs">
                   {loadError ?? (vouchers.length === 0 ? "No vouchers recorded yet." : "No Day Book entries found matching the selected filter.")}
                 </td>
               </tr>
@@ -436,10 +436,10 @@ export function RecentlyAddedVouchers({
                   >
                     {/* Date & Time (Chronological order) */}
                     <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className="font-mono text-slate-800 font-semibold block">
+                      <span className="font-mono text-ink font-semibold block">
                         {formatDateTally(item.entry_date)}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                      <span className="text-[10px] font-mono text-ink-subtle flex items-center gap-1">
                         <Clock className="h-2.5 w-2.5" />
                         {item.entry_time}
                       </span>
@@ -450,7 +450,7 @@ export function RecentlyAddedVouchers({
                       <span className="font-mono font-bold text-ink group-hover:text-brand-strong transition-colors block">
                         {item.entry_number}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-ink-subtle">
                         {item.reference}
                       </span>
                     </td>
@@ -466,17 +466,17 @@ export function RecentlyAddedVouchers({
                           <span className="text-[9px] opacity-75">({typeMeta.key})</span>
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-0.5 truncate max-w-[160px]" title={item.source_document || docLabel}>
+                      <span className="text-[10px] text-ink-muted block mt-0.5 truncate max-w-[160px]" title={item.source_document || docLabel}>
                         📄 {item.source_document || docLabel}
                       </span>
                     </td>
 
                     {/* Particulars / Party Name */}
                     <td className="py-2.5 px-3 max-w-[200px]">
-                      <span className="font-semibold text-slate-900 block truncate group-hover:text-ink">
+                      <span className="font-semibold text-ink block truncate group-hover:text-ink">
                         {item.party_name}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-ink-subtle">
                         {item.lines.length} double-entry line{item.lines.length !== 1 ? "s" : ""}
                       </span>
                     </td>
@@ -484,7 +484,7 @@ export function RecentlyAddedVouchers({
                     {/* Ledger Folio (L.F.) Reference */}
                     <td className="py-2.5 px-3 text-center whitespace-nowrap">
                       <span
-                        className="inline-block px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-100 text-slate-800 border border-slate-300 group-hover:bg-brand/20 group-hover:border-brand group-hover:text-ink transition-colors"
+                        className="inline-block px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-canvas-sunken text-ink border border-line-strong group-hover:bg-brand/20 group-hover:border-brand group-hover:text-ink transition-colors"
                         title={`General Ledger Folio Reference: ${item.ledger_folio}`}
                       >
                         {item.ledger_folio}
@@ -493,17 +493,17 @@ export function RecentlyAddedVouchers({
 
                     {/* Narration & Source Ref */}
                     <td className="py-2.5 px-3 max-w-[240px]">
-                      <span className="text-slate-700 block truncate text-[11px]">
+                      <span className="text-ink-soft block truncate text-[11px]">
                         {item.narration}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">
+                      <span className="text-[10px] font-mono text-ink-subtle">
                         Source Ref: {item.reference}
                       </span>
                     </td>
 
                     {/* Debit / Credit Amount */}
                     <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                      <div className="font-mono font-black text-slate-900 text-xs group-hover:text-brand-strong transition-colors">
+                      <div className="font-mono font-black text-ink text-xs group-hover:text-brand-strong transition-colors">
                         {formatINR(item.amount)}
                       </div>
                       <span
@@ -523,7 +523,7 @@ export function RecentlyAddedVouchers({
                           Posted to Ledger
                         </span>
                       ) : item.status === "reversed" ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-300">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-ink-soft bg-canvas-sunken px-2 py-0.5 rounded border border-line-strong">
                           Reversed
                         </span>
                       ) : (
@@ -541,7 +541,7 @@ export function RecentlyAddedVouchers({
                           e.stopPropagation();
                           handleRowClick(item);
                         }}
-                        className="px-2.5 py-1 rounded bg-slate-100 hover:bg-brand hover:text-ink text-slate-700 text-[11px] font-bold transition-colors inline-flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 rounded bg-canvas-sunken hover:bg-brand hover:text-ink text-ink-soft text-[11px] font-bold transition-colors inline-flex items-center gap-1 cursor-pointer"
                         title="View complete double-entry ledger folio breakdown"
                       >
                         <Eye className="h-3 w-3" />
@@ -557,10 +557,10 @@ export function RecentlyAddedVouchers({
       </div>
 
       {/* Footer Info Strip */}
-      <div className="p-3 bg-canvas border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 font-mono">
+      <div className="p-3 bg-canvas border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-ink-muted font-mono">
         <div>
           <span>Showing {filteredVouchers.length} of {vouchers.length} Day Book records • </span>
-          <span className="text-slate-800 font-bold">
+          <span className="text-ink font-bold">
             Posted Debit Volume: {formatINR(filteredVouchers.filter((v) => v.status !== "draft").reduce((s, v) => s + v.amount, 0))}
           </span>
         </div>
@@ -589,23 +589,23 @@ export function RecentlyAddedVouchers({
         >
           <div className="space-y-4 font-sans text-xs">
             {/* Header Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3 bg-canvas rounded-lg border border-line">
               <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
+                <span className="text-ink-subtle block text-[10px] font-mono uppercase">
                   Voucher No.
                 </span>
                 <span className="font-mono font-black text-sm text-ink">
                   {selectedVoucher.entry_number}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500 block">
+                <span className="text-[10px] font-mono text-ink-muted block">
                   Ref: {selectedVoucher.reference}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
+                <span className="text-ink-subtle block text-[10px] font-mono uppercase">
                   Source Document
                 </span>
-                <span className="font-medium text-slate-900 block truncate" title={selectedVoucher.source_document}>
+                <span className="font-medium text-ink block truncate" title={selectedVoucher.source_document}>
                   {selectedVoucher.source_document}
                 </span>
                 <span className="text-[10px] font-mono text-brand-strong font-bold">
@@ -613,15 +613,15 @@ export function RecentlyAddedVouchers({
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
+                <span className="text-ink-subtle block text-[10px] font-mono uppercase">
                   Ledger Folio (L.F.)
                 </span>
-                <span className="font-mono font-black text-sm text-ink bg-white px-2 py-0.5 rounded border border-slate-300 inline-block mt-0.5">
+                <span className="font-mono font-black text-sm text-ink bg-surface px-2 py-0.5 rounded border border-line-strong inline-block mt-0.5">
                   {selectedVoucher.ledger_folio}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
+                <span className="text-ink-subtle block text-[10px] font-mono uppercase">
                   Posting Lifecycle
                 </span>
                 <div className="mt-0.5">
@@ -638,14 +638,14 @@ export function RecentlyAddedVouchers({
 
             {/* Narration */}
             <div>
-              <span className="text-slate-500 block text-[10px] font-mono uppercase mb-1 font-bold">
+              <span className="text-ink-muted block text-[10px] font-mono uppercase mb-1 font-bold">
                 Particulars / Narration
               </span>
-              <div className="p-3 bg-canvas rounded-lg border border-slate-200 text-slate-800">
-                <div className="font-bold text-slate-900 mb-0.5">
+              <div className="p-3 bg-canvas rounded-lg border border-line text-ink">
+                <div className="font-bold text-ink mb-0.5">
                   Counterparty: {selectedVoucher.party_name}
                 </div>
-                <p className="text-slate-600 text-[11px] leading-relaxed">
+                <p className="text-ink-soft text-[11px] leading-relaxed">
                   {selectedVoucher.narration}
                 </p>
               </div>
@@ -654,7 +654,7 @@ export function RecentlyAddedVouchers({
             {/* ALERX Double-Entry Ledger Lines */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-slate-500 block text-[10px] font-mono uppercase font-bold">
+                <span className="text-ink-muted block text-[10px] font-mono uppercase font-bold">
                   authoritative double-entry general ledger postings
                 </span>
                 <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
@@ -662,10 +662,10 @@ export function RecentlyAddedVouchers({
                 </span>
               </div>
 
-              <div className="border border-slate-300 rounded-lg overflow-hidden">
+              <div className="border border-line-strong rounded-lg overflow-hidden">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-100 border-b border-slate-200 text-[10px] font-mono uppercase text-slate-600">
+                    <tr className="bg-canvas-sunken border-b border-line text-[10px] font-mono uppercase text-ink-soft">
                       <th className="py-2 px-3">Dr / Cr</th>
                       <th className="py-2 px-3">General Ledger Account Head</th>
                       <th className="py-2 px-3">L.F. Folio</th>
@@ -674,9 +674,9 @@ export function RecentlyAddedVouchers({
                       <th className="py-2 px-3 text-right">Credit (₹)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-line">
                     {selectedVoucher.lines.map((line, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50">
+                      <tr key={idx} className="hover:bg-canvas">
                         <td className="py-2 px-3 font-mono font-bold">
                           <span
                             className={`px-1.5 py-0.5 rounded text-[10px] ${
@@ -689,34 +689,34 @@ export function RecentlyAddedVouchers({
                           </span>
                         </td>
                         <td className="py-2 px-3">
-                          <span className="font-semibold text-slate-900 block">
+                          <span className="font-semibold text-ink block">
                             {line.account_name}
                           </span>
                           {line.description && (
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-[10px] text-ink-muted block">
                               {line.description}
                             </span>
                           )}
                         </td>
-                        <td className="py-2 px-3 font-mono font-bold text-slate-600">
+                        <td className="py-2 px-3 font-mono font-bold text-ink-soft">
                           {line.ledger_folio || selectedVoucher.ledger_folio}
                         </td>
                         <td className="py-2 px-3">
-                          <span className="font-mono text-[10px] text-slate-500 uppercase">
+                          <span className="font-mono text-[10px] text-ink-muted uppercase">
                             {line.category}
                           </span>
                         </td>
-                        <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                        <td className="py-2 px-3 text-right font-mono font-bold text-ink">
                           {line.debit > 0 ? formatINR(line.debit) : "—"}
                         </td>
-                        <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                        <td className="py-2 px-3 text-right font-mono font-bold text-ink">
                           {line.credit > 0 ? formatINR(line.credit) : "—"}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-slate-50 border-t border-slate-300 font-mono font-black text-xs text-slate-900">
+                    <tr className="bg-canvas border-t border-line-strong font-mono font-black text-xs text-ink">
                       <td colSpan={4} className="py-2 px-3 text-right">
                         Ledger Balance Check:
                       </td>
@@ -733,8 +733,8 @@ export function RecentlyAddedVouchers({
             </div>
 
             {/* Actions */}
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 font-mono">
+            <div className="pt-3 border-t border-line flex items-center justify-between">
+              <span className="text-[11px] text-ink-muted font-mono">
                 Source Document: {selectedVoucher.source_document}
               </span>
               <div className="flex items-center gap-2">
@@ -750,7 +750,7 @@ export function RecentlyAddedVouchers({
                 <button
                   type="button"
                   onClick={() => setIsDetailModalOpen(false)}
-                  className="px-3.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs transition-colors cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg bg-line hover:bg-slate-300 text-ink font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Close Folio
                 </button>

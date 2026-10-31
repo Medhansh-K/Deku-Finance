@@ -21,7 +21,7 @@ export default function PaymentVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-slate-500">
+            <div className="p-6 text-xs font-mono text-ink-muted">
               Loading payment voucher desk...
             </div>
           }

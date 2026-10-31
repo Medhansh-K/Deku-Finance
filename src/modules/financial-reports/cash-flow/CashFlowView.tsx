@@ -91,7 +91,7 @@ export function CashFlowView() {
             <h3 className="text-sm font-semibold text-slate-100">
               Universal Cash Flow Rollup (Direct Method)
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-ink-subtle">
               Operating, Investing, and Financing activities computed from posted journal lines
             </p>
           </div>
@@ -99,9 +99,9 @@ export function CashFlowView() {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs text-slate-300">
-            <Calendar className="h-3.5 w-3.5 text-slate-500" />
+            <Calendar className="h-3.5 w-3.5 text-ink-muted" />
             <span>{startDate}</span>
-            <span className="text-slate-600">to</span>
+            <span className="text-ink-soft">to</span>
             <span>{endDate}</span>
           </div>
           <Button
@@ -130,18 +130,18 @@ export function CashFlowView() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Opening Cash & Bank</span>
-            <span className="text-xs text-slate-500">Reserves</span>
+            <span className="text-xs font-medium text-ink-subtle">Opening Cash & Bank</span>
+            <span className="text-xs text-ink-muted">Reserves</span>
           </div>
           <div className="text-xl font-bold text-slate-100">
             {formatINR(summary.opening_cash)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">Cash balance at period start</div>
+          <div className="text-[11px] text-ink-subtle mt-1">Cash balance at period start</div>
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Operating Cash Flow</span>
+            <span className="text-xs font-medium text-ink-subtle">Operating Cash Flow</span>
             {operating.net_operating_cash >= 0 ? (
               <span className="text-xs text-emerald-400 flex items-center">
                 <ArrowUpRight className="h-3.5 w-3.5 mr-0.5" /> Positive
@@ -155,23 +155,23 @@ export function CashFlowView() {
           <div className={`text-xl font-bold ${operating.net_operating_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
             {formatINR(operating.net_operating_cash)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">Core business operations yield</div>
+          <div className="text-[11px] text-ink-subtle mt-1">Core business operations yield</div>
         </div>
 
         <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">Net Period Cash Change</span>
+            <span className="text-xs font-medium text-ink-subtle">Net Period Cash Change</span>
             <span className="text-xs text-teal-400">Δ Cash</span>
           </div>
           <div className={`text-xl font-bold ${summary.net_cash_flow >= 0 ? "text-teal-400" : "text-amber-400"}`}>
             {formatINR(summary.net_cash_flow)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">Operating + Investing + Financing</div>
+          <div className="text-[11px] text-ink-subtle mt-1">Operating + Investing + Financing</div>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-950/40 via-slate-900/80 to-slate-900/70 border border-emerald-500/30 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-emerald-500/10 via-slate-900/80 to-slate-900/70 border border-emerald-500/30 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-emerald-300">Closing Cash & Bank</span>
+            <span className="text-xs font-medium text-emerald-400">Closing Cash & Bank</span>
             <Badge variant="teal" size="sm">Active Reserves</Badge>
           </div>
           <div className="text-xl font-bold text-emerald-400">
@@ -190,7 +190,7 @@ export function CashFlowView() {
               Statement of Cash Flows
             </h4>
           </div>
-          <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
+          <Badge variant="outline" className="border-slate-700 text-ink-subtle text-xs">
             Ind AS 7 / AS 3 Compliant
           </Badge>
         </div>
@@ -208,11 +208,11 @@ export function CashFlowView() {
               </span>
             </div>
             <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-ink-subtle">
                 <span>Cash receipts from customers & debtors (Receivables collected)</span>
                 <span className="text-slate-200 font-medium">+{formatINR(operating.inflows)}</span>
               </div>
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-ink-subtle">
                 <span>Cash paid to suppliers, vendors, and operating expenses</span>
                 <span className="text-rose-400 font-medium">-{formatINR(operating.outflows)}</span>
               </div>
@@ -231,7 +231,7 @@ export function CashFlowView() {
               </span>
             </div>
             <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-ink-subtle">
                 <span>Capital expenditures, office equipment, and fixed asset additions</span>
                 <span className="text-slate-200 font-medium">{formatINR(investing.net_investing_cash)}</span>
               </div>
@@ -250,7 +250,7 @@ export function CashFlowView() {
               </span>
             </div>
             <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-ink-subtle">
                 <span>Capital contributions, debt financing, and bank borrowings</span>
                 <span className="text-slate-200 font-medium">{formatINR(financing.net_financing_cash)}</span>
               </div>
@@ -266,7 +266,7 @@ export function CashFlowView() {
                   {formatINR(summary.net_cash_flow)}
                 </span>
               </div>
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-ink-subtle">
                 <span>Cash & Cash Equivalents at Beginning of Period</span>
                 <span className="text-slate-200">{formatINR(summary.opening_cash)}</span>
               </div>

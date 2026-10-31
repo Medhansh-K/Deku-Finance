@@ -21,7 +21,7 @@ export default function ContraVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-slate-500">
+            <div className="p-6 text-xs font-mono text-ink-muted">
               Loading contra voucher desk...
             </div>
           }

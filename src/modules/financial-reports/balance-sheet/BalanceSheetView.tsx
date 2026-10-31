@@ -71,12 +71,12 @@ export function BalanceSheetView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         <div className="flex items-center gap-2">
           <Badge variant={isBalanced ? "success" : "warning"}>
             {isBalanced ? "Balance Sheet Equated" : `Difference: ${formatINR(difference)}`}
           </Badge>
-          <span className="text-slate-500 font-mono text-[11px]">
+          <span className="text-ink-muted font-mono text-[11px]">
             ALERX Double-Entry Balance Sheet
           </span>
         </div>
@@ -120,7 +120,7 @@ export function BalanceSheetView() {
       {/* T-Account Two Column Balance Sheet */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left Side: Liabilities & Equity */}
-        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
             <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
               <span>Capital & Liabilities</span>
@@ -130,26 +130,26 @@ export function BalanceSheetView() {
             </div>
 
             {/* Equity Section */}
-            <div className="p-2 bg-slate-50 border-b border-slate-200 font-mono text-[11px] font-bold text-slate-700">
+            <div className="p-2 bg-canvas border-b border-line font-mono text-[11px] font-bold text-ink-soft">
               Shareholders&apos; Funds & Capital (Equity)
             </div>
             <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {equityRows.map((acc) => (
                   <tr
                     key={acc.account_id}
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-canvas cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
                       {acc.account_code}
                     </td>
-                    <td className="py-2 px-3 font-medium text-slate-900">
+                    <td className="py-2 px-3 font-medium text-ink">
                       {acc.account_name}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 w-32">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
                       {formatINR(acc.balance, { showCurrencySymbol: false })}
                     </td>
                   </tr>
@@ -158,26 +158,26 @@ export function BalanceSheetView() {
             </table>
 
             {/* Liabilities Section */}
-            <div className="p-2 bg-slate-50 border-y border-slate-200 font-mono text-[11px] font-bold text-slate-700 mt-2">
+            <div className="p-2 bg-canvas border-y border-line font-mono text-[11px] font-bold text-ink-soft mt-2">
               Current & Non-Current Liabilities
             </div>
             <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {liabilityRows.map((acc) => (
                   <tr
                     key={acc.account_id}
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-canvas cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
                       {acc.account_code}
                     </td>
-                    <td className="py-2 px-3 font-medium text-slate-900">
+                    <td className="py-2 px-3 font-medium text-ink">
                       {acc.account_name}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 w-32">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
                       {formatINR(acc.balance, { showCurrencySymbol: false })}
                     </td>
                   </tr>
@@ -195,7 +195,7 @@ export function BalanceSheetView() {
         </div>
 
         {/* Right Side: Assets */}
-        <div className="bg-white border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
             <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
               <span>Assets (Property & Liquid Capital)</span>
@@ -204,26 +204,26 @@ export function BalanceSheetView() {
               </span>
             </div>
 
-            <div className="p-2 bg-slate-50 border-b border-slate-200 font-mono text-[11px] font-bold text-slate-700">
+            <div className="p-2 bg-canvas border-b border-line font-mono text-[11px] font-bold text-ink-soft">
               Current & Fixed Assets
             </div>
             <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {assetRows.map((acc) => (
                   <tr
                     key={acc.account_id}
                     onClick={() =>
                       router.push(`/day-book?account_code=${acc.account_code}`)
                     }
-                    className="hover:bg-slate-50 cursor-pointer"
+                    className="hover:bg-canvas cursor-pointer"
                   >
-                    <td className="py-2 px-3 font-mono font-bold text-slate-700 w-20">
+                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
                       {acc.account_code}
                     </td>
-                    <td className="py-2 px-3 font-medium text-slate-900">
+                    <td className="py-2 px-3 font-medium text-ink">
                       {acc.account_name}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 w-32">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
                       {formatINR(acc.balance, { showCurrencySymbol: false })}
                     </td>
                   </tr>

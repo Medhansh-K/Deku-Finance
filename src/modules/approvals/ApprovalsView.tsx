@@ -80,7 +80,7 @@ export function ApprovalsView() {
     }, `Voucher ${e.entry_number} sent back to its maker.`);
 
   if (!orgId) {
-    return <p className="text-sm text-slate-500">Select a company to see its approval queue.</p>;
+    return <p className="text-sm text-ink-muted">Select a company to see its approval queue.</p>;
   }
 
   return (
@@ -111,7 +111,7 @@ export function ApprovalsView() {
         />
       </section>
 
-      <section aria-label="Voucher detail" className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section aria-label="Voucher detail" className="rounded-xl border border-line bg-surface p-4 shadow-sm">
         {notice && (
           <div role="status" className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-900">
             {notice}
@@ -124,7 +124,7 @@ export function ApprovalsView() {
         )}
 
         {!selected ? (
-          <div className="py-16 text-center text-sm text-slate-500">
+          <div className="py-16 text-center text-sm text-ink-muted">
             <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-slate-300" />
             Select a voucher to review it.
           </div>
@@ -132,16 +132,16 @@ export function ApprovalsView() {
           <div className="space-y-4">
             <header className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">{selected.entry_number}</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-lg font-bold text-ink">{selected.entry_number}</h2>
+                <p className="text-xs text-ink-muted">
                   {formatDateTally(selected.entry_date)}
                   {selected.reference ? ` · Ref ${selected.reference}` : ""}
                 </p>
-                <p className="mt-1 text-sm text-slate-700">{selected.narration}</p>
+                <p className="mt-1 text-sm text-ink-soft">{selected.narration}</p>
               </div>
               <div className="text-right">
-                <div className="text-xs uppercase tracking-wider text-slate-500">Voucher total</div>
-                <div className="font-mono text-xl font-bold text-slate-900">{formatINR(entryTotal(selected))}</div>
+                <div className="text-xs uppercase tracking-wider text-ink-muted">Voucher total</div>
+                <div className="font-mono text-xl font-bold text-ink">{formatINR(entryTotal(selected))}</div>
               </div>
             </header>
 
@@ -153,7 +153,7 @@ export function ApprovalsView() {
 
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-ink-muted">
                   <th className="py-2 font-semibold">Account</th>
                   <th className="py-2 font-semibold">Description</th>
                   <th className="py-2 text-right font-semibold">Debit</th>
@@ -165,12 +165,12 @@ export function ApprovalsView() {
                   .slice()
                   .sort((a, b) => a.line_number - b.line_number)
                   .map((l) => (
-                    <tr key={l.id ?? l.line_number} className="border-b border-slate-100">
-                      <td className="py-2 font-medium text-slate-900">
+                    <tr key={l.id ?? l.line_number} className="border-b border-line">
+                      <td className="py-2 font-medium text-ink">
                         {accounts[l.account_id]?.name ?? "Unknown account"}
-                        <span className="ml-1 font-mono text-xs text-slate-400">{accounts[l.account_id]?.code}</span>
+                        <span className="ml-1 font-mono text-xs text-ink-subtle">{accounts[l.account_id]?.code}</span>
                       </td>
-                      <td className="py-2 text-slate-600">{l.description || "–"}</td>
+                      <td className="py-2 text-ink-soft">{l.description || "–"}</td>
                       <td className="py-2 text-right font-mono">{Number(l.debit) ? formatINR(Number(l.debit)) : "–"}</td>
                       <td className="py-2 text-right font-mono">{Number(l.credit) ? formatINR(Number(l.credit)) : "–"}</td>
                     </tr>
@@ -179,8 +179,8 @@ export function ApprovalsView() {
             </table>
 
             {selected.submitted_at && (
-              <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
-                <p className="text-xs text-slate-500">
+              <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                <p className="text-xs text-ink-muted">
                   {canApprove(selected, user?.id)
                     ? "Approving posts this voucher to the ledger. Posted vouchers can only be reversed, not edited."
                     : "You made or submitted this voucher, so another approver must review it."}
@@ -202,7 +202,7 @@ export function ApprovalsView() {
               title={`Send back ${selected.entry_number}`}
               description="The maker sees this reason and can fix and resubmit the voucher."
             >
-              <label className="block text-xs font-semibold text-slate-700" htmlFor="reject-reason">
+              <label className="block text-xs font-semibold text-ink-soft" htmlFor="reject-reason">
                 Reason
               </label>
               <textarea
@@ -210,7 +210,7 @@ export function ApprovalsView() {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-md border border-slate-300 p-2 text-sm"
+                className="mt-1 w-full rounded-md border border-line-strong p-2 text-sm"
                 placeholder="e.g. GST should be IGST, the supplier is in Karnataka"
               />
               <div className="mt-3 flex justify-end gap-2">
@@ -245,15 +245,15 @@ function QueueList({
   empty: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <h2 className="flex items-center gap-2 border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800">
+    <div className="rounded-xl border border-line bg-surface shadow-sm">
+      <h2 className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm font-semibold text-ink">
         {icon} {title}
         <Badge variant={entries.length ? "warning" : "default"} className="ml-auto">
           {entries.length}
         </Badge>
       </h2>
       {entries.length === 0 ? (
-        <p className="px-3 py-4 text-xs text-slate-500">{empty}</p>
+        <p className="px-3 py-4 text-xs text-ink-muted">{empty}</p>
       ) : (
         <ul>
           {entries.map((e) => (
@@ -261,15 +261,15 @@ function QueueList({
               <button
                 onClick={() => onSelect(e.id)}
                 aria-current={e.id === selectedId}
-                className={`flex w-full items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 text-left text-sm last:border-0 hover:bg-slate-50 ${
-                  e.id === selectedId ? "bg-slate-100" : ""
+                className={`flex w-full items-center justify-between gap-2 border-b border-line px-3 py-2 text-left text-sm last:border-0 hover:bg-canvas ${
+                  e.id === selectedId ? "bg-canvas-sunken" : ""
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-medium text-slate-900">{e.entry_number}</span>
-                  <span className="block truncate text-xs text-slate-500">{e.narration}</span>
+                  <span className="block truncate font-medium text-ink">{e.entry_number}</span>
+                  <span className="block truncate text-xs text-ink-muted">{e.narration}</span>
                 </span>
-                <span className="shrink-0 font-mono text-xs text-slate-700">{formatINR(entryTotal(e))}</span>
+                <span className="shrink-0 font-mono text-xs text-ink-soft">{formatINR(entryTotal(e))}</span>
               </button>
             </li>
           ))}

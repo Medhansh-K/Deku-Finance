@@ -113,8 +113,8 @@ export function CompaniesView() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 font-sans text-xs">
-      <div className="flex items-center justify-between bg-white p-3 rounded border border-slate-200">
-        <div className="text-xs font-semibold text-slate-700">
+      <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
+        <div className="text-xs font-semibold text-ink-soft">
           Switch active company workspace or register a new accounting tenant
         </div>
         <div className="flex items-center gap-2">
@@ -147,24 +147,24 @@ export function CompaniesView() {
             <div
               key={org.id}
               onClick={() => handleSelectOrg(org)}
-              className={`p-4 rounded-lg border cursor-pointer transition-all bg-white shadow-xs hover:border-brand ${
+              className={`p-4 rounded-lg border cursor-pointer transition-all bg-surface shadow-xs hover:border-brand ${
                 isActive
                   ? "border-brand ring-2 ring-brand/20"
-                  : "border-slate-300 hover:bg-slate-50"
+                  : "border-line-strong hover:bg-canvas"
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-8 w-8 rounded flex items-center justify-center font-bold ${
-                      isActive ? "bg-brand text-ink" : "bg-slate-100 text-slate-600"
+                      isActive ? "bg-brand text-panel-deep" : "bg-canvas-sunken text-ink-soft"
                     }`}
                   >
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-ink">{org.name}</h3>
-                    <span className="font-mono text-[10px] text-slate-400">
+                    <span className="font-mono text-[10px] text-ink-subtle">
                       Slug: {org.slug}
                     </span>
                   </div>
@@ -174,21 +174,21 @@ export function CompaniesView() {
                 )}
               </div>
 
-              <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+              <div className="mt-3 pt-3 border-t border-line grid grid-cols-2 gap-2 text-[11px] text-ink-soft">
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Regime / GSTIN</span>
+                  <span className="text-ink-subtle text-[10px] block">Regime / GSTIN</span>
                   {org.gstin ? (
                     <span className="font-mono font-bold text-emerald-800 block">
                       GST: {org.gstin}
                     </span>
                   ) : (
-                    <span className="font-mono text-slate-700 block">
+                    <span className="font-mono text-ink-soft block">
                       Sec 22 Exempt
                     </span>
                   )}
                 </div>
                 <div>
-                  <span className="text-slate-400 text-[10px] block">Currency</span>
+                  <span className="text-ink-subtle text-[10px] block">Currency</span>
                   <span className="font-mono font-medium">{org.currency}</span>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export function CompaniesView() {
             />
           </div>
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-slate-200">
+          <div className="pt-3 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"

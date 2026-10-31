@@ -149,7 +149,7 @@ export function CollectView() {
     return (
       <p className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-muted shadow-card">
         No issued sales invoices yet, so there is nothing to collect. Issue one from{" "}
-        <a className="font-medium text-brand-strong underline" href="/invoices">Invoices</a>.
+        <a className="font-medium text-brand-strong underline" href="/gst">Invoices</a>.
       </p>
     );
 
@@ -200,7 +200,7 @@ export function CollectView() {
                 aria-controls="collect-panel"
                 onClick={() => setTab(t.id)}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                  tab === t.id ? "bg-ink text-white" : "text-ink-muted hover:bg-canvas-sunken hover:text-ink"
+                  tab === t.id ? "bg-panel text-white" : "text-ink-muted hover:bg-canvas-sunken hover:text-ink"
                 }`}
               >
                 {t.label} <span className="font-mono text-xs">{counts[t.id]}</span>

@@ -13,10 +13,10 @@ export interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-slate-500 font-sans select-none">
+    <nav className="flex items-center gap-1.5 text-xs text-ink-muted font-sans select-none">
       <Link
         href="/gateway"
-        className="flex items-center gap-1 text-slate-600 hover:text-brand transition-colors"
+        className="flex items-center gap-1 text-ink-soft hover:text-brand transition-colors"
       >
         <Home className="h-3.5 w-3.5" />
         <span>Gateway</span>
@@ -26,7 +26,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         const isLast = index === items.length - 1;
         return (
           <React.Fragment key={index}>
-            <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
+            <ChevronRight className="h-3 w-3 text-ink-subtle shrink-0" />
             {isLast || !item.href ? (
               <span className="font-semibold text-ink truncate">
                 {item.label}
@@ -34,7 +34,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
             ) : (
               <Link
                 href={item.href}
-                className="text-slate-600 hover:text-brand transition-colors truncate"
+                className="text-ink-soft hover:text-brand transition-colors truncate"
               >
                 {item.label}
               </Link>

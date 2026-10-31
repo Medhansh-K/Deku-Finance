@@ -21,13 +21,13 @@ export function KeyboardHelpModal({ isOpen, onClose }: KeyboardHelpModalProps) {
           {STANDARD_SHORTCUTS.map((sc, i) => (
             <div
               key={i}
-              className="flex items-start justify-between p-2 rounded border border-slate-200 bg-slate-50 text-xs"
+              className="flex items-start justify-between p-2 rounded border border-line bg-canvas text-xs"
             >
               <div>
                 <span className="font-bold text-ink block">{sc.label}</span>
-                <span className="text-[11px] text-slate-500">{sc.description}</span>
+                <span className="text-[11px] text-ink-muted">{sc.description}</span>
               </div>
-              <span className="text-[10px] font-mono uppercase bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono uppercase bg-line text-ink-soft px-1.5 py-0.5 rounded">
                 {sc.category}
               </span>
             </div>
@@ -36,7 +36,7 @@ export function KeyboardHelpModal({ isOpen, onClose }: KeyboardHelpModalProps) {
 
         <div className="p-3 rounded bg-brand/10 border border-brand/30 text-xs text-ink">
           <p className="font-bold mb-1">Voucher Data Entry Pro-Tips:</p>
-          <ul className="list-disc list-inside space-y-0.5 text-[11px] text-slate-700">
+          <ul className="list-disc list-inside space-y-0.5 text-[11px] text-ink-soft">
             <li>Press <strong>Enter</strong> to advance from field to field or account selection.</li>
             <li>Press <strong>Tab</strong> or <strong>Shift+Tab</strong> to navigate backwards.</li>
             <li>Press <strong>Esc</strong> to cancel, close dialogs, or step back to the Gateway.</li>

@@ -172,13 +172,13 @@ export default function ExecutiveDashboardPage() {
 
   return (
     <AppShell>
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-canvas font-sans text-slate-900 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-canvas font-sans text-ink space-y-6">
         {/* Top Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line-strong pb-4">
           <div className="flex items-center gap-3">
             <Link
               href="/gateway"
-              className="p-2 rounded-xl bg-white border border-line-strong hover:bg-slate-50 text-slate-700 hover:text-ink transition-colors"
+              className="p-2 rounded-xl bg-surface border border-line-strong hover:bg-canvas text-ink-soft hover:text-ink transition-colors"
               title="Return to Gateway (Esc)"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -193,7 +193,7 @@ export default function ExecutiveDashboardPage() {
                   From the books ({activeOrgName.split(" ")[0] || "–"})
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-ink-muted mt-0.5">
                 Authoritative overview of cash flow, receivables, operating margins &amp; statutory compliance
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function ExecutiveDashboardPage() {
                 <div className="flex items-center gap-2" suppressHydrationWarning>
                   <div
                     suppressHydrationWarning
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 shadow-xs"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-canvas-sunken border border-line-strong text-xs font-bold text-ink shadow-xs"
                     title="No GSTIN on the company record, so it is treated as unregistered (Sec 22) and issues Bills of Supply."
                   >
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -238,7 +238,7 @@ export default function ExecutiveDashboardPage() {
                       setNewGstin("");
                       setIsConvertModalOpen(true);
                     }}
-                    className="px-3 py-2 rounded-xl bg-white border border-brand hover:bg-brand/15 text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-surface border border-brand hover:bg-brand/15 text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                     title="A Sec 22 company can convert to GST registered once it gets a valid GST ID"
                   >
                     <ShieldCheck className="h-3.5 w-3.5 text-brand-strong" />
@@ -255,7 +255,7 @@ export default function ExecutiveDashboardPage() {
                   <div className="flex items-center gap-1.5" suppressHydrationWarning>
                     <span>GST Registered</span>
                     {taxProfile.gstin && (
-                      <span className="font-mono text-[11px] text-emerald-800 bg-white/80 px-2 py-0.5 rounded border border-emerald-200 font-bold">
+                      <span className="font-mono text-[11px] text-emerald-800 bg-surface/80 px-2 py-0.5 rounded border border-emerald-200 font-bold">
                         {taxProfile.gstin}
                       </span>
                     )}
@@ -269,7 +269,7 @@ export default function ExecutiveDashboardPage() {
 
             <button
               onClick={() => setIsKpiModalOpen(true)}
-              className="px-3 py-2 rounded-xl bg-white border border-edge hover:border-brand hover:bg-brand/10 text-slate-800 font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-surface border border-edge hover:border-brand hover:bg-brand/10 text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
               title="Choose which KPIs the Gateway lists"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-brand-strong" />
@@ -278,7 +278,7 @@ export default function ExecutiveDashboardPage() {
 
             <Link
               href="/gateway"
-              className="px-3.5 py-2 rounded-xl bg-brand hover:bg-brand-soft text-ink font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-brand hover:bg-brand-soft text-panel-deep font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
             >
               <span className="font-mono text-[10px]">Esc</span>
               <span>Gateway</span>
@@ -290,15 +290,15 @@ export default function ExecutiveDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Card 1: Revenue & Turnover */}
           <Link
-            href="/invoices"
-            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
+            href="/gst"
+            className="bg-surface p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Sales Invoices Register & Billed Turnover Tracker"
           >
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
+              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-ink transition-colors">
                 Gross Turnover
               </span>
-              <span className="h-6 w-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-panel-deep transition-colors">
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </span>
             </div>
@@ -308,20 +308,20 @@ export default function ExecutiveDashboardPage() {
 
             {isSec22 ? (
               <div className="space-y-1">
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-canvas-sunken h-1.5 rounded-full overflow-hidden">
                   <div className="bg-brand h-full rounded-full" style={{ width: `${kpiProfile.sec22Pct ?? 0}%` }} />
                 </div>
-                <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                <div className="flex justify-between text-[10px] text-ink-muted font-mono">
                   <span>{kpiProfile.sec22Sub}</span>
                   <span className="text-emerald-700 font-bold">{kpiProfile.sec22Badge}</span>
                 </div>
               </div>
             ) : (
               <div className="space-y-1">
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-canvas-sunken h-1.5 rounded-full overflow-hidden">
                   <div className="bg-emerald-500 h-full rounded-full w-full" />
                 </div>
-                <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                <div className="flex justify-between text-[10px] text-ink-muted font-mono">
                   <span>Regular GST Taxpayer</span>
                   <span className="text-emerald-700 font-bold">GSTIN Active</span>
                 </div>
@@ -332,67 +332,67 @@ export default function ExecutiveDashboardPage() {
           {/* Card 2: Net Profit */}
           <Link
             href="/reports/profit-loss"
-            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-surface p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Profit & Loss Account (L)"
           >
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
+              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-ink transition-colors">
                 Net Profit
               </span>
-              <span className="h-6 w-6 rounded-lg bg-brand/15 text-brand-strong flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-brand/15 text-brand-strong flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-panel-deep transition-colors">
                 <TrendingUp className="h-3.5 w-3.5" />
               </span>
             </div>
             <div className="text-xl font-black font-mono text-emerald-700 group-hover:text-emerald-600 transition-colors">
               {kpiProfile.profit}
             </div>
-            <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
+            <div className="text-[11px] font-mono text-ink-muted flex items-center justify-between">
               <span>Net Margin:</span>
-              <span className="font-bold text-slate-900">{kpiProfile.margin}</span>
+              <span className="font-bold text-ink">{kpiProfile.margin}</span>
             </div>
           </Link>
 
           {/* Card 3: Liquid Bank & Cash */}
           <Link
             href="/masters/chart-of-accounts?group=asset&filter=liquid"
-            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-surface p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Chart of Accounts: Liquid Cash & Bank Asset Units and Values"
           >
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
+              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-ink transition-colors">
                 Liquid Cash &amp; Bank
               </span>
-              <span className="h-6 w-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-panel-deep transition-colors">
                 <DollarSign className="h-3.5 w-3.5" />
               </span>
             </div>
             <div className="text-xl font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
               {kpiProfile.liquid}
             </div>
-            <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
+            <div className="text-[11px] font-mono text-ink-muted flex items-center justify-between">
               <span>{kpiProfile.liquidBank}</span>
-              <span className="text-slate-500">Cash &amp; bank ledgers</span>
+              <span className="text-ink-muted">Cash &amp; bank ledgers</span>
             </div>
           </Link>
 
           {/* Card 4: Accounts Receivable */}
           <Link
             href="/reports/debtors"
-            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-surface p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title="Open Trade Debtors (AR) DSO Analysis & Customer Invoices"
           >
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
+              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-ink transition-colors">
                 Trade Debtors
               </span>
-              <span className="h-6 w-6 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-ink transition-colors">
+              <span className="h-6 w-6 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center font-bold group-hover:bg-brand group-hover:text-panel-deep transition-colors">
                 <Receipt className="h-3.5 w-3.5" />
               </span>
             </div>
             <div className="text-xl font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
               {kpiProfile.debtors}
             </div>
-            <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
+            <div className="text-[11px] font-mono text-ink-muted flex items-center justify-between">
               <span>{kpiProfile.debtorsCount}</span>
               <span className="text-emerald-700 font-bold">{kpiProfile.debtorsAging}</span>
             </div>
@@ -401,18 +401,18 @@ export default function ExecutiveDashboardPage() {
           {/* Card 5: Statutory & GST (Dynamic Sec 22 Exempt vs GST Registered) */}
           <Link
             href="/gst"
-            className="bg-white p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
+            className="bg-surface p-4 rounded-xl border border-line-strong shadow-xs space-y-2 hover:border-brand hover:shadow-md transition-all cursor-pointer block group"
             title={isSec22 ? "Section 22 Exemption Hub" : "Open GST Returns & Tax Engine Hub (G)"}
           >
-            <div className="flex items-center justify-between text-xs text-slate-500">
-              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-slate-900 transition-colors">
+            <div className="flex items-center justify-between text-xs text-ink-muted">
+              <span className="font-mono font-bold uppercase tracking-wider text-[10px] group-hover:text-ink transition-colors">
                 {isSec22 ? "Statutory Status" : "GST Net Liability"}
               </span>
               <span
                 className={`h-6 w-6 rounded-lg flex items-center justify-center font-bold transition-colors ${
                   isSec22
-                    ? "bg-emerald-50 text-emerald-700 group-hover:bg-brand group-hover:text-ink"
-                    : "bg-rose-50 text-rose-700 group-hover:bg-brand group-hover:text-ink"
+                    ? "bg-emerald-50 text-emerald-700 group-hover:bg-brand group-hover:text-panel-deep"
+                    : "bg-rose-50 text-rose-700 group-hover:bg-brand group-hover:text-panel-deep"
                 }`}
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -427,9 +427,9 @@ export default function ExecutiveDashboardPage() {
             >
               {isSec22 ? "Not registered" : kpiProfile.gst}
             </div>
-            <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between">
+            <div className="text-[11px] font-mono text-ink-muted flex items-center justify-between">
               <span>{isSec22 ? "Exempt under § 22" : kpiProfile.gstBreakdown}</span>
-              <span className="text-slate-800 font-bold">
+              <span className="text-ink font-bold">
                 {isSec22 ? "Bill of Supply" : kpiProfile.gstStatus}
               </span>
             </div>
@@ -439,8 +439,8 @@ export default function ExecutiveDashboardPage() {
         {/* 2-Column Analytical Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Financial Statement Health & ALERX Parity (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-line-strong rounded-xl p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="lg:col-span-7 bg-surface border border-line-strong rounded-xl p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
                 <Layers className="h-4 w-4 text-brand" />
                 <h2 className="text-sm font-bold text-ink">
@@ -448,7 +448,7 @@ export default function ExecutiveDashboardPage() {
                 </h2>
               </div>
               {kpiProfile.balanced === null ? (
-                <span className="text-[11px] font-mono text-slate-500">No posted entries yet</span>
+                <span className="text-[11px] font-mono text-ink-muted">No posted entries yet</span>
               ) : kpiProfile.balanced ? (
                 <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
                   <CheckCircle2 className="h-3 w-3" />
@@ -464,27 +464,27 @@ export default function ExecutiveDashboardPage() {
 
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Total Assets (A)</span>
-                  <span className="text-sm font-black font-mono text-slate-900">{kpiProfile.assets}</span>
-                  <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">All asset ledgers</span>
+                <div className="p-3 rounded-lg bg-canvas border border-line">
+                  <span className="text-[10px] text-ink-muted uppercase font-mono block">Total Assets (A)</span>
+                  <span className="text-sm font-black font-mono text-ink">{kpiProfile.assets}</span>
+                  <span className="text-[10px] text-ink-muted block mt-0.5 font-mono">All asset ledgers</span>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Total Liabilities (L)</span>
-                  <span className="text-sm font-black font-mono text-slate-900">{kpiProfile.liabilities}</span>
-                  <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">All liability ledgers</span>
+                <div className="p-3 rounded-lg bg-canvas border border-line">
+                  <span className="text-[10px] text-ink-muted uppercase font-mono block">Total Liabilities (L)</span>
+                  <span className="text-sm font-black font-mono text-ink">{kpiProfile.liabilities}</span>
+                  <span className="text-[10px] text-ink-muted block mt-0.5 font-mono">All liability ledgers</span>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Owner Equity (E)</span>
-                  <span className="text-sm font-black font-mono text-slate-900">{kpiProfile.equity}</span>
-                  <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">Capital + profit to date</span>
+                <div className="p-3 rounded-lg bg-canvas border border-line">
+                  <span className="text-[10px] text-ink-muted uppercase font-mono block">Owner Equity (E)</span>
+                  <span className="text-sm font-black font-mono text-ink">{kpiProfile.equity}</span>
+                  <span className="text-[10px] text-ink-muted block mt-0.5 font-mono">Capital + profit to date</span>
                 </div>
               </div>
 
-              <div className="p-3.5 bg-canvas rounded-lg border border-slate-200 flex items-center justify-between text-xs font-mono">
+              <div className="p-3.5 bg-canvas rounded-lg border border-line flex items-center justify-between text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
-                  <span className="text-slate-700">Accounting Parity Equation:</span>
+                  <span className="text-ink-soft">Accounting Parity Equation:</span>
                 </div>
                 <span className="font-bold text-ink">
                   {kpiProfile.equationText}
@@ -492,7 +492,7 @@ export default function ExecutiveDashboardPage() {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
+            <div className="pt-2 flex items-center justify-between text-xs text-ink-muted border-t border-line">
               <span className="font-mono text-[11px]">Computed from posted journal entries</span>
               <div className="flex items-center gap-3">
                 <Link
@@ -512,71 +512,71 @@ export default function ExecutiveDashboardPage() {
           </div>
 
           {/* Right: Quick Action Hub & Navigation (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-line-strong rounded-xl p-5 shadow-xs flex flex-col justify-between space-y-4">
+          <div className="lg:col-span-5 bg-surface border border-line-strong rounded-xl p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center justify-between border-b border-line pb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-brand" />
                   <h2 className="text-sm font-bold text-ink">
                     Accounting Workflow Shortcuts
                   </h2>
                 </div>
-                <span className="text-[10px] font-mono text-slate-400">Desktop First</span>
+                <span className="text-[10px] font-mono text-ink-subtle">Desktop First</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 pt-3">
                 <Link
                   href="/vouchers/payment"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
+                  className="p-3 rounded-lg bg-canvas hover:bg-brand/10 border border-line hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">Payment</span>
-                    <kbd className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">F5</kbd>
+                    <span className="text-xs font-bold text-ink">Payment</span>
+                    <kbd className="text-[10px] font-mono font-bold bg-surface px-1.5 py-0.5 rounded border border-line-strong">F5</kbd>
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1 block">Record vendor payouts</span>
+                  <span className="text-[11px] text-ink-muted mt-1 block">Record vendor payouts</span>
                 </Link>
 
                 <Link
                   href="/vouchers/receipt"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
+                  className="p-3 rounded-lg bg-canvas hover:bg-brand/10 border border-line hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">Receipt</span>
-                    <kbd className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">F6</kbd>
+                    <span className="text-xs font-bold text-ink">Receipt</span>
+                    <kbd className="text-[10px] font-mono font-bold bg-surface px-1.5 py-0.5 rounded border border-line-strong">F6</kbd>
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1 block">Customer collections</span>
+                  <span className="text-[11px] text-ink-muted mt-1 block">Customer collections</span>
                 </Link>
 
                 <Link
                   href="/vouchers/sales"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
+                  className="p-3 rounded-lg bg-canvas hover:bg-brand/10 border border-line hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">
+                    <span className="text-xs font-bold text-ink">
                       {isSec22 ? "Bill of Supply" : "Sales Invoice"}
                     </span>
-                    <kbd className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">F8</kbd>
+                    <kbd className="text-[10px] font-mono font-bold bg-surface px-1.5 py-0.5 rounded border border-line-strong">F8</kbd>
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1 block">
+                  <span className="text-[11px] text-ink-muted mt-1 block">
                     {isSec22 ? "Sec 22 Nil GST" : "Tax Invoice (GST)"}
                   </span>
                 </Link>
 
                 <Link
                   href="/day-book"
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-brand/10 border border-slate-200 hover:border-brand transition-all text-left"
+                  className="p-3 rounded-lg bg-canvas hover:bg-brand/10 border border-line hover:border-brand transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">Day Book</span>
-                    <kbd className="text-[10px] font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">D</kbd>
+                    <span className="text-xs font-bold text-ink">Day Book</span>
+                    <kbd className="text-[10px] font-mono font-bold bg-surface px-1.5 py-0.5 rounded border border-line-strong">D</kbd>
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1 block">Chronological register</span>
+                  <span className="text-[11px] text-ink-muted mt-1 block">Chronological register</span>
                 </Link>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-slate-500">Return to Gateway menu anytime:</span>
+            <div className="pt-3 border-t border-line flex items-center justify-between text-xs">
+              <span className="text-ink-muted">Return to Gateway menu anytime:</span>
               <Link
                 href="/gateway"
                 className="font-bold text-ink hover:text-brand flex items-center gap-1"
@@ -620,19 +620,19 @@ export default function ExecutiveDashboardPage() {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-slate-700 font-bold mb-1">
+              <label className="block text-ink-soft font-bold mb-1">
                 Organisation Legal Entity
               </label>
               <input
                 type="text"
                 value={activeOrgName}
                 disabled
-                className="w-full bg-slate-100 border border-slate-300 rounded-lg py-2 px-3 text-xs text-slate-600 cursor-not-allowed font-medium"
+                className="w-full bg-canvas-sunken border border-line-strong rounded-lg py-2 px-3 text-xs text-ink-soft cursor-not-allowed font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">
+              <label className="block text-ink-soft font-bold mb-1">
                 Valid 15-Digit GSTIN <span className="text-rose-500">*</span>
               </label>
               <input
@@ -645,9 +645,9 @@ export default function ExecutiveDashboardPage() {
                 placeholder="e.g. 27AAACD1234E1Z5"
                 maxLength={15}
                 required
-                className="w-full bg-white border border-slate-300 rounded-lg py-2 px-3 text-xs font-mono font-bold tracking-wider placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                className="w-full bg-surface border border-line-strong rounded-lg py-2 px-3 text-xs font-mono font-bold tracking-wider placeholder:text-ink-subtle focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
               />
-              <span className="text-[10px] text-slate-400 font-mono mt-1 block">
+              <span className="text-[10px] text-ink-subtle font-mono mt-1 block">
                 Format: 2 state digits + 10-char PAN + 1 entity num + 'Z' + check digit
               </span>
             </div>
@@ -660,11 +660,11 @@ export default function ExecutiveDashboardPage() {
             )}
           </div>
 
-          <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-line flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={() => setIsConvertModalOpen(false)}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-canvas-sunken hover:bg-line text-ink-soft font-bold text-xs transition-colors cursor-pointer"
             >
               Cancel
             </button>

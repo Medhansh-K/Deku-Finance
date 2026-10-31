@@ -48,15 +48,15 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
   };
 
   return (
-    <div className="bg-white border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-        <Building2 className="h-4 w-4 text-slate-600" />
+    <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
+      <div className="flex items-center gap-2 border-b border-line pb-3">
+        <Building2 className="h-4 w-4 text-ink-soft" />
         <h3 className="text-sm font-bold uppercase text-ink font-mono">Company Controls</h3>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <label htmlFor="company-gstin" className="block font-semibold text-slate-700">
+          <label htmlFor="company-gstin" className="block font-semibold text-ink-soft">
             Company GSTIN
           </label>
           <Input
@@ -68,7 +68,7 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
             className="font-mono uppercase"
           />
           {gstinError && <p className="text-rose-700">{gstinError}</p>}
-          <p className="text-slate-500">Printed on invoices and used to build GSTR-1 and GSTR-3B.</p>
+          <p className="text-ink-muted">Printed on invoices and used to build GSTR-1 and GSTR-3B.</p>
           <Button
             size="sm"
             disabled={busy || !!gstinError || cleanGstin === savedGstin}
@@ -79,10 +79,10 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2 font-semibold text-slate-700">
+          <div className="flex items-center gap-2 font-semibold text-ink-soft">
             <ShieldCheck className="h-4 w-4" /> Maker-checker approvals
           </div>
-          <p className="text-slate-500">
+          <p className="text-ink-muted">
             When on, a voucher reaches the ledger only after a second person (owner, CFO or admin) approves it.
             Nobody can approve their own voucher.
           </p>

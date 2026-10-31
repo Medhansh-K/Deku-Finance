@@ -9,6 +9,8 @@ import { useReturnPeriod } from "@/lib/gst/period";
 import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
 import { ReturnCard } from "@/modules/gst/ReturnCard";
+import { AppShell } from "@/layouts/AppShell";
+import { WorkspaceLayout } from "@/layouts/WorkspaceLayout";
 
 export default function ReturnsHubPage() {
   const { operatingMode } = useAuth();
@@ -18,20 +20,18 @@ export default function ReturnsHubPage() {
   const isPure = operatingMode === "pure_accounting";
 
   return (
+    <AppShell>
+      <WorkspaceLayout
+        title="GST returns: GSTR-1 & GSTR-3B"
+        subtitle="Offline JSON built from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes."
+        breadcrumbs={[{ label: "GST", href: "/gst" }, { label: "Returns", href: "/gst/returns" }]}
+        actions={
+          <div className="w-44">
+            <Input label={fy ? `Return period (FY ${fy})` : "Return period"} id="return-period" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+          </div>
+        }
+      >
     <div className="max-w-5xl mx-auto space-y-6 font-sans">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-black text-zinc-950">GST Returns: GSTR-1 & GSTR-3B</h1>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Offline JSON built from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes.
-          </p>
-        </div>
-        <div className="w-44">
-          <Input label={fy ? `Return period (FY ${fy})` : "Return period"} id="return-period" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
-        </div>
-      </div>
-
       {/* Section 22 Advisory if in Pure Accounting */}
       {isPure && (
         <div className="rounded-2xl bg-emerald-50 border border-emerald-300 p-5 flex items-start gap-3.5 text-xs text-emerald-900">
@@ -47,8 +47,8 @@ export default function ReturnsHubPage() {
         </div>
       )}
 
-      {!orgId && <p className="text-xs text-zinc-500">Select a company first.</p>}
-      {loading && <p className="text-xs text-zinc-500">Loading invoices and ledgers…</p>}
+      {!orgId && <p className="text-xs text-ink-muted">Select a company first.</p>}
+      {loading && <p className="text-xs text-ink-muted">Loading invoices and ledgers…</p>}
       {loadError && (
         <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-xs text-rose-900 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
@@ -73,5 +73,7 @@ export default function ReturnsHubPage() {
         </div>
       )}
     </div>
+      </WorkspaceLayout>
+    </AppShell>
   );
 }
