@@ -1,4 +1,5 @@
 import { apiClient } from "./client";
+import type { ReturnResult } from "@/lib/gst/returns";
 import {
   Account,
   AccountBalanceRow,
@@ -660,4 +661,17 @@ export const purchasesApi = {
     }),
 };
 
+export type GstReturnType = "gstr1" | "gstr3b";
 
+/** Returns are computed by the backend from the books; `period` is MMYYYY. */
+export const gstApi = {
+  get: (orgId: string, period: string, type: GstReturnType) =>
+    apiClient<ApiResponse<ReturnResult>>(`/api/v1/organisations/${orgId}/gst/${period}/${type}`),
+  record: (orgId: string, period: string, type: GstReturnType) =>
+    apiClient<ApiResponse<unknown[]>>(`/api/v1/organisations/${orgId}/gst/${period}/${type}/record`, { method: "POST" }),
+  markFiled: (orgId: string, period: string, type: GstReturnType, arn: string) =>
+    apiClient<ApiResponse<unknown[]>>(`/api/v1/organisations/${orgId}/gst/${period}/${type}/filed`, {
+      method: "PATCH",
+      body: JSON.stringify({ arn }),
+    }),
+};

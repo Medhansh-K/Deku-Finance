@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertCircle, CheckCircle2, Download, Upload } from "lucide-react";
+import { AlertCircle, CheckCircle2, Download, FileCheck2, Save, Upload } from "lucide-react";
 import { AppShell } from "@/layouts/AppShell";
 import { WorkspaceLayout } from "@/layouts/WorkspaceLayout";
 import { Badge } from "@/components/ui/Badge";
@@ -13,10 +13,12 @@ import { useReturnPeriod } from "@/lib/gst/period";
 import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
 import { ReturnCard } from "@/modules/gst/ReturnCard";
+import { Table6Card } from "@/modules/gst/Table6Card";
+import { gstApi, type GstReturnType } from "@/api/endpoints";
 
 const STEPS = ["Period", "Readiness", "Review", "Download"];
 
-/** Where the user can fix a blocking error, by the wording returns.ts uses. */
+/** Where the user can fix a blocking error, by the wording backend/src/gst uses. */
 function fixLink(error: string): { href: string; label: string } | null {
   if (error.startsWith("Company GSTIN")) return { href: "/settings", label: "Fix in Settings" };
   if (error.startsWith("Invoice ")) return { href: "/gst", label: "Open invoices" };
@@ -26,7 +28,7 @@ function fixLink(error: string): { href: string; label: string } | null {
 
 export default function GstFilePage() {
   const { month, setMonth, fy, retPeriod } = useReturnPeriod();
-  const { orgId, books, loading, loadError, gstr1, gstr3b } = useReturnBooks(retPeriod);
+  const { orgId, gstin, loading, loadError, gstr1, gstr3b } = useReturnBooks(retPeriod);
   const [step, setStep] = useState(0);
   const [guideOpen, setGuideOpen] = useState(false);
 
@@ -115,13 +117,14 @@ export default function GstFilePage() {
             {step === 2 && ready && (
               <>
                 <h2 className="text-base font-semibold text-ink">Review the figures</h2>
-                <p className="text-sm text-ink-muted">Amounts in rupees for {month}, straight from your issued invoices and Input GST ledgers.</p>
+                <p className="text-sm text-ink-muted">Amounts in rupees for {month}, computed by the server from your issued invoices and purchase bills (or Input GST ledgers).</p>
                 <ReturnCard title="GSTR-1" result={gstr1!} notCovered={GSTR1_NOT_COVERED} />
                 <ReturnCard title="GSTR-3B" result={gstr3b!} notCovered={GSTR3B_NOT_COVERED} />
+                <Table6Card table6={gstr3b!.table6} />
               </>
             )}
 
-            {step === 3 && ready && books && (
+            {step === 3 && ready && (
               <>
                 <h2 className="text-base font-semibold text-ink">Download and upload</h2>
                 {errors.length > 0 && (
@@ -132,13 +135,13 @@ export default function GstFilePage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     disabled={!gstr1!.json}
-                    onClick={() => downloadJson(`GSTR1_${books.gstin}_${retPeriod}.json`, gstr1!.json)}
+                    onClick={() => downloadJson(`GSTR1_${gstin}_${retPeriod}.json`, gstr1!.json)}
                   >
                     <Download className="h-4 w-4" aria-hidden /> Download GSTR-1 JSON
                   </Button>
                   <Button
                     disabled={!gstr3b!.json}
-                    onClick={() => downloadJson(`GSTR3B_${books.gstin}_${retPeriod}.json`, gstr3b!.json)}
+                    onClick={() => downloadJson(`GSTR3B_${gstin}_${retPeriod}.json`, gstr3b!.json)}
                   >
                     <Download className="h-4 w-4" aria-hidden /> Download GSTR-3B JSON
                   </Button>
@@ -150,6 +153,15 @@ export default function GstFilePage() {
                   Deku does not file for you. The files stay on your computer until you upload them yourself.{" "}
                   <a href="/gst/guide" className="text-brand-strong underline">Full portal guide</a>
                 </p>
+                <div className="space-y-3 border-t border-line pt-4">
+                  <h3 className="text-sm font-semibold text-ink">Keep a record</h3>
+                  <p className="text-xs text-ink-muted">
+                    Recording stores the return exactly as the server computed it. After you file on the portal, enter the ARN it
+                    shows; a filed return can&apos;t be changed.
+                  </p>
+                  <FilingRecord orgId={orgId} retPeriod={retPeriod} type="gstr1" label="GSTR-1" canRecord={!!gstr1!.json} />
+                  <FilingRecord orgId={orgId} retPeriod={retPeriod} type="gstr3b" label="GSTR-3B" canRecord={!!gstr3b!.json} />
+                </div>
               </>
             )}
 
@@ -182,5 +194,74 @@ export default function GstFilePage() {
         </div>
       </WorkspaceLayout>
     </AppShell>
+  );
+}
+
+
+/** Record the prepared return on the server, then mark it filed with the portal's ARN. */
+function FilingRecord({
+  orgId,
+  retPeriod,
+  type,
+  label,
+  canRecord,
+}: {
+  orgId: string;
+  retPeriod: string;
+  type: GstReturnType;
+  label: string;
+  canRecord: boolean;
+}) {
+  const [arn, setArn] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const run = async (action: () => Promise<unknown>, done: string) => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await action();
+      setMessage({ ok: true, text: done });
+    } catch (err) {
+      setMessage({ ok: false, text: (err as Error)?.message || "Request failed" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-line p-3 space-y-2">
+      <div className="flex flex-wrap items-end gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={!canRecord || busy}
+          onClick={() => run(() => gstApi.record(orgId, retPeriod, type), `${label} recorded as prepared.`)}
+        >
+          <Save className="h-4 w-4" aria-hidden /> Record prepared {label}
+        </Button>
+        <div className="w-56">
+          <Input
+            label={`${label} ARN`}
+            id={`arn-${type}`}
+            value={arn}
+            onChange={(e) => setArn(e.target.value.toUpperCase())}
+            placeholder="As shown on gst.gov.in"
+          />
+        </div>
+        <Button
+          size="sm"
+          disabled={!arn.trim() || busy}
+          onClick={() => run(() => gstApi.markFiled(orgId, retPeriod, type, arn.trim()), `${label} marked as filed.`)}
+        >
+          <FileCheck2 className="h-4 w-4" aria-hidden /> Mark as filed
+        </Button>
+      </div>
+      {message && (
+        <p role="status" className={`text-xs ${message.ok ? "text-emerald-800" : "text-rose-800"}`}>
+          {message.text}
+        </p>
+      )}
+    </div>
   );
 }
