@@ -690,6 +690,60 @@ export const purchasesApi = {
     }),
 };
 
+export interface MarketplaceSettlement {
+  id: string;
+  channel: string;
+  settlement_ref: string;
+  period_from: string;
+  period_to: string;
+  gross_sales: number;
+  refunds: number;
+  commission: number;
+  other_fees: number;
+  gst_on_fees: number;
+  fee_gst_split: "igst" | "cgst_sgst";
+  tcs_amount: number;
+  tds_amount: number;
+  net_payout: number;
+  journal_entry_id: string | null;
+  source_filename: string | null;
+  created_at: string;
+  journal_entries?: { entry_number: string; status: string; submitted_at: string | null } | null;
+}
+
+export interface MarketplaceColumnMap {
+  channel: string;
+  mapping: import("@/lib/marketplace/parsers").ColumnMapping;
+  deductions_negative: boolean;
+}
+
+export const marketplaceApi = {
+  list: (orgId: string) =>
+    apiClient<ApiResponse<MarketplaceSettlement[]>>(`/api/v1/organisations/${orgId}/marketplace/settlements`),
+  create: (orgId: string, payload: ReturnType<typeof import("@/lib/marketplace/parsers").settlementPayload>) =>
+    apiClient<ApiResponse<MarketplaceSettlement>>(`/api/v1/organisations/${orgId}/marketplace/settlements`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  /** Posts, or submits for approval under maker-checker; the returned entry says which. */
+  post: (orgId: string, id: string, bankAccountId: string | null) =>
+    apiClient<{ success: boolean; entry: JournalEntry }>(
+      `/api/v1/organisations/${orgId}/marketplace/settlements/${id}/post`,
+      { method: "POST", body: JSON.stringify({ bank_account_id: bankAccountId }) }
+    ),
+  remove: (orgId: string, id: string) =>
+    apiClient<ApiResponse<MarketplaceSettlement[]>>(`/api/v1/organisations/${orgId}/marketplace/settlements/${id}`, {
+      method: "DELETE",
+    }),
+  listColumnMaps: (orgId: string) =>
+    apiClient<ApiResponse<MarketplaceColumnMap[]>>(`/api/v1/organisations/${orgId}/marketplace/column-maps`),
+  saveColumnMap: (orgId: string, channel: string, map: Omit<MarketplaceColumnMap, "channel">) =>
+    apiClient<ApiResponse<MarketplaceColumnMap[]>>(`/api/v1/organisations/${orgId}/marketplace/column-maps/${channel}`, {
+      method: "PUT",
+      body: JSON.stringify(map),
+    }),
+};
+
 export type GstReturnType = "gstr1" | "gstr3b";
 
 /** Returns are computed by the backend from the books; `period` is MMYYYY. */

@@ -76,6 +76,9 @@ pub struct Invoice {
     pub cess_amount: f64,
     #[serde(default, deserialize_with = "de_num")]
     pub total_amount: f64,
+    /// Migration 25; absent in older rows and fixtures means "direct".
+    #[serde(default)]
+    pub sales_channel: Option<String>,
     pub parties: Option<Party>,
     pub sales_invoice_lines: Option<Vec<InvoiceLine>>,
 }
@@ -938,6 +941,7 @@ pub fn build_gstr3b(b: &Books) -> ReturnResult {
     let (mut errors, gstin, checked) = check(b);
 
     let (mut osup, mut zero, mut nil_exempt) = (Amounts::default(), Amounts::default(), Amounts::default());
+    let mut eco = Amounts::default();
     let mut unreg: Vec<(String, Amounts)> = Vec::new();
     for Checked { inv, ctin, pos, total } in &checked {
         match inv.supply_type.as_str() {
@@ -945,6 +949,9 @@ pub fn build_gstr3b(b: &Books) -> ReturnResult {
             "exempt" => nil_exempt.add(total),
             _ => {
                 osup.add(total);
+                if inv.sales_channel.as_deref().map_or(false, |c| c != "direct") {
+                    eco.add(total);
+                }
                 if inv.supply_type == "inter_state" && ctin.is_none() {
                     bucket(&mut unreg, pos.clone()).add(total);
                 }
@@ -974,6 +981,10 @@ pub fn build_gstr3b(b: &Books) -> ReturnResult {
         SummaryRow { section: "3.1(a) Outward taxable".into(), amounts: Some(osup.rupees()) },
         SummaryRow { section: "3.1(b) Zero rated (exports)".into(), amounts: Some(zero.rupees()) },
         SummaryRow { section: "3.1(c) Nil rated / exempt".into(), amounts: Some(nil_exempt.rupees()) },
+        // Information only, already inside 3.1(a) and not in the JSON: Table 3.1.1 covers supplies on
+        // which the operator pays tax u/s 9(5), which applies only to notified services (transport,
+        // accommodation, restaurant, housekeeping...). Goods sold on a marketplace stay in 3.1(a).
+        SummaryRow { section: "3.1.1 Through e-commerce operators (information)".into(), amounts: Some(eco.rupees()) },
         SummaryRow {
             section: if bills.is_empty() {
                 "4 Eligible ITC (Input GST ledgers)".into()
@@ -1099,6 +1110,16 @@ mod tests {
         let f = fixture();
         let r = build_gstr3b(&books(&f));
         assert_eq!(r.errors, Vec::<String>::new());
+        assert_eq!(r.json.unwrap(), f["expected"]["gstr3b"]);
+    }
+
+    #[test]
+    fn gstr3b_reports_marketplace_sales_under_3_1_1_as_information_only() {
+        let f = fixture();
+        let r = build_gstr3b(&books(&f));
+        let eco = r.summary.iter().find(|s| s.section.starts_with("3.1.1")).unwrap();
+        assert_eq!(eco.amounts.as_ref().unwrap(), &f["expected"]["gstr3b_eco"]);
+        // Still inside 3.1(a), and nothing extra in the uploaded JSON.
         assert_eq!(r.json.unwrap(), f["expected"]["gstr3b"]);
     }
 

@@ -79,6 +79,7 @@
       "due_date": "2026-10-10",
       "status": "issued",
       "supply_type": "inter_state",
+      "sales_channel": "amazon",
       "place_of_supply": "07-Delhi",
       "taxable_amount": 10000.1,
       "cgst_amount": 0,
@@ -709,6 +710,13 @@
           "csamt": 0
         }
       }
+    },
+    "gstr3b_eco": {
+      "txval": 10000.1,
+      "iamt": 1800.02,
+      "camt": 0,
+      "samt": 0,
+      "csamt": 0
     },
     "gstr3b_bills_itc_elg": {
       "itc_avl": [
