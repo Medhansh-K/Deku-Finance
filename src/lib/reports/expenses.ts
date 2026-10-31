@@ -1,5 +1,28 @@
-import type { Account, JournalEntry, JournalStatus, Party } from "@/types/accounting";
-import { bookEntries, inRange, isOperatingExpense, toPaise } from "./ledger";
+/** Operating-expense report: computed by get_expense_breakdown (GET /reports/expenses), mapped to paise here. */
+import type { JournalStatus } from "@/types/accounting";
+import { toPaise } from "./ledger";
+
+type Money = number | string;
+
+export interface ExpenseBreakdown {
+  total: Money;
+  revenue: Money;
+  by_head: { account_id: string; code: string; name: string; amount: Money; entries: number }[];
+  vouchers: {
+    id: string;
+    entry_number: string;
+    date: string;
+    status: JournalStatus;
+    reference: string | null;
+    narration: string;
+    party_name: string | null;
+    amount: Money;
+    heads: string[];
+    head_ids: string[];
+    sources: string[];
+    lines: { account_name: string; account_code: string; group: string; debit: Money; credit: Money }[];
+  }[];
+}
 
 export interface ExpenseLine {
   accountName: string;
@@ -34,73 +57,32 @@ export interface ExpenseHeadTotal {
   entries: number;
 }
 
-/** Operating expenses (cost of sales excluded) booked between `from` and `to`, by entry and by expense head. */
-export function operatingExpenses(
-  journals: JournalEntry[],
-  accounts: Account[],
-  parties: Party[],
-  from: string,
-  to: string
-) {
-  const acc = new Map(accounts.map((a) => [a.id, a]));
-  const partyName = new Map(parties.map((p) => [p.id, p.display_name || p.legal_name]));
-  const heads = new Map<string, ExpenseHeadTotal>();
-  const vouchers: ExpenseVoucher[] = [];
-
-  for (const j of bookEntries(journals)) {
-    if (!inRange(j.entry_date, from, to)) continue;
-    const lines = j.journal_entry_lines ?? [];
-    let amount = 0;
-    const touched = new Set<string>();
-    for (const l of lines) {
-      const a = acc.get(l.account_id);
-      if (!a || !isOperatingExpense(a)) continue;
-      const net = toPaise(l.debit) - toPaise(l.credit);
-      amount += net;
-      const h = heads.get(a.id) ?? { accountId: a.id, code: a.code, name: a.name, amountPaise: 0, entries: 0 };
-      h.amountPaise += net;
-      if (!touched.has(a.id)) h.entries += 1;
-      touched.add(a.id);
-      heads.set(a.id, h);
-    }
-    if (!touched.size) continue;
-    const party = lines.find((l) => l.party_id && partyName.has(l.party_id))?.party_id;
-    vouchers.push({
-      id: j.id,
-      entryNumber: j.entry_number,
-      date: j.entry_date,
-      status: j.status,
-      reference: j.reference ?? null,
-      narration: j.narration,
-      partyName: party ? partyName.get(party)! : null,
-      amountPaise: amount,
-      heads: [...touched].map((id) => acc.get(id)!.name),
-      headIds: [...touched],
-      sources: [
-        ...new Set(
-          lines
-            .filter((l) => {
-              const a = acc.get(l.account_id);
-              return toPaise(l.credit) > 0 && !(a && isOperatingExpense(a));
-            })
-            .map((l) => acc.get(l.account_id)?.name ?? "Unknown account")
-        ),
-      ],
-      lines: lines.map((l) => {
-        const a = acc.get(l.account_id);
-        return {
-          accountName: a?.name ?? "Unknown account",
-          accountCode: a?.code ?? "",
-          group: a?.account_group ?? a?.type ?? "",
-          debitPaise: toPaise(l.debit),
-          creditPaise: toPaise(l.credit),
-        };
-      }),
-    });
-  }
-
-  vouchers.sort((a, b) => b.date.localeCompare(a.date) || b.entryNumber.localeCompare(a.entryNumber));
-  const byHead = [...heads.values()].filter((h) => h.amountPaise !== 0).sort((a, b) => b.amountPaise - a.amountPaise);
-  const totalPaise = vouchers.reduce((s, v) => s + v.amountPaise, 0);
-  return { vouchers, byHead, totalPaise };
-}
+export const toExpenseReport = (r: ExpenseBreakdown) => ({
+  totalPaise: toPaise(r.total),
+  revenuePaise: toPaise(r.revenue),
+  byHead: r.by_head.map(
+    (h): ExpenseHeadTotal => ({ accountId: h.account_id, code: h.code, name: h.name, amountPaise: toPaise(h.amount), entries: h.entries })
+  ),
+  vouchers: r.vouchers.map(
+    (v): ExpenseVoucher => ({
+      id: v.id,
+      entryNumber: v.entry_number,
+      date: v.date,
+      status: v.status,
+      reference: v.reference,
+      narration: v.narration,
+      partyName: v.party_name,
+      amountPaise: toPaise(v.amount),
+      heads: v.heads,
+      headIds: v.head_ids,
+      sources: v.sources,
+      lines: v.lines.map((l) => ({
+        accountName: l.account_name,
+        accountCode: l.account_code,
+        group: l.group,
+        debitPaise: toPaise(l.debit),
+        creditPaise: toPaise(l.credit),
+      })),
+    })
+  ),
+});

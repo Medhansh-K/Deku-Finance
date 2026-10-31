@@ -18,17 +18,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
-import { accountingApi, invoicesApi, partiesApi } from "@/api/endpoints";
-import { Account, JournalEntry, Party, SalesInvoice } from "@/types/accounting";
-import {
-  ageBuckets,
-  bucketOf,
-  daysOutstanding,
-  daysBetween,
-  findControlAccount,
-  partyBalances,
-  toRupees,
-} from "@/lib/reports/ledger";
+import { reportsApi } from "@/api/endpoints";
+import { ageBuckets, bucketOf, daysBetween, KpiSnapshot, PartyBalance, toPartyBalances, toRupees } from "@/lib/reports/ledger";
 
 const BUCKETS = [
   { id: "d0_30", label: "0–30 Days" },
@@ -38,10 +29,8 @@ const BUCKETS = [
 ] as const;
 
 interface Books {
-  accounts: Account[];
-  journals: JournalEntry[];
-  parties: Party[];
-  invoices: SalesInvoice[];
+  debtors: PartyBalance[];
+  kpis: KpiSnapshot;
   asOf: string;
 }
 
@@ -64,19 +53,12 @@ export function DebtorsDsoView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [accounts, journals, parties, invoices] = await Promise.all([
-        accountingApi.listAccounts(orgId),
-        accountingApi.listJournals(orgId),
-        partiesApi.list(orgId),
-        invoicesApi.list(orgId),
+      const asOf = toISODateString();
+      const [ageing, kpis] = await Promise.all([
+        reportsApi.getPartyAgeing(orgId, "receivable", asOf),
+        reportsApi.getKpis(orgId, asOf, asOf),
       ]);
-      setBooks({
-        accounts: accounts.data ?? [],
-        journals: journals.data ?? [],
-        parties: parties.data ?? [],
-        invoices: invoices.data ?? [],
-        asOf: toISODateString(),
-      });
+      setBooks({ debtors: toPartyBalances(ageing.data ?? []), kpis: kpis.data, asOf });
     } catch (e: any) {
       setBooks(null);
       setError(e?.message || "Could not load the books");
@@ -91,34 +73,17 @@ export function DebtorsDsoView() {
   }, [orgId]);
 
   const asOf = books?.asOf ?? "";
-  const receivablesAccount = useMemo(
-    () => (books ? findControlAccount(books.accounts, "receivable") : undefined),
-    [books]
-  );
-  const debtors = useMemo(
-    () => (books && receivablesAccount ? partyBalances(books.journals, receivablesAccount.id, "receivable", asOf) : []),
-    [books, receivablesAccount, asOf]
-  );
-  const partyById = useMemo(() => new Map((books?.parties ?? []).map((p) => [p.id, p])), [books]);
-  // Issued invoices carry the journal they posted, which is how a due date reaches a ledger item.
-  const invoiceByEntry = useMemo(
-    () => new Map((books?.invoices ?? []).filter((i) => i.journal_entry_id).map((i) => [i.journal_entry_id!, i])),
-    [books]
-  );
+  const receivablesAccount = books?.kpis.debtors_account ?? null;
+  const debtors = useMemo(() => books?.debtors ?? [], [books]);
 
   const totalReceivablesPaise = debtors.reduce((s, d) => s + d.balancePaise, 0);
-  const dso = books && receivablesAccount
-    ? daysOutstanding(books.journals, receivablesAccount.id, "receivable", totalReceivablesPaise, asOf)
-    : null;
+  const dso = books?.kpis.dso_days ?? null;
   const owing = debtors.filter((d) => d.balancePaise > 0);
   const overduePaise = debtors.reduce(
     (sum, d) =>
       sum +
       d.openItems
-        .filter((i) => {
-          const due = invoiceByEntry.get(i.entryId)?.due_date;
-          return due && due < asOf;
-        })
+        .filter((i) => i.dueDate && i.dueDate < asOf)
         .reduce((s, i) => s + i.openPaise, 0),
     0
   );
@@ -277,8 +242,7 @@ export function DebtorsDsoView() {
         )}
         {filteredDebtors.map((deb) => {
           const key = deb.partyId ?? "none";
-          const party = deb.partyId ? partyById.get(deb.partyId) : undefined;
-          const name = party ? party.display_name || party.legal_name : deb.partyId ? "Unknown party" : "No party on entry";
+          const name = deb.partyName ?? (deb.partyId ? "Unknown party" : "No party on entry");
           const isExpanded = expandedId === key;
           return (
             <div
@@ -304,11 +268,11 @@ export function DebtorsDsoView() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-500 font-mono mt-0.5">
-                      <span>GSTIN: {party?.gstin || "–"}</span>
-                      {party?.billing_address?.city && (
+                      <span>GSTIN: {deb.gstin || "–"}</span>
+                      {deb.billingAddress?.city && (
                         <>
                           <span>•</span>
-                          <span>{[party.billing_address.city, party.billing_address.state].filter(Boolean).join(", ")}</span>
+                          <span>{[deb.billingAddress.city, deb.billingAddress.state].filter(Boolean).join(", ")}</span>
                         </>
                       )}
                       <span>•</span>
@@ -380,18 +344,17 @@ export function DebtorsDsoView() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {deb.openItems.map((item) => {
-                          const inv = invoiceByEntry.get(item.entryId);
-                          const overdueDays = inv?.due_date ? daysBetween(inv.due_date, asOf) : null;
+                          const overdueDays = item.dueDate ? daysBetween(item.dueDate, asOf) : null;
                           return (
                             <tr key={item.entryId} className="hover:bg-slate-50">
                               <td className="p-2.5 font-bold text-slate-900">
                                 <span className="flex items-center gap-1">
                                   <FileText className="h-3 w-3 text-slate-400" />
-                                  <span>{inv?.invoice_number ?? item.reference ?? item.entryNumber}</span>
+                                  <span>{item.invoiceNumber ?? item.reference ?? item.entryNumber}</span>
                                 </span>
                               </td>
                               <td className="p-2.5 text-slate-600">{formatDateTally(item.date)}</td>
-                              <td className="p-2.5 text-slate-600">{inv?.due_date ? formatDateTally(inv.due_date) : "–"}</td>
+                              <td className="p-2.5 text-slate-600">{item.dueDate ? formatDateTally(item.dueDate) : "–"}</td>
                               <td className="p-2.5 text-right text-slate-700">{formatINR(toRupees(item.amountPaise))}</td>
                               <td className="p-2.5 text-right font-bold text-amber-800">
                                 {formatINR(toRupees(item.openPaise))}

@@ -19,6 +19,18 @@ pub struct DateRangeQuery {
     pub end_date: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct PartyAgeingQuery {
+    pub side: String,
+    pub as_of: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PeriodQuery {
+    pub from: String,
+    pub to: String,
+}
+
 pub fn routes(state: AppState) -> Router {
     Router::new()
         // Chart of Accounts
@@ -43,6 +55,9 @@ pub fn routes(state: AppState) -> Router {
         .route("/reports/ar-ap-aging", get(get_ar_ap_aging))
         .route("/reports/fpa-metrics", get(get_fpa_metrics))
         .route("/reports/budget-variance", get(get_budget_variance))
+        .route("/reports/party-ageing", get(get_party_ageing))
+        .route("/reports/kpis", get(get_kpis))
+        .route("/reports/expenses", get(get_expenses))
         .route("/accounts/:account_id/statement", get(get_account_statement_handler))
         .with_state(state)
 }
@@ -564,6 +579,51 @@ async fn get_account_statement_handler(
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
     let res = state.db.rpc("get_account_statement", &payload, token).await?;
+
+    Ok(Json(json!({ "success": true, "data": res })))
+}
+
+async fn get_party_ageing(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+    Query(params): Query<PartyAgeingQuery>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    if params.side != "receivable" && params.side != "payable" {
+        return Err(AppError::BadRequest("side must be receivable or payable".into()));
+    }
+    let mut payload = json!({ "p_org_id": org_id, "p_side": params.side });
+    if let Some(as_of) = params.as_of {
+        payload["p_as_of"] = json!(as_of);
+    }
+    let res = state.db.rpc("get_party_ledger_ageing", &payload, token).await?;
+
+    Ok(Json(json!({ "success": true, "data": res })))
+}
+
+async fn get_kpis(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+    Query(params): Query<PeriodQuery>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let payload = json!({ "p_org_id": org_id, "p_from": params.from, "p_to": params.to });
+    let res = state.db.rpc("get_kpi_snapshot", &payload, token).await?;
+
+    Ok(Json(json!({ "success": true, "data": res })))
+}
+
+async fn get_expenses(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+    Query(params): Query<PeriodQuery>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let payload = json!({ "p_org_id": org_id, "p_from": params.from, "p_to": params.to });
+    let res = state.db.rpc("get_expense_breakdown", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }

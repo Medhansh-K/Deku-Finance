@@ -1,14 +1,13 @@
 /**
  * Deku Finance — KPI Service
- * KPI values come from the company's books (see src/lib/reports/kpis.ts). Only the choice of
+ * KPI values come from the company's books (get_kpi_snapshot, GET /reports/kpis). Only the choice of
  * which tiles to show is kept per browser.
  */
 
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
-import { accountingApi, invoicesApi, organisationsApi } from "@/api/endpoints";
-import { computeKpis, LedgerKpis } from "@/lib/reports/kpis";
-import { fyStart, toRupees } from "@/lib/reports/ledger";
+import { organisationsApi, reportsApi } from "@/api/endpoints";
+import { EMPTY_KPIS, fyStart, LedgerKpis, toLedgerKpis, toRupees } from "@/lib/reports/ledger";
 
 export type KpiKey =
   | "turnover"
@@ -140,29 +139,17 @@ export function formatKpis(kp: LedgerKpis, from: string, asOf: string): Formatte
   };
 }
 
-/** Loads the books for an organisation and computes its KPIs for the current financial year. */
+/** Computes an organisation's KPIs for the current financial year on the server. */
 export async function loadKpis(orgId: string): Promise<FormattedKpiProfile> {
   const asOf = toISODateString();
-  const [org, accounts, journals, invoices] = await Promise.all([
-    organisationsApi.get(orgId),
-    accountingApi.listAccounts(orgId),
-    accountingApi.listJournals(orgId),
-    invoicesApi.list(orgId),
-  ]);
+  const org = await organisationsApi.get(orgId);
   const from = fyStart(asOf, org.data?.[0]?.financial_year_start_month || 4);
-  const k = computeKpis({
-    accounts: accounts.data ?? [],
-    journals: journals.data ?? [],
-    invoices: invoices.data ?? [],
-    from,
-    asOf,
-  });
-  return formatKpis(k, from, asOf);
+  const k = await reportsApi.getKpis(orgId, from, asOf);
+  return formatKpis(toLedgerKpis(k.data), from, asOf);
 }
 
 /** Placeholder while loading or when the books can't be read: every figure shows "–". */
-export const emptyKpis = () =>
-  formatKpis(computeKpis({ accounts: [], journals: [], invoices: [], from: "", asOf: "" }), "", "");
+export const emptyKpis = () => formatKpis(EMPTY_KPIS, "", "");
 
 const tilesKey = (orgId: string) => `deku_kpi_tiles_${orgId}`;
 

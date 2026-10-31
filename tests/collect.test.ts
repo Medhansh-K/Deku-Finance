@@ -1,30 +1,29 @@
 import { describe, it, expect } from "vitest";
-import type { Account, JournalEntry, Party } from "@/types/accounting";
+import type { Party } from "@/types/accounting";
 import { collectRows, collectStats, inTab, msmeFlag, CollectInvoice } from "@/lib/collect/receivables";
 import { checkIndianMobile, reminderMessage, whatsappUrl } from "@/lib/collect/whatsapp";
 import { defaultReturnMonth, fyOf, monthEnd, readStoredMonth, retPeriodOf } from "@/lib/gst/period";
+import { toPartyBalances, PartyAgeingRow } from "@/lib/reports/ledger";
 
-const AR: Account = {
-  id: "ar",
-  organisation_id: "o",
-  code: "1030",
-  name: "Trade Debtors",
-  type: "asset",
-  account_group: "asset",
-  is_postable: true,
-} as Account;
-
-const je = (id: string, date: string, debit: number, credit: number, party = "p1"): JournalEntry =>
-  ({
-    id,
-    organisation_id: "o",
-    fiscal_period_id: "f",
-    entry_number: id,
-    entry_date: date,
-    status: "posted",
-    narration: "",
-    journal_entry_lines: [{ line_number: 1, account_id: "ar", party_id: party, debit, credit }],
-  }) as unknown as JournalEntry;
+// Receivable ageing as get_party_ledger_ageing returns it (rupees, numeric as strings): [entry, amount, open].
+const ageing = (items: [string, number, number][]) =>
+  toPartyBalances([
+    {
+      party_id: "p1",
+      party_name: "Acme",
+      gstin: null,
+      billing_address: null,
+      balance: String(items.reduce((s, [, , o]) => s + o, 0)),
+      advance: "0.00",
+      oldest_age_days: 88,
+      d0_30: "0", d31_60: "0", d61_90: "0", d90_plus: "0",
+      open_items: items.map(([entry_id, amount, open]) => ({
+        entry_id, entry_number: entry_id, reference: null, date: "2026-08-01",
+        amount: amount.toFixed(2), open: open.toFixed(2), age_days: 0,
+        invoice_id: null, invoice_number: null, due_date: null,
+      })),
+    } satisfies PartyAgeingRow,
+  ]);
 
 const inv = (id: string, date: string, due: string | null, total: number, extra: Partial<CollectInvoice> = {}) =>
   ({
@@ -60,17 +59,12 @@ describe("collect: settlement and buckets", () => {
     inv("4", "2026-10-05", "2026-10-25", 300, { journal_entry_id: null }),
     inv("5", "2026-10-05", null, 100, { status: "draft" }),
   ];
-  const journals = [
-    je("j1", "2026-08-01", 1000, 0),
-    je("j3", "2026-10-01", 200, 0),
-    je("j2", "2026-10-20", 500, 0),
-    je("r1", "2026-10-21", 0, 600), // settles oldest first: INV-1 by 600
-  ];
-  // Oldest-first: payment 600 goes to INV-1 (1000) -> 400 open. INV-3 stays open 200 (later invoice).
-  const { rows, hasControlAccount } = collectRows(invoices, [AR], journals, [party], ASOF);
+  // The server settled a 600 receipt against INV-1 first (oldest); INV-3 and INV-2 stay open.
+  const debtors = ageing([["j1", 1000, 400], ["j3", 200, 200], ["j2", 500, 500]]);
+  const { rows, hasControlAccount } = collectRows(invoices, debtors, [party], ASOF);
   const by = (n: string) => rows.find((r) => r.invoice.id === n)!;
 
-  it("uses the ledger's oldest-first settlement and skips drafts", () => {
+  it("reads open amounts from the ledger ageing and skips drafts", () => {
     expect(hasControlAccount).toBe(true);
     expect(rows).toHaveLength(4);
     expect(by("1").openPaise).toBe(40000);
@@ -89,8 +83,8 @@ describe("collect: settlement and buckets", () => {
   });
 
   it("marks a fully settled invoice paid", () => {
-    // 600 more clears INV-1 (400) then INV-3 (200), oldest first; INV-2 stays open.
-    const paid = collectRows(invoices, [AR], [...journals, je("r2", "2026-10-22", 0, 600)], [party], ASOF).rows;
+    // A later 600 receipt cleared INV-1 and INV-3; only INV-2 is still an open item.
+    const paid = collectRows(invoices, ageing([["j2", 500, 500]]), [party], ASOF).rows;
     expect(paid.find((r) => r.invoice.id === "1")!.openPaise).toBe(0);
     expect(paid.find((r) => r.invoice.id === "2")!.openPaise).toBe(50000);
     const r3 = paid.find((r) => r.invoice.id === "3")!;
@@ -111,12 +105,12 @@ describe("collect: settlement and buckets", () => {
     expect(s.due7Paise).toBe(50000);
     expect(s.gstAtRiskPaise).toBe(1800); // only INV-1 is dated up to Sep
     expect(s.unposted).toBe(1);
-    const noTax = collectRows([inv("1", "2026-08-01", "2026-09-01", 1000, { cgst_amount: undefined })], [AR], journals, [party], ASOF);
+    const noTax = collectRows([inv("1", "2026-08-01", "2026-09-01", 1000, { cgst_amount: undefined })], debtors, [party], ASOF);
     expect(collectStats(noTax.rows, "2026-09-30").gstAtRiskPaise).toBeNull();
   });
 
   it("reports no settlement without a debtors control account", () => {
-    const r = collectRows(invoices, [], journals, [party], ASOF);
+    const r = collectRows(invoices, null, [party], ASOF);
     expect(r.hasControlAccount).toBe(false);
     expect(r.rows.every((x) => x.openPaise === null)).toBe(true);
   });

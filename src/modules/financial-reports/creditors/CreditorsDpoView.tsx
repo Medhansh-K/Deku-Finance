@@ -17,16 +17,8 @@ import {
 import { Button } from "@/components/ui/Button";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
-import { accountingApi, partiesApi } from "@/api/endpoints";
-import { Account, JournalEntry, Party } from "@/types/accounting";
-import {
-  ageBuckets,
-  bucketOf,
-  daysOutstanding,
-  findControlAccount,
-  partyBalances,
-  toRupees,
-} from "@/lib/reports/ledger";
+import { reportsApi } from "@/api/endpoints";
+import { ageBuckets, bucketOf, KpiSnapshot, PartyBalance, toPartyBalances, toRupees } from "@/lib/reports/ledger";
 
 const BUCKETS = [
   { id: "d0_30", label: "0–30 Days" },
@@ -37,7 +29,7 @@ const BUCKETS = [
 
 export function CreditorsDpoView() {
   const [orgId, setOrgId] = useState<string>("");
-  const [books, setBooks] = useState<{ accounts: Account[]; journals: JournalEntry[]; parties: Party[]; asOf: string } | null>(null);
+  const [books, setBooks] = useState<{ creditors: PartyBalance[]; kpis: KpiSnapshot } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -54,12 +46,12 @@ export function CreditorsDpoView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [accounts, journals, parties] = await Promise.all([
-        accountingApi.listAccounts(orgId),
-        accountingApi.listJournals(orgId),
-        partiesApi.list(orgId),
+      const asOf = toISODateString();
+      const [ageing, kpis] = await Promise.all([
+        reportsApi.getPartyAgeing(orgId, "payable", asOf),
+        reportsApi.getKpis(orgId, asOf, asOf),
       ]);
-      setBooks({ accounts: accounts.data ?? [], journals: journals.data ?? [], parties: parties.data ?? [], asOf: toISODateString() });
+      setBooks({ creditors: toPartyBalances(ageing.data ?? []), kpis: kpis.data });
     } catch (e: any) {
       setBooks(null);
       setError(e?.message || "Could not load the books");
@@ -73,18 +65,11 @@ export function CreditorsDpoView() {
     loadData();
   }, [orgId]);
 
-  const asOf = books?.asOf ?? "";
-  const payablesAccount = useMemo(() => (books ? findControlAccount(books.accounts, "payable") : undefined), [books]);
-  const creditors = useMemo(
-    () => (books && payablesAccount ? partyBalances(books.journals, payablesAccount.id, "payable", asOf) : []),
-    [books, payablesAccount, asOf]
-  );
-  const partyById = useMemo(() => new Map((books?.parties ?? []).map((p) => [p.id, p])), [books]);
+  const payablesAccount = books?.kpis.creditors_account ?? null;
+  const creditors = useMemo(() => books?.creditors ?? [], [books]);
 
   const totalPayablesPaise = creditors.reduce((s, c) => s + c.balancePaise, 0);
-  const dpo = books && payablesAccount
-    ? daysOutstanding(books.journals, payablesAccount.id, "payable", totalPayablesPaise, asOf)
-    : null;
+  const dpo = books?.kpis.dpo_days ?? null;
   const buckets = ageBuckets(creditors);
   const over60Paise = buckets.d61_90 + buckets.d90_plus;
   const owed = creditors.filter((c) => c.balancePaise > 0);
@@ -241,8 +226,7 @@ export function CreditorsDpoView() {
         )}
         {filteredCreditors.map((cred) => {
           const key = cred.partyId ?? "none";
-          const party = cred.partyId ? partyById.get(cred.partyId) : undefined;
-          const name = party ? party.display_name || party.legal_name : cred.partyId ? "Unknown party" : "No party on entry";
+          const name = cred.partyName ?? (cred.partyId ? "Unknown party" : "No party on entry");
           const isExpanded = expandedId === key;
           return (
             <div
@@ -268,11 +252,11 @@ export function CreditorsDpoView() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-500 font-mono mt-0.5">
-                      <span>GSTIN: {party?.gstin || "–"}</span>
-                      {party?.billing_address?.city && (
+                      <span>GSTIN: {cred.gstin || "–"}</span>
+                      {cred.billingAddress?.city && (
                         <>
                           <span>•</span>
-                          <span>{[party.billing_address.city, party.billing_address.state].filter(Boolean).join(", ")}</span>
+                          <span>{[cred.billingAddress.city, cred.billingAddress.state].filter(Boolean).join(", ")}</span>
                         </>
                       )}
                       <span>•</span>

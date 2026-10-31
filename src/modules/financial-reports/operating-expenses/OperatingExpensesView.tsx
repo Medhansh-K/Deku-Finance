@@ -18,18 +18,13 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
-import { accountingApi, organisationsApi, partiesApi } from "@/api/endpoints";
-import { Account, JournalEntry, Party } from "@/types/accounting";
-import { ExpenseVoucher, operatingExpenses } from "@/lib/reports/expenses";
-import { accountBalances, byGroup, fyStart, sumWhere, toRupees } from "@/lib/reports/ledger";
+import { organisationsApi, reportsApi } from "@/api/endpoints";
+import { ExpenseVoucher, toExpenseReport } from "@/lib/reports/expenses";
+import { fyStart, toRupees } from "@/lib/reports/ledger";
 
-interface Books {
-  accounts: Account[];
-  journals: JournalEntry[];
-  parties: Party[];
-  fyStartMonth: number;
-  asOf: string;
-}
+type Books = ReturnType<typeof toExpenseReport> & { from: string; asOf: string };
+
+const NO_REPORT: Books = { totalPaise: 0, revenuePaise: 0, byHead: [], vouchers: [], from: "", asOf: "" };
 
 export function OperatingExpensesView() {
   const [orgId, setOrgId] = useState<string>("");
@@ -53,19 +48,11 @@ export function OperatingExpensesView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [org, accounts, journals, parties] = await Promise.all([
-        organisationsApi.get(orgId),
-        accountingApi.listAccounts(orgId),
-        accountingApi.listJournals(orgId),
-        partiesApi.list(orgId),
-      ]);
-      setBooks({
-        accounts: accounts.data ?? [],
-        journals: journals.data ?? [],
-        parties: parties.data ?? [],
-        fyStartMonth: org.data?.[0]?.financial_year_start_month || 4,
-        asOf: toISODateString(),
-      });
+      const asOf = toISODateString();
+      const org = await organisationsApi.get(orgId);
+      const from = fyStart(asOf, org.data?.[0]?.financial_year_start_month || 4);
+      const res = await reportsApi.getExpenses(orgId, from, asOf);
+      setBooks({ ...toExpenseReport(res.data), from, asOf });
     } catch (e: any) {
       setBooks(null);
       setError(e?.message || "Could not load the books");
@@ -79,19 +66,8 @@ export function OperatingExpensesView() {
     loadData();
   }, [orgId]);
 
-  const asOf = books?.asOf ?? "";
-  const from = books ? fyStart(asOf, books.fyStartMonth) : "";
-  const report = useMemo(
-    () => operatingExpenses(books?.journals ?? [], books?.accounts ?? [], books?.parties ?? [], from, asOf),
-    [books, from, asOf]
-  );
-  const revenuePaise = useMemo(
-    () =>
-      books
-        ? sumWhere(books.accounts, accountBalances(books.accounts, books.journals, from, asOf), byGroup("revenue"))
-        : 0,
-    [books, from, asOf]
-  );
+  const report = books ?? NO_REPORT;
+  const { revenuePaise, from, asOf } = report;
   const ratio = revenuePaise > 0 ? Math.round((report.totalPaise / revenuePaise) * 1000) / 10 : null;
   const hasData = !!books && report.vouchers.length > 0;
 

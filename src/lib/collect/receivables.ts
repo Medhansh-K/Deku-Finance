@@ -1,9 +1,9 @@
 /**
- * Receivables per issued sales invoice, settled by the ledger (partyBalances, oldest first).
+ * Receivables per issued sales invoice, settled by the ledger (get_party_ledger_ageing, oldest first).
  * Pure functions; amounts in paise.
  */
-import type { Account, JournalEntry, Party, SalesInvoice } from "@/types/accounting";
-import { daysBetween, findControlAccount, liveEntries, partyBalances, toPaise } from "@/lib/reports/ledger";
+import type { Party, SalesInvoice } from "@/types/accounting";
+import { daysBetween, PartyBalance, toPaise } from "@/lib/reports/ledger";
 
 /** The list call returns the stored tax columns too (migration 007). */
 export type CollectInvoice = SalesInvoice & {
@@ -40,19 +40,16 @@ export function invoiceTaxPaise(inv: CollectInvoice): number | null {
   return TAX_COLS.reduce((s, c) => s + toPaise(inv[c]), 0);
 }
 
+/** `debtors` is the receivable ageing, or null when there is no trade debtors ledger. */
 export function collectRows(
   invoices: CollectInvoice[],
-  accounts: Account[],
-  journals: JournalEntry[],
+  debtors: PartyBalance[] | null,
   parties: Party[],
   asOf: string
 ): { rows: CollectRow[]; hasControlAccount: boolean } {
-  const control = findControlAccount(accounts, "receivable");
   const open = new Map<string, number>();
-  if (control)
-    for (const p of partyBalances(journals, control.id, "receivable", asOf))
-      for (const i of p.openItems) open.set(i.entryId, (open.get(i.entryId) ?? 0) + i.openPaise);
-  const live = new Set(liveEntries(journals).map((j) => j.id));
+  for (const p of debtors ?? [])
+    for (const i of p.openItems) open.set(i.entryId, (open.get(i.entryId) ?? 0) + i.openPaise);
   const partyById = new Map(parties.map((p) => [p.id, p]));
 
   const rows = invoices
@@ -65,14 +62,14 @@ export function collectRows(
         partyName: inv.parties?.legal_name ?? party?.legal_name ?? "Unknown customer",
         phone: party?.phone ?? null,
         amountPaise: toPaise(inv.total_amount),
-        // A posted invoice entry with no open item left has been fully settled.
-        openPaise: control && jid && live.has(jid) ? open.get(jid) ?? 0 : null,
+        // An issued invoice's posted entry with no open item left has been fully settled.
+        openPaise: debtors && jid ? open.get(jid) ?? 0 : null,
         taxPaise: invoiceTaxPaise(inv),
         daysPastDue: inv.due_date ? daysBetween(inv.due_date, asOf) : null,
         invoiceAgeDays: Math.max(0, daysBetween(inv.invoice_date, asOf)),
       };
     });
-  return { rows, hasControlAccount: !!control };
+  return { rows, hasControlAccount: !!debtors };
 }
 
 export function inTab(r: CollectRow, tab: CollectTab): boolean {

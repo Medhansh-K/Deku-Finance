@@ -5,8 +5,9 @@ import { AlertTriangle, Download, MessageCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, invoicesApi, organisationsApi, partiesApi } from "@/api/endpoints";
-import type { Account, JournalEntry, Party } from "@/types/accounting";
+import { invoicesApi, organisationsApi, partiesApi, reportsApi } from "@/api/endpoints";
+import type { Party } from "@/types/accounting";
+import { PartyBalance, toPartyBalances } from "@/lib/reports/ledger";
 import { useAuth } from "@/context/AuthContext";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
@@ -27,8 +28,8 @@ import { checkIndianMobile, reminderMessage, whatsappUrl } from "@/lib/collect/w
 interface Books {
   companyName: string | null;
   invoices: CollectInvoice[];
-  accounts: Account[];
-  journals: JournalEntry[];
+  /** null when the chart of accounts has no trade debtors ledger. */
+  debtors: PartyBalance[] | null;
   parties: Party[];
   asOf: string;
 }
@@ -69,22 +70,22 @@ export function CollectView() {
     if (!orgId) return;
     let stale = false;
     setError(null);
+    const asOf = toISODateString();
     Promise.all([
       invoicesApi.list(orgId),
-      accountingApi.listAccounts(orgId),
-      accountingApi.listJournals(orgId),
+      reportsApi.getPartyAgeing(orgId, "receivable", asOf),
+      reportsApi.getKpis(orgId, asOf, asOf),
       partiesApi.list(orgId),
       organisationsApi.get(orgId),
     ])
-      .then(([inv, acc, jr, pa, org]) => {
+      .then(([inv, ageing, kpis, pa, org]) => {
         if (stale) return;
         setBooks({
           companyName: org.data?.[0]?.name ?? null,
           invoices: (inv.data ?? []) as CollectInvoice[],
-          accounts: acc.data ?? [],
-          journals: jr.data ?? [],
+          debtors: kpis.data?.debtors_account ? toPartyBalances(ageing.data ?? []) : null,
           parties: pa.data ?? [],
-          asOf: toISODateString(),
+          asOf,
         });
       })
       .catch((e) => !stale && setError((e as Error).message || "Could not load invoices and ledgers"));
@@ -96,7 +97,7 @@ export function CollectView() {
   const { rows, hasControlAccount } = useMemo(
     () =>
       books
-        ? collectRows(books.invoices, books.accounts, books.journals, books.parties, books.asOf)
+        ? collectRows(books.invoices, books.debtors, books.parties, books.asOf)
         : { rows: [], hasControlAccount: false },
     [books]
   );

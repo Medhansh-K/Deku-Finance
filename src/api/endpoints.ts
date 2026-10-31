@@ -15,6 +15,8 @@ import {
   ProfitLossRow,
   SalesInvoice,
 } from "@/types/accounting";
+import type { ControlKind, KpiSnapshot, PartyAgeingRow } from "@/lib/reports/ledger";
+import type { ExpenseBreakdown } from "@/lib/reports/expenses";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -280,6 +282,14 @@ export const reportsApi = {
           : ""
       }`
     ),
+  getPartyAgeing: (orgId: string, side: ControlKind, asOf?: string) =>
+    apiClient<ApiResponse<PartyAgeingRow[]>>(
+      `/api/v1/organisations/${orgId}/reports/party-ageing?side=${side}${asOf ? `&as_of=${asOf}` : ""}`
+    ),
+  getKpis: (orgId: string, from: string, to: string) =>
+    apiClient<ApiResponse<KpiSnapshot>>(`/api/v1/organisations/${orgId}/reports/kpis?from=${from}&to=${to}`),
+  getExpenses: (orgId: string, from: string, to: string) =>
+    apiClient<ApiResponse<ExpenseBreakdown>>(`/api/v1/organisations/${orgId}/reports/expenses?from=${from}&to=${to}`),
   getBudgetVariance: (orgId: string) =>
     apiClient<ApiResponse<any>>(
       `/api/v1/organisations/${orgId}/reports/budget-variance`
