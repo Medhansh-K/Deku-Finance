@@ -94,6 +94,16 @@ impl PostgrestClient {
         self.send(req, format!("PostgREST insert into '{}'", table)).await
     }
 
+    /// INSERT ... ON CONFLICT (on_conflict) DO UPDATE with the payload's columns.
+    pub async fn upsert_table(&self, table: &str, on_conflict: &str, payload: &Value, auth_token: Option<&str>) -> Result<Value, AppError> {
+        let req = self.client.post(self.url(table))
+            .headers(self.build_headers(auth_token)?)
+            .header("Prefer", "resolution=merge-duplicates,return=representation")
+            .query(&[("on_conflict", on_conflict)])
+            .json(payload);
+        self.send(req, format!("PostgREST upsert into '{}'", table)).await
+    }
+
     pub async fn update_table(&self, table: &str, query: &[(&str, &str)], payload: &Value, auth_token: Option<&str>) -> Result<Value, AppError> {
         let req = self.client.patch(self.url(table))
             .headers(self.build_headers(auth_token)?)

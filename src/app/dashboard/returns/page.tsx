@@ -9,11 +9,12 @@ import { useReturnPeriod } from "@/lib/gst/period";
 import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
 import { ReturnCard } from "@/modules/gst/ReturnCard";
+import { Table6Card } from "@/modules/gst/Table6Card";
 
 export default function ReturnsHubPage() {
   const { operatingMode } = useAuth();
   const { month, setMonth, fy, retPeriod } = useReturnPeriod();
-  const { orgId, books, loading, loadError, gstr1, gstr3b } = useReturnBooks(retPeriod);
+  const { orgId, gstin, loading, loadError, gstr1, gstr3b } = useReturnBooks(retPeriod);
 
   const isPure = operatingMode === "pure_accounting";
 
@@ -24,7 +25,7 @@ export default function ReturnsHubPage() {
         <div>
           <h1 className="text-2xl font-black text-zinc-950">GST Returns: GSTR-1 & GSTR-3B</h1>
           <p className="text-xs text-zinc-500 mt-0.5">
-            Offline JSON built from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes.
+            Offline JSON built by the server from your issued sales invoices and purchase bills (or Input GST ledgers when no bills are registered). Exports stay locked until every check passes.
           </p>
         </div>
         <div className="w-44">
@@ -56,20 +57,21 @@ export default function ReturnsHubPage() {
         </div>
       )}
 
-      {gstr1 && gstr3b && books && (
+      {gstr1 && gstr3b && (
         <div className="grid grid-cols-1 gap-5">
           <ReturnCard
             title="GSTR-1"
             result={gstr1}
             notCovered={GSTR1_NOT_COVERED}
-            onDownload={() => downloadJson(`GSTR1_${books.gstin}_${retPeriod}.json`, gstr1.json)}
+            onDownload={() => downloadJson(`GSTR1_${gstin}_${retPeriod}.json`, gstr1.json)}
           />
           <ReturnCard
             title="GSTR-3B"
             result={gstr3b}
             notCovered={GSTR3B_NOT_COVERED}
-            onDownload={() => downloadJson(`GSTR3B_${books.gstin}_${retPeriod}.json`, gstr3b.json)}
+            onDownload={() => downloadJson(`GSTR3B_${gstin}_${retPeriod}.json`, gstr3b.json)}
           />
+          <Table6Card table6={gstr3b.table6} />
         </div>
       )}
     </div>

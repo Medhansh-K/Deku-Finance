@@ -1,0 +1,749 @@
+{
+  "gstin": "27AAPFU0939F1ZV",
+  "ret_period": "102026",
+  "invoices": [
+    {
+      "id": "INV-001",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-001",
+      "invoice_date": "2026-10-05",
+      "due_date": "2026-10-05",
+      "status": "issued",
+      "supply_type": "intra_state",
+      "place_of_supply": "27-Maharashtra",
+      "taxable_amount": 1700,
+      "cgst_amount": 147,
+      "sgst_amount": 147,
+      "igst_amount": 0,
+      "cess_amount": 0,
+      "total_amount": 1994,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": "29AABCT1332L1ZA"
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 1,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 2,
+          "unit_price": 500,
+          "taxable_amount": 1000,
+          "gst_rate": 18,
+          "cgst_amount": 90,
+          "sgst_amount": 90,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 1180
+        },
+        {
+          "line_number": 2,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 1,
+          "unit_price": 500,
+          "taxable_amount": 500,
+          "gst_rate": 18,
+          "cgst_amount": 45,
+          "sgst_amount": 45,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 590
+        },
+        {
+          "line_number": 3,
+          "item_name": "item",
+          "hsn_sac_code": "9983",
+          "unit_code": "OTH",
+          "quantity": 1,
+          "unit_price": 200,
+          "taxable_amount": 200,
+          "gst_rate": 12,
+          "cgst_amount": 12,
+          "sgst_amount": 12,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 224
+        }
+      ]
+    },
+    {
+      "id": "INV-002",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-002",
+      "invoice_date": "2026-10-10",
+      "due_date": "2026-10-10",
+      "status": "issued",
+      "supply_type": "inter_state",
+      "place_of_supply": "07-Delhi",
+      "taxable_amount": 10000.1,
+      "cgst_amount": 0,
+      "sgst_amount": 0,
+      "igst_amount": 1800.02,
+      "cess_amount": 0,
+      "total_amount": 11800.12,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": null
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 4,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 1,
+          "unit_price": 10000.1,
+          "taxable_amount": 10000.1,
+          "gst_rate": 18,
+          "cgst_amount": 0,
+          "sgst_amount": 0,
+          "igst_amount": 1800.02,
+          "cess_amount": 0,
+          "total_amount": 11800.12
+        }
+      ]
+    },
+    {
+      "id": "INV-003",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-003",
+      "invoice_date": "2026-10-12",
+      "due_date": "2026-10-12",
+      "status": "issued",
+      "supply_type": "intra_state",
+      "place_of_supply": "27",
+      "taxable_amount": 300.1,
+      "cgst_amount": 27.01,
+      "sgst_amount": 27.01,
+      "igst_amount": 0,
+      "cess_amount": 0,
+      "total_amount": 354.12,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": null
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 5,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 3,
+          "unit_price": 100.03333333333335,
+          "taxable_amount": 300.1,
+          "gst_rate": 18,
+          "cgst_amount": 27.01,
+          "sgst_amount": 27.01,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 354.12
+        }
+      ]
+    },
+    {
+      "id": "INV-004",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-004",
+      "invoice_date": "2026-10-15",
+      "due_date": "2026-10-15",
+      "status": "cancelled",
+      "supply_type": "intra_state",
+      "place_of_supply": "27",
+      "taxable_amount": 50000,
+      "cgst_amount": 4500,
+      "sgst_amount": 4500,
+      "igst_amount": 0,
+      "cess_amount": 0,
+      "total_amount": 59000,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": "29AABCT1332L1ZA"
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 6,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 1,
+          "unit_price": 50000,
+          "taxable_amount": 50000,
+          "gst_rate": 18,
+          "cgst_amount": 4500,
+          "sgst_amount": 4500,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 59000
+        }
+      ]
+    },
+    {
+      "id": "INV-005",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-005",
+      "invoice_date": "2026-09-30",
+      "due_date": "2026-09-30",
+      "status": "issued",
+      "supply_type": "intra_state",
+      "place_of_supply": "27",
+      "taxable_amount": 70000,
+      "cgst_amount": 6300,
+      "sgst_amount": 6300,
+      "igst_amount": 0,
+      "cess_amount": 0,
+      "total_amount": 82600,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": "29AABCT1332L1ZA"
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 7,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 1,
+          "unit_price": 70000,
+          "taxable_amount": 70000,
+          "gst_rate": 18,
+          "cgst_amount": 6300,
+          "sgst_amount": 6300,
+          "igst_amount": 0,
+          "cess_amount": 0,
+          "total_amount": 82600
+        }
+      ]
+    },
+    {
+      "id": "INV-006",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-006",
+      "invoice_date": "2026-10-20",
+      "due_date": "2026-10-20",
+      "status": "draft",
+      "supply_type": "intra_state",
+      "place_of_supply": "27",
+      "taxable_amount": 0,
+      "cgst_amount": 0,
+      "sgst_amount": 0,
+      "igst_amount": 0,
+      "cess_amount": 0,
+      "total_amount": 0,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": null
+      },
+      "sales_invoice_lines": []
+    }
+  ],
+  "accounts": [
+    {
+      "id": "a1",
+      "name": "Input CGST 9%"
+    },
+    {
+      "id": "a2",
+      "name": "Input SGST 9%"
+    },
+    {
+      "id": "a3",
+      "name": "Input IGST 18%"
+    },
+    {
+      "id": "a4",
+      "name": "Purchases"
+    }
+  ],
+  "journals": [
+    {
+      "id": "J1",
+      "entry_number": "J1",
+      "entry_date": "2026-10-03",
+      "status": "posted",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a4",
+          "debit": 1000,
+          "credit": 0
+        },
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 90,
+          "credit": 0
+        },
+        {
+          "line_number": 1,
+          "account_id": "a2",
+          "debit": 90,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "J2",
+      "entry_number": "J2",
+      "entry_date": "2026-10-20",
+      "status": "posted",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a3",
+          "debit": 180.55,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "J3",
+      "entry_number": "J3",
+      "entry_date": "2026-09-28",
+      "status": "posted",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 50,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "J4",
+      "entry_number": "J4",
+      "entry_date": "2026-10-21",
+      "status": "reversed",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 10,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "J5",
+      "entry_number": "J5",
+      "entry_date": "2026-10-22",
+      "status": "posted",
+      "reversal_of_id": "J4",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 0,
+          "credit": 10
+        }
+      ]
+    },
+    {
+      "id": "J6",
+      "entry_number": "J6",
+      "entry_date": "2026-10-23",
+      "status": "draft",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 999,
+          "credit": 0
+        }
+      ]
+    }
+  ],
+  "purchase_bills": [],
+  "cases": {
+    "intra_state_with_igst": {
+      "id": "INV-007",
+      "organisation_id": "org",
+      "customer_id": "cust",
+      "invoice_number": "INV-007",
+      "invoice_date": "2026-10-25",
+      "due_date": "2026-10-25",
+      "status": "issued",
+      "supply_type": "intra_state",
+      "place_of_supply": "27",
+      "taxable_amount": 100,
+      "cgst_amount": 0,
+      "sgst_amount": 0,
+      "igst_amount": 18,
+      "cess_amount": 0,
+      "total_amount": 118,
+      "parties": {
+        "legal_name": "Customer",
+        "gstin": null
+      },
+      "sales_invoice_lines": [
+        {
+          "line_number": 8,
+          "item_name": "item",
+          "hsn_sac_code": "8471",
+          "unit_code": "NOS",
+          "quantity": 1,
+          "unit_price": 100,
+          "taxable_amount": 100,
+          "gst_rate": 18,
+          "cgst_amount": 0,
+          "sgst_amount": 0,
+          "igst_amount": 18,
+          "cess_amount": 0,
+          "total_amount": 118
+        }
+      ]
+    },
+    "set_off_journal": {
+      "id": "J9",
+      "entry_number": "J9",
+      "entry_date": "2026-10-31",
+      "status": "posted",
+      "journal_entry_lines": [
+        {
+          "line_number": 1,
+          "account_id": "a1",
+          "debit": 0,
+          "credit": 50
+        }
+      ]
+    },
+    "purchase_bills": [
+      {
+        "id": "b",
+        "organisation_id": "org",
+        "party_id": null,
+        "supplier_name": "Supplier",
+        "supplier_gstin": "27AABCS1429B1ZU",
+        "bill_number": "B-1",
+        "bill_date": "2026-10-05",
+        "place_of_supply": "27",
+        "taxable_amount": 1000,
+        "cgst": 90,
+        "sgst": 90,
+        "igst": 0,
+        "cess": 0,
+        "total_amount": 1180,
+        "itc_eligibility": "eligible",
+        "blocked_reason": null,
+        "journal_entry_id": null
+      },
+      {
+        "id": "b",
+        "organisation_id": "org",
+        "party_id": null,
+        "supplier_name": "Supplier",
+        "supplier_gstin": "29AABCT1332L1ZA",
+        "bill_number": "B-2",
+        "bill_date": "2026-10-05",
+        "place_of_supply": "27",
+        "taxable_amount": 1000,
+        "cgst": 0,
+        "sgst": 0,
+        "igst": 180.55,
+        "cess": 0,
+        "total_amount": 1180.55,
+        "itc_eligibility": "eligible",
+        "blocked_reason": null,
+        "journal_entry_id": null
+      },
+      {
+        "id": "b",
+        "organisation_id": "org",
+        "party_id": null,
+        "supplier_name": "Supplier",
+        "supplier_gstin": "27AABCS1429B1ZU",
+        "bill_number": "B-3",
+        "bill_date": "2026-10-05",
+        "place_of_supply": "27",
+        "taxable_amount": 2000,
+        "cgst": 140,
+        "sgst": 140,
+        "igst": 0,
+        "cess": 0,
+        "total_amount": 1180,
+        "itc_eligibility": "blocked_17_5",
+        "blocked_reason": "Motor vehicle",
+        "journal_entry_id": null
+      },
+      {
+        "id": "b",
+        "organisation_id": "org",
+        "party_id": null,
+        "supplier_name": "Supplier",
+        "supplier_gstin": "27AABCS1429B1ZU",
+        "bill_number": "B-4",
+        "bill_date": "2026-10-05",
+        "place_of_supply": "27",
+        "taxable_amount": 1000,
+        "cgst": 5,
+        "sgst": 5,
+        "igst": 0,
+        "cess": 0,
+        "total_amount": 1180,
+        "itc_eligibility": "ineligible_other",
+        "blocked_reason": "Time-barred u/s 16(4)",
+        "journal_entry_id": null
+      },
+      {
+        "id": "b",
+        "organisation_id": "org",
+        "party_id": null,
+        "supplier_name": "Supplier",
+        "supplier_gstin": "27AABCS1429B1ZU",
+        "bill_number": "B-5",
+        "bill_date": "2026-09-30",
+        "place_of_supply": "27",
+        "taxable_amount": 1000,
+        "cgst": 999,
+        "sgst": 999,
+        "igst": 0,
+        "cess": 0,
+        "total_amount": 1180,
+        "itc_eligibility": "eligible",
+        "blocked_reason": null,
+        "journal_entry_id": null
+      }
+    ],
+    "bill_missing_reason": {
+      "id": "b",
+      "organisation_id": "org",
+      "party_id": null,
+      "supplier_name": "Supplier",
+      "supplier_gstin": "27AABCS1429B1ZU",
+      "bill_number": "B-1",
+      "bill_date": "2026-10-05",
+      "place_of_supply": "27",
+      "taxable_amount": 1000,
+      "cgst": 90,
+      "sgst": 90,
+      "igst": 0,
+      "cess": 0,
+      "total_amount": 1180,
+      "itc_eligibility": "blocked_17_5",
+      "blocked_reason": null,
+      "journal_entry_id": null
+    }
+  },
+  "expected": {
+    "gstr1": {
+      "gstin": "27AAPFU0939F1ZV",
+      "fp": "102026",
+      "b2b": [
+        {
+          "ctin": "29AABCT1332L1ZA",
+          "inv": [
+            {
+              "inum": "INV-001",
+              "idt": "05-10-2026",
+              "val": 1994,
+              "pos": "27",
+              "rchrg": "N",
+              "inv_typ": "R",
+              "itms": [
+                {
+                  "num": 1801,
+                  "itm_det": {
+                    "rt": 18,
+                    "txval": 1500,
+                    "iamt": 0,
+                    "camt": 135,
+                    "samt": 135,
+                    "csamt": 0
+                  }
+                },
+                {
+                  "num": 1201,
+                  "itm_det": {
+                    "rt": 12,
+                    "txval": 200,
+                    "iamt": 0,
+                    "camt": 12,
+                    "samt": 12,
+                    "csamt": 0
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "b2cs": [
+        {
+          "sply_ty": "INTER",
+          "pos": "07",
+          "typ": "OE",
+          "rt": 18,
+          "txval": 10000.1,
+          "iamt": 1800.02,
+          "camt": 0,
+          "samt": 0,
+          "csamt": 0
+        },
+        {
+          "sply_ty": "INTRA",
+          "pos": "27",
+          "typ": "OE",
+          "rt": 18,
+          "txval": 300.1,
+          "iamt": 0,
+          "camt": 27.01,
+          "samt": 27.01,
+          "csamt": 0
+        }
+      ],
+      "nil": {
+        "inv": []
+      },
+      "hsn": {
+        "hsn_b2b": [
+          {
+            "num": 1,
+            "hsn_sc": "8471",
+            "uqc": "NOS",
+            "qty": 3,
+            "rt": 18,
+            "txval": 1500,
+            "iamt": 0,
+            "camt": 135,
+            "samt": 135,
+            "csamt": 0
+          },
+          {
+            "num": 2,
+            "hsn_sc": "9983",
+            "uqc": "NA",
+            "qty": 0,
+            "rt": 12,
+            "txval": 200,
+            "iamt": 0,
+            "camt": 12,
+            "samt": 12,
+            "csamt": 0
+          }
+        ],
+        "hsn_b2c": [
+          {
+            "num": 1,
+            "hsn_sc": "8471",
+            "uqc": "NOS",
+            "qty": 4,
+            "rt": 18,
+            "txval": 10300.2,
+            "iamt": 1800.02,
+            "camt": 27.01,
+            "samt": 27.01,
+            "csamt": 0
+          }
+        ]
+      },
+      "doc_issue": {
+        "doc_det": [
+          {
+            "doc_num": 1,
+            "docs": [
+              {
+                "num": 1,
+                "from": "INV-001",
+                "to": "INV-004",
+                "totnum": 4,
+                "cancel": 1,
+                "net_issue": 3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "gstr3b": {
+      "gstin": "27AAPFU0939F1ZV",
+      "ret_period": "102026",
+      "sup_details": {
+        "osup_det": {
+          "txval": 12000.2,
+          "iamt": 1800.02,
+          "camt": 174.01,
+          "samt": 174.01,
+          "csamt": 0
+        },
+        "osup_zero": {
+          "txval": 0,
+          "iamt": 0,
+          "csamt": 0
+        },
+        "osup_nil_exmp": {
+          "txval": 0
+        }
+      },
+      "inter_sup": {
+        "unreg_details": [
+          {
+            "pos": "07",
+            "txval": 10000.1,
+            "iamt": 1800.02
+          }
+        ]
+      },
+      "itc_elg": {
+        "itc_avl": [
+          {
+            "ty": "OTH",
+            "iamt": 180.55,
+            "camt": 90,
+            "samt": 90,
+            "csamt": 0
+          }
+        ],
+        "itc_net": {
+          "iamt": 180.55,
+          "camt": 90,
+          "samt": 90,
+          "csamt": 0
+        }
+      }
+    },
+    "gstr3b_bills_itc_elg": {
+      "itc_avl": [
+        {
+          "ty": "OTH",
+          "iamt": 180.55,
+          "camt": 230,
+          "samt": 230,
+          "csamt": 0
+        }
+      ],
+      "itc_rev": [
+        {
+          "ty": "RUL",
+          "iamt": 0,
+          "camt": 140,
+          "samt": 140,
+          "csamt": 0
+        }
+      ],
+      "itc_net": {
+        "iamt": 180.55,
+        "camt": 90,
+        "samt": 90,
+        "csamt": 0
+      },
+      "itc_inelg": [
+        {
+          "ty": "OTH",
+          "iamt": 0,
+          "camt": 5,
+          "samt": 5,
+          "csamt": 0
+        }
+      ]
+    }
+  }
+}

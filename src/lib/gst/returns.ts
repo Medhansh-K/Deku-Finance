@@ -7,6 +7,10 @@
  *   periods from April 2025). The tool's own "version"/"hash" stamps are not emitted.
  * - GSTR-3B: returns offline utility schema (sup_details, inter_sup, itc_elg).
  * Amounts are summed in paise (integers) and converted to rupees only when the JSON is written.
+ *
+ * The app gets its returns from the backend port (backend/src/gst), which is the authority. These
+ * builders stay only as the TypeScript side of the shared-fixture parity test; delete them once
+ * the Rust tests have passed in CI.
  */
 import type { Account, JournalEntry, SalesInvoice, SalesInvoiceLine } from "@/types/accounting";
 import { isValidGstin } from "@/lib/vouchers/invoice-text-parser";
@@ -49,10 +53,25 @@ export interface SummaryRow {
   amounts: Amounts | null;
 }
 
+export type TaxAmounts = Omit<Amounts, "txval">;
+
+/** GSTR-3B Table 6 in rupees, from the backend's Rule 88A set-off. */
+export interface Table6 {
+  liability: TaxAmounts;
+  itc: TaxAmounts;
+  paid_by_igst_credit: TaxAmounts;
+  paid_by_cgst_credit: TaxAmounts;
+  paid_by_sgst_credit: TaxAmounts;
+  paid_by_cess_credit: TaxAmounts;
+  cash: TaxAmounts;
+  credit_carried_forward: TaxAmounts;
+}
+
 export interface ReturnResult {
   json: Record<string, unknown> | null;
   errors: string[];
   summary: SummaryRow[];
+  table6?: Table6 | null;
 }
 
 export const GSTR1_NOT_COVERED = [
@@ -67,7 +86,8 @@ export const GSTR3B_NOT_COVERED = [
   "3.1(d) inward supplies on reverse charge and 3.1(e) non-GST outward supplies",
   "3.2 supplies to composition taxpayers and UIN holders (only unregistered persons are filled)",
   "Table 4: with purchase bills, 17(5) credit is reported in 4(A)(5) and reversed in 4(B)(1), other ineligible ITC in 4(D)(2); without them, Input GST ledger debits are reported as 4(A)(5). Imports, RCM, ISD and 4(B) reversals are not split out, and nothing is matched against GSTR-2B",
-  "Table 5 (inward exempt supplies), 6.1 tax payment, interest and late fee",
+  "Table 5 (inward exempt supplies), interest and late fee",
+  "Table 6 is shown for reference, not uploaded: it sets off only this period's ITC (no credit-ledger balance brought forward), so pay on the portal from its own ledgers",
 ];
 
 const ZERO = (): Amounts => ({ txval: 0, iamt: 0, camt: 0, samt: 0, csamt: 0 });

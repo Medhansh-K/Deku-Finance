@@ -1,6 +1,7 @@
 mod auth;
 mod config;
 mod error;
+mod gst;
 mod models;
 mod postgrest;
 mod routes;
