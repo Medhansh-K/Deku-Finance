@@ -1,4 +1,4 @@
-FROM rust:1.83-bookworm AS build
+FROM rust:1.88-bookworm AS build
 WORKDIR /app
 # Build dependencies against a dummy main first so this layer is reused until Cargo.toml/Cargo.lock change.
 COPY Cargo.toml Cargo.lock ./
