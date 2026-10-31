@@ -36,7 +36,14 @@ jobs:
             backend/target
           key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
           restore-keys: cargo-${{ runner.os }}-
-      - run: cargo test
+      # Errors are also published as annotations: run logs need a GitHub login, annotations don't.
+      - run: |
+          set -o pipefail
+          cargo test --color never 2>&1 | tee cargo.log || {
+            grep -E '^(error|warning: unused)|^ *--> |panicked at|^---- .* stdout ----|assertion' cargo.log \
+              | head -60 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }
 
   sql:
     runs-on: ubuntu-latest
