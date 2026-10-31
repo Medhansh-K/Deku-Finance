@@ -23,7 +23,7 @@ Browser ──HTTPS──> frontend (Next.js, Cloud Run, public)
 ### JWT
 - HS256, secret from env `JWT_SECRET` (at least 32 random bytes, Secret Manager in GCP). The same value is used by the backend (signing), PostgREST (`PGRST_JWT_SECRET`) and the frontend server (middleware verification).
 - **Access token** claims: `{ sub: <user uuid>, role: "authenticated", email, aud: "deku", iat, exp: iat + 3600 }`.
-- **Service token** (backend-internal only, never leaves the backend): `{ role: "service_role", aud: "deku", iat, exp: iat + 60 }`. Used only to call the `auth_*` functions below.
+- **Service token** (backend-internal only, never leaves the backend): `{ role: "service_role", aud: "deku", iat, exp: iat + 60 }`. Used only to call the `auth_*` functions below and the scheduler's `generate_notifications`.
 - PostgREST: `PGRST_JWT_AUD=deku`, `PGRST_DB_ANON_ROLE=anon`, `PGRST_DB_SCHEMAS=public`.
 - In SQL, `auth.uid()` = `(current_setting('request.jwt.claims', true)::json->>'sub')::uuid`; `auth.jwt()` = the claims as `jsonb`; `auth.role()` = the `role` claim (default `current_user`). Both fall back to the legacy `request.jwt.claim.sub` / `.role` settings, which SQL tests use to impersonate.
 
@@ -82,7 +82,7 @@ Browser ──HTTPS──> frontend (Next.js, Cloud Run, public)
 | PostgREST | `postgrest/postgrest:v12.2.3` | configured purely by env |
 
 Local: `docker compose up --build` (postgres, migrate, postgrest, backend, frontend).
-GCP: Artifact Registry images, Cloud SQL Postgres 16, Secret Manager (`JWT_SECRET`, `AUTHENTICATOR_PASSWORD`, DB URLs), Cloud Run services (frontend public; backend public, JWT-guarded; postgrest internal ingress), and a Cloud Run Job for migrations. See `deploy/gcp/README.md`.
+GCP: Artifact Registry images, Cloud SQL Postgres 16, Secret Manager (`JWT_SECRET`, `AUTHENTICATOR_PASSWORD`, `CRON_SECRET`, DB URLs), Cloud Run services (frontend public; backend public, JWT-guarded; postgrest internal ingress), a Cloud Run Job for migrations, and an hourly Cloud Scheduler job that calls `POST /api/v1/internal/notifications/generate` with header `X-Deku-Cron-Secret` (the backend then uses a service token for `generate_notifications`; 404 when `CRON_SECRET` is unset). See `deploy/gcp/README.md`.
 
 ### Third-party integrations
 These are switched off until configured (GSP, KYC, Razorpay). Each has a `*_connections` table and an adapter in Rust behind a config flag, and the UI shows "not connected" honestly.

@@ -48,6 +48,9 @@ services:
       PORT: "8080"
       POSTGREST_URL: http://postgrest:3000
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      # No scheduler locally; generate notifications by hand:
+      # curl -X POST -H "X-Deku-Cron-Secret: dev-only-cron-secret" http://localhost:8080/api/v1/internal/notifications/generate
+      CRON_SECRET: ${CRON_SECRET:-dev-only-cron-secret}
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:

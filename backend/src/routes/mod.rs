@@ -13,6 +13,7 @@ pub mod consultant;
 pub mod banking;
 pub mod purchases;
 pub mod gst;
+pub mod notifications;
 
 use axum::Router;
 use crate::postgrest::PostgrestClient;
@@ -21,6 +22,7 @@ use crate::postgrest::PostgrestClient;
 pub struct AppState {
     pub db: PostgrestClient,
     pub jwt_secret: String,
+    pub cron_secret: Option<String>,
 }
 
 pub fn create_router(state: AppState) -> Router {
@@ -72,4 +74,10 @@ fn api_routes(state: AppState) -> Router {
             purchases::routes(state.clone()),
         )
         .nest("/organisations/:org_id/gst", gst::routes(state.clone()))
+        .nest(
+            "/organisations/:org_id/notifications",
+            notifications::routes(state.clone()),
+        )
+        // Guarded by X-Deku-Cron-Secret instead of a caller token.
+        .nest("/internal/notifications", notifications::internal_routes(state.clone()))
 }

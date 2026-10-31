@@ -6,6 +6,8 @@ pub struct Config {
     pub postgrest_url: String,
     pub jwt_secret: String,
     pub cors_allowed_origins: Vec<String>,
+    /// Shared secret for the scheduler's internal endpoints; unset disables them.
+    pub cron_secret: Option<String>,
 }
 
 impl Config {
@@ -35,11 +37,14 @@ impl Config {
             .map(String::from)
             .collect();
 
+        let cron_secret = env::var("CRON_SECRET").ok().filter(|s| !s.trim().is_empty());
+
         Self {
             port,
             postgrest_url,
             jwt_secret,
             cors_allowed_origins,
+            cron_secret,
         }
     }
 }

@@ -19,7 +19,8 @@ gcloud config set project "$PROJECT_ID"
 
 ```bash
 gcloud services enable run.googleapis.com sqladmin.googleapis.com artifactregistry.googleapis.com \
-  secretmanager.googleapis.com cloudbuild.googleapis.com compute.googleapis.com
+  secretmanager.googleapis.com cloudbuild.googleapis.com compute.googleapis.com \
+  cloudscheduler.googleapis.com
 
 gcloud artifacts repositories create "$REPO" --repository-format=docker --location="$REGION"
 ```
@@ -51,9 +52,11 @@ Hex passwords need no escaping inside URIs (otherwise percent-encode them).
 ```bash
 JWT_SECRET=$(openssl rand -hex 32)
 AUTHENTICATOR_PASSWORD=$(openssl rand -hex 24)
+CRON_SECRET=$(openssl rand -hex 32)
 
 printf %s "$JWT_SECRET" | gcloud secrets create JWT_SECRET --data-file=-
 printf %s "$AUTHENTICATOR_PASSWORD" | gcloud secrets create AUTHENTICATOR_PASSWORD --data-file=-
+printf %s "$CRON_SECRET" | gcloud secrets create CRON_SECRET --data-file=-
 printf %s "postgresql://deku_migrator:$MIGRATOR_PASSWORD@/deku?host=/cloudsql/$CONN" \
   | gcloud secrets create MIGRATE_DATABASE_URL --data-file=-
 printf %s "postgres://authenticator:$AUTHENTICATOR_PASSWORD@/deku?host=/cloudsql/$CONN" \
@@ -93,6 +96,7 @@ grant AUTHENTICATOR_PASSWORD deku-migrate
 grant PGRST_DB_URI deku-postgrest
 grant JWT_SECRET deku-postgrest
 grant JWT_SECRET deku-backend
+grant CRON_SECRET deku-backend
 grant JWT_SECRET deku-frontend
 
 # Cloud Build: push images, deploy Cloud Run, act as the runtime accounts, write logs.
@@ -129,7 +133,7 @@ everything and later releases update it:
   `postgrest/postgrest:v12.2.3`, `PGRST_DB_URI`/`PGRST_JWT_SECRET` from secrets, `PGRST_DB_SCHEMAS=public`,
   `PGRST_DB_ANON_ROLE=anon`, `PGRST_JWT_AUD=deku`, port 3000);
 - `gcloud run deploy deku-backend --network=default --subnet=default --vpc-egress=all-traffic` with
-  `POSTGREST_URL` = postgrest's `status.url` and `JWT_SECRET` from Secret Manager;
+  `POSTGREST_URL` = postgrest's `status.url`, and `JWT_SECRET` and `CRON_SECRET` from Secret Manager;
 - `gcloud run deploy deku-frontend` with `BACKEND_URL` = backend's `status.url` and `JWT_SECRET`.
 
 ```bash
@@ -185,3 +189,28 @@ Migrations run while the previous revision still serves traffic, so keep them ba
   ```bash
   gcloud sql instances clone "$INSTANCE" deku-pg-restore --point-in-time=2026-11-01T10:00:00Z
   ```
+
+## 10. Scheduled notifications
+
+`POST /api/v1/internal/notifications/generate` on `deku-backend` runs `generate_notifications()` (GST
+due dates from `public.compliance_calendar`, overdue invoices, vouchers waiting over 24 hours for
+approval, fiscal periods ending within 7 days). It is idempotent, so hourly runs and retries are safe.
+It only answers when the `X-Deku-Cron-Secret` header matches `CRON_SECRET` (§3); without that env it
+returns 404. Cloud Scheduler calls it hourly:
+
+```bash
+BACKEND_URL=$(gcloud run services describe deku-backend --region="$REGION" --format='value(status.url)')
+gcloud scheduler jobs create http deku-notifications --location="$REGION" \
+  --schedule="0 * * * *" --time-zone="Asia/Kolkata" \
+  --uri="$BACKEND_URL/api/v1/internal/notifications/generate" --http-method=POST \
+  --headers="X-Deku-Cron-Secret=$(gcloud secrets versions access latest --secret=CRON_SECRET)" \
+  --attempt-deadline=120s --max-retry-attempts=2
+```
+
+Cloud Scheduler can't read Secret Manager at run time, so the header value is copied into the job when
+it is created. After rotating `CRON_SECRET`, redeploy the backend (§8) and update the job with the same
+`--headers` flag via `gcloud scheduler jobs update http deku-notifications`. Run it once by hand with
+`gcloud scheduler jobs run deku-notifications --location="$REGION"`.
+
+The GST due days in `compliance_calendar` (GSTR-1 on the 11th, GSTR-3B on the 20th, monthly filers)
+are data: check them against the current CBIC notifications and change them with a migration.

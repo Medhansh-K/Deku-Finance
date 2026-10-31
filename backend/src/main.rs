@@ -36,6 +36,7 @@ async fn main() {
     let state = AppState {
         db: PostgrestClient::new(&config),
         jwt_secret: config.jwt_secret.clone(),
+        cron_secret: config.cron_secret.clone(),
     };
 
     // 4. Configure CORS: only explicitly configured origins (none by default)
