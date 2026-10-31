@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Plus, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -22,10 +23,8 @@ import {
 import {
   SALES_CHANNELS,
   SalesChannel,
-  Settlement,
-  loadSettlement,
-  saveSettlement,
   settlementErrors,
+  settlementFromOrg,
 } from "@/lib/invoices/settlement";
 import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
 
@@ -64,7 +63,6 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   const [salesChannel, setSalesChannel] = useState<SalesChannel>("direct");
   const [roundToRupee, setRoundToRupee] = useState(true);
   const [lines, setLines] = useState<EditorLine[]>([blankLine()]);
-  const [settlement, setSettlement] = useState<Settlement>(() => loadSettlement(orgId));
   const [errors, setErrors] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -78,6 +76,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
     fields?.[fields.length - 5]?.focus();
   }, [lines.length]);
 
+  const settlement = settlementFromOrg(organisation);
   const customer = customers.find((c) => c.id === customerId);
   const companyGstin = organisation?.gstin ?? "";
   const companyState = isValidGstin(companyGstin) ? stateCodeOf(companyGstin) : "";
@@ -94,13 +93,6 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   );
 
   const settlementErrs = settlementErrors(settlement);
-
-  const updateSettlement = (field: keyof Settlement, value: string) => {
-    const v = field === "ifsc" ? value.toUpperCase().trim() : field === "upiId" ? value.trim() : value;
-    const next = { ...settlement, [field]: v };
-    setSettlement(next);
-    saveSettlement(orgId, next);
-  };
 
   const updateLine = (index: number, field: keyof EditorLine, value: string) =>
     setLines((prev) => prev.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
@@ -355,22 +347,9 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
           <fieldset className="rounded-lg border border-line bg-surface p-4 shadow-card space-y-3">
             <legend className="px-1 text-sm font-semibold text-ink">Bank and UPI details</legend>
             <p className="text-xs text-ink-muted">
-              Printed on the invoice and remembered for this company on this device. Leave a field empty to leave it off.
+              Printed on the invoice from the company profile. Change them in{" "}
+              <Link href="/settings" className="font-medium text-brand underline">Settings</Link>.
             </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Input id="set-upi" label="UPI ID" value={settlement.upiId} error={settlementErrs.upiId}
-                onChange={(e) => updateSettlement("upiId", e.target.value)} autoComplete="off" spellCheck={false} />
-              <Input id="set-beneficiary" label="Beneficiary name" value={settlement.beneficiaryName}
-                onChange={(e) => updateSettlement("beneficiaryName", e.target.value)} />
-              <Input id="set-bank" label="Bank name" value={settlement.bankName} error={settlementErrs.bankName}
-                onChange={(e) => updateSettlement("bankName", e.target.value)} />
-              <Input id="set-account" label="Account number" value={settlement.accountNumber} error={settlementErrs.accountNumber}
-                inputMode="numeric" className="font-mono" autoComplete="off"
-                onChange={(e) => updateSettlement("accountNumber", e.target.value.replace(/\s/g, ""))} />
-              <Input id="set-ifsc" label="IFSC" value={settlement.ifsc} error={settlementErrs.ifsc} maxLength={11}
-                className="font-mono" autoComplete="off" spellCheck={false}
-                onChange={(e) => updateSettlement("ifsc", e.target.value)} />
-            </div>
             <InvoiceSettlementBlock settlement={settlement} payee={payee} amountPaise={summary.grandTotal}
               invoiceNumber={invoiceNumber.trim()} />
           </fieldset>

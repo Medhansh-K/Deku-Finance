@@ -12,7 +12,7 @@ import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally } from "@/lib/formatters/date";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
 import { toPaise } from "@/lib/invoices/tax-summary";
-import { EMPTY_SETTLEMENT, SALES_CHANNELS, loadSettlement } from "@/lib/invoices/settlement";
+import { SALES_CHANNELS, settlementFromOrg } from "@/lib/invoices/settlement";
 import { useAuth } from "@/context/AuthContext";
 import { SalesInvoiceEditor } from "./SalesInvoiceEditor";
 import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
@@ -32,8 +32,7 @@ export function GstTaxHubView() {
   const [isActionPending, setIsActionPending] = useState(false);
 
   const [orgId, setOrgId] = useState<string>("");
-  // Read while the invoice is open so details edited in the editor show up when printing.
-  const savedSettlement = isDetailOpen ? loadSettlement(orgId) : EMPTY_SETTLEMENT;
+  const savedSettlement = settlementFromOrg(organisation);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

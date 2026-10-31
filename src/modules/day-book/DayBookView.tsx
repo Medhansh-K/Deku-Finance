@@ -39,7 +39,6 @@ import { loadOrgTaxProfile, OrgTaxProfile } from "@/lib/org-regime";
 import { VOUCHER_TYPE_STYLES } from "@/modules/executive/RecentlyAddedVouchers";
 import { journalToVoucher, VoucherItem } from "@/lib/reports/vouchers";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
-import { DocumentProofAttachment, SAMPLE_PROOFS } from "@/lib/vouchers/document-proof";
 
 export function DayBookView() {
   const [mounted, setMounted] = useState(false);
@@ -71,10 +70,6 @@ export function DayBookView() {
 
   // Printable Indian GAAP Voucher Slip Modal State
   const [isPrintSlipOpen, setIsPrintSlipOpen] = useState(false);
-
-  // Attach Proof Modal State for Unposted Drafts
-  const [isAttachProofModalOpen, setIsAttachProofModalOpen] = useState(false);
-  const [draftProofRefInput, setDraftProofRefInput] = useState<string>("");
 
   // Definition banner toggle
   const [showDefinition, setShowDefinition] = useState(true);
@@ -130,8 +125,6 @@ export function DayBookView() {
   const fetchJournals = async () => {
     setIsLoading(true);
     setError(null);
-    const localRaw = typeof window !== "undefined" ? localStorage.getItem("deku_local_daybook_vouchers") : null;
-    const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
     try {
       const [res, accounts, parties] = await Promise.all([
         accountingApi.listJournals(orgId),
@@ -143,11 +136,10 @@ export function DayBookView() {
       const apiVouchers = (res.data ?? []).map((j) =>
         journalToVoucher(j, accountMap, partyMap, taxProfile?.regime)
       );
-      const apiNos = new Set(apiVouchers.map((v) => v.entry_number));
-      setJournals([...localVouchers.filter((v) => !apiNos.has(v.entry_number)), ...apiVouchers]);
+      setJournals(apiVouchers);
     } catch (err: any) {
       setError(err?.message || "Could not load the day book");
-      setJournals(localVouchers);
+      setJournals([]);
     } finally {
       setIsLoading(false);
     }
@@ -159,96 +151,16 @@ export function DayBookView() {
   }, [orgId, taxProfile?.regime]);
 
   // Handle Post Draft Journal to ledger
+  // Posting and reversal run on the server, which enforces balance, period, approval and immutability rules.
   const handlePostDraft = async (vch: VoucherItem) => {
-    // If voucher has no document proof, prompt user to attach proof first
-    if (!vch.document_proof) {
-      setSelectedEntry(vch);
-      setDraftProofRefInput(vch.reference || "");
-      setIsAttachProofModalOpen(true);
-      return;
-    }
-
-    if (confirm(`Post draft transaction ${vch.entry_number} into General Ledger (L.F. ${vch.ledger_folio}) with verified proof [${vch.document_proof.title}]?`)) {
-      setIsActionPending(true);
-      try {
-        setJournals((prev) =>
-          prev.map((v) => (v.id === vch.id ? { ...v, status: "posted" } : v))
-        );
-        if (selectedEntry && selectedEntry.id === vch.id) {
-          setSelectedEntry({ ...selectedEntry, status: "posted" });
-        }
-
-        // Update localStorage
-        if (typeof window !== "undefined") {
-          const localRaw = localStorage.getItem("deku_local_daybook_vouchers");
-          const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-          const updatedLocal = localVouchers.map((v) =>
-            v.id === vch.id ? { ...v, status: "posted" as const } : v
-          );
-          localStorage.setItem("deku_local_daybook_vouchers", JSON.stringify(updatedLocal));
-        }
-
-        // Dispatch reactive ledger update
-        window.dispatchEvent(
-          new CustomEvent("deku_ledger_updated", {
-            detail: { voucherNumber: vch.entry_number },
-          })
-        );
-
-        alert(`Transaction ${vch.entry_number} successfully posted to General Ledger and financial statements.`);
-      } finally {
-        setIsActionPending(false);
-      }
-    }
-  };
-
-  const handleAttachProofAndPost = async () => {
-    if (!selectedEntry) return;
-
-    // Use sample or generated proof for this mode
-    const sampleList = SAMPLE_PROOFS[selectedEntry.voucher_type] || SAMPLE_PROOFS.sales;
-    const sample = sampleList[0];
-
-    const proof: DocumentProofAttachment = {
-      ...sample,
-      id: `proof-${Date.now()}`,
-      refNumber: draftProofRefInput.trim() || sample.refNumber,
-      uploadedAt: new Date().toISOString(),
-      verified: true,
-      notes: `Attached and verified during Day Book ledger posting.`,
-    };
-
+    if (!confirm(`Post draft ${vch.entry_number} to the ledger?`)) return;
     setIsActionPending(true);
     try {
-      const updated: VoucherItem = {
-        ...selectedEntry,
-        status: "posted" as const,
-        document_proof: proof,
-      };
-
-      setJournals((prev) =>
-        prev.map((v) => (v.id === selectedEntry.id ? updated : v))
-      );
-      setSelectedEntry(updated);
-
-      // Update localStorage
-      if (typeof window !== "undefined") {
-        const localRaw = localStorage.getItem("deku_local_daybook_vouchers");
-        const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-        const updatedLocal = localVouchers.map((v) =>
-          v.id === selectedEntry.id ? updated : v
-        );
-        localStorage.setItem("deku_local_daybook_vouchers", JSON.stringify(updatedLocal));
-      }
-
-      window.dispatchEvent(
-        new CustomEvent("deku_ledger_updated", {
-          detail: { voucherNumber: selectedEntry.entry_number },
-        })
-      );
-
-      setIsAttachProofModalOpen(false);
-      alert(`Proof attached! Transaction ${selectedEntry.entry_number} posted to General Ledger & Day Book.`);
+      await accountingApi.postJournal(orgId, vch.id);
+      setIsDetailOpen(false);
+      window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber: vch.entry_number } }));
+    } catch (err: any) {
+      alert(`Posting failed: ${err?.message || "Unknown error"}`);
     } finally {
       setIsActionPending(false);
     }
@@ -261,100 +173,22 @@ export function DayBookView() {
     setIsReversalModalOpen(true);
   };
 
+
   const handleConfirmReversal = async () => {
     if (!selectedEntry) return;
     setIsActionPending(true);
     try {
-      try {
-        await accountingApi.reverseJournal(orgId, selectedEntry.id, {
-          reversal_date: reversalDate,
-          narration: reversalReason,
-        });
-      } catch (e) {
-        console.warn("Backend journal reversal notice (contra fallback active):", e);
-      }
-
-      const updatedJournals = journals.map((j) =>
-        j.id === selectedEntry.id
-          ? {
-              ...j,
-              status: "reversed" as const,
-              reversal_ref: `REV-${selectedEntry.entry_number}`,
-              reversal_reason: reversalReason,
-              reversed_at: reversalDate,
-            }
-          : j
-      );
-
-      // Add contra reversal voucher into chronological Day Book
-      const reversalContraEntry: VoucherItem = {
-        id: `rev-${selectedEntry.id}-${Date.now()}`,
-        entry_number: `REV-${selectedEntry.entry_number}`,
-        voucher_type: selectedEntry.voucher_type,
-        f_key: selectedEntry.f_key,
-        entry_date: reversalDate,
-        entry_time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        party_name: selectedEntry.party_name,
-        source_document: `Reversal Contra Slip (${selectedEntry.entry_number})`,
-        ledger_folio: selectedEntry.ledger_folio,
-        reference: selectedEntry.entry_number,
-        narration: `[CONTRA REVERSAL] ${reversalReason}`,
-        amount: selectedEntry.amount,
-        dr_cr: selectedEntry.dr_cr === "Dr" ? "Cr" : "Dr",
-        status: "posted",
-        organisation_id: orgId,
-        reversal_ref: selectedEntry.entry_number,
-        lines: selectedEntry.lines.map((l) => ({
-          ...l,
-          dr_cr: l.dr_cr === "Dr" ? "Cr" : "Dr",
-          debit: l.credit,
-          credit: l.debit,
-          description: `Contra reversal: ${l.account_name}`,
-        })),
-        document_proof: {
-          id: `proof-rev-${Date.now()}`,
-          proofType: "journal_adjustment_bill",
-          categoryLabel: "Reversal Audit Memo",
-          title: `Reversal Sanction Memo for #${selectedEntry.entry_number}`,
-          refNumber: `REV-${selectedEntry.entry_number}`,
-          uploadedAt: new Date().toISOString(),
-          verified: true,
-          notes: reversalReason,
-        },
-      };
-
-      setJournals([reversalContraEntry, ...updatedJournals]);
-
-      if (typeof window !== "undefined") {
-        const localRaw = localStorage.getItem("deku_local_daybook_vouchers");
-        const localVouchers: VoucherItem[] = localRaw ? JSON.parse(localRaw) : [];
-        const updatedLocal = localVouchers.map((v) =>
-          v.id === selectedEntry.id || v.entry_number === selectedEntry.entry_number
-            ? {
-                ...v,
-                status: "reversed" as const,
-                reversal_ref: `REV-${selectedEntry.entry_number}`,
-                reversal_reason: reversalReason,
-              }
-            : v
-        );
-        localStorage.setItem(
-          "deku_local_daybook_vouchers",
-          JSON.stringify([reversalContraEntry, ...updatedLocal])
-        );
-
-        window.dispatchEvent(
-          new CustomEvent("deku_ledger_updated", {
-            detail: { voucherNumber: selectedEntry.entry_number, reversed: true },
-          })
-        );
-      }
-
+      await accountingApi.reverseJournal(orgId, selectedEntry.id, {
+        reversal_date: reversalDate,
+        narration: reversalReason,
+      });
       setIsReversalModalOpen(false);
       setIsDetailOpen(false);
-      alert(`Voucher ${selectedEntry.entry_number} reversed. Contra entry REV-${selectedEntry.entry_number} recorded in Day Book & General Ledger.`);
+      window.dispatchEvent(
+        new CustomEvent("deku_ledger_updated", { detail: { voucherNumber: selectedEntry.entry_number, reversed: true } })
+      );
     } catch (err: any) {
-      alert(`Reversal failed: ${err.message || "Unknown error"}`);
+      alert(`Reversal failed: ${err?.message || "Unknown error"}`);
     } finally {
       setIsActionPending(false);
     }
@@ -876,13 +710,11 @@ export function DayBookView() {
                     <Button
                       variant="tally"
                       size="sm"
-                      onClick={() => {
-                        setDraftProofRefInput(selectedEntry.reference || "");
-                        setIsAttachProofModalOpen(true);
-                      }}
+                      onClick={() => handlePostDraft(selectedEntry)}
+                      disabled={isActionPending}
                       className="text-xs shrink-0 font-bold"
                     >
-                      Attach Proof &amp; Post
+                      Post to Ledger
                     </Button>
                   )}
                 </div>
@@ -1267,52 +1099,6 @@ export function DayBookView() {
         </Modal>
       )}
 
-      {/* Attach Proof Modal for Draft Vouchers */}
-      {selectedEntry && (
-        <Modal
-          isOpen={isAttachProofModalOpen}
-          onClose={() => setIsAttachProofModalOpen(false)}
-          title={`Attach Document Proof for ${selectedEntry.entry_number}`}
-          description={`Statutory document proof is strictly required before posting to General Ledger, P&L, and Balance Sheet.`}
-          maxWidth="md"
-        >
-          <div className="space-y-4 font-sans text-xs">
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 flex items-start gap-2">
-              <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <strong>Mandatory Statutory Rule:</strong> For {selectedEntry.voucher_type.toUpperCase()} vouchers, you must provide verifiable document proof (external invoice, bank deposit slip, UTR advice, or CFO approval memo).
-              </div>
-            </div>
-
-            <Input
-              label="Document Proof Reference # (UTR / Slip / Memo / Inv #)"
-              value={draftProofRefInput}
-              onChange={(e) => setDraftProofRefInput(e.target.value)}
-              placeholder="e.g. UTR-99482910 or CFO-AUTH-2026-081"
-              required
-            />
-
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsAttachProofModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="tally"
-                size="sm"
-                onClick={handleAttachProofAndPost}
-                isLoading={isActionPending}
-                className="gap-1.5 font-bold"
-              >
-                <Check className="h-3.5 w-3.5" /> Verify Proof &amp; Post to Ledger
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 }

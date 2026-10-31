@@ -18,6 +18,7 @@ import {
 } from "@/types/accounting";
 import type { ControlKind, KpiSnapshot, PartyAgeingRow } from "@/lib/reports/ledger";
 import type { ExpenseBreakdown } from "@/lib/reports/expenses";
+import type { RegisteredAddress } from "@/types";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -35,8 +36,36 @@ export interface OrgSummary {
   pan?: string | null;
   financial_year_start_month: number;
   require_journal_approval?: boolean;
+  operating_mode?: "gst" | "pure";
+  state_code?: string | null;
+  registered_address?: RegisteredAddress | null;
+  upi_vpa?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_beneficiary?: string | null;
+  bank_name?: string | null;
+  udyam_number?: string | null;
+  composition_scheme?: boolean;
+  onboarded_at?: string | null;
   created_at?: string;
   updated_at?: string;
+}
+
+/** Fields PATCH /organisations/:id/settings accepts; blank text clears a column. */
+export interface OrgSettingsUpdate {
+  require_journal_approval?: boolean;
+  gstin?: string;
+  operating_mode?: "gst" | "pure";
+  state_code?: string;
+  registered_address?: RegisteredAddress;
+  upi_vpa?: string;
+  bank_account_number?: string;
+  bank_ifsc?: string;
+  bank_beneficiary?: string;
+  bank_name?: string;
+  udyam_number?: string;
+  composition_scheme?: boolean;
+  onboarded?: boolean;
 }
 
 export const healthApi = {
@@ -67,7 +96,7 @@ export const organisationsApi = {
         body: JSON.stringify(payload),
       }
     ),
-  updateSettings: (orgId: string, payload: { require_journal_approval?: boolean; gstin?: string }) =>
+  updateSettings: (orgId: string, payload: OrgSettingsUpdate) =>
     apiClient<{ success: boolean; data: OrgSummary[] }>(`/api/v1/organisations/${orgId}/settings`, {
       method: "PATCH",
       body: JSON.stringify(payload),

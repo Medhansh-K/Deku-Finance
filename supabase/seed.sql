@@ -35,9 +35,9 @@ BEGIN
     ) ON CONFLICT DO NOTHING;
   END LOOP;
 
-  INSERT INTO public.organisations (id, name, legal_name, slug, gstin, pan, created_by) VALUES
-    (v_org, 'Demo Traders Pvt Ltd', 'Demo Traders Private Limited', 'demo-traders', '27AABCD1234F1Z6', 'AABCD1234F', '11111111-1111-4111-8111-111111111111'),
-    (v_studio, 'Demo Creative Studio', 'Demo Creative Studio', 'demo-creative-studio', NULL, NULL, '44444444-4444-4444-8444-444444444444')
+  INSERT INTO public.organisations (id, name, legal_name, slug, gstin, pan, created_by, operating_mode, state_code, onboarded_at) VALUES
+    (v_org, 'Demo Traders Pvt Ltd', 'Demo Traders Private Limited', 'demo-traders', '27AABCD1234F1Z6', 'AABCD1234F', '11111111-1111-4111-8111-111111111111', 'gst', '27', now()),
+    (v_studio, 'Demo Creative Studio', 'Demo Creative Studio', 'demo-creative-studio', NULL, NULL, '44444444-4444-4444-8444-444444444444', 'pure', NULL, now())
   ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO public.organisation_members (organisation_id, user_id, role) VALUES

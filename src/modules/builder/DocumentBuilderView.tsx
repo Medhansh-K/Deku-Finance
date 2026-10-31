@@ -181,13 +181,11 @@ export function DocumentBuilderView() {
   const [reverseCharge, setReverseCharge] = useState<boolean>(false);
 
   // Counterparty / Party Details
-  const [partyName, setPartyName] = useState<string>("Endeavor Energy & Tech Solutions");
-  const [partyGSTIN, setPartyGSTIN] = useState<string>("27AABCE4567F1Z8");
-  const [partyAddress, setPartyAddress] = useState<string>(
-    "Plot 42, MIDC Cyber Gateway, Andheri East, Mumbai, Maharashtra 400069"
-  );
-  const [partyEmail, setPartyEmail] = useState<string>("procurement@endeavorenergy.com");
-  const [partyPhone, setPartyPhone] = useState<string>("+91 98200 12345");
+  const [partyName, setPartyName] = useState<string>("");
+  const [partyGSTIN, setPartyGSTIN] = useState<string>("");
+  const [partyAddress, setPartyAddress] = useState<string>("");
+  const [partyEmail, setPartyEmail] = useState<string>("");
+  const [partyPhone, setPartyPhone] = useState<string>("");
 
   // Discount Coupon Specific State
   const [couponCode, setCouponCode] = useState<string>("FESTIVE20");
@@ -204,41 +202,23 @@ export function DocumentBuilderView() {
 
   // Delivery Challan Specific State
   const [challanReason, setChallanReason] = useState<string>("Supply on Approval / Exhibition");
-  const [vehicleNumber, setVehicleNumber] = useState<string>("MH-02-EE-8822");
-  const [transporterName, setTransporterName] = useState<string>("All Might Express Logistics Ltd");
-  const [ewayBillNo, setEwayBillNo] = useState<string>("291084729104");
+  const [vehicleNumber, setVehicleNumber] = useState<string>("");
+  const [transporterName, setTransporterName] = useState<string>("");
+  const [ewayBillNo, setEwayBillNo] = useState<string>("");
 
   // Line Items
   const [items, setItems] = useState<DocumentLineItem[]>([
-    {
-      id: "line-1",
-      description: "Deku Financial OS — Annual Cloud Enterprise License",
-      hsn: "998313",
-      qty: 1,
-      unit: "Year",
-      rate: 150000,
-      discountPct: 10,
-      gstRate: 18,
-    },
-    {
-      id: "line-2",
-      description: "ALERX Multi-Tenant Ledger Architecture Consulting & Integration",
-      hsn: "998314",
-      qty: 40,
-      unit: "Hours",
-      rate: 3500,
-      discountPct: 0,
-      gstRate: 18,
-    },
+    { id: "line-1", description: "", hsn: "", qty: 1, unit: "Nos", rate: 0, discountPct: 0, gstRate: 18 },
   ]);
+
 
   // Notes, Bank Details & Signatory
   const [notes, setNotes] = useState<string>(
     "1. Payment due strictly within 30 days of invoice date.\n2. In case of delayed payment, interest @ 18% p.a. will be levied.\n3. Goods / Services once supplied are subject to Deku OS Terms of Service."
   );
-  const [bankName, setBankName] = useState<string>("HDFC Bank — Corporate Current A/c");
-  const [bankAccount, setBankAccount] = useState<string>("50200088921478");
-  const [bankIFSC, setBankIFSC] = useState<string>("HDFC0000128");
+  const [bankName, setBankName] = useState<string>("");
+  const [bankAccount, setBankAccount] = useState<string>("");
+  const [bankIFSC, setBankIFSC] = useState<string>("");
   const [signatoryName, setSignatoryName] = useState<string>("");
   const [signatoryTitle, setSignatoryTitle] = useState<string>("Managing Director");
 
@@ -252,12 +232,18 @@ export function DocumentBuilderView() {
     }
   }, []);
 
-  // The issuer GSTIN printed on documents must be the company's own, never a placeholder.
+  // The issuer GSTIN and bank details printed on documents come from the company profile, never a placeholder.
   useEffect(() => {
     if (!orgId) return;
     organisationsApi
       .get(orgId)
-      .then((res) => setActiveGSTIN(res.data?.[0]?.gstin ?? ""))
+      .then((res) => {
+        const org = res.data?.[0];
+        setActiveGSTIN(org?.gstin ?? "");
+        setBankName(org?.bank_name ?? "");
+        setBankAccount(org?.bank_account_number ?? "");
+        setBankIFSC(org?.bank_ifsc ?? "");
+      })
       .catch(() => setActiveGSTIN(""));
   }, [orgId]);
 
