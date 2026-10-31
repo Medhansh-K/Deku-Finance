@@ -89,7 +89,7 @@ async fn create_audit_event(
     });
 
     let insert_res = state
-        .supabase
+        .db
         .insert_table("user_activity_logs", &db_payload, token)
         .await;
 
@@ -121,7 +121,7 @@ async fn create_audit_event(
                 }
             });
             let _ = state
-                .supabase
+                .db
                 .insert_table("audit_events", &fallback_payload, token)
                 .await;
 
@@ -163,13 +163,13 @@ async fn list_audit_events(
     }
 
     let res = match state
-        .supabase
+        .db
         .query_table("user_activity_logs", &query, token)
         .await
     {
         Ok(data) if data.as_array().map_or(false, |a| !a.is_empty()) => data,
         _ => state
-            .supabase
+            .db
             .query_table("audit_events", &query, token)
             .await
             .unwrap_or_else(|_| json!([])),
@@ -209,13 +209,13 @@ async fn export_audit_events(
     ];
 
     let logs_val = match state
-        .supabase
+        .db
         .query_table("user_activity_logs", &query, token)
         .await
     {
         Ok(data) if data.as_array().map_or(false, |a| !a.is_empty()) => data,
         _ => state
-            .supabase
+            .db
             .query_table("audit_events", &query, token)
             .await
             .unwrap_or_else(|_| json!([])),

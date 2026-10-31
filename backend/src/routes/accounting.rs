@@ -67,7 +67,7 @@ async fn list_accounts(
         ("organisation_id", &org_filter),
         ("order", "code.asc"),
     ];
-    let res = state.supabase.query_table("accounts", &query, token).await?;
+    let res = state.db.query_table("accounts", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -79,7 +79,7 @@ async fn seed_chart_of_accounts(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let payload = json!({ "p_org_id": org_id });
-    state.supabase.rpc("seed_default_chart_of_accounts", &payload, token).await?;
+    state.db.rpc("seed_default_chart_of_accounts", &payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -140,7 +140,7 @@ async fn create_account(
         "parent_account_id": payload.parent_account_id,
     });
 
-    let res = state.supabase.insert_table("accounts", &body, token).await?;
+    let res = state.db.insert_table("accounts", &body, token).await?;
     Ok(Json(json!({ "success": true, "data": res })))
 }
 
@@ -158,7 +158,7 @@ async fn delete_account(
         ("organisation_id", &org_filter),
         ("id", &id_filter),
     ];
-    let accounts = state.supabase.query_table("accounts", &query, token).await?;
+    let accounts = state.db.query_table("accounts", &query, token).await?;
     let account = accounts
         .as_array()
         .and_then(|arr| arr.first())
@@ -175,7 +175,7 @@ async fn delete_account(
         ("account_id", &id_filter),
         ("limit", "1"),
     ];
-    let lines = state.supabase.query_table("journal_entry_lines", &j_query, token).await?;
+    let lines = state.db.query_table("journal_entry_lines", &j_query, token).await?;
     if let Some(arr) = lines.as_array() {
         if !arr.is_empty() {
             return Err(AppError::BadRequest(
@@ -188,7 +188,7 @@ async fn delete_account(
         ("organisation_id", org_filter.as_str()),
         ("id", id_filter.as_str()),
     ];
-    let res = state.supabase.delete_table("accounts", &delete_query, token).await?;
+    let res = state.db.delete_table("accounts", &delete_query, token).await?;
     Ok(Json(json!({
         "success": true,
         "message": "Account removed successfully",
@@ -211,7 +211,7 @@ async fn update_account(
         ("id", id_filter.as_str()),
     ];
 
-    let res = state.supabase.update_table("accounts", &query, &payload, token).await?;
+    let res = state.db.update_table("accounts", &query, &payload, token).await?;
     Ok(Json(json!({ "success": true, "data": res })))
 }
 
@@ -232,7 +232,7 @@ async fn create_fiscal_period(
         "status": "open"
     });
 
-    let res = state.supabase.insert_table("fiscal_periods", &body, token).await?;
+    let res = state.db.insert_table("fiscal_periods", &body, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -249,7 +249,7 @@ async fn list_fiscal_periods(
         ("organisation_id", &org_filter),
         ("order", "start_date.desc"),
     ];
-    let res = state.supabase.query_table("fiscal_periods", &query, token).await?;
+    let res = state.db.query_table("fiscal_periods", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -274,7 +274,7 @@ async fn create_journal(
         "reference": payload.reference,
     });
 
-    let header_res = state.supabase.insert_table("journal_entries", &header_body, token).await?;
+    let header_res = state.db.insert_table("journal_entries", &header_body, token).await?;
     let entry_id = header_res
         .as_array()
         .and_then(|arr| arr.first())
@@ -301,7 +301,7 @@ async fn create_journal(
         .collect();
 
     let lines_res = state
-        .supabase
+        .db
         .insert_table("journal_entry_lines", &json!(lines_body), token)
         .await?;
 
@@ -324,7 +324,7 @@ async fn list_journals(
         ("organisation_id", &org_filter),
         ("order", "entry_date.desc"),
     ];
-    let res = state.supabase.query_table("journal_entries", &query, token).await?;
+    let res = state.db.query_table("journal_entries", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -340,7 +340,7 @@ async fn post_journal(
         "p_entry_id": entry_id
     });
 
-    let res = state.supabase.rpc("post_journal_entry", &payload, token).await?;
+    let res = state.db.rpc("post_journal_entry", &payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -357,7 +357,7 @@ async fn submit_journal(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let payload = json!({ "p_org_id": org_id, "p_entry_id": entry_id });
-    let res = state.supabase.rpc("submit_journal_for_approval", &payload, token).await?;
+    let res = state.db.rpc("submit_journal_for_approval", &payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -374,7 +374,7 @@ async fn reject_journal(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let rpc_payload = json!({ "p_org_id": org_id, "p_entry_id": entry_id, "p_reason": payload.reason });
-    let res = state.supabase.rpc("reject_journal_entry", &rpc_payload, token).await?;
+    let res = state.db.rpc("reject_journal_entry", &rpc_payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -397,7 +397,7 @@ async fn reverse_journal(
         "p_narration": payload.narration
     });
 
-    let res = state.supabase.rpc("reverse_journal_entry", &rpc_payload, token).await?;
+    let res = state.db.rpc("reverse_journal_entry", &rpc_payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -419,7 +419,7 @@ async fn get_general_ledger(
         ("organisation_id", &org_filter),
         ("order", "entry_date.desc,line_number.asc"),
     ];
-    let res = state.supabase.query_table("view_general_ledger", &query, token).await?;
+    let res = state.db.query_table("view_general_ledger", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -436,7 +436,7 @@ async fn get_account_balances(
         ("organisation_id", &org_filter),
         ("order", "account_code.asc"),
     ];
-    let res = state.supabase.query_table("view_account_balances", &query, token).await?;
+    let res = state.db.query_table("view_account_balances", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -453,7 +453,7 @@ async fn get_profit_and_loss(
         ("organisation_id", &org_filter),
         ("order", "account_code.asc"),
     ];
-    let res = state.supabase.query_table("view_profit_and_loss", &query, token).await?;
+    let res = state.db.query_table("view_profit_and_loss", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -470,7 +470,7 @@ async fn get_balance_sheet(
         ("organisation_id", &org_filter),
         ("order", "account_code.asc"),
     ];
-    let res = state.supabase.query_table("view_balance_sheet", &query, token).await?;
+    let res = state.db.query_table("view_balance_sheet", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -487,7 +487,7 @@ async fn get_trial_balance(
         ("organisation_id", &org_filter),
         ("order", "account_code.asc"),
     ];
-    let res = state.supabase.query_table("view_trial_balance", &query, token).await?;
+    let res = state.db.query_table("view_trial_balance", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -504,7 +504,7 @@ async fn get_cash_flow(
         "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
-    let res = state.supabase.rpc("get_cash_flow_statement", &payload, token).await?;
+    let res = state.db.rpc("get_cash_flow_statement", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -516,7 +516,7 @@ async fn get_ar_ap_aging(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let payload = json!({ "p_org_id": org_id });
-    let res = state.supabase.rpc("get_ar_ap_aging_analysis", &payload, token).await?;
+    let res = state.db.rpc("get_ar_ap_aging_analysis", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -533,7 +533,7 @@ async fn get_fpa_metrics(
         "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
-    let res = state.supabase.rpc("get_fpa_corporate_metrics", &payload, token).await?;
+    let res = state.db.rpc("get_fpa_corporate_metrics", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -545,7 +545,7 @@ async fn get_budget_variance(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let payload = json!({ "p_org_id": org_id });
-    let res = state.supabase.rpc("get_departmental_budget_variance", &payload, token).await?;
+    let res = state.db.rpc("get_departmental_budget_variance", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -563,7 +563,7 @@ async fn get_account_statement_handler(
         "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
-    let res = state.supabase.rpc("get_account_statement", &payload, token).await?;
+    let res = state.db.rpc("get_account_statement", &payload, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }

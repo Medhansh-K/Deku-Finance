@@ -60,7 +60,7 @@ async fn list_departments(
         ("order", "created_at.asc"),
     ];
 
-    let res = state.supabase.query_table("departments", &query, token).await?;
+    let res = state.db.query_table("departments", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -98,7 +98,7 @@ async fn create_department(
         body["lead_designation"] = json!(lead_desig);
     }
 
-    let res = state.supabase.insert_table("departments", &body, token).await?;
+    let res = state.db.insert_table("departments", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -123,7 +123,7 @@ async fn get_department(
         ("id", &id_filter),
     ];
 
-    let res = state.supabase.query_table("departments", &query, token).await?;
+    let res = state.db.query_table("departments", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -172,7 +172,7 @@ async fn update_department(
     }
 
     let res = state
-        .supabase
+        .db
         .update_table("departments", &query, &body, token)
         .await?;
 
@@ -195,7 +195,7 @@ async fn delete_department(
         ("id", id_filter.as_str()),
     ];
 
-    let res = state.supabase.delete_table("departments", &query, token).await?;
+    let res = state.db.delete_table("departments", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -223,7 +223,7 @@ async fn list_department_tasks(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("department_tasks", &query, token)
         .await?;
 
@@ -270,7 +270,7 @@ async fn create_department_task(
     }
 
     let res = state
-        .supabase
+        .db
         .insert_table("department_tasks", &body, token)
         .await?;
 
@@ -329,7 +329,7 @@ async fn update_department_task(
     }
 
     let res = state
-        .supabase
+        .db
         .update_table("department_tasks", &query, &body, token)
         .await?;
 
@@ -355,7 +355,7 @@ async fn delete_department_task(
     ];
 
     let res = state
-        .supabase
+        .db
         .delete_table("department_tasks", &query, token)
         .await?;
 
@@ -401,7 +401,7 @@ async fn list_members(
         ("order", "is_owner.desc,name.asc"),
     ];
 
-    let res = state.supabase.query_table("employees", &query, token).await?;
+    let res = state.db.query_table("employees", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -449,7 +449,7 @@ async fn create_member(
         body["permissions"] = perms;
     }
 
-    let res = state.supabase.insert_table("employees", &body, token).await?;
+    let res = state.db.insert_table("employees", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -474,7 +474,7 @@ async fn get_member(
         ("id", &id_filter),
     ];
 
-    let res = state.supabase.query_table("employees", &query, token).await?;
+    let res = state.db.query_table("employees", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -529,7 +529,7 @@ async fn update_member(
     }
 
     let res = state
-        .supabase
+        .db
         .update_table("employees", &query, &body, token)
         .await?;
 
@@ -553,7 +553,7 @@ async fn delete_member(
         ("is_owner", "eq.false"), // Architectural safeguard: cannot delete prime owner
     ];
 
-    let res = state.supabase.delete_table("employees", &query, token).await?;
+    let res = state.db.delete_table("employees", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -577,7 +577,7 @@ async fn update_permissions(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("update_employee_permissions", &rpc_payload, token)
         .await?;
 
@@ -626,7 +626,7 @@ async fn update_compensation(
     }
 
     let res = state
-        .supabase
+        .db
         .update_table("employees", &query, &body, token)
         .await?;
 
@@ -651,7 +651,7 @@ async fn grant_bonus(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("grant_employee_bonus", &rpc_payload, token)
         .await?;
 
@@ -678,7 +678,7 @@ async fn approve_reimbursement(
         });
 
         let res = state
-            .supabase
+            .db
             .rpc("approve_employee_reimbursement", &rpc_payload, token)
             .await?;
 
@@ -697,7 +697,7 @@ async fn approve_reimbursement(
         ("id", &id_filter),
     ];
 
-    let member_records = state.supabase.query_table("employees", &query, token).await?;
+    let member_records = state.db.query_table("employees", &query, token).await?;
     let pending = member_records
         .as_array()
         .and_then(|arr| arr.first())
@@ -724,7 +724,7 @@ async fn approve_reimbursement(
     });
 
     let res = state
-        .supabase
+        .db
         .update_table("employees", &update_query, &update_body, token)
         .await?;
 
@@ -760,7 +760,7 @@ async fn run_monthly_payroll_batch(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("run_monthly_payroll", &rpc_payload, token)
         .await?;
 
@@ -784,7 +784,7 @@ async fn list_payroll_runs(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("payroll_runs", &query, token)
         .await?;
 

@@ -42,7 +42,7 @@ async fn get_organisation_license(
         ("limit", "1"),
     ];
 
-    let res = state.supabase.query_table("organisation_licenses", &query, token).await?;
+    let res = state.db.query_table("organisation_licenses", &query, token).await?;
 
     let license_opt = res.as_array().and_then(|arr| arr.first().cloned());
 
@@ -62,13 +62,13 @@ async fn get_organisation_license(
                 "p_tier": "go"
             });
 
-            if let Ok(issued) = state.supabase.rpc("issue_organisation_license", &issue_payload, token).await {
+            if let Ok(issued) = state.db.rpc("issue_organisation_license", &issue_payload, token).await {
                 if let Some(key) = issued.get("license_key").and_then(|k| k.as_str()) {
                     let act_payload = json!({
                         "p_license_key": key,
                         "p_owner_email": "admin@deku.finance"
                     });
-                    if let Ok(activated) = state.supabase.rpc("activate_organisation_license", &act_payload, token).await {
+                    if let Ok(activated) = state.db.rpc("activate_organisation_license", &act_payload, token).await {
                         return Ok(Json(json!({
                             "success": true,
                             "has_license": true,
@@ -110,7 +110,7 @@ async fn activate_license(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("activate_organisation_license", &rpc_payload, token)
         .await?;
 
@@ -139,7 +139,7 @@ async fn issue_license(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("issue_organisation_license", &rpc_payload, token)
         .await?;
 

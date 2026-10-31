@@ -45,7 +45,7 @@ async fn create_party(
         "notes": payload.notes,
     });
 
-    let res = state.supabase.insert_table("parties", &body, token).await?;
+    let res = state.db.insert_table("parties", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -61,7 +61,7 @@ async fn list_parties(
     let token = extract_auth_token(&headers);
     let org_filter = format!("eq.{}", org_id);
     let query = [("select", "*"), ("organisation_id", &org_filter), ("order", "created_at.desc")];
-    let res = state.supabase.query_table("parties", &query, token).await?;
+    let res = state.db.query_table("parties", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -82,7 +82,7 @@ async fn get_party(
         ("organisation_id", &org_filter),
         ("id", &id_filter),
     ];
-    let res = state.supabase.query_table("parties", &query, token).await?;
+    let res = state.db.query_table("parties", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,

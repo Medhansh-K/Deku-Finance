@@ -82,7 +82,7 @@ async fn list_purchase_bills(
     }
     let query: Vec<(&str, &str)> = query.iter().map(|(k, v)| (*k, v.as_str())).collect();
     let res = state
-        .supabase
+        .db
         .query_table("purchase_bills", &query, token)
         .await?;
 
@@ -124,7 +124,7 @@ async fn create_purchase_bill(
         "journal_entry_id": payload.journal_entry_id,
     });
     let res = state
-        .supabase
+        .db
         .insert_table("purchase_bills", &body, token)
         .await?;
 
@@ -146,7 +146,7 @@ async fn link_purchase_bill_journal(
     ];
     let body = json!({ "journal_entry_id": payload.journal_entry_id });
     let res = state
-        .supabase
+        .db
         .update_table("purchase_bills", &query, &body, token)
         .await?;
     // RLS hides bills that already have a voucher, so PostgREST returns an empty list.
@@ -172,7 +172,7 @@ async fn delete_purchase_bill(
         ("id", id_filter.as_str()),
     ];
     let res = state
-        .supabase
+        .db
         .delete_table("purchase_bills", &query, token)
         .await?;
     if is_empty_array(&res) {

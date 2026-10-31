@@ -59,7 +59,7 @@ async fn list_reconciliations(
     }
     let query: Vec<(&str, &str)> = query.iter().map(|(k, v)| (*k, v.as_str())).collect();
     let res = state
-        .supabase
+        .db
         .query_table("bank_reconciliations", &query, token)
         .await?;
 
@@ -88,7 +88,7 @@ async fn create_reconciliation(
         "journal_entry_line_id": payload.journal_entry_line_id,
     });
     let res = state
-        .supabase
+        .db
         .insert_table("bank_reconciliations", &body, token)
         .await?;
 
@@ -108,7 +108,7 @@ async fn delete_reconciliation(
         ("id", id_filter.as_str()),
     ];
     let res = state
-        .supabase
+        .db
         .delete_table("bank_reconciliations", &query, token)
         .await?;
 

@@ -11,6 +11,7 @@ pub enum AppError {
     NotFound(String),
     BadRequest(String),
     Unauthorized(String),
+    Conflict(String),
     Database(String),
     Internal(String),
 }
@@ -21,6 +22,7 @@ impl IntoResponse for AppError {
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),
+            AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
             AppError::Database(msg) => (StatusCode::BAD_GATEWAY, msg),
             AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
         };
@@ -37,6 +39,6 @@ impl IntoResponse for AppError {
 
 impl From<reqwest::Error> for AppError {
     fn from(err: reqwest::Error) -> Self {
-        AppError::Database(format!("Supabase HTTP error: {}", err))
+        AppError::Database(format!("PostgREST HTTP error: {}", err))
     }
 }

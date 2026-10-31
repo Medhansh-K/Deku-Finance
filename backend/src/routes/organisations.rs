@@ -69,7 +69,7 @@ async fn create_organisation(
         "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
     });
 
-    let res = state.supabase.rpc("create_organisation", &body, token).await?;
+    let res = state.db.rpc("create_organisation", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -83,7 +83,7 @@ async fn list_organisations(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let query = [("select", "*"), ("order", "created_at.desc")];
-    let res = state.supabase.query_table("organisations", &query, token).await?;
+    let res = state.db.query_table("organisations", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -99,7 +99,7 @@ async fn get_organisation(
     let token = extract_auth_token(&headers);
     let id_filter = format!("eq.{}", id);
     let query = [("select", "*"), ("id", &id_filter)];
-    let res = state.supabase.query_table("organisations", &query, token).await?;
+    let res = state.db.query_table("organisations", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -135,7 +135,7 @@ async fn update_settings(
 
     let id_filter = format!("eq.{}", id);
     let res = state
-        .supabase
+        .db
         .update_table("organisations", &[("id", id_filter.as_str())], &Value::Object(body), token)
         .await?;
     // RLS silently matches zero rows for someone who may not edit this company.
@@ -163,7 +163,7 @@ async fn invite_member(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("invite_user_to_organisation", &body, token)
         .await?;
 
@@ -185,7 +185,7 @@ async fn accept_invitation(
     });
 
     let res = state
-        .supabase
+        .db
         .rpc("accept_organisation_invitation", &body, token)
         .await?;
 
@@ -209,7 +209,7 @@ async fn list_invitations(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("organisation_invitations", &query, token)
         .await?;
 
@@ -233,7 +233,7 @@ async fn list_members(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("organisation_members", &query, token)
         .await?;
 
@@ -263,7 +263,7 @@ async fn update_member_role(
     });
 
     let res = state
-        .supabase
+        .db
         .update_table("organisation_members", &query, &body, token)
         .await?;
 
@@ -287,7 +287,7 @@ async fn remove_member(
     ];
 
     let res = state
-        .supabase
+        .db
         .delete_table("organisation_members", &query, token)
         .await?;
 

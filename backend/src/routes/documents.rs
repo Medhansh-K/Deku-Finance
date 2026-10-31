@@ -50,7 +50,7 @@ async fn register_document(
         ];
 
         let existing = state
-            .supabase
+            .db
             .query_table("document_extractions", &check_query, token)
             .await;
 
@@ -83,7 +83,7 @@ async fn register_document(
     });
 
     let res = state
-        .supabase
+        .db
         .insert_table("invoice_documents", &doc_body, token)
         .await?;
 
@@ -111,7 +111,7 @@ async fn list_documents(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("invoice_documents", &query, token)
         .await?;
 
@@ -145,7 +145,7 @@ async fn save_extraction(
     });
 
     let res = state
-        .supabase
+        .db
         .insert_table("document_extractions", &body, token)
         .await?;
 
@@ -174,7 +174,7 @@ async fn get_document_extractions(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("document_extractions", &query, token)
         .await?;
 
@@ -209,7 +209,7 @@ async fn create_voucher_proposal(
     });
 
     let res = state
-        .supabase
+        .db
         .insert_table("agent_voucher_proposals", &body, token)
         .await?;
 
@@ -237,7 +237,7 @@ async fn list_voucher_proposals(
     ];
 
     let res = state
-        .supabase
+        .db
         .query_table("agent_voucher_proposals", &query, token)
         .await?;
 
@@ -269,7 +269,7 @@ async fn approve_voucher_proposal(
     });
 
     let res = state
-        .supabase
+        .db
         .update_table("agent_voucher_proposals", &update_query, &update_body, token)
         .await?;
 

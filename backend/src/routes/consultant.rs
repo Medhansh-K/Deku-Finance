@@ -53,7 +53,7 @@ async fn fetch_grounded_org_context(
         ("limit", "1"),
     ];
     let org_meta = state
-        .supabase
+        .db
         .query_table("organisations", &org_query, token)
         .await
         .ok()
@@ -62,28 +62,28 @@ async fn fetch_grounded_org_context(
 
     // 2. Fetch FP&A Metrics
     let fpa_metrics = state
-        .supabase
+        .db
         .rpc("get_fpa_corporate_metrics", &payload, token)
         .await
         .unwrap_or_else(|_| json!({}));
 
     // 3. Fetch Cash Flow Statement
     let cash_flow = state
-        .supabase
+        .db
         .rpc("get_cash_flow_statement", &payload, token)
         .await
         .unwrap_or_else(|_| json!({}));
 
     // 4. Fetch AR/AP Aging Analysis
     let aging = state
-        .supabase
+        .db
         .rpc("get_ar_ap_aging_analysis", &payload, token)
         .await
         .unwrap_or_else(|_| json!({}));
 
     // 5. Fetch Departmental Budget Variance
     let budget_variance = state
-        .supabase
+        .db
         .rpc("get_departmental_budget_variance", &payload, token)
         .await
         .unwrap_or_else(|_| json!({}));
@@ -97,7 +97,7 @@ async fn fetch_grounded_org_context(
         ("limit", "5"),
     ];
     let recent_vouchers = state
-        .supabase
+        .db
         .query_table("journal_entries", &voucher_query, token)
         .await
         .unwrap_or_else(|_| json!([]));
@@ -153,7 +153,7 @@ async fn chat_with_consultant(
             "model": model_name
         }
     });
-    let _ = state.supabase.insert_table("agent_events", &event_body, token).await;
+    let _ = state.db.insert_table("agent_events", &event_body, token).await;
 
     let followups = vec![
         "What is our cash runway?".to_string(),

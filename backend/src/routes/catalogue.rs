@@ -43,7 +43,7 @@ async fn create_item(
         "is_taxable": payload.is_taxable.unwrap_or(true),
     });
 
-    let res = state.supabase.insert_table("catalogue_items", &body, token).await?;
+    let res = state.db.insert_table("catalogue_items", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -59,7 +59,7 @@ async fn list_items(
     let token = extract_auth_token(&headers);
     let org_filter = format!("eq.{}", org_id);
     let query = [("select", "*"), ("organisation_id", &org_filter), ("order", "created_at.desc")];
-    let res = state.supabase.query_table("catalogue_items", &query, token).await?;
+    let res = state.db.query_table("catalogue_items", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,

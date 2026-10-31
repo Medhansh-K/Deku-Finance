@@ -3,8 +3,9 @@ use std::env;
 #[derive(Clone, Debug)]
 pub struct Config {
     pub port: u16,
-    pub supabase_url: String,
-    pub supabase_anon_key: String,
+    pub postgrest_url: String,
+    pub jwt_secret: String,
+    pub cors_allowed_origins: Vec<String>,
 }
 
 impl Config {
@@ -16,18 +17,29 @@ impl Config {
             .parse::<u16>()
             .expect("PORT must be a valid number");
 
-        let supabase_url = env::var("SUPABASE_URL")
-            .expect("SUPABASE_URL environment variable must be set");
+        let postgrest_url = env::var("POSTGREST_URL")
+            .expect("POSTGREST_URL environment variable must be set");
 
-        let supabase_anon_key = env::var("SUPABASE_ANON_KEY")
-            .expect("SUPABASE_ANON_KEY environment variable must be set");
+        let jwt_secret = env::var("JWT_SECRET")
+            .expect("JWT_SECRET environment variable must be set");
+        if jwt_secret.len() < 32 {
+            panic!("JWT_SECRET must be at least 32 bytes");
+        }
 
-
+        // Empty by default: the frontend calls the backend server-side, so browsers never need CORS.
+        let cors_allowed_origins = env::var("CORS_ALLOWED_ORIGINS")
+            .unwrap_or_default()
+            .split(',')
+            .map(str::trim)
+            .filter(|o| !o.is_empty())
+            .map(String::from)
+            .collect();
 
         Self {
             port,
-            supabase_url,
-            supabase_anon_key,
+            postgrest_url,
+            jwt_secret,
+            cors_allowed_origins,
         }
     }
 }

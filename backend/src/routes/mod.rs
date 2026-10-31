@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod health;
 pub mod organisations;
 pub mod parties;
@@ -13,21 +14,24 @@ pub mod banking;
 pub mod purchases;
 
 use axum::Router;
-use crate::supabase::SupabaseClient;
+use crate::postgrest::PostgrestClient;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub supabase: SupabaseClient,
+    pub db: PostgrestClient,
+    pub jwt_secret: String,
 }
 
 pub fn create_router(state: AppState) -> Router {
     Router::new()
-        .merge(health::routes())
+        .merge(health::routes(state.clone()))
         .nest("/api/v1", api_routes(state))
 }
 
 fn api_routes(state: AppState) -> Router {
     Router::new()
+        // The only routes that need no caller token: they issue it.
+        .nest("/auth", auth::routes(state.clone()))
         .nest("/organisations", organisations::routes(state.clone()))
         .nest("/organisations/:org_id/parties", parties::routes(state.clone()))
         .nest("/organisations/:org_id/catalogue", catalogue::routes(state.clone()))
