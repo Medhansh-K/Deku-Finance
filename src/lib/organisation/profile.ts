@@ -13,7 +13,7 @@ export const toOperatingMode = (m: OrgSummary["operating_mode"]): OperatingMode 
   m === "gst" ? "gst_enterprise" : "pure_accounting";
 
 /** Maps a database row to the Organisation the app works with. */
-export function orgFromRow(o: OrgSummary): Omit<Organisation, "license"> {
+export function orgFromRow(o: OrgSummary): Organisation {
   return {
     id: o.id,
     name: o.name,

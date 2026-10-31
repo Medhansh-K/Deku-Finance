@@ -7,5 +7,4 @@ pub mod accounting;
 pub mod invoice;
 pub mod department;
 pub mod audit;
-pub mod license;
 pub mod document;
