@@ -12,6 +12,8 @@ import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import { CompanyControlsCard } from "./CompanyControlsCard";
 import { CompanyProfileCard } from "./CompanyProfileCard";
+import { GspCard } from "./GspCard";
+import { KycCard } from "./KycCard";
 
 export function SettingsView() {
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
@@ -85,6 +87,8 @@ export function SettingsView() {
     <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
       <CompanyProfileCard />
       {orgId && <CompanyControlsCard orgId={orgId} />}
+      {orgId && <GspCard orgId={orgId} />}
+      {orgId && <KycCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
       <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">

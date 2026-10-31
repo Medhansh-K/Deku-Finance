@@ -10,6 +10,11 @@ pub struct Config {
     pub cron_secret: Option<String>,
     /// Base64 32-byte key for third-party credentials; unset keeps integrations switched off.
     pub data_encryption_key: Option<String>,
+    /// GSP_PROVIDER / KYC_PROVIDER; unset keeps that integration switched off.
+    pub gsp_provider: Option<String>,
+    pub kyc_provider: Option<String>,
+    /// DEKU_ENV=production refuses the sandbox providers.
+    pub deku_env: Option<String>,
 }
 
 impl Config {
@@ -43,7 +48,12 @@ impl Config {
 
         let data_encryption_key = env::var("DATA_ENCRYPTION_KEY").ok().filter(|s| !s.trim().is_empty());
 
+        let opt = |k: &str| env::var(k).ok().filter(|s| !s.trim().is_empty());
+
         Self {
+            gsp_provider: opt("GSP_PROVIDER"),
+            kyc_provider: opt("KYC_PROVIDER"),
+            deku_env: opt("DEKU_ENV"),
             port,
             postgrest_url,
             jwt_secret,

@@ -15,8 +15,12 @@ pub mod purchases;
 pub mod gst;
 pub mod hsn;
 pub mod notifications;
+pub mod gsp;
+pub mod kyc;
 
+use std::sync::Arc;
 use axum::Router;
+use crate::integrations::{gsp::GspProvider, kyc::KycProvider};
 use crate::postgrest::PostgrestClient;
 
 #[derive(Clone)]
@@ -26,6 +30,9 @@ pub struct AppState {
     pub cron_secret: Option<String>,
     /// `None` when DATA_ENCRYPTION_KEY is missing or malformed: integrations report "not configured".
     pub cipher: Option<crate::crypto::Cipher>,
+    /// `NotConfigured` unless GSP_PROVIDER / KYC_PROVIDER select an adapter (see integrations/).
+    pub gsp: Arc<dyn GspProvider>,
+    pub kyc: Arc<dyn KycProvider>,
 }
 
 pub fn create_router(state: AppState) -> Router {
@@ -77,6 +84,8 @@ fn api_routes(state: AppState) -> Router {
             purchases::routes(state.clone()),
         )
         .nest("/organisations/:org_id/gst", gst::routes(state.clone()))
+        .nest("/organisations/:org_id/gsp", gsp::routes(state.clone()))
+        .nest("/organisations/:org_id/kyc", kyc::routes(state.clone()))
         .nest("/hsn", hsn::routes(state.clone()))
         .nest(
             "/organisations/:org_id/notifications",

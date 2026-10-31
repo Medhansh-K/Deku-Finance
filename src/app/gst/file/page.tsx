@@ -14,6 +14,7 @@ import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
 import { ReturnCard } from "@/modules/gst/ReturnCard";
 import { Table6Card } from "@/modules/gst/Table6Card";
+import { DirectFiling } from "@/modules/integrations/DirectFiling";
 import { gstApi, type GstReturnType } from "@/api/endpoints";
 
 const STEPS = ["Period", "Readiness", "Review", "Download"];
@@ -150,9 +151,10 @@ export default function GstFilePage() {
                   </Button>
                 </div>
                 <p className="text-xs text-ink-muted">
-                  Deku does not file for you. The files stay on your computer until you upload them yourself.{" "}
+                  The downloaded files stay on your computer until you upload them yourself.{" "}
                   <a href="/gst/guide" className="text-brand-strong underline">Full portal guide</a>
                 </p>
+                <DirectFiling orgId={orgId} retPeriod={retPeriod} canFile={{ gstr1: !!gstr1!.json, gstr3b: !!gstr3b!.json }} />
                 <div className="space-y-3 border-t border-line pt-4">
                   <h3 className="text-sm font-semibold text-ink">Keep a record</h3>
                   <p className="text-xs text-ink-muted">

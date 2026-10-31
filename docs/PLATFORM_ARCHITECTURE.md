@@ -86,3 +86,4 @@ GCP: Artifact Registry images, Cloud SQL Postgres 16, Secret Manager (`JWT_SECRE
 
 ### Third-party integrations
 These are switched off until configured (GSP, KYC, Razorpay). Each has a `*_connections` table and an adapter in Rust behind a config flag, and the UI shows "not connected" honestly.
+GSP and KYC: env `GSP_PROVIDER` / `KYC_PROVIDER` (unset = off, routes answer `503 {error:"gsp_not_configured"}` / `"kyc_not_configured"`; `sandbox` is a labelled demo refused when `DEKU_ENV=production`). See `docs/INTEGRATIONS.md`.

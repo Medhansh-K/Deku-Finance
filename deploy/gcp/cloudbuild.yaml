@@ -90,7 +90,7 @@ steps:
           --allow-unauthenticated --port=8080 \
           --network=default --subnet=default --vpc-egress=all-traffic \
           --set-secrets=JWT_SECRET=JWT_SECRET:latest,CRON_SECRET=CRON_SECRET:latest \
-          --set-env-vars=POSTGREST_URL=$$postgrest_url
+          --set-env-vars=POSTGREST_URL=$$postgrest_url,DEKU_ENV=production
 
   - id: deploy-frontend
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim

@@ -120,7 +120,18 @@ gcloud compute networks subnets update default --region="$REGION" --enable-priva
 ```
 
 With `all-traffic` the backend has no direct internet egress. Add Cloud NAT on `default` when an
-integration (GSP, KYC, Razorpay) needs to call out.
+integration (GSP, KYC, Razorpay) needs to call out: provider calls fail with a 502 until it exists.
+GSPs usually allow-list caller IPs, so reserve a static address and give it to the provider:
+
+```bash
+gcloud compute addresses create deku-nat-ip --region="$REGION"
+gcloud compute routers create deku-router --network=default --region="$REGION"
+gcloud compute routers nats create deku-nat --router=deku-router --region="$REGION"   --nat-all-subnet-ip-ranges --nat-external-ip-pool=deku-nat-ip
+```
+
+Integrations stay off until configured (docs/INTEGRATIONS.md). The backend runs with `DEKU_ENV=production`,
+which refuses `GSP_PROVIDER=sandbox` / `KYC_PROVIDER=sandbox` at startup. Storing GSP credentials also
+needs `DATA_ENCRYPTION_KEY` from Secret Manager (`--set-secrets=...,DATA_ENCRYPTION_KEY=DATA_ENCRYPTION_KEY:latest`).
 
 ## 6. Cloud Run Job and services
 

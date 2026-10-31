@@ -3,6 +3,7 @@ mod config;
 mod crypto;
 mod error;
 mod gst;
+mod integrations;
 mod models;
 mod postgrest;
 mod routes;
@@ -11,7 +12,9 @@ use axum::http::HeaderValue;
 use config::Config;
 use postgrest::PostgrestClient;
 use routes::{create_router, AppState};
+use integrations::Choice;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tower_http::cors::{AllowOrigin, Any, CorsLayer};
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
@@ -33,8 +36,27 @@ async fn main() {
     tracing::info!("Initializing Deku Finance Rust/Axum Backend...");
     tracing::info!("PostgREST URL: {}", config.postgrest_url);
 
-    // 3. Initialize Clients and Shared State
+    // 3. Initialize Clients and Shared State. A bad provider name, or sandbox in production, stops startup.
+    let gsp: Arc<dyn integrations::gsp::GspProvider> =
+        match integrations::choose("GSP_PROVIDER", config.gsp_provider.as_deref(), config.deku_env.as_deref())
+            .unwrap_or_else(|e| panic!("{}", e))
+        {
+            Choice::NotConfigured => Arc::new(integrations::gsp::NotConfigured),
+            Choice::Sandbox => Arc::new(integrations::gsp::Sandbox),
+        };
+    let kyc: Arc<dyn integrations::kyc::KycProvider> =
+        match integrations::choose("KYC_PROVIDER", config.kyc_provider.as_deref(), config.deku_env.as_deref())
+            .unwrap_or_else(|e| panic!("{}", e))
+        {
+            Choice::NotConfigured => Arc::new(integrations::kyc::NotConfigured),
+            Choice::Sandbox => Arc::new(integrations::kyc::Sandbox),
+        };
+    if gsp.is_sandbox() || kyc.is_sandbox() {
+        tracing::warn!("SANDBOX integration active (GSP: {}, KYC: {}): results are not legally valid", gsp.name(), kyc.name());
+    }
     let state = AppState {
+        gsp,
+        kyc,
         db: PostgrestClient::new(&config),
         jwt_secret: config.jwt_secret.clone(),
         cron_secret: config.cron_secret.clone(),
