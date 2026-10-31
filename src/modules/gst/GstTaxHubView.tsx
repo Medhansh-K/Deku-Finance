@@ -326,7 +326,7 @@ export function GstTaxHubView() {
             </div>
 
             {/* Invoice Line Breakdown */}
-            <div className="rounded border border-line-strong overflow-hidden">
+            <div className="rounded border border-line-strong overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[10px] text-ink-soft">

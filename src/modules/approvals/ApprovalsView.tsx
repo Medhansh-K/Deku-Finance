@@ -151,6 +151,7 @@ export function ApprovalsView() {
               </div>
             )}
 
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-ink-muted">
@@ -177,6 +178,7 @@ export function ApprovalsView() {
                   ))}
               </tbody>
             </table>
+            </div>
 
             {selected.submitted_at && (
               <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">

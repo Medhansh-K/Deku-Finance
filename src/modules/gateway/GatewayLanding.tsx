@@ -208,12 +208,12 @@ export function GatewayLanding() {
   const companyShortName = activeOrg.name.split(" ")[0];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-2 sm:p-2.5 lg:px-4 lg:py-1 bg-canvas w-full min-h-0">
-      <div className="w-full max-w-[1480px] flex flex-col lg:flex-row gap-3 xl:gap-3.5 items-stretch">
+    <div className="flex-1 flex flex-col items-center justify-start p-3 lg:px-5 lg:py-3.5 bg-canvas w-full min-h-0">
+      <div className="w-full max-w-[1400px] flex flex-col xl:flex-row gap-3.5 items-stretch">
         {/* ========================================================================= */}
         {/* Column 1 (Left): Company Status & Instant Shift Switcher */}
         {/* ========================================================================= */}
-        <div className="w-full lg:w-[310px] xl:w-[325px] shrink-0 bg-surface border border-line-strong rounded-lg p-3 shadow-xs flex flex-col justify-between">
+        <div className="w-full xl:w-[290px] shrink-0 bg-surface border border-line-strong rounded-xl p-3.5 shadow-xs flex flex-col justify-between">
           <div className="space-y-2.5">
             {/* Header with Company Selector Dropdown */}
             <div className="border-b border-line pb-2">
@@ -347,10 +347,11 @@ export function GatewayLanding() {
           </div>
         </div>
 
+        <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 gap-3.5 items-stretch">
         {/* ========================================================================= */}
         {/* Column 2 (Center): Gateway of Deku Navigation Menu (Enlarged & Focused)  */}
         {/* ========================================================================= */}
-        <div className="flex-1 bg-surface border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[340px]">
+        <div className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
           <div>
             {/* Menu Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
@@ -579,7 +580,7 @@ export function GatewayLanding() {
                       <span>Deku <u>K</u>onsultant</span>
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-teal-800 px-1.5 py-0.2 rounded border border-teal-700">
+                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
                       K
                     </kbd>
                   </Link>
@@ -656,7 +657,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 3 (Right): Quick KPI Table (Dynamically Synced with Company)       */}
         {/* ========================================================================= */}
-        <div className="flex-1 bg-surface border border-edge rounded-lg shadow-md overflow-hidden flex flex-col justify-between min-w-[350px]">
+        <div className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
           <div>
             {/* KPI Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
@@ -900,6 +901,7 @@ export function GatewayLanding() {
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
+        </div>
         </div>
       </div>
     </div>

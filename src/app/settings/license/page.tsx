@@ -252,21 +252,13 @@ export default function LicenseManagementPage() {
           <div>
             <span className="text-ink-subtle block text-[10px] uppercase font-bold">Activated At</span>
             <span className="font-medium text-ink-soft block mt-0.5">
-              {new Date(license?.activated_at || Date.now()).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              {license?.activated_at ? new Date(license.activated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "–"}
             </span>
           </div>
           <div>
             <span className="text-ink-subtle block text-[10px] uppercase font-bold">Hard Expiry Date</span>
             <span className="font-bold text-rose-700 block mt-0.5">
-              {new Date(Date.now() + 18 * 24 * 60 * 60 * 1000).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+              {license?.expires_at ? new Date(license.expires_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "–"}
             </span>
           </div>
         </div>

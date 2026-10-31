@@ -112,7 +112,7 @@ export function SettingsView() {
           </div>
         )}
 
-        <div className="rounded border border-line overflow-hidden">
+        <div className="rounded border border-line overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-panel text-white font-mono text-[11px]">

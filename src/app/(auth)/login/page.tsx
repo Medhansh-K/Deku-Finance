@@ -116,28 +116,28 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-panel-deep via-panel to-panel-deep text-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       {/* Background Ambient Glow */}
-      <div className="absolute top-0 right-1/4 -mt-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-1/4 -mb-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-1/4 -mt-20 w-96 h-96 bg-brand/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 -mb-20 w-96 h-96 bg-sky-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center space-y-3">
         {/* Brand Logo */}
         <Link href="/" className="inline-flex items-center gap-3 group">
-          <div className="h-12 w-12 rounded-2xl bg-amber-400 text-black flex items-center justify-center font-black shadow-lg shadow-amber-400/25 group-hover:scale-105 transition-transform">
-            <ReceiptText className="h-6 w-6 text-zinc-950" />
+          <div className="h-12 w-12 rounded-2xl bg-brand text-panel-deep flex items-center justify-center font-black shadow-lg shadow-brand/25 group-hover:scale-105 transition-transform">
+            <ReceiptText className="h-6 w-6 text-panel-deep" />
           </div>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
           Sign In to Deku Finance
         </h2>
-        <p className="text-xs text-zinc-400 max-w-xs mx-auto">
+        <p className="text-xs text-slate-400 max-w-xs mx-auto">
           Access your dual-mode accounting, live GST returns, and immutable ALERX ledger.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+        <div className="bg-panel/90 backdrop-blur-xl border border-edge rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
           {/* Notifications / Alerts */}
           {errorMsg && (
             <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3.5 flex items-center gap-2.5 text-xs text-rose-300">
@@ -155,26 +155,26 @@ function LoginForm() {
 
           {/* Quick Sandbox / Instant Demo Options */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold text-zinc-400">
-              <span className="flex items-center gap-1.5 text-amber-400">
-                <Zap className="h-3.5 w-3.5 fill-amber-400" />
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+              <span className="flex items-center gap-1.5 text-brand">
+                <Zap className="h-3.5 w-3.5 fill-brand" />
                 Instant Demo Sandbox
               </span>
-              <span className="text-[10px] text-zinc-500">Pre-activated licenses</span>
+              <span className="text-[10px] text-slate-500">Pre-activated licenses</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoLogin("owner")}
                 disabled={demoLoading !== null}
-                className="py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/60 text-xs font-bold text-white text-left transition-colors flex items-center justify-between"
+                className="py-2 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-colors flex items-center justify-between"
               >
                 <div className="flex items-center gap-1.5">
-                  <Building className="h-3.5 w-3.5 text-amber-400" />
+                  <Building className="h-3.5 w-3.5 text-brand" />
                   <span>PRO Enterprise</span>
                 </div>
                 {demoLoading === "owner" && (
-                  <Loader2 className="h-3 w-3 animate-spin text-amber-400" />
+                  <Loader2 className="h-3 w-3 animate-spin text-brand" />
                 )}
               </button>
 
@@ -182,7 +182,7 @@ function LoginForm() {
                 type="button"
                 onClick={() => handleDemoLogin("freelancer")}
                 disabled={demoLoading !== null}
-                className="py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/60 text-xs font-bold text-white text-left transition-colors flex items-center justify-between"
+                className="py-2 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-colors flex items-center justify-between"
               >
                 <div className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 text-emerald-400" />
@@ -196,7 +196,7 @@ function LoginForm() {
           </div>
 
           {/* Tab Selector: Standard Login vs Activate with License Key */}
-          <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-semibold">
+          <div className="flex bg-panel-deep p-1 rounded-xl border border-edge text-xs font-semibold">
             <button
               type="button"
               onClick={() => {
@@ -206,8 +206,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 activeTab === "login"
-                  ? "bg-amber-400 text-zinc-950 font-bold shadow-xs"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-brand text-panel-deep font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               Sign In
@@ -221,8 +221,8 @@ function LoginForm() {
               }}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 activeTab === "activate"
-                  ? "bg-amber-400 text-zinc-950 font-bold shadow-xs"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-brand text-panel-deep font-bold shadow-xs"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               🔑 Activate License
@@ -236,14 +236,14 @@ function LoginForm() {
                 {/* License Key Field */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-zinc-300">
+                    <label className="block text-xs font-semibold text-slate-300">
                       License Key *
                     </label>
                     <button
                       type="button"
                       onClick={handleSendLicenseEmail}
                       disabled={isSendingEmail}
-                      className="text-[11px] font-medium text-amber-400 hover:underline flex items-center gap-1"
+                      className="text-[11px] font-medium text-brand hover:underline flex items-center gap-1"
                     >
                       <Mail className="h-3 w-3" />
                       <span>{isSendingEmail ? "Sending..." : "Email My Key"}</span>
@@ -255,50 +255,50 @@ function LoginForm() {
                     value={licenseKey}
                     onChange={(e) => setLicenseKey(e.target.value)}
                     placeholder="e.g. DEKU-TEMP-GO-7506-4610"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono font-bold text-amber-300 placeholder-zinc-600 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all uppercase"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs font-mono font-bold text-brand-soft placeholder-slate-600 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all uppercase"
                   />
-                  <span className="text-[10px] text-zinc-500 mt-1 block">
+                  <span className="text-[10px] text-slate-500 mt-1 block">
                     Temp license: 15-day trial + 5-day migration period (20d total access).
                   </span>
                 </div>
 
                 {/* Owner Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     Owner's Registered Email *
                   </label>
                   <div className="relative">
-                    <Mail className="h-4 w-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       value={ownerEmail}
                       onChange={(e) => setOwnerEmail(e.target.value)}
                       placeholder="owner@business.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Owner Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     Owner's Password *
                   </label>
                   <div className="relative">
-                    <Lock className="h-4 w-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Lock className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type={showPassword ? "text" : "password"}
                       required
                       value={ownerPassword}
                       onChange={(e) => setOwnerPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -310,28 +310,28 @@ function LoginForm() {
                 {/* Standard Login Email */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-zinc-300">
+                    <label className="block text-xs font-semibold text-slate-300">
                       Work Email Address
                     </label>
                     <button
                       type="button"
                       onClick={handleSendLicenseEmail}
                       disabled={isSendingEmail}
-                      className="text-[11px] font-medium text-amber-400 hover:underline flex items-center gap-1"
+                      className="text-[11px] font-medium text-brand hover:underline flex items-center gap-1"
                     >
                       <Mail className="h-3 w-3" />
                       <span>{isSendingEmail ? "Sending..." : "Send Activation Email"}</span>
                     </button>
                   </div>
                   <div className="relative">
-                    <Mail className="h-4 w-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@company.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                     />
                   </div>
                 </div>
@@ -339,7 +339,7 @@ function LoginForm() {
                 {/* Standard Password */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-zinc-300">
+                    <label className="block text-xs font-semibold text-slate-300">
                       Password
                     </label>
                     <a
@@ -348,25 +348,25 @@ function LoginForm() {
                         e.preventDefault();
                         alert("Please use the Instant Demo Sandbox or contact support at +91 7506461004.");
                       }}
-                      className="text-[11px] font-medium text-amber-400 hover:underline"
+                      className="text-[11px] font-medium text-brand hover:underline"
                     >
                       Forgot password?
                     </a>
                   </div>
                   <div className="relative">
-                    <Lock className="h-4 w-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Lock className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type={showPassword ? "text" : "password"}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
+                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -378,11 +378,11 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 hover:bg-amber-300 py-3 px-4 text-xs font-bold text-zinc-950 shadow-md shadow-amber-400/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-brand hover:bg-brand-soft py-3 px-4 text-xs font-bold text-panel-deep shadow-md shadow-brand/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
+                  <Loader2 className="h-4 w-4 animate-spin text-panel-deep" />
                   <span>
                     {activeTab === "activate"
                       ? "Verifying & Activating..."
@@ -403,7 +403,7 @@ function LoginForm() {
           </form>
 
           {/* Helpline and Privacy Footnote */}
-          <div className="pt-2 flex flex-col items-center justify-center gap-1 text-[11px] text-zinc-500">
+          <div className="pt-2 flex flex-col items-center justify-center gap-1 text-[11px] text-slate-500">
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
               <span>Zero password sharing • 256-Bit SSL Encryption</span>
@@ -413,9 +413,9 @@ function LoginForm() {
         </div>
 
         {/* Link to Signup */}
-        <p className="mt-6 text-center text-xs text-zinc-400">
+        <p className="mt-6 text-center text-xs text-slate-400">
           New to Deku Finance?{" "}
-          <Link href="/signup" className="font-bold text-amber-400 hover:underline">
+          <Link href="/signup" className="font-bold text-brand hover:underline">
             Create Free Workspace ➔
           </Link>
         </p>
@@ -428,8 +428,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
-          <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
+        <div className="min-h-screen bg-panel-deep flex items-center justify-center text-white">
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
       }
     >

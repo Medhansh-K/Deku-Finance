@@ -434,7 +434,7 @@ export function OperatingExpensesView() {
               </div>
             </div>
 
-            <div className="border border-line rounded overflow-hidden">
+            <div className="border border-line rounded overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead className="bg-panel text-white text-[11px]">
                   <tr>
