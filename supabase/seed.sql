@@ -46,6 +46,12 @@ BEGIN
     (v_studio, '44444444-4444-4444-8444-444444444444', 'owner')
   ON CONFLICT (organisation_id, user_id) DO NOTHING;
 
+  -- The demo companies keep their plan instead of running out with the 20-day trial they got on insert.
+  UPDATE public.subscriptions
+     SET plan_code = CASE WHEN organisation_id = v_org THEN 'pro' ELSE 'go' END,
+         status = 'active', trial_ends_at = NULL, current_period_end = NULL
+   WHERE organisation_id IN (v_org, v_studio) AND status IN ('trialing', 'active', 'past_due');
+
   IF NOT EXISTS (SELECT 1 FROM public.accounts WHERE organisation_id = v_org) THEN
     PERFORM public.seed_default_chart_of_accounts(v_org);
   END IF;

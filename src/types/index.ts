@@ -1,38 +1,5 @@
 export type OperatingMode = "pure_accounting" | "gst_enterprise";
 
-export type LicenseType = "temp" | "plan";
-export type PlanTier = "go" | "pro";
-export type LicenseStatus =
-  | "pending_activation"
-  | "active"
-  | "grace_period"
-  | "expired"
-  | "revoked";
-
-export interface OrganisationLicense {
-  id: string;
-  organisation_id: string;
-  license_key: string;
-  license_type: LicenseType;
-  plan_tier: PlanTier;
-  owner_email: string;
-  issued_at: string;
-  trial_ends_at?: string; // 15 days from issue
-  grace_period_ends_at?: string; // 20 days from issue (5 days migration/purchase)
-  expires_at: string; // Hard termination
-  status: LicenseStatus;
-  activated_at?: string;
-  activated_by_email?: string;
-  last_email_sent_at?: string;
-  features: {
-    max_monthly_bills: number;
-    has_gstn_json: boolean;
-    has_custom_fields: boolean;
-    has_upi_qr: boolean;
-    seats: number;
-  };
-}
-
 export interface UserProfile {
   id: string;
   email: string;
@@ -62,7 +29,6 @@ export interface Organisation {
   udyam_number?: string;
   composition_scheme?: boolean;
   onboarded_at?: string;
-  license?: OrganisationLicense;
 }
 
 export interface RegisteredAddress {

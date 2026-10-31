@@ -2,36 +2,21 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { organisationsApi, OrgSummary } from "@/api/endpoints";
+import { organisationsApi, OrgSummary, subscriptionApi } from "@/api/endpoints";
 import { orgFromRow } from "@/lib/organisation/profile";
-import {
-  UserProfile,
-  Organisation,
-  OperatingMode,
-  OrganisationLicense,
-  PlanTier,
-  LicenseType,
-} from "@/types";
-
-export interface EmailNotification {
-  visible: boolean;
-  to: string;
-  licenseKey: string;
-  licenseType: LicenseType;
-  planTier: PlanTier;
-  subject: string;
-  sentAt: string;
-}
+import type { Entitlements, Subscription } from "@/lib/subscription/entitlements";
+import { UserProfile, Organisation, OperatingMode } from "@/types";
 
 interface AuthContextType {
   user: UserProfile | null;
   organisation: Organisation | null;
   organisations: Organisation[];
-  license: OrganisationLicense | null;
+  /** The selected company's plan, from the server; null until loaded or if it could not be read. */
+  subscription: Subscription | null;
+  entitlements: Entitlements | null;
+  refreshSubscription: () => Promise<void>;
   isLoading: boolean;
   operatingMode: OperatingMode;
-  emailNotification: EmailNotification | null;
-  dismissEmailNotification: () => void;
   setOrganisation: (org: Organisation) => void;
   /** Re-reads the companies from the database, e.g. after the profile changed. */
   refreshOrganisations: () => Promise<void>;
@@ -42,62 +27,11 @@ interface AuthContextType {
     fullName: string,
     businessName: string,
     mode: OperatingMode,
-    state: string,
-    plan?: PlanTier
+    state: string
   ) => Promise<{ error?: string }>;
-  activateLicense: (
-    licenseKey: string,
-    ownerEmail: string,
-    pass?: string
-  ) => Promise<{ success: boolean; error?: string }>;
-  sendActivationEmail: (
-    email: string
-  ) => Promise<{ success: boolean; licenseKey?: string; message?: string }>;
   loginDemo: (type: "owner" | "accountant" | "freelancer") => Promise<void>;
   logout: () => Promise<void>;
 }
-
-export const createDefaultLicense = (
-  orgId: string,
-  ownerEmail: string,
-  type: LicenseType = "temp",
-  tier: PlanTier = "go"
-): OrganisationLicense => {
-  const now = new Date();
-  const trialEnds = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000); // 15 days unrestricted
-  const graceEnds = new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000); // 20 days (5 days migration/purchase)
-  const randomSuffix =
-    Math.random().toString(36).substring(2, 6).toUpperCase() +
-    "-" +
-    Math.random().toString(36).substring(2, 6).toUpperCase();
-
-  return {
-    id: crypto.randomUUID(),
-    organisation_id: orgId,
-    license_key: `DEKU-${type.toUpperCase()}-${tier.toUpperCase()}-${randomSuffix}`,
-    license_type: type,
-    plan_tier: tier,
-    owner_email: ownerEmail,
-    issued_at: now.toISOString(),
-    trial_ends_at: type === "temp" ? trialEnds.toISOString() : undefined,
-    grace_period_ends_at: type === "temp" ? graceEnds.toISOString() : undefined,
-    expires_at:
-      type === "temp"
-        ? graceEnds.toISOString()
-        : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "active",
-    activated_at: now.toISOString(),
-    activated_by_email: ownerEmail,
-    last_email_sent_at: now.toISOString(),
-    features: {
-      max_monthly_bills: tier === "go" ? 150 : -1,
-      has_gstn_json: tier === "pro",
-      has_custom_fields: true,
-      has_upi_qr: true,
-      seats: tier === "go" ? 2 : -1,
-    },
-  };
-};
 
 // Sandbox accounts from the demo seed (seed.sql). They belong only to fictional demo companies,
 // so row-level security keeps demo visitors out of every real tenant.
@@ -147,12 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [organisation, setOrg] = useState<Organisation | null>(null);
   const [organisations, setOrganisations] = useState<Organisation[]>([]);
-  const [license, setLicense] = useState<OrganisationLicense | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [operatingMode, setOperatingModeState] =
     useState<OperatingMode>("pure_accounting");
-  const [emailNotification, setEmailNotification] =
-    useState<EmailNotification | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -160,10 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setOrganisation = (org: Organisation) => {
     setOrg(org);
     setOperatingModeState(org.operating_mode);
-    if (org.license) {
-      setLicense(org.license);
-      localStorage.setItem("deku_active_license", JSON.stringify(org.license));
-    }
     // Only the selected company (a per-browser choice) is remembered; its profile comes from the database.
     localStorage.setItem("deku_active_org_id", org.id);
     localStorage.setItem("deku_active_org_name", org.name);
@@ -178,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   // Companies come from the database; row-level security returns only this user's.
-  const loadOrganisations = async (email: string, businessName?: string) => {
+  const loadOrganisations = async (businessName?: string) => {
     try {
       let list: OrgSummary[] = (await organisationsApi.list()).data || [];
       if (list.length === 0 && businessName) {
@@ -186,18 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await organisationsApi.create({ name: businessName, slug: slugify(businessName) });
         list = (await organisationsApi.list()).data || [];
       }
-      let savedLicense: OrganisationLicense | null = null;
-      try {
-        savedLicense = JSON.parse(localStorage.getItem("deku_active_license") || "null");
-      } catch {
-        // ignore a corrupt saved license
-      }
-      // shortcut: licenses are still issued client-side; move them to the backend licenses API.
-      const orgs: Organisation[] = list.map((o) => ({
-        ...orgFromRow(o),
-        license:
-          savedLicense?.organisation_id === o.id ? savedLicense : createDefaultLicense(o.id, email),
-      }));
+      const orgs: Organisation[] = list.map(orgFromRow);
       setOrganisations(orgs);
       const savedId = localStorage.getItem("deku_active_org_id");
       const active = orgs.find((o) => o.id === savedId) ?? orgs[0];
@@ -209,12 +126,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const startSession = async (u: SessionUser, businessName?: string) => {
     setUser(toUser(u));
-    await loadOrganisations(u.email || "", businessName ?? u.business_name);
+    await loadOrganisations(businessName ?? u.business_name);
   };
 
   const refreshOrganisations = async () => {
-    if (user) await loadOrganisations(user.email);
+    if (user) await loadOrganisations();
   };
+
+  // `isCurrent` drops a late answer for a company the user has already switched away from.
+  const loadSubscription = async (orgId: string, isCurrent: () => boolean = () => true) => {
+    try {
+      const data = (await subscriptionApi.get(orgId)).data ?? null;
+      if (isCurrent()) setSubscription(data);
+    } catch (e) {
+      console.error("Failed to load the plan:", e);
+      if (isCurrent()) setSubscription(null);
+    }
+  };
+
+  const refreshSubscription = async () => {
+    if (organisation) await loadSubscription(organisation.id);
+  };
+
+  const activeOrgId = organisation?.id;
+  useEffect(() => {
+    setSubscription(null);
+    if (!activeOrgId) return;
+    let current = true;
+    void loadSubscription(activeOrgId, () => current);
+    return () => {
+      current = false;
+    };
+  }, [activeOrgId]);
 
   // A company that hasn't finished onboarding goes to the wizard first, whatever page was asked for.
   useEffect(() => {
@@ -234,117 +177,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const dismissEmailNotification = () => {
-    setEmailNotification(null);
-  };
-
-  const sendActivationEmail = async (email: string) => {
-    const targetEmail = email.trim();
-    if (!targetEmail) {
-      return { success: false, message: "Please provide a valid email." };
-    }
-
-    // Determine or generate license key
-    let targetKey = license?.license_key;
-    if (!targetKey) {
-      const newLic = createDefaultLicense(
-        organisation?.id || crypto.randomUUID(),
-        targetEmail,
-        "temp",
-        "go"
-      );
-      targetKey = newLic.license_key;
-      setLicense(newLic);
-      localStorage.setItem("deku_active_license", JSON.stringify(newLic));
-    }
-
-    setEmailNotification({
-      visible: true,
-      to: targetEmail,
-      licenseKey: targetKey,
-      licenseType: license?.license_type || "temp",
-      planTier: license?.plan_tier || "go",
-      subject: `[Deku Finance] Workspace License Activation Key (${targetKey})`,
-      sentAt: new Date().toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    });
-
-    return {
-      success: true,
-      licenseKey: targetKey,
-      message: `License activation email successfully dispatched to ${targetEmail}.`,
-    };
-  };
-
-  const activateLicense = async (
-    licenseKey: string,
-    ownerEmail: string,
-    pass?: string
-  ) => {
-    const cleanKey = licenseKey.trim().toUpperCase();
-    const cleanEmail = ownerEmail.trim().toLowerCase();
-
-    if (!cleanKey) {
-      return { success: false, error: "Please provide a license key." };
-    }
-    if (!cleanEmail) {
-      return { success: false, error: "Please provide the owner's email." };
-    }
-
-    // Basic format check
-    if (!cleanKey.startsWith("DEKU-")) {
-      return {
-        success: false,
-        error: "Invalid license key format. Keys start with DEKU-TEMP- or DEKU-PLAN-.",
-      };
-    }
-
-    const isTemp = cleanKey.includes("-TEMP-");
-    const isPro = cleanKey.includes("-PRO-");
-    const now = new Date();
-    const trialEnds = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
-    const graceEnds = new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000);
-
-    const activatedLicense: OrganisationLicense = {
-      id: license?.id || crypto.randomUUID(),
-      organisation_id: organisation?.id || crypto.randomUUID(),
-      license_key: cleanKey,
-      license_type: isTemp ? "temp" : "plan",
-      plan_tier: isPro ? "pro" : "go",
-      owner_email: cleanEmail,
-      issued_at: license?.issued_at || now.toISOString(),
-      trial_ends_at: isTemp ? trialEnds.toISOString() : undefined,
-      grace_period_ends_at: isTemp ? graceEnds.toISOString() : undefined,
-      expires_at: isTemp
-        ? graceEnds.toISOString()
-        : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      status: "active",
-      activated_at: now.toISOString(),
-      activated_by_email: cleanEmail,
-      features: {
-        max_monthly_bills: isPro ? -1 : 150,
-        has_gstn_json: isPro,
-        has_custom_fields: true,
-        has_upi_qr: true,
-        seats: isPro ? -1 : 2,
-      },
-    };
-
-    setLicense(activatedLicense);
-    localStorage.setItem(
-      "deku_active_license",
-      JSON.stringify(activatedLicense)
-    );
-
-    if (organisation) {
-      setOrg({ ...organisation, license: activatedLicense });
-    }
-
-    return { success: true };
-  };
-
   const login = async (email: string, pass: string) => {
     setIsLoading(true);
     try {
@@ -356,9 +188,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (u) {
         await startSession(u);
-
-        // Automatically trigger activation email dispatch record for the logged in user
-        await sendActivationEmail(email);
       }
       return {};
     } catch (err: unknown) {
@@ -376,8 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fullName: string,
     businessName: string,
     mode: OperatingMode,
-    state: string,
-    plan: PlanTier = "go"
+    state: string
   ) => {
     setIsLoading(true);
     try {
@@ -393,9 +221,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         return { error };
       }
-      // Dispatch activation email on signup
-      await sendActivationEmail(email);
-
       if (u) {
         // The company is created from the business name on this first load.
         await startSession(u, businessName);
@@ -431,7 +256,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setOrg(null);
     setOrganisations([]);
-    for (const key of ["deku_active_org", "deku_active_license", "deku_active_org_id", "deku_active_org_name", "deku_operating_mode"]) {
+    setSubscription(null);
+    for (const key of ["deku_active_org", "deku_active_org_id", "deku_active_org_name", "deku_operating_mode"]) {
       localStorage.removeItem(key);
     }
   };
@@ -442,17 +268,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         organisation,
         organisations,
-        license,
+        subscription,
+        entitlements: subscription?.entitlements ?? null,
+        refreshSubscription,
         isLoading,
         operatingMode,
-        emailNotification,
-        dismissEmailNotification,
         setOrganisation,
         refreshOrganisations,
         login,
         signup,
-        activateLicense,
-        sendActivationEmail,
         loginDemo,
         logout,
       }}

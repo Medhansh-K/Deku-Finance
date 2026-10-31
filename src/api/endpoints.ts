@@ -21,6 +21,7 @@ import {
 import type { ControlKind, KpiSnapshot, PartyAgeingRow } from "@/lib/reports/ledger";
 import type { ExpenseBreakdown } from "@/lib/reports/expenses";
 import type { RegisteredAddress } from "@/types";
+import type { Subscription } from "@/lib/subscription/entitlements";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -726,6 +727,12 @@ export const purchasesApi = {
     apiClient<ApiResponse<PurchaseBillRow[]>>(`/api/v1/organisations/${orgId}/purchases/${billId}`, {
       method: "DELETE",
     }),
+};
+
+/** Deku's own plan; trials start and limits are enforced in the database. */
+export const subscriptionApi = {
+  get: (orgId: string) =>
+    apiClient<ApiResponse<Subscription>>(`/api/v1/organisations/${orgId}/subscription`),
 };
 
 export type GstReturnType = "gstr1" | "gstr3b";

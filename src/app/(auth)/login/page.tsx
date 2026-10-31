@@ -22,23 +22,17 @@ import {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, loginDemo, user, activateLicense, sendActivationEmail } = useAuth();
+  const { login, loginDemo, user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"login" | "activate">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [licenseKey, setLicenseKey] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState("");
-  const [ownerPassword, setOwnerPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState(() => {
     const err = searchParams.get("error");
     if (err === "auth_code_error") return "Authentication link expired or invalid.";
     return "";
   });
-  const [successMsg, setSuccessMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
 
   // If already logged in, redirect
@@ -49,56 +43,13 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setSuccessMsg("");
     setIsLoading(true);
-
-    if (activeTab === "activate") {
-      const res = await activateLicense(licenseKey, ownerEmail, ownerPassword);
-      if (!res.success) {
-        setErrorMsg(res.error || "License activation failed.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Also sign in or start session for owner
-      const loginRes = await login(ownerEmail, ownerPassword);
-      setIsLoading(false);
-      if (loginRes.error) {
-        // If password login fails, proceed with demo/activated session
-        setSuccessMsg("License activated successfully! Entering workspace...");
-        setTimeout(() => router.push("/gateway"), 1000);
-      } else {
-        router.push("/gateway");
-      }
+    const res = await login(email, password);
+    setIsLoading(false);
+    if (res.error) {
+      setErrorMsg(res.error);
     } else {
-      const res = await login(email, password);
-      setIsLoading(false);
-
-      if (res.error) {
-        setErrorMsg(res.error);
-      } else {
-        router.push("/gateway");
-      }
-    }
-  };
-
-  const handleSendLicenseEmail = async () => {
-    const target = activeTab === "activate" ? ownerEmail : email;
-    if (!target) {
-      setErrorMsg("Please enter your work email to receive the license key.");
-      return;
-    }
-    setErrorMsg("");
-    setIsSendingEmail(true);
-    const res = await sendActivationEmail(target);
-    setIsSendingEmail(false);
-    if (res.success) {
-      setSuccessMsg(`✓ Activation email sent! Check simulated inbox toast below.`);
-      if (res.licenseKey && activeTab === "activate") {
-        setLicenseKey(res.licenseKey);
-      }
-    } else {
-      setErrorMsg(res.message || "Failed to dispatch email.");
+      router.push("/gateway");
     }
   };
 
@@ -146,13 +97,6 @@ function LoginForm() {
             </div>
           )}
 
-          {successMsg && (
-            <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3.5 flex items-center gap-2.5 text-xs text-emerald-300">
-              <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
           {/* Quick Sandbox / Instant Demo Options */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
@@ -160,7 +104,7 @@ function LoginForm() {
                 <Zap className="h-3.5 w-3.5 fill-brand" />
                 Instant Demo Sandbox
               </span>
-              <span className="text-[10px] text-slate-500">Pre-activated licenses</span>
+              <span className="text-[10px] text-slate-500">Fictional sample companies</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -186,7 +130,7 @@ function LoginForm() {
               >
                 <div className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>GO Temp (15d)</span>
+                  <span>GO Freelancer</span>
                 </div>
                 {demoLoading === "freelancer" && (
                   <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
@@ -195,133 +139,14 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Tab Selector: Standard Login vs Activate with License Key */}
-          <div className="flex bg-panel-deep p-1 rounded-xl border border-edge text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("login");
-                setErrorMsg("");
-                setSuccessMsg("");
-              }}
-              className={`flex-1 py-2 rounded-lg transition-all ${
-                activeTab === "login"
-                  ? "bg-brand text-panel-deep font-bold shadow-xs"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("activate");
-                setErrorMsg("");
-                setSuccessMsg("");
-              }}
-              className={`flex-1 py-2 rounded-lg transition-all ${
-                activeTab === "activate"
-                  ? "bg-brand text-panel-deep font-bold shadow-xs"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              🔑 Activate License
-            </button>
-          </div>
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
-            {activeTab === "activate" ? (
-              <>
-                {/* License Key Field */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-300">
-                      License Key *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleSendLicenseEmail}
-                      disabled={isSendingEmail}
-                      className="text-[11px] font-medium text-brand hover:underline flex items-center gap-1"
-                    >
-                      <Mail className="h-3 w-3" />
-                      <span>{isSendingEmail ? "Sending..." : "Email My Key"}</span>
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={licenseKey}
-                    onChange={(e) => setLicenseKey(e.target.value)}
-                    placeholder="e.g. DEKU-TEMP-GO-7506-4610"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs font-mono font-bold text-brand-soft placeholder-slate-600 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all uppercase"
-                  />
-                  <span className="text-[10px] text-slate-500 mt-1 block">
-                    Temp license: 15-day trial + 5-day migration period (20d total access).
-                  </span>
-                </div>
-
-                {/* Owner Email */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Owner's Registered Email *
-                  </label>
-                  <div className="relative">
-                    <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="email"
-                      required
-                      value={ownerEmail}
-                      onChange={(e) => setOwnerEmail(e.target.value)}
-                      placeholder="owner@business.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Owner Password */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Owner's Password *
-                  </label>
-                  <div className="relative">
-                    <Lock className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={ownerPassword}
-                      onChange={(e) => setOwnerPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
                 {/* Standard Login Email */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-semibold text-slate-300">
                       Work Email Address
                     </label>
-                    <button
-                      type="button"
-                      onClick={handleSendLicenseEmail}
-                      disabled={isSendingEmail}
-                      className="text-[11px] font-medium text-brand hover:underline flex items-center gap-1"
-                    >
-                      <Mail className="h-3 w-3" />
-                      <span>{isSendingEmail ? "Sending..." : "Send Activation Email"}</span>
-                    </button>
                   </div>
                   <div className="relative">
                     <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -372,8 +197,6 @@ function LoginForm() {
                     </button>
                   </div>
                 </div>
-              </>
-            )}
 
             <button
               type="submit"
@@ -383,19 +206,11 @@ function LoginForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin text-panel-deep" />
-                  <span>
-                    {activeTab === "activate"
-                      ? "Verifying & Activating..."
-                      : "Authenticating..."}
-                  </span>
+                  <span>Authenticating...</span>
                 </>
               ) : (
                 <>
-                  <span>
-                    {activeTab === "activate"
-                      ? "Verify & Activate Organisation"
-                      : "Sign In to Workspace"}
-                  </span>
+                  <span>Sign In to Workspace</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
@@ -408,7 +223,7 @@ function LoginForm() {
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
               <span>Zero password sharing • 256-Bit SSL Encryption</span>
             </div>
-            <span>Support & Activation Helpline: <strong>+91 7506461004</strong></span>
+            <span>Support Helpline: <strong>+91 7506461004</strong></span>
           </div>
         </div>
 
