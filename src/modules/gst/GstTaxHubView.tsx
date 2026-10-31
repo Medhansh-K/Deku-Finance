@@ -74,6 +74,19 @@ export function GstTaxHubView() {
     loadData();
   }, [orgId]);
 
+  // ?invoice=<id> (e.g. a quotation just converted in the Document Builder) opens that invoice once.
+  const [linkedInvoiceId, setLinkedInvoiceId] = useState<string | null>(null);
+  useEffect(() => {
+    setLinkedInvoiceId(new URLSearchParams(window.location.search).get("invoice"));
+  }, []);
+  useEffect(() => {
+    const inv = linkedInvoiceId && invoices.find((i) => i.id === linkedInvoiceId);
+    if (!inv) return;
+    setSelectedInvoice(inv);
+    setIsDetailOpen(true);
+    setLinkedInvoiceId(null);
+  }, [linkedInvoiceId, invoices]);
+
   // Issue invoice with atomic double-entry journal creation
   const handleIssueInvoice = async (invId: string) => {
     if (

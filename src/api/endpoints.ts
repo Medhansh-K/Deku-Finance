@@ -22,6 +22,7 @@ import type { ControlKind, KpiSnapshot, PartyAgeingRow } from "@/lib/reports/led
 import type { ExpenseBreakdown } from "@/lib/reports/expenses";
 import type { RegisteredAddress } from "@/types";
 import type { Subscription } from "@/lib/subscription/entitlements";
+import type { BusinessDocStatus, BusinessDocument, SavePayload } from "@/lib/builder/business-documents";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -398,6 +399,39 @@ export const invoicesApi = {
         body: JSON.stringify({ reason }),
       }
     ),
+};
+
+export const businessDocumentsApi = {
+  list: (orgId: string, filter: { doc_type?: string; status?: string } = {}) => {
+    const qs = new URLSearchParams(Object.entries(filter).filter(([, v]) => v) as [string, string][]).toString();
+    return apiClient<ApiResponse<BusinessDocument[]>>(
+      `/api/v1/organisations/${orgId}/business-documents${qs ? `?${qs}` : ""}`
+    );
+  },
+  get: (orgId: string, docId: string) =>
+    apiClient<ApiResponse<BusinessDocument[]>>(`/api/v1/organisations/${orgId}/business-documents/${docId}`),
+  create: (orgId: string, payload: SavePayload) =>
+    apiClient<ApiResponse<BusinessDocument>>(`/api/v1/organisations/${orgId}/business-documents`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  update: (orgId: string, docId: string, payload: SavePayload) =>
+    apiClient<ApiResponse<BusinessDocument>>(`/api/v1/organisations/${orgId}/business-documents/${docId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+  remove: (orgId: string, docId: string) =>
+    apiClient<ApiResponse<unknown>>(`/api/v1/organisations/${orgId}/business-documents/${docId}`, { method: "DELETE" }),
+  setStatus: (orgId: string, docId: string, status: BusinessDocStatus) =>
+    apiClient<ApiResponse<BusinessDocument[]>>(`/api/v1/organisations/${orgId}/business-documents/${docId}/status`, {
+      method: "POST",
+      body: JSON.stringify({ status }),
+    }),
+  convert: (orgId: string, docId: string, invoiceNumber: string) =>
+    apiClient<ApiResponse<BusinessDocument>>(`/api/v1/organisations/${orgId}/business-documents/${docId}/convert`, {
+      method: "POST",
+      body: JSON.stringify({ invoice_number: invoiceNumber }),
+    }),
 };
 
 export const notesApi = {

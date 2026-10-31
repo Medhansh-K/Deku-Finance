@@ -9,6 +9,7 @@ pub mod audit;
 pub mod departments;
 pub mod subscriptions;
 pub mod documents;
+pub mod documents_builder;
 pub mod consultant;
 pub mod banking;
 pub mod purchases;
@@ -77,6 +78,10 @@ fn api_routes(state: AppState) -> Router {
         .nest(
             "/organisations/:org_id/documents",
             documents::routes(state.clone()),
+        )
+        .nest(
+            "/organisations/:org_id/business-documents",
+            documents_builder::routes(state.clone()),
         )
         .nest(
             "/organisations/:org_id/consultant",
