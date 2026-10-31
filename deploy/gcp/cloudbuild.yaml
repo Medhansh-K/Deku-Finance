@@ -1,0 +1,108 @@
+# Release: build and push the three images, run migrations, then deploy.
+# gcloud builds submit --config deploy/gcp/cloudbuild.yaml \
+#   --service-account=projects/PROJECT/serviceAccounts/deku-build@PROJECT.iam.gserviceaccount.com \
+#   --substitutions=_REGION=asia-south1,_REPO=deku,_INSTANCE=deku-pg
+# Each deploy is create-or-update, so this file is the single source of truth for Cloud Run config.
+substitutions:
+  _REGION: asia-south1
+  _REPO: deku
+  _INSTANCE: deku-pg
+  _POSTGREST_IMAGE: docker.io/postgrest/postgrest:v12.2.3
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - id: build-migrate
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "db/Dockerfile", "-t", "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-migrate:${BUILD_ID}", "."]
+    waitFor: ["-"]
+  - id: build-backend
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-backend:${BUILD_ID}", "backend"]
+    waitFor: ["-"]
+  - id: build-frontend
+    name: gcr.io/cloud-builders/docker
+    args: ["build", "-t", "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-frontend:${BUILD_ID}", "."]
+    waitFor: ["-"]
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        for img in deku-migrate deku-backend deku-frontend; do
+          docker push "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/$$img:${BUILD_ID}"
+        done
+    waitFor: ["build-migrate", "build-backend", "build-frontend"]
+
+  # Migrations run before any new code is served; they must stay compatible with the running revision.
+  - id: migrate
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - deploy
+      - deku-migrate
+      - --region=${_REGION}
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-migrate:${BUILD_ID}
+      - --service-account=deku-migrate@${PROJECT_ID}.iam.gserviceaccount.com
+      - --set-cloudsql-instances=${PROJECT_ID}:${_REGION}:${_INSTANCE}
+      - --set-secrets=DATABASE_URL=MIGRATE_DATABASE_URL:latest,AUTHENTICATOR_PASSWORD=AUTHENTICATOR_PASSWORD:latest
+      - --set-env-vars=DEKU_SEED_DEMO=false
+      - --max-retries=0
+      - --task-timeout=10m
+      - --execute-now
+      - --wait
+
+  - id: deploy-postgrest
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - deku-postgrest
+      - --region=${_REGION}
+      - --image=${_POSTGREST_IMAGE}
+      - --service-account=deku-postgrest@${PROJECT_ID}.iam.gserviceaccount.com
+      - --ingress=internal
+      # No IAM check: the JWT verified by PostgREST is the gate, and only the VPC can reach it.
+      - --allow-unauthenticated
+      - --port=3000
+      - --set-cloudsql-instances=${PROJECT_ID}:${_REGION}:${_INSTANCE}
+      - --set-secrets=PGRST_DB_URI=PGRST_DB_URI:latest,PGRST_JWT_SECRET=JWT_SECRET:latest
+      - --set-env-vars=PGRST_DB_SCHEMAS=public,PGRST_DB_ANON_ROLE=anon,PGRST_JWT_AUD=deku
+
+  - id: deploy-backend
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        postgrest_url=$$(gcloud run services describe deku-postgrest --region=${_REGION} --format='value(status.url)')
+        gcloud run deploy deku-backend --region=${_REGION} \
+          --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-backend:${BUILD_ID} \
+          --service-account=deku-backend@${PROJECT_ID}.iam.gserviceaccount.com \
+          --allow-unauthenticated --port=8080 \
+          --network=default --subnet=default --vpc-egress=all-traffic \
+          --set-secrets=JWT_SECRET=JWT_SECRET:latest \
+          --set-env-vars=POSTGREST_URL=$$postgrest_url
+
+  - id: deploy-frontend
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -e
+        backend_url=$$(gcloud run services describe deku-backend --region=${_REGION} --format='value(status.url)')
+        gcloud run deploy deku-frontend --region=${_REGION} \
+          --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-frontend:${BUILD_ID} \
+          --service-account=deku-frontend@${PROJECT_ID}.iam.gserviceaccount.com \
+          --allow-unauthenticated --port=3000 \
+          --set-secrets=JWT_SECRET=JWT_SECRET:latest \
+          --set-env-vars=BACKEND_URL=$$backend_url

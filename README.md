@@ -20,7 +20,7 @@ Deku Finance is an enterprise-grade accounting and financial management platform
 └───────────────────────────┬────────────────────────────┘
                             │ SQL & Triggers
 ┌───────────────────────────▼────────────────────────────┐
-│                    Supabase PostgreSQL                 │
+│          PostgreSQL 16 (via PostgREST, RLS)            │
 │   ALERX 4-Tier Hierarchy • Ledger Balances View        │
 │    Atomic Journal Posting • Immutability & Reversals   │
 └────────────────────────────────────────────────────────┘
@@ -120,42 +120,25 @@ On the **Gateway of Deku** (`/gateway`), pressing highlighted keys instantly nav
 
 ## 🚀 Development Setup
 
-### Prerequisites
-- Node.js 22+
-- Rust & Cargo (1.75+)
-- PostgreSQL / Supabase
-
-### 0. Database
+### Quick start (Docker)
 ```bash
-supabase db push     # apply migrations to your project
-supabase db reset    # local only: migrations + demo sandbox from supabase/seed.sql
+cp .env.example .env      # optional: compose falls back to the same dev-only values
+docker compose up --build
+# http://localhost:3000 (demo sandbox loaded; backend on :8080)
 ```
-For a hosted project, run `supabase/seed.sql` once in the SQL editor to create the demo sandbox.
+Compose runs Postgres 16, the `migrate` job (applies `supabase/migrations/*.sql` in order, records them in
+`public.schema_migrations`, loads `supabase/seed.sql`), PostgREST, the Rust backend and the Next.js frontend.
+There is no Supabase: login is handled by the backend (see `docs/PLATFORM_ARCHITECTURE.md`).
+Production runs on GCP: `deploy/gcp/README.md`.
 
-### 1. Start the Rust Backend
+### Frontend from source
 ```bash
-cd backend
-cargo run
-# Authoritative server starts on http://127.0.0.1:8080
-```
-
-### 2. Start the Frontend
-```bash
-# In repository root
-npm install
-npm run dev
-# Web application starts on http://localhost:3000
-```
-
-### 3. Run Production Build
-```bash
-npm run build
-# Compiles all 31 App Router pages with Next.js Turbopack
+docker compose stop frontend && npm install && npm run dev   # reads BACKEND_URL / JWT_SECRET from .env
 ```
 
 ### 4. Run Automated Tests
 ```bash
-bash supabase/tests/run_local.sh   # all migrations + seed + SQL tests on Postgres in Docker
+bash supabase/tests/run_local.sh   # all migrations + seed (twice) + SQL tests on Postgres in Docker
 npm test
 # Executes Vitest suite testing formatters, accounting math, and UI components
 ```
@@ -165,7 +148,7 @@ npm test
 ## 🔒 Security & Data Integrity
 - All financial balances are queried directly from authoritative PostgreSQL views and Axum endpoints (`/reports/...`, `/accounts`, `/journals`).
 - Frontend performs client-side double-entry pre-validation to prevent network roundtrips for unbalanced entries while the backend enforces database transactions atomically.
-- Every API call runs as the signed-in user, so Supabase row-level security decides what each person sees. The backend has no service-role fallback and rejects requests without a login.
+- Every API call runs as the signed-in user, so Postgres row-level security decides what each person sees. The backend has no service-role fallback and rejects requests without a login.
 - Database functions cannot be called with the public anon key (migration 18).
 - **No financial data leaves your infrastructure.** Invoices are read in the browser (PDF text layer, or on-device OCR for scans); the Deku Consultant answers from your own ledger on your own server. Nothing is sent to a third-party AI service.
 - Extracted values are never guessed: anything that cannot be read is left blank and flagged for the user.

@@ -1,0 +1,8 @@
+node_modules
+.next
+backend/target
+Media
+.claude
+.git
+.env*
+!.env.example
