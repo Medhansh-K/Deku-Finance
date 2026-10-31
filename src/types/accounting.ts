@@ -222,7 +222,15 @@ export interface BalanceSheetRow {
 
 // Invoices & GST Contracts
 export type InvoiceStatus = "draft" | "issued" | "cancelled" | "paid";
-export type SupplyType = "intra_state" | "inter_state";
+export type SupplyType = "intra_state" | "inter_state" | "export";
+
+export type InvoiceType =
+  | "tax_invoice"
+  | "bill_of_supply"
+  | "export_with_payment"
+  | "export_without_payment"
+  | "sez_with_payment"
+  | "sez_without_payment";
 
 export interface SalesInvoiceLine {
   id?: string;
@@ -260,7 +268,15 @@ export interface SalesInvoice {
   supply_type: SupplyType;
   place_of_supply: string;
   sales_channel?: string;
+  invoice_type?: InvoiceType;
+  shipping_bill_number?: string | null;
+  shipping_bill_date?: string | null;
+  port_code?: string | null;
   taxable_amount: number;
+  cgst_amount?: number;
+  sgst_amount?: number;
+  igst_amount?: number;
+  cess_amount?: number;
   round_off?: number;
   total_amount: number;
   notes?: string | null;
@@ -282,11 +298,49 @@ export interface CreateInvoiceRequest {
   supply_type: SupplyType;
   place_of_supply: string;
   sales_channel?: string;
+  invoice_type?: InvoiceType;
+  shipping_bill_number?: string;
+  shipping_bill_date?: string;
+  port_code?: string;
   taxable_amount: number;
   round_off?: number;
   total_amount: number;
   notes?: string;
   terms?: string;
+  lines: Omit<SalesInvoiceLine, "id" | "invoice_id">[];
+}
+
+export type NoteType = "credit" | "debit";
+
+/** A credit or debit note against an issued invoice (migration 31). */
+export interface SalesNote {
+  id: string;
+  organisation_id: string;
+  note_type: NoteType;
+  original_invoice_id: string;
+  customer_id: string;
+  note_number: string;
+  note_date: string;
+  reason_code: string;
+  reason?: string | null;
+  status: InvoiceStatus;
+  supply_type: SupplyType;
+  place_of_supply: string;
+  taxable_amount: number;
+  total_tax: number;
+  total_amount: number;
+  journal_entry_id?: string | null;
+  parties?: { legal_name: string; gstin?: string | null };
+  sales_invoices?: { invoice_number: string; invoice_date: string };
+}
+
+export interface CreateNoteRequest {
+  original_invoice_id: string;
+  note_type: NoteType;
+  note_number: string;
+  note_date: string;
+  reason_code: string;
+  reason?: string;
   lines: Omit<SalesInvoiceLine, "id" | "invoice_id">[];
 }
 

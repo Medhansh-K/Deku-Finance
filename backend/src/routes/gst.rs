@@ -85,12 +85,24 @@ async fn load_books(state: &AppState, token: Option<&str>, org_id: &str, period:
         ("bill_date", before.as_str()),
         ("order", "bill_date.asc,created_at.asc"),
     ];
-    let (orgs, invoices, accounts, journals, bills) = tokio::try_join!(
+    let note_q = [
+        (
+            "select",
+            "*,parties(gstin),sales_note_lines(*),sales_invoices(invoice_number,invoice_type,total_amount)",
+        ),
+        ("organisation_id", org.as_str()),
+        ("note_date", from.as_str()),
+        ("note_date", before.as_str()),
+        ("order", "note_date.asc,note_number.asc"),
+        ("sales_note_lines.order", "line_number.asc"),
+    ];
+    let (orgs, invoices, accounts, journals, bills, notes) = tokio::try_join!(
         state.db.query_table("organisations", &org_q, token),
         state.db.query_table("sales_invoices", &inv_q, token),
         state.db.query_table("accounts", &acc_q, token),
         state.db.query_table("journal_entries", &jnl_q, token),
         state.db.query_table("purchase_bills", &bill_q, token),
+        state.db.query_table("sales_notes", &note_q, token),
     )?;
 
     let org_row = orgs
@@ -104,6 +116,7 @@ async fn load_books(state: &AppState, token: Option<&str>, org_id: &str, period:
         accounts: rows(accounts, "accounts")?,
         journals: rows(journals, "journals")?,
         purchase_bills: rows(bills, "purchase bills")?,
+        notes: rows(notes, "credit/debit notes")?,
     })
 }
 

@@ -8,6 +8,8 @@ import {
   CatalogueItem,
   CreateAccountRequest,
   CreateInvoiceRequest,
+  CreateNoteRequest,
+  SalesNote,
   CreateJournalRequest,
   FiscalPeriod,
   GeneralLedgerRow,
@@ -370,6 +372,25 @@ export const invoicesApi = {
         method: "POST",
         body: JSON.stringify({ reason }),
       }
+    ),
+};
+
+export const notesApi = {
+  list: (orgId: string) => apiClient<ApiResponse<SalesNote[]>>(`/api/v1/organisations/${orgId}/notes`),
+  create: (orgId: string, payload: CreateNoteRequest) =>
+    apiClient<{ success: boolean; note: SalesNote[]; lines: unknown }>(`/api/v1/organisations/${orgId}/notes`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  issue: (orgId: string, noteId: string) =>
+    apiClient<{ success: boolean; message: string; note: SalesNote }>(
+      `/api/v1/organisations/${orgId}/notes/${noteId}/issue`,
+      { method: "POST" }
+    ),
+  cancel: (orgId: string, noteId: string, reason: string) =>
+    apiClient<{ success: boolean; message: string; note: SalesNote }>(
+      `/api/v1/organisations/${orgId}/notes/${noteId}/cancel`,
+      { method: "POST", body: JSON.stringify({ reason }) }
     ),
 };
 

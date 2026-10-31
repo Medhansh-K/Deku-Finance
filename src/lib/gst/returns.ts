@@ -10,7 +10,8 @@
  *
  * The app gets its returns from the backend port (backend/src/gst), which is the authority. These
  * builders stay only as the TypeScript side of the shared-fixture parity test; delete them once
- * the Rust tests have passed in CI.
+ * the Rust tests have passed in CI. Exports, SEZ supplies and credit/debit notes were added to the
+ * Rust side only (its tests cover them), so they are not ported here.
  */
 import type { Account, JournalEntry, SalesInvoice, SalesInvoiceLine } from "@/types/accounting";
 import { isValidGstin } from "@/lib/vouchers/invoice-text-parser";
@@ -76,10 +77,9 @@ export interface ReturnResult {
 
 export const GSTR1_NOT_COVERED = [
   "B2CL (inter-state invoices above ₹1 lakh to unregistered buyers): such invoices block the export",
-  "Exports (Table 6A): export invoices block the export",
-  "Credit/debit notes (CDNR/CDNUR), amendments, advances (11A/11B), e-commerce supplies",
-  "SEZ and deemed exports: every B2B invoice is reported as Regular (inv_typ R)",
-  "Table 8: invoices marked exempt are reported as exempt, not nil-rated or non-GST",
+  "Amendments, advances (11A/11B), e-commerce supplies and deemed exports",
+  "Credit/debit notes carrying cess, or raised against exempt invoices or bills of supply, block the export",
+  "Table 8: exempt invoices and bills of supply are reported as exempt, not nil-rated or non-GST",
 ];
 
 export const GSTR3B_NOT_COVERED = [

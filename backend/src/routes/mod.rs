@@ -13,6 +13,7 @@ pub mod consultant;
 pub mod banking;
 pub mod purchases;
 pub mod gst;
+pub mod notes;
 
 use axum::Router;
 use crate::postgrest::PostgrestClient;
@@ -72,4 +73,5 @@ fn api_routes(state: AppState) -> Router {
             purchases::routes(state.clone()),
         )
         .nest("/organisations/:org_id/gst", gst::routes(state.clone()))
+        .nest("/organisations/:org_id/notes", notes::routes(state.clone()))
 }
