@@ -413,12 +413,14 @@ export function buildGstr3b(input: Gstr3bInput): ReturnResult {
   const osup = ZERO();
   const zero = ZERO();
   const nilExempt = ZERO();
+  const eco = ZERO();
   const unreg = new Map<string, Amounts>();
   for (const { inv, ctin, pos, total } of checked) {
     if (inv.supply_type === "export") addInto(zero, total);
     else if (inv.supply_type === "exempt") addInto(nilExempt, total);
     else {
       addInto(osup, total);
+      if ((inv.sales_channel ?? "direct") !== "direct") addInto(eco, total);
       if (inv.supply_type === "inter_state" && !ctin) addInto(bucket(unreg, pos), total);
     }
   }
@@ -437,6 +439,8 @@ export function buildGstr3b(input: Gstr3bInput): ReturnResult {
     { section: "3.1(a) Outward taxable", amounts: rupees(osup) },
     { section: "3.1(b) Zero rated (exports)", amounts: rupees(zero) },
     { section: "3.1(c) Nil rated / exempt", amounts: rupees(nilExempt) },
+    // Information only, already inside 3.1(a): 3.1.1 is for tax the operator pays u/s 9(5) (notified services only).
+    { section: "3.1.1 Through e-commerce operators (information)", amounts: rupees(eco) },
     {
       section: bills.length ? "4(A)(5) Eligible ITC (purchase bills)" : "4 Eligible ITC (Input GST ledgers)",
       amounts: itc.errors.length ? null : rupees(itc.itc),

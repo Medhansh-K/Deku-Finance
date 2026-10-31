@@ -16,6 +16,7 @@ pub mod gst;
 pub mod hsn;
 pub mod notifications;
 pub mod notes;
+pub mod marketplace;
 
 use axum::Router;
 use crate::postgrest::PostgrestClient;
@@ -86,4 +87,8 @@ fn api_routes(state: AppState) -> Router {
         // Guarded by X-Deku-Cron-Secret instead of a caller token.
         .nest("/internal/notifications", notifications::internal_routes(state.clone()))
         .nest("/organisations/:org_id/notes", notes::routes(state.clone()))
+        .nest(
+            "/organisations/:org_id/marketplace",
+            marketplace::routes(state.clone()),
+        )
 }

@@ -18,7 +18,7 @@ const f = fixture as unknown as {
     purchase_bills: PurchaseBill[];
     bill_missing_reason: PurchaseBill;
   };
-  expected: { gstr1: unknown; gstr3b: unknown; gstr3b_bills_itc_elg: unknown };
+  expected: { gstr1: unknown; gstr3b: unknown; gstr3b_eco: unknown; gstr3b_bills_itc_elg: unknown };
 };
 const OUR = f.gstin;
 const PERIOD = f.ret_period;
@@ -62,6 +62,10 @@ describe("buildGstr3b", () => {
   it("computes 3.1, 3.2 and Table 4 from the books", () => {
     expect(r.errors).toEqual([]);
     expect(r.json).toEqual(f.expected.gstr3b);
+  });
+
+  it("reports marketplace sales under 3.1.1 as information, leaving the JSON unchanged", () => {
+    expect(r.summary.find((s) => s.section.startsWith("3.1.1"))!.amounts).toEqual(f.expected.gstr3b_eco);
   });
 
   it("marks ITC not computed and blocks when an Input ledger is credited", () => {
