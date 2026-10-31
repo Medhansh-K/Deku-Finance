@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { NotificationBell } from "@/modules/notifications/NotificationBell";
 
 interface NavItem {
   label: string;
@@ -202,6 +203,7 @@ export function AppSidebar({ companyName, onOpenCommandPalette, onOpenHelp, onNa
           <span className="block truncate text-sm text-slate-200">{user?.full_name || user?.email || "Signed out"}</span>
           {user?.is_demo && <span className="block text-xs text-amber-400">Demo sandbox</span>}
         </span>
+        <NotificationBell />
         <button onClick={onOpenHelp} className="rounded-md p-1.5 text-slate-500 hover:bg-panel hover:text-slate-200" title="Keyboard shortcuts (F1)" aria-label="Keyboard shortcuts">
           <HelpCircle className="h-4 w-4" />
         </button>
