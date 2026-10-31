@@ -20,11 +20,25 @@ pub enum AppError {
     Internal(String),
     /// 503: a switched-off integration.
     Unavailable(String),
+    /// 402: the company's plan limit (e.g. "seats") is used up.
+    PlanLimit(String),
+    /// 409: not enough stock of the named item.
+    StockInsufficient(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
+            AppError::PlanLimit(limit) => {
+                let status = StatusCode::PAYMENT_REQUIRED;
+                let body = json!({ "success": false, "error": "plan_limit", "limit": limit, "status": status.as_u16() });
+                return (status, Json(body)).into_response();
+            }
+            AppError::StockInsufficient(item) => {
+                let status = StatusCode::CONFLICT;
+                let body = json!({ "success": false, "error": "stock_insufficient", "item": item, "status": status.as_u16() });
+                return (status, Json(body)).into_response();
+            }
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),

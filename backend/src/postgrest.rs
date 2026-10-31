@@ -55,11 +55,8 @@ impl PostgrestClient {
         let status = resp.status();
         let body_text = resp.text().await.unwrap_or_default();
 
-        if status == reqwest::StatusCode::UNAUTHORIZED || status == reqwest::StatusCode::FORBIDDEN {
-            return Err(AppError::Unauthorized(format!("{} not permitted: {}", what, body_text)));
-        }
         if !status.is_success() {
-            return Err(AppError::Database(format!("{} error ({}): {}", what, status, body_text)));
+            return Err(map_error(status, &body_text, &what));
         }
         if body_text.trim().is_empty() {
             return Ok(Value::Null);
@@ -119,5 +116,77 @@ impl PostgrestClient {
             .header("Prefer", "return=representation")
             .query(query);
         self.send(req, format!("PostgREST delete from '{}'", table)).await
+    }
+}
+
+/// Turns the database's stable error codes (`plan_limit:<name>`, `stock_insufficient:<code>`,
+/// `Permission denied…`) into statuses the browser can act on instead of a raw 502.
+fn map_error(status: reqwest::StatusCode, body: &str, what: &str) -> AppError {
+    let message = serde_json::from_str::<serde_json::Value>(body)
+        .ok()
+        .and_then(|v| v.get("message").and_then(|m| m.as_str()).map(str::to_owned))
+        .unwrap_or_default();
+
+    if let Some(limit) = message.strip_prefix("plan_limit:") {
+        return AppError::PlanLimit(limit.trim().to_string());
+    }
+    if let Some(item) = message.strip_prefix("stock_insufficient:") {
+        return AppError::StockInsufficient(item.trim().to_string());
+    }
+    // Migration 016 spells it "Permission Denied", later ones "Permission denied".
+    if message.to_ascii_lowercase().starts_with("permission denied") {
+        return AppError::Forbidden(message);
+    }
+    if status == reqwest::StatusCode::UNAUTHORIZED {
+        AppError::Unauthorized(format!("{} not permitted: {}", what, body))
+    } else if status == reqwest::StatusCode::FORBIDDEN {
+        // A 401 would send the browser to the login page; a signed-in user lacking a grant is a 403.
+        AppError::Forbidden(format!("{} not permitted: {}", what, body))
+    } else {
+        AppError::Database(format!("{} error ({}): {}", what, status, body))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::response::IntoResponse;
+    use reqwest::StatusCode;
+
+    fn pgrst(message: &str) -> String {
+        serde_json::json!({ "code": "P0001", "message": message, "details": null, "hint": null }).to_string()
+    }
+
+    #[test]
+    fn plan_limit_is_402_with_the_limit_name() {
+        let err = map_error(StatusCode::BAD_REQUEST, &pgrst("plan_limit:seats"), "rpc");
+        assert!(matches!(&err, AppError::PlanLimit(l) if l == "seats"));
+        assert_eq!(err.into_response().status().as_u16(), 402);
+        let err = map_error(StatusCode::BAD_REQUEST, &pgrst("plan_limit:max_monthly_invoices"), "rpc");
+        assert!(matches!(&err, AppError::PlanLimit(l) if l == "max_monthly_invoices"));
+    }
+
+    #[test]
+    fn stock_insufficient_is_409_with_the_item() {
+        let err = map_error(StatusCode::BAD_REQUEST, &pgrst("stock_insufficient:SKU-01"), "rpc");
+        assert!(matches!(&err, AppError::StockInsufficient(i) if i == "SKU-01"));
+        assert_eq!(err.into_response().status().as_u16(), 409);
+    }
+
+    #[test]
+    fn permission_denied_is_403_in_either_spelling() {
+        for m in ["Permission denied: only the owner, CFO or admin can run payroll", "Permission Denied: Only Owners"] {
+            let err = map_error(StatusCode::BAD_REQUEST, &pgrst(m), "rpc");
+            assert!(matches!(&err, AppError::Forbidden(msg) if msg == m));
+            assert_eq!(err.into_response().status().as_u16(), 403);
+        }
+    }
+
+    #[test]
+    fn other_errors_keep_their_status_mapping() {
+        assert!(matches!(map_error(StatusCode::UNAUTHORIZED, "{}", "q"), AppError::Unauthorized(_)));
+        assert!(matches!(map_error(StatusCode::FORBIDDEN, "{}", "q"), AppError::Forbidden(_)));
+        assert!(matches!(map_error(StatusCode::BAD_REQUEST, &pgrst("email_taken"), "q"), AppError::Database(m) if m.contains("email_taken")));
+        assert!(matches!(map_error(StatusCode::BAD_GATEWAY, "not json", "q"), AppError::Database(_)));
     }
 }

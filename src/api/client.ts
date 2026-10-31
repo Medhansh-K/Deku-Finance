@@ -1,4 +1,5 @@
 import { ApiError, NetworkError } from "./errors";
+import { friendlyError } from "@/lib/errors/friendly";
 
 // Same-origin proxy: it attaches the httpOnly session cookie as a bearer token server-side.
 const API_BASE_URL = "/api/backend";
@@ -53,6 +54,7 @@ export async function apiClient<T>(
 
     if (!response.ok) {
       const errorMsg =
+        friendlyError(responseData, response.status) ||
         responseData?.message ||
         responseData?.error ||
         `HTTP Error ${response.status}: ${response.statusText}`;

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import {
   Sparkles,
   Send,
@@ -415,7 +416,8 @@ export function DekuConsultantView() {
   const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
 
   // Typewriter state for greeting
-  const [userName] = useState("Medhansh");
+  const { user } = useAuth();
+  const userName = user?.full_name || user?.email || "";
 
   // History sessions list
   const [historySessions] = useState([
@@ -748,7 +750,7 @@ export function DekuConsultantView() {
               </div>
               <div className="truncate text-left">
                 <div className="text-xs font-bold text-ink truncate">{userName}</div>
-                <div className="text-[10px] text-ink-muted truncate font-mono">medhansh@deku.finance</div>
+                <div className="text-[10px] text-ink-muted truncate font-mono">{user?.email}</div>
               </div>
             </div>
           </div>

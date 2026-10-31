@@ -353,15 +353,36 @@ async fn list_members(
     let token = extract_auth_token(&headers);
     let org_filter = format!("eq.{}", org_id);
     let query = [
-        ("select", "*,profiles:user_id(id,full_name,avatar_url)"),
+        ("select", "*"),
         ("organisation_id", &org_filter),
         ("order", "created_at.asc"),
     ];
 
-    let res = state
+    let mut res = state
         .db
         .query_table("organisation_members", &query, token)
         .await?;
+
+    // organisation_members.user_id references auth.users, not profiles, so PostgREST cannot
+    // embed profiles; fetch them separately (RLS lets peers read each other's profile).
+    let ids: Vec<&str> = res
+        .as_array()
+        .map(|rows| rows.iter().filter_map(|r| r["user_id"].as_str()).collect())
+        .unwrap_or_default();
+    if !ids.is_empty() {
+        let id_filter = format!("in.({})", ids.join(","));
+        let profiles = state
+            .db
+            .query_table("profiles", &[("select", "id,email,full_name,avatar_url"), ("id", id_filter.as_str())], token)
+            .await?;
+        let profiles = profiles.as_array().cloned().unwrap_or_default();
+        if let Some(rows) = res.as_array_mut() {
+            for row in rows {
+                let profile = profiles.iter().find(|p| p["id"] == row["user_id"]).cloned().unwrap_or(Value::Null);
+                row["profiles"] = profile;
+            }
+        }
+    }
 
     Ok(Json(json!({
         "success": true,
@@ -383,15 +404,17 @@ async fn update_member_role(
         ("id", id_filter.as_str()),
     ];
 
-    let body = json!({
-        "role": payload.role,
-        "updated_at": "now()",
-    });
+    // updated_at is set by trg_org_members_updated_at; the text "now()" is not a timestamp.
+    let body = json!({ "role": payload.role });
 
     let res = state
         .db
         .update_table("organisation_members", &query, &body, token)
         .await?;
+    // RLS silently matches zero rows for someone who may not change roles.
+    if res.as_array().map_or(true, |rows| rows.is_empty()) {
+        return Err(AppError::Forbidden("Only an owner or admin can change roles".into()));
+    }
 
     Ok(Json(json!({
         "success": true,
@@ -416,6 +439,9 @@ async fn remove_member(
         .db
         .delete_table("organisation_members", &query, token)
         .await?;
+    if res.as_array().map_or(true, |rows| rows.is_empty()) {
+        return Err(AppError::Forbidden("Only an owner or admin can remove members".into()));
+    }
 
     Ok(Json(json!({
         "success": true,
