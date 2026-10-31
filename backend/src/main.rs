@@ -1,5 +1,6 @@
 mod auth;
 mod config;
+mod crypto;
 mod error;
 mod gst;
 mod models;
@@ -37,7 +38,11 @@ async fn main() {
         db: PostgrestClient::new(&config),
         jwt_secret: config.jwt_secret.clone(),
         cron_secret: config.cron_secret.clone(),
+        cipher: config.data_encryption_key.as_deref().and_then(crypto::Cipher::from_base64),
     };
+    if config.data_encryption_key.is_some() && state.cipher.is_none() {
+        panic!("DATA_ENCRYPTION_KEY must be base64 of exactly 32 bytes");
+    }
 
     // 4. Configure CORS: only explicitly configured origins (none by default)
     let origins: Vec<HeaderValue> = config

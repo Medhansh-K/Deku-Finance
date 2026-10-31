@@ -24,6 +24,8 @@ pub struct AppState {
     pub db: PostgrestClient,
     pub jwt_secret: String,
     pub cron_secret: Option<String>,
+    /// `None` when DATA_ENCRYPTION_KEY is missing or malformed: integrations report "not configured".
+    pub cipher: Option<crate::crypto::Cipher>,
 }
 
 pub fn create_router(state: AppState) -> Router {

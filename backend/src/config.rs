@@ -8,6 +8,8 @@ pub struct Config {
     pub cors_allowed_origins: Vec<String>,
     /// Shared secret for the scheduler's internal endpoints; unset disables them.
     pub cron_secret: Option<String>,
+    /// Base64 32-byte key for third-party credentials; unset keeps integrations switched off.
+    pub data_encryption_key: Option<String>,
 }
 
 impl Config {
@@ -39,12 +41,15 @@ impl Config {
 
         let cron_secret = env::var("CRON_SECRET").ok().filter(|s| !s.trim().is_empty());
 
+        let data_encryption_key = env::var("DATA_ENCRYPTION_KEY").ok().filter(|s| !s.trim().is_empty());
+
         Self {
             port,
             postgrest_url,
             jwt_secret,
             cors_allowed_origins,
             cron_secret,
+            data_encryption_key,
         }
     }
 }
