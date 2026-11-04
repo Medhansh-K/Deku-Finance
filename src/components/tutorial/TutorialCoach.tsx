@@ -62,7 +62,8 @@ export function TutorialCoach() {
     let el: Element | null = null;
     let tries = 0;
     const timer = setInterval(() => {
-      el = document.querySelector(`[data-tour="${step.target}"]`);
+      // Next keeps earlier pages mounted but hidden, so the shell's elements can appear more than once.
+      el = [...document.querySelectorAll(`[data-tour="${step.target}"]`)].find((e) => e.getClientRects().length > 0) ?? null;
       if (el || ++tries > 20) clearInterval(timer);
       if (el) {
         el.classList.add("tour-highlight");

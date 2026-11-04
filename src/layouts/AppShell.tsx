@@ -49,10 +49,11 @@ export interface AppShellProps {
 /** Helper: detect if a modal, drawer, or dialog is currently open in the DOM */
 function isModalOrDrawerOpen(): boolean {
   if (typeof document === "undefined") return false;
-  const activeDialog = document.querySelector(
+  // Only visible ones: Next keeps earlier pages mounted but hidden, along with anything open on them.
+  const dialogs = document.querySelectorAll(
     '[role="dialog"], [aria-modal="true"], .modal-overlay, [data-modal="true"]'
   );
-  return !!activeDialog;
+  return [...dialogs].some((d) => d.getClientRects().length > 0);
 }
 
 /** Pages whose forms lose work on navigation; report filters elsewhere aren't worth a prompt. */

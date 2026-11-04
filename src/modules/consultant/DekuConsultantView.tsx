@@ -446,6 +446,7 @@ export function DekuConsultantView() {
 
   // Fetch grounding context from backend
   const loadContext = async (orgIdToLoad: string) => {
+    if (!orgIdToLoad) return;
     setIsLoadingContext(true);
     setContextFailed(false);
     try {

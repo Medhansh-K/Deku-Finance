@@ -538,7 +538,7 @@ export function VoucherWorkspace({
       const mode = VOUCHER_MODE_KEYS[e.key];
       if (!mode || !isPlainKey(e)) return;
       e.preventDefault();
-      if (e.repeat || isTargetInteractive(e.target) || document.querySelector('[role="dialog"], [aria-modal="true"]')) return;
+      if (e.repeat || isTargetInteractive(e.target) || [...document.querySelectorAll('[role="dialog"], [aria-modal="true"]')].some((d) => d.getClientRects().length > 0)) return;
       switchModeRef.current(mode);
     };
 

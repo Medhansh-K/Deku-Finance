@@ -163,9 +163,8 @@ async function walkTutorials(browser) {
         await guide.getByRole("heading", { name: step.title, exact: true }).waitFor({ timeout: 10000 });
         if (step.route) await page.waitForURL((u) => u.pathname === step.route, { timeout: 15000 });
         if (step.target) {
-          await page.locator(`[data-tour="${step.target}"].tour-highlight`).waitFor({ state: "attached", timeout: 8000 });
-          const box = await page.locator(`[data-tour="${step.target}"]`).boundingBox();
-          if (!box || box.width === 0 || box.height === 0) bad.push(`${step.id}: target has no size`);
+          // Visible: the highlight must land on what the user can actually see, not a hidden earlier page.
+          await page.locator(`[data-tour="${step.target}"].tour-highlight:visible`).first().waitFor({ timeout: 8000 });
         }
       } catch (e) {
         bad.push(`${step.id}: ${e.message.split("\n")[0]}`);
