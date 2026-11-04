@@ -323,7 +323,8 @@ async function fresh() {
   const elsewhere = await login(owner.email);
   check("S-05c", "other users are unaffected", elsewhere.r.status === 200, elsewhere.r.status);
 
-  writeFileSync(STATE, JSON.stringify({ email: owner.email, org, seededCount, tb, fileId, fileBase64: pdf.toString("base64") }));
+  const finalTb = tbTotals((await me.api("GET", `/organisations/${org}/reports/trial-balance`)).json?.data ?? []);
+  writeFileSync(STATE, JSON.stringify({ email: owner.email, org, seededCount, tb: finalTb, fileId, fileBase64: pdf.toString("base64") }));
   return true;
 }
 
