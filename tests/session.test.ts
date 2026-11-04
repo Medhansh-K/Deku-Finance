@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { createHmac } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cookieOptions, proxyTarget, verifyAccessToken } from "@/lib/auth/session";
+import { NextRequest } from "next/server";
+import { cookieOptions, isCrossSiteWrite, proxyTarget, updateSession, verifyAccessToken } from "@/lib/auth/session";
 
 const SECRET = "dev-secret-at-least-32-bytes-long-xx";
 const b64 = (v: object | Buffer) =>
@@ -53,5 +54,50 @@ describe("cookieOptions", () => {
     expect(cookieOptions(3600)).toEqual({ httpOnly: true, sameSite: "lax", secure: false, path: "/", maxAge: 3600 });
     vi.stubEnv("NODE_ENV", "production");
     expect(cookieOptions(3600).secure).toBe(true);
+  });
+});
+
+describe("proxy limits", () => {
+  it("doesn't forward auth, internal or webhook routes", () => {
+    expect(proxyTarget(["api", "v1", "auth", "login"], "")).toBeNull();
+    expect(proxyTarget(["api", "v1", "internal", "notifications", "generate"], "")).toBeNull();
+    expect(proxyTarget(["api", "v1", "webhooks", "razorpay"], "")).toBeNull();
+    expect(proxyTarget(["api", "v1", "payments", "razorpay", "callback"], "")).not.toBeNull();
+  });
+});
+
+describe("isCrossSiteWrite", () => {
+  const h = (o: Record<string, string>) => new Headers(o);
+  it("refuses writes from other sites and sibling subdomains", () => {
+    expect(isCrossSiteWrite("POST", h({ "sec-fetch-site": "cross-site" }))).toBe(true);
+    expect(isCrossSiteWrite("DELETE", h({ "sec-fetch-site": "same-site" }))).toBe(true);
+    expect(isCrossSiteWrite("POST", h({ origin: "https://evil.example", host: "app.example" }))).toBe(true);
+    expect(isCrossSiteWrite("POST", h({ origin: "not a url", host: "app.example" }))).toBe(true);
+  });
+  it("allows the app itself, reads, and non-browser callers", () => {
+    expect(isCrossSiteWrite("POST", h({ "sec-fetch-site": "same-origin" }))).toBe(false);
+    expect(isCrossSiteWrite("POST", h({ origin: "https://app.example", host: "app.example" }))).toBe(false);
+    expect(isCrossSiteWrite("POST", h({ origin: "https://app.example", "x-forwarded-host": "app.example", host: "internal" }))).toBe(false);
+    expect(isCrossSiteWrite("GET", h({ "sec-fetch-site": "cross-site" }))).toBe(false);
+    expect(isCrossSiteWrite("POST", h({}))).toBe(false);
+  });
+});
+
+describe("updateSession refresh failures", () => {
+  const request = (refresh: string) =>
+    new NextRequest("http://app.example/gateway", { headers: { cookie: `deku_rt=${refresh}` } });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("keeps the session when the backend is briefly down", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 503 })));
+    const res = await updateSession(request("outage-token"));
+    expect(res.headers.get("set-cookie") ?? "").not.toContain("deku_rt=;");
+    expect(res.status).not.toBe(307);
+  });
+  it("signs out when the token is really dead", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("no", { status: 401 })));
+    const res = await updateSession(request("dead-token"));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("/login");
   });
 });

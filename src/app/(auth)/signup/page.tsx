@@ -29,6 +29,8 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get("next") ?? searchParams.get("redirect"));
+  // /join sends invited people here with their invitation in the return path; signup needs its token.
+  const inviteToken = new URLSearchParams(nextPath.split("?")[1] ?? "").get("token") ?? undefined;
   const { signup, user } = useAuth();
 
   const initialPlan = searchParams.get("plan") === "pro" ? "pro" : "go";
@@ -72,7 +74,7 @@ function SignupForm() {
     setErrorMsg("");
     setIsLoading(true);
 
-    const res = await signup(email, password, fullName, businessName, mode, state);
+    const res = await signup(email, password, fullName, businessName, mode, state, inviteToken);
     setIsLoading(false);
 
     if (res.error) {

@@ -35,6 +35,7 @@ struct SignupRequest {
     business_name: Option<String>,
     operating_mode: Option<String>,
     state: Option<String>,
+    invite_token: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -141,6 +142,7 @@ async fn signup(
             "p_password_hash": password_hash,
             "p_meta": meta,
             "p_first_admin_allowed": auth::may_be_first_admin(&email, app.admin_email.as_deref(), app.production),
+            "p_invite_token": payload.invite_token,
         }),
     )
     .await
@@ -167,6 +169,10 @@ async fn login(
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<Value>, AppError> {
     let email = auth::normalize_email(&payload.email);
+    let blocked = rpc_service(&app, "auth_login_blocked", json!({ "p_email": email })).await?;
+    if blocked == Value::Bool(true) {
+        return Err(AppError::TooManyRequests("too_many_attempts".into()));
+    }
     let rows = rpc_service(&app, "auth_credentials", json!({ "p_email": email })).await?;
     let row = rows.as_array().and_then(|r| r.first()).cloned();
 
@@ -180,8 +186,12 @@ async fn login(
 
     let row = match row {
         Some(row) if valid => row,
-        _ => return Err(invalid_credentials()),
+        _ => {
+            rpc_service(&app, "auth_login_failed", json!({ "p_email": email })).await?;
+            return Err(invalid_credentials());
+        }
     };
+    rpc_service(&app, "auth_login_succeeded", json!({ "p_email": email })).await?;
     let id = row["id"].as_str().ok_or_else(invalid_credentials)?.to_string();
     let email = row["email"].as_str().unwrap_or(email.as_str()).to_string();
     let user = user_json(&id, &email, &row["meta"]);

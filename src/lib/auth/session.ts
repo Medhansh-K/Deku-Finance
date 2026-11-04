@@ -47,6 +47,8 @@ export function backendUrl(path: string): string {
 /** Proxy target for /api/backend/[...path]; null unless it is a plain /api/v1/ path (no open proxy, no ".." escapes). */
 export function proxyTarget(segments: string[], search: string): string | null {
   if (segments.length < 3 || segments[0] !== "api" || segments[1] !== "v1") return null;
+  // Auth answers carry raw tokens, which must not reach page scripts; the other two aren't for browsers.
+  if (["auth", "internal", "webhooks"].includes(segments[2])) return null;
   if (segments.some((s) => s === "" || s === "." || s === ".." || /[/\\]/.test(s))) return null;
   return backendUrl(`/${segments.map(encodeURIComponent).join("/")}${search}`);
 }
@@ -90,10 +92,13 @@ export async function verifyAccessToken(
 
 // Refresh tokens rotate and reuse revokes the whole family, so parallel requests
 // carrying the same old token must share one refresh instead of racing.
-// shortcut: per-process only; move to a shared store if several frontend instances race on one browser.
-const refreshes = new Map<string, Promise<BackendSession | null>>();
+// shortcut: per-process only, so deploy/gcp runs one frontend instance; move to a shared store to run several.
+const refreshes = new Map<string, Promise<RefreshResult>>();
 
-function refreshSession(refreshToken: string): Promise<BackendSession | null> {
+// "rejected" means the token is dead. "unavailable" means we couldn't find out, which must not sign anyone out.
+type RefreshResult = BackendSession | "rejected" | "unavailable";
+
+function refreshSession(refreshToken: string): Promise<RefreshResult> {
   let pending = refreshes.get(refreshToken);
   if (!pending) {
     pending = fetch(backendUrl("/api/v1/auth/refresh"), {
@@ -102,16 +107,44 @@ function refreshSession(refreshToken: string): Promise<BackendSession | null> {
       body: JSON.stringify({ refresh_token: refreshToken }),
       cache: "no-store",
     })
-      .then((r) => (r.ok ? (r.json() as Promise<BackendSession>) : null))
-      .catch(() => null);
+      .then((r): RefreshResult | Promise<RefreshResult> => {
+        if (r.ok) return r.json() as Promise<BackendSession>;
+        return r.status === 401 ? "rejected" : "unavailable";
+      })
+      .catch((): RefreshResult => "unavailable")
+      .then((result) => {
+        if (result === "unavailable") refreshes.delete(refreshToken);
+        return result;
+      });
     refreshes.set(refreshToken, pending);
     setTimeout(() => refreshes.delete(refreshToken), 30_000);
   }
   return pending;
 }
 
+/**
+ * A write sent by another site's page, which the browser would otherwise send with our cookies.
+ * SameSite=Lax doesn't cover sibling subdomains, and login and logout need this too. Scripts and
+ * servers send neither header and carry no ambient cookies.
+ */
+export function isCrossSiteWrite(method: string, headers: Headers): boolean {
+  if (["GET", "HEAD", "OPTIONS"].includes(method)) return false;
+  const site = headers.get("sec-fetch-site");
+  if (site) return site === "cross-site" || site === "same-site";
+  const origin = headers.get("origin");
+  if (!origin) return false;
+  try {
+    return new URL(origin).host !== (headers.get("x-forwarded-host") ?? headers.get("host"));
+  } catch {
+    return true;
+  }
+}
+
 export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  if (path.startsWith("/api/") && isCrossSiteWrite(request.method, request.headers)) {
+    return NextResponse.json({ error: "cross_site_request" }, { status: 403 });
+  }
   // login/signup/logout set their own cookies; a second Set-Cookie from here would race them.
   if (path.startsWith("/api/auth/") && path !== "/api/auth/me") return NextResponse.next();
 
@@ -125,7 +158,13 @@ export async function updateSession(request: NextRequest) {
   const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
   if (refresh) {
     const session = await refreshSession(refresh);
-    if (session) {
+    if (session === "unavailable") {
+      // The cookies stay, so the session picks up again once the backend is back.
+      return path.startsWith("/api/") && !isPublicPath(path)
+        ? NextResponse.json({ error: "backend_unavailable" }, { status: 503 })
+        : NextResponse.next();
+    }
+    if (session !== "rejected") {
       // The route handler or page behind this request must already see the new tokens.
       request.cookies.set(ACCESS_COOKIE, session.access_token);
       request.cookies.set(REFRESH_COOKIE, session.refresh_token);

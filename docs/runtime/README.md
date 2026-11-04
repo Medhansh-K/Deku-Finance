@@ -24,19 +24,19 @@ Status values: Not Started, In Progress, Blocked, Passed. Passed needs a recorde
 | A-06 | Honest data | Sample bills can't be posted to a real company | Not Started | | | |
 | A-07 | Honest data | Fix "Liquid" total, Sec 22 threshold, hardcoded FY labels, unconditional status labels | Not Started | | | |
 | A-08 | Honest data | Remove or qualify marketing claims with no feature behind them | Not Started | | | |
-| F-01 | Files | Store and serve uploaded documents with size, type and access checks | Not Started | | | Blocker 1 |
+| F-01 | Files | Store and serve uploaded documents with size, type and access checks | In Progress | `document_files_test.sql`; CI `8840a96` pending | Migration 048, `routes/files.rs`, voucher and Day Book views | Postgres, 10 MB limit, immutable once attached |
 | S-01 | Security | Switch to close public signup; first admin bootstrap | Passed | CI `bd36cdd`, docker job: S-01, S-01b; `single_customer_test.sql` | Migration 047, `routes/auth.rs`, `auth.rs`, `config.rs` | Only the first administrator and invited addresses can register |
 | S-02 | Security | Demo credentials and buttons only in demo mode | Passed | CI `bd36cdd`, docker job: S-02a, S-02b, D-11a | `api/auth/demo/route.ts`, `AuthContext.tsx`, login page | Blocker 7 |
 | S-03 | Security | Production refuses dev secrets; frontend fails fast without `JWT_SECRET` | In Progress | Backend unit test, CI `bd36cdd` | `config.rs` | Backend half only. Frontend still doesn't stop without `JWT_SECRET` |
-| S-04 | Security | Origin check on cookie-authenticated writes and auth routes | Not Started | | | |
-| S-05 | Security | Login rate limit | Not Started | | | |
+| S-04 | Security | Origin check on cookie-authenticated writes and auth routes | In Progress | `tests/session.test.ts`; CI pending | `session.ts` | Checks Sec-Fetch-Site, then Origin, on every `/api/` write |
+| S-05 | Security | Login rate limit | In Progress | `single_customer_test.sql`; CI pending | Migration 049, `routes/auth.rs`, `error.rs` | 10 failures locks an address for 15 minutes. Someone guessing can keep an account locked; add IP limits at the load balancer if that happens |
 | S-06 | Security | Password change and admin-driven reset | Not Started | | | No email provider |
-| S-07 | Security | Keep session on transient refresh failure; handle multi-instance refresh | Not Started | | | |
+| S-07 | Security | Keep session on transient refresh failure; handle multi-instance refresh | In Progress | `tests/session.test.ts`; CI pending | `session.ts`, `cloudbuild.yaml` | Outages no longer sign users out. One frontend instance on Cloud Run avoids the refresh race |
 | S-08 | Security | Production log level; keep query strings out of logs | In Progress | Compiles, CI `bd36cdd`; not observed on a deployed service | `main.rs` | Production default is now info level. Not observed on a deployed service |
-| S-09 | Security | Block `api/v1/auth/*` through the proxy | Not Started | | | |
-| S-10 | Security | Remove the seeded vendor superadmin row | Not Started | | | New migration |
-| S-11 | Security | Trace membership checks on service-token paths | Not Started | | | |
-| S-12 | Security | Close invited-address squatting | Not Started | | | |
+| S-09 | Security | Block `api/v1/auth/*` through the proxy | In Progress | `tests/session.test.ts`; CI pending | `session.ts` |  |
+| S-10 | Security | Remove the seeded vendor superadmin row | In Progress | `single_customer_test.sql`; CI pending | Migration 049 |  |
+| S-11 | Security | Trace membership checks on service-token paths | Passed | Code trace; see notes | None | Read only. GSP and payments check role with the caller's token before service-token use. KYC authorises before acting; DigiLocker completion reads the request first only to learn its subject, and stays scoped to the company |
+| S-12 | Security | Close invited-address squatting | In Progress | `single_customer_test.sql`; CI pending | Migration 049, `routes/auth.rs`, signup page | Invited signup now needs the link's token |
 | O-01 | Single org | Remove trial lockout for a single-customer deployment | Passed | CI `bd36cdd`, docker job: O-09; `single_customer_test.sql` | Migration 047, license page | GO and PRO limits kept for a later hosted product |
 | O-02 | Single org | Chart of accounts created exactly once with the company | Not Started | | | |
 | O-03 | Single org | Limit a deployment to one organisation | Passed | CI `bd36cdd`, docker job: O-08; `single_customer_test.sql` | Migration 047, `routes/organisations.rs` | `/companies` still offers Add; the server refuses it |

@@ -24,6 +24,8 @@ pub enum AppError {
     PlanLimit(String),
     /// 409: not enough stock of the named item.
     StockInsufficient(String),
+    /// 429: too many failed sign-ins for this address.
+    TooManyRequests(String),
 }
 
 impl IntoResponse for AppError {
@@ -39,6 +41,7 @@ impl IntoResponse for AppError {
                 let body = json!({ "success": false, "error": "stock_insufficient", "item": item, "status": status.as_u16() });
                 return (status, Json(body)).into_response();
             }
+            AppError::TooManyRequests(msg) => (StatusCode::TOO_MANY_REQUESTS, msg),
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, msg),

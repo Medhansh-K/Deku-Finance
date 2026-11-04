@@ -47,10 +47,10 @@ class Session {
   }
 }
 
-async function signup(tag, invitedEmail) {
+async function signup(tag, invitedEmail, inviteToken) {
   const s = new Session();
   const email = invitedEmail ?? `e2e-${tag}-${Date.now()}@example.com`;
-  const r = await s.req("POST", "/api/auth/signup", { email, password: PASSWORD, full_name: `E2E ${tag}` });
+  const r = await s.req("POST", "/api/auth/signup", { email, password: PASSWORD, full_name: `E2E ${tag}`, invite_token: inviteToken });
   return { s, email, r };
 }
 
@@ -203,7 +203,11 @@ async function fresh() {
   // Plan §8: forbidden, no membership, low role
   const strangerEmail = `e2e-stranger-${Date.now()}@example.com`;
   await owner.s.api("POST", `/organisations/${org}/invitations`, { email: strangerEmail, role: "viewer" });
-  const stranger = await signup("stranger", strangerEmail);
+  const inviteToken = async (address) =>
+    ((await owner.s.api("GET", `/organisations/${org}/invitations`)).json?.data ?? []).find((i) => i.email === address)?.token;
+  const squatter = await signup("squatter", strangerEmail);
+  check("S-12", "an invited address can't sign up without the link", squatter.r.status === 403, squatter.r.status);
+  const stranger = await signup("stranger", strangerEmail, await inviteToken(strangerEmail));
   check("A-06b", "invited address can sign up", stranger.r.status === 200, stranger.r.status);
   r = await stranger.s.api("GET", `/organisations/${org}/accounts`);
   check("A-07", "non-member reads no accounts", (r.json?.data ?? []).length === 0, r.text.slice(0, 200));
@@ -213,9 +217,8 @@ async function fresh() {
   const viewerEmail = `e2e-viewer-${Date.now()}@example.com`;
   r = await owner.s.api("POST", `/organisations/${org}/invitations`, { email: viewerEmail, role: "viewer" });
   check("A-09", "owner invites a viewer", r.status === 200, `${r.status} ${r.text}`);
-  const viewer = await signup("viewer", viewerEmail);
-  r = await owner.s.api("GET", `/organisations/${org}/invitations`);
-  const token = (r.json?.data ?? []).find((i) => i.email === viewer.email)?.token;
+  const token = await inviteToken(viewerEmail);
+  const viewer = await signup("viewer", viewerEmail, token);
   r = await viewer.s.api("POST", "/organisations/invitations/accept", { token });
   check("A-10", "viewer accepts invitation", r.status === 200, `${r.status} ${r.text}`);
   r = await viewer.s.api("GET", `/organisations/${org}/accounts`);
@@ -289,6 +292,31 @@ async function fresh() {
   const listed = await me.api("GET", `/organisations/${org}/files`);
   const fileRow = (listed.json?.data ?? []).find((f) => f.id === fileId);
   check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));
+
+  // S-04, S-09: what a hostile page or script can reach through the proxy.
+  r = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/fiscal-periods`, {
+    method: "POST",
+    headers: { Cookie: `deku_at=${me.cookies.deku_at}`, "Content-Type": "application/json", Origin: "https://evil.example", "Sec-Fetch-Site": "cross-site" },
+    body: JSON.stringify(fy),
+  });
+  check("S-04a", "a cross-site write is refused", r.status === 403, r.status);
+  r = await fetch(`${BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain", Origin: "https://evil.example", "Sec-Fetch-Site": "cross-site" },
+    body: JSON.stringify({ email: owner.email, password: PASSWORD }),
+  });
+  check("S-04b", "a cross-site login is refused", r.status === 403, r.status);
+  r = await me.api("GET", "/auth/me");
+  check("S-09", "auth routes aren't reachable through the proxy", r.status === 404, r.status);
+
+  // S-05, last because it locks this address.
+  let lastBad;
+  for (let i = 0; i < 10; i++) lastBad = (await new Session().req("POST", "/api/auth/login", { email: strangerEmail, password: "wrong-password-e2e" })).status;
+  check("S-05a", "ten wrong passwords are each refused", lastBad === 401, lastBad);
+  const locked = await new Session().req("POST", "/api/auth/login", { email: strangerEmail, password: PASSWORD });
+  check("S-05b", "the address is locked, even with the right password", locked.status === 429 && locked.json?.error === "too_many_attempts", `${locked.status} ${locked.text}`);
+  const elsewhere = await login(owner.email);
+  check("S-05c", "other users are unaffected", elsewhere.r.status === 200, elsewhere.r.status);
 
   writeFileSync(STATE, JSON.stringify({ email: owner.email, org, seededCount, tb, fileId, fileBase64: pdf.toString("base64") }));
   return true;

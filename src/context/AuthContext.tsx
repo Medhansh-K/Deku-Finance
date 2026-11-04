@@ -27,7 +27,8 @@ interface AuthContextType {
     fullName: string,
     businessName: string,
     mode: OperatingMode,
-    state: string
+    state: string,
+    inviteToken?: string
   ) => Promise<{ error?: string }>;
   loginDemo: (type: "owner" | "accountant" | "freelancer") => Promise<void>;
   logout: () => Promise<void>;
@@ -45,7 +46,8 @@ interface SessionUser {
 const AUTH_ERRORS: Record<string, string> = {
   invalid_credentials: "Incorrect email or password.",
   email_taken: "An account with this email already exists.",
-  signup_closed: "Sign-ups are closed. Ask your administrator to invite this email address.",
+  signup_closed: "Sign-ups are closed. Ask your administrator for an invitation link, and open it to create your account.",
+  too_many_attempts: "Too many failed sign-ins for this address. Please try again in 15 minutes.",
   demo_disabled: "The demo isn't available here.",
   backend_unavailable: "Deku Finance is unreachable right now. Please try again shortly.",
 };
@@ -198,7 +200,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fullName: string,
     businessName: string,
     mode: OperatingMode,
-    state: string
+    state: string,
+    inviteToken?: string
   ) => {
     setIsLoading(true);
     try {
@@ -209,6 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         business_name: businessName,
         operating_mode: mode,
         state,
+        invite_token: inviteToken,
       });
 
       if (error) {

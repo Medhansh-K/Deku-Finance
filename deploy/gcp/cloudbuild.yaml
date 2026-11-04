@@ -107,6 +107,6 @@ steps:
         gcloud run deploy deku-frontend --region=${_REGION} \
           --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/deku-frontend:${BUILD_ID} \
           --service-account=deku-frontend@${PROJECT_ID}.iam.gserviceaccount.com \
-          --allow-unauthenticated --port=3000 \
+          --allow-unauthenticated --port=3000 --max-instances=1 \
           --set-secrets=JWT_SECRET=JWT_SECRET:latest \
           --set-env-vars=BACKEND_URL=$$backend_url

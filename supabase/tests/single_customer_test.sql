@@ -52,14 +52,44 @@ BEGIN
   INSERT INTO public.organisation_invitations (organisation_id, email, role, token, status, expires_at)
   VALUES (v_org, 'Invited@test.local', 'viewer', 'single-customer-test-a', 'pending', now() + interval '1 day'),
          (v_org, 'expired@test.local', 'viewer', 'single-customer-test-b', 'pending', now() - interval '1 day');
-  v_invited := public.auth_register_guarded(' invited@TEST.local ', 'h', '{}', false);
+  -- Knowing the address isn't enough; the invitation's token is what proves it reached this person.
+  BEGIN
+    PERFORM public.auth_register_guarded('invited@test.local', 'h', '{}', false);
+    RAISE EXCEPTION 'signup allowed with no invitation token';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'signup_closed' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.auth_register_guarded('invited@test.local', 'h', '{}', false, 'single-customer-test-b');
+    RAISE EXCEPTION 'signup allowed with another invitation''s token';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'signup_closed' THEN RAISE; END IF;
+  END;
+  v_invited := public.auth_register_guarded(' invited@TEST.local ', 'h', '{}', false, 'single-customer-test-a');
   ASSERT v_invited IS NOT NULL, 'invited address refused';
   BEGIN
-    PERFORM public.auth_register_guarded('expired@test.local', 'h', '{}', false);
+    PERFORM public.auth_register_guarded('expired@test.local', 'h', '{}', false, 'single-customer-test-b');
     RAISE EXCEPTION 'an expired invitation opened signup';
   EXCEPTION WHEN raise_exception THEN
     IF SQLERRM <> 'signup_closed' THEN RAISE; END IF;
   END;
+
+  -- Ten failures lock an address for everyone; a success or another address is unaffected.
+  FOR i IN 1..9 LOOP
+    PERFORM public.auth_login_failed(' Locked@test.local ');
+  END LOOP;
+  ASSERT NOT public.auth_login_blocked('locked@test.local'), 'locked after nine failures';
+  PERFORM public.auth_login_failed('locked@test.local');
+  ASSERT public.auth_login_blocked('LOCKED@test.local'), 'not locked after ten failures';
+  ASSERT NOT public.auth_login_blocked('other@test.local'), 'lock spilled to another address';
+  UPDATE auth.login_attempts SET window_start = now() - interval '16 minutes' WHERE email = 'locked@test.local';
+  ASSERT NOT public.auth_login_blocked('locked@test.local'), 'lock outlasted its window';
+  PERFORM public.auth_login_failed('locked@test.local');
+  ASSERT (SELECT failures FROM auth.login_attempts WHERE email = 'locked@test.local') = 1, 'old failures still counted';
+  PERFORM public.auth_login_succeeded('locked@test.local');
+  ASSERT NOT EXISTS (SELECT 1 FROM auth.login_attempts WHERE email = 'locked@test.local'), 'success kept the count';
+
+  ASSERT NOT EXISTS (SELECT 1 FROM public.superadmins WHERE email = 'medhansh@deku.finance'), 'vendor superadmin still seeded';
 END $$;
 
 -- Only the backend's service role can register, and a signed-in user can't insert a company directly.
@@ -69,6 +99,11 @@ BEGIN
   BEGIN
     PERFORM public.auth_register_guarded('x@test.local', 'h', '{}', true);
     RAISE EXCEPTION 'authenticated can call auth_register_guarded';
+  EXCEPTION WHEN insufficient_privilege THEN NULL;
+  END;
+  BEGIN
+    PERFORM public.auth_login_succeeded('x@test.local');
+    RAISE EXCEPTION 'authenticated can clear a login lock';
   EXCEPTION WHEN insufficient_privilege THEN NULL;
   END;
   BEGIN

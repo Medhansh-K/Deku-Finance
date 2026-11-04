@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // Next silently truncates bodies past this limit, which would store a corrupt file. Set above the
+    // backend's 10 MB limit so oversized uploads reach the backend and get refused.
+    proxyClientMaxBodySize: "12mb",
+  },
   turbopack: {
     rules: {
       "*.css": {
