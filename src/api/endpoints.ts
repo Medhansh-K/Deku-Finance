@@ -325,7 +325,7 @@ export const reportsApi = {
     apiClient<ApiResponse<BalanceSheetRow[]>>(
       `/api/v1/organisations/${orgId}/reports/balance-sheet${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`
     ),
-  getTrialBalance: (orgId: string, range?: { from: string; to: string }) =>
+  getTrialBalance: (orgId: string, range?: { from?: string; to: string }) =>
     apiClient<ApiResponse<any[]>>(
       `/api/v1/organisations/${orgId}/reports/trial-balance${range ? `?${new URLSearchParams(range)}` : ""}`
     ),

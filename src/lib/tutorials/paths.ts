@@ -174,7 +174,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "trial-balance",
         title: "Check the Trial Balance",
-        body: "The Trial Balance shows each account's debit total, credit total and balance from posted entries, and the two totals should match. The sample would add ₹1,000 of debit to the charges account and ₹1,000 of credit to the bank. There is no separate General Ledger screen, so use the Day Book, or the Day book export for line-by-line detail.",
+        body: "The Trial Balance shows each account's debit total, credit total and balance from posted entries, and the two totals should match. The sample would add ₹1,000 of debit to the charges account and ₹1,000 of credit to the bank. For line-by-line detail on one account, open General Ledger under Financial Reports.",
         route: "/reports/trial-balance",
         target: "trial-balance-table",
       },
@@ -300,7 +300,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
     summary: "Compare a bank statement file with the entries in your bank ledger.",
     audience: "everyone",
     prerequisites: "Posted vouchers on your bank account, and your bank statement as a CSV file.",
-    outcome: "You can load a statement, confirm matches, deal with unmatched lines and see what remains.",
+    outcome: "You can load a statement, confirm matches, deal with unmatched lines, and complete the reconciliation against the closing balance.",
     steps: [
       {
         id: "bank-accounts",
@@ -331,13 +331,13 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "complete",
         title: "Finishing a reconciliation",
-        body: "There is no finish or sign-off button and no closing balance check. You are done when every statement line is under Matched, so compare the totals with your statement yourself. Undo on a matched line removes that match if you confirmed the wrong one.",
+        body: "Enter the statement's closing balance and date, and the screen shows the book balance, matched and unmatched amounts and the difference. Complete reconciliation records it, and if a difference remains you must accept that exact amount. A completed record can't be changed. Undo on a matched line removes that match if you confirmed the wrong one.",
         route: "/banking/reconciliation",
       },
       {
         id: "status",
         title: "Review the status",
-        body: "The Matched, Suggested and Unmatched tabs show counts for the loaded statement, with In and Out totals for the open tab. Confirmed matches are saved on the server but only show when you load the same statement again, and there is no separate reconciliation report. A Balance break label means the statement's running balance doesn't follow from that line's amount, so check the file.",
+        body: "The Matched, Suggested and Unmatched tabs show counts for the loaded statement, with In and Out totals for the open tab. Confirmed matches are saved on the server but only show when you load the same statement again. Completed reconciliations are listed without loading a statement. A Balance break label means the statement's running balance doesn't follow from that line's amount, so check the file.",
         route: "/banking/reconciliation",
         target: "recon-controls",
       },
@@ -361,7 +361,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "ledger-detail",
         title: "Ledger detail",
-        body: "There is no General Ledger screen. The Day book export lists every posted voucher line between two dates with account code, party, debit and credit, so you can filter by account in a spreadsheet. Clicking an account in a report opens the Day Book but doesn't yet filter it to that account.",
+        body: "General Ledger shows one account's entries with a running balance, for the dates you choose, and exports to CSV. Clicking an account in a report opens the Day Book filtered to that account.",
         route: "/export",
         target: "export-day-book",
       },
@@ -375,7 +375,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "profit-loss",
         title: "Read Profit & Loss",
-        body: "Profit & Loss sets income against expenses from posted entries and shows the net result. The screen has no date selector, so don't read it as a single month or year without checking.",
+        body: "Profit & Loss sets income against expenses from posted entries and shows the net result. Use From and To to choose the period; it opens on the current financial year.",
         route: "/reports/profit-loss",
         target: "profit-loss-summary",
       },
@@ -389,21 +389,21 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "cash-flow",
         title: "Understand Cash Flow",
-        body: "Cash Flow shows money in and out of cash and bank ledgers, grouped as operating, investing and financing activities. The period shown here runs from 1 April of the current financial year to today, and you can't change it on this screen.",
+        body: "Cash Flow shows money in and out of cash and bank ledgers, grouped as operating, investing and financing activities. It opens on the current financial year, and From and To change the period.",
         route: "/reports/cash-flow",
         target: "cash-flow-period",
       },
       {
         id: "filters",
         title: "Date and period filters",
-        body: "The Day Book filters by one date here, and the Day book export takes a From and To range. Purchases, Collections and GST returns each have their own month selector. Trial Balance, Profit & Loss and Balance Sheet have no date filter at the moment.",
+        body: "The Day Book filters by one date here, and the Day book export takes a From and To range. Purchases, Collections and GST returns each have their own month selector. Trial Balance and Profit & Loss take From and To, and Balance Sheet takes an As of date. Leave Trial Balance's From blank for balances to date.",
         route: "/day-book",
         target: "day-book-date",
       },
       {
         id: "export",
         title: "Export and print",
-        body: "These buttons download the Chart of accounts, Parties, Items and Trial balance as CSV files built in your browser. Profit & Loss, Balance Sheet and Cash Flow have no CSV; use their print button and your browser's save as PDF option. Tally XML export of vouchers isn't available yet.",
+        body: "These buttons download the Chart of accounts, Parties, Items and Trial balance as CSV files built in your browser. Profit & Loss, Balance Sheet, Cash Flow and General Ledger each have a CSV button on their own screen. Tally XML export of vouchers isn't available yet.",
         route: "/export",
         target: "export-masters",
       },

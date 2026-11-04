@@ -14,9 +14,12 @@
 - **No GSTR-2B matching.** ITC comes from your purchase register and nothing checks it against the portal.
 - **The ₹40L goods and ₹20L services limit text is general guidance.** Special-category states and your own position aren't computed.
 - **Nothing verifies what an attached document says.** The app stores it; it doesn't read or validate its contents.
-- **The Consultant answers from ledger figures with fixed logic.** It isn't an external AI service, and some screens still call it "AI CFO".
-- **Cash Flow assumes an April financial year** and has no date picker.
+- **The Consultant answers from ledger figures with fixed logic.** It isn't an external AI service.
+- **Report date defaults assume an April financial year,** though From and To can be changed.
 - **FP&A department budget use** reads a manually maintained field, not the ledger.
+- **Payroll doesn't post to the ledger.** A run records its totals and marks people processed, but salaries reach the P&L only through a voucher someone enters. Rerunning a month overwrites the run, and the run doesn't record who ran it. Invited people who haven't accepted count in its headcount.
+- **A completed bank reconciliation can't be corrected or redone** for that account and date. Undoing a match later makes it differ from its recorded snapshot.
+- **Vouchers tied to an invoice, bill, settlement or other source can't be edited,** only resubmitted, so they stay in line with that source.
 
 ## Documents and files
 
@@ -34,14 +37,14 @@
 
 ## Not confirmed
 
-- Automated checks run through the API. **Screens haven't been clicked through**, including tutorials, uploads and password pages. Keyboard behaviour has unit tests only.
-- Bank reconciliation, payroll and marketplace settlement have no end-to-end test yet.
+- Browser tests cover page loads, tutorials, keyboard and navigation, but forms aren't filled in screen by screen. Business flows are tested through the API.
+- HR screens have no end-to-end test.
 - No test has run on a developer machine or on GCP.
 - Razorpay, GSP and KYC adapters have never been run against a real provider.
 
 ## Marketing
 
-The landing page claims features that don't exist yet: GSTR-2B matching, Shopify and bulk marketplace sync, automated WhatsApp reminders, automated GSTN filing, and logo and stamp on documents. It also describes GO and PRO plans and a 15-day trial, which a single-customer deployment doesn't use. That copy needs a product decision.
+Claims for features that don't exist have been removed from the landing page. It still describes GO and PRO plans and a 15-day trial, which a single-customer deployment doesn't use, because that's a product decision.
 
 ## Out of scope for this delivery
 

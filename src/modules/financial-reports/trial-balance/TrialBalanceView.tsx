@@ -29,12 +29,10 @@ export function TrialBalanceView() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const latest = useRef(0);
-  const problem = rangeProblem(from, to);
+  const problem = rangeProblem(from || "1900-01-01", to);
 
   useEffect(() => {
-    const range = currentFyRange();
-    setFrom(range.from);
-    setTo(range.to);
+    setTo(currentFyRange().to);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -51,7 +49,7 @@ export function TrialBalanceView() {
     }
     setIsLoading(true);
     try {
-      const res = await reportsApi.getTrialBalance(orgId, { from, to });
+      const res = await reportsApi.getTrialBalance(orgId, from ? { from, to } : { to });
       if (request === latest.current) setRows((res.data || []) as any);
     } catch (err: any) {
       if (request === latest.current) setError(err.message || "Failed to load authoritative Trial Balance");
@@ -99,6 +97,7 @@ export function TrialBalanceView() {
               Debits and credits posted between these dates
             </span>
           </div>
+          <p className="text-[11px] text-ink-muted basis-full">Leave From blank for balances to date, or set it to see one period&apos;s movements.</p>
           <ReportDateRange from={from} to={to} onFrom={setFrom} onTo={setTo} problem={orgId ? problem : null} />
         </div>
 

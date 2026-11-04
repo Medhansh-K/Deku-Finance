@@ -41,10 +41,6 @@ These steps describe what exists rather than what plan §22 assumed.
 | Create the organisation, set legal details and financial year | The company is created at signup. Settings has no field for company name, PAN or financial-year start month; fiscal periods are managed there |
 | Download the invoice | Print only |
 | Bank statement import | CSV, read in the browser and not kept, so it's chosen again each visit |
-| Complete a reconciliation, review status | No finish step or closing balance check. Matches show only with a statement loaded |
-| General Ledger screen | None exists; the step uses the Day Book CSV export |
-| Date filters | Trial Balance, P&L and Balance Sheet take no dates |
-| Export reports | P&L, Balance Sheet and Cash Flow print only |
 | Upload a document | No document library; files attach to a voucher |
 | Backup, update and health screens | None in the app; these steps are explanations |
 

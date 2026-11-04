@@ -47,6 +47,9 @@ export async function runReportChecks({ me, org, date, fy, check }) {
     check("R-03b", "its accumulated profit is the ledger's", bsYearEnd.profit === ledgerProfit, `${bsYearEnd.profit} ${ledgerProfit}`);
 
     // Year 2000 has no entries at all.
+    const toDate = await rows(`trial-balance?to=${date}`);
+    const totalOf = (list, key) => Math.round(list.reduce((a, r) => a + Number(r[key] || 0), 0) * 100) / 100;
+    check("R-tb-to", "balances to date match the undated trial balance", totalOf(toDate, "total_debit") === totalOf(undated, "total_debit"), `${totalOf(toDate, "total_debit")} ${totalOf(undated, "total_debit")}`);
     const tb2000 = await rows("trial-balance?from=2000-01-01&to=2000-12-31");
     check("R-04a", "year 2000: trial balance totals are zero", same(totals(tb2000), { debit: 0, credit: 0 }), JSON.stringify(totals(tb2000)));
     const pl2000 = await rows("profit-and-loss?from=2000-01-01&to=2000-12-31");
