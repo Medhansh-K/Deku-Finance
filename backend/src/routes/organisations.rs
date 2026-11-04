@@ -69,7 +69,13 @@ async fn create_organisation(
         "p_fy_start_month": payload.financial_year_start_month.unwrap_or(4),
     });
 
-    let res = state.db.rpc("create_organisation", &body, token).await?;
+    let res = state.db.rpc("create_organisation", &body, token).await.map_err(|e| {
+        if matches!(&e, AppError::Database(msg) if msg.contains("single_organisation")) {
+            AppError::Conflict("single_organisation".into())
+        } else {
+            e
+        }
+    })?;
 
     Ok(Json(json!({
         "success": true,

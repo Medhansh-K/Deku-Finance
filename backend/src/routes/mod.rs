@@ -34,6 +34,8 @@ pub struct AppState {
     pub db: PostgrestClient,
     pub jwt_secret: String,
     pub cron_secret: Option<String>,
+    pub admin_email: Option<String>,
+    pub production: bool,
     /// `None` when DATA_ENCRYPTION_KEY is missing or malformed: integrations report "not configured".
     pub cipher: Option<crate::crypto::Cipher>,
     /// `None` unless every RAZORPAY_* setting is present.

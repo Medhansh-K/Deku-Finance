@@ -33,7 +33,13 @@ BEGIN
   INSERT INTO public.organisation_members (organisation_id, user_id, role)
   VALUES (v_org, '39000000-0000-4000-8000-0000000000a1', 'owner');
   SELECT * INTO s FROM public.subscriptions WHERE organisation_id = v_org;
-  ASSERT s.plan_code = 'go' AND s.status = 'trialing' AND s.provider = 'manual', 'no GO trial on creation';
+  -- Migration 47 gives every company the single_org plan; these limit checks stay for a hosted product.
+  ASSERT s.plan_code = 'single_org' AND s.status = 'active' AND s.provider = 'manual', 'no plan on creation';
+  UPDATE public.subscriptions
+     SET plan_code = 'go', status = 'trialing', trial_ends_at = now() + interval '15 days',
+         current_period_end = now() + interval '20 days'
+   WHERE organisation_id = v_org
+   RETURNING * INTO s;
   ASSERT abs(extract(epoch FROM s.trial_ends_at - (now() + interval '15 days'))) < 5, 'trial is not 15 days';
   ASSERT abs(extract(epoch FROM s.current_period_end - (now() + interval '20 days'))) < 5, 'grace is not 5 days';
   PERFORM pg_temp.as_user('39000000-0000-4000-8000-0000000000a1');

@@ -8,10 +8,7 @@ const REFRESH_MAX_AGE = 30 * 24 * 3600;
 // Pages anyone may open; every other page needs a signed-in user.
 const PUBLIC_PATHS = ["/login", "/signup", "/join", "/api/auth"];
 
-/** Post-login redirect target: same-site paths only ("//evil.com" or "/\evil.com" would leave the site). */
-export function safeNextPath(requested: string | null): string {
-  return requested && /^\/(?![/\\])/.test(requested) ? requested : "/gateway";
-}
+export { safeNextPath } from "./next-path";
 
 export function isPublicPath(path: string): boolean {
   return path === "/" || PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
@@ -176,9 +173,13 @@ export async function backendAuth(
 }
 
 export async function sessionFromBackend(path: "login" | "signup", request: NextRequest) {
+  return startSession(path, await request.text());
+}
+
+export function startSession(path: "login" | "signup", body: string) {
   return backendAuth(
     path,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: await request.text() },
+    { method: "POST", headers: { "Content-Type": "application/json" }, body },
     (data) => {
       const res = NextResponse.json({ user: data.user });
       setSessionCookies(res, data as unknown as BackendSession);

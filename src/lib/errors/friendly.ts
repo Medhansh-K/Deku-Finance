@@ -15,6 +15,10 @@ export function friendlyError(body: unknown, status?: number, limits?: Entitleme
   const obj = body && typeof body === "object" ? (body as Record<string, unknown>) : {};
   const text = typeof body === "string" ? body : JSON.stringify(body ?? "");
 
+  if (obj.error === "single_organisation" || text.includes("single_organisation")) {
+    return "This deployment is set up for one company, and it already has one.";
+  }
+
   const limit = obj.error === "plan_limit" ? String(obj.limit ?? "") : text.match(/plan_limit:(\w+)/)?.[1];
   if (limit !== undefined) {
     const n = limits?.[limit as keyof Entitlements];

@@ -10,6 +10,7 @@ use crate::auth;
 use crate::error::AppError;
 use crate::routes::AppState;
 
+// Signup is limited to the first administrator and invited addresses (migration 47).
 // shortcut: no email verification and no rate limiting on these endpoints; add an email
 // provider for verification and Cloud Armor rate-limit rules in front of /api/v1/auth before launch.
 pub fn routes(state: AppState) -> Router {
@@ -134,11 +135,24 @@ async fn signup(
     });
     let id = rpc_service(
         &app,
-        "auth_register",
-        json!({ "p_email": email, "p_password_hash": password_hash, "p_meta": meta }),
+        "auth_register_guarded",
+        json!({
+            "p_email": email,
+            "p_password_hash": password_hash,
+            "p_meta": meta,
+            "p_first_admin_allowed": auth::may_be_first_admin(&email, app.admin_email.as_deref(), app.production),
+        }),
     )
     .await
-    .map_err(|e| if is_db_error(&e, "email_taken") { AppError::Conflict("email_taken".into()) } else { e })?;
+    .map_err(|e| {
+        if is_db_error(&e, "email_taken") {
+            AppError::Conflict("email_taken".into())
+        } else if is_db_error(&e, "signup_closed") {
+            AppError::Forbidden("signup_closed".into())
+        } else {
+            e
+        }
+    })?;
     let id = id
         .as_str()
         .ok_or_else(|| AppError::Internal("auth_register returned no user id".into()))?

@@ -3,6 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeNextPath } from "@/lib/auth/next-path";
 import { useAuth } from "@/context/AuthContext";
 import { OperatingMode } from "@/types";
 import {
@@ -27,6 +28,7 @@ import {
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const nextPath = safeNextPath(searchParams.get("next") ?? searchParams.get("redirect"));
   const { signup, user } = useAuth();
 
   const initialPlan = searchParams.get("plan") === "pro" ? "pro" : "go";
@@ -43,7 +45,7 @@ function SignupForm() {
 
   // If already logged in, redirect
   if (user) {
-    router.push("/gateway");
+    router.push(nextPath);
   }
 
   const indianStates = [
@@ -76,7 +78,7 @@ function SignupForm() {
     if (res.error) {
       setErrorMsg(res.error);
     } else {
-      router.push("/gateway");
+      router.push(nextPath);
     }
   };
 

@@ -47,9 +47,9 @@ class Session {
   }
 }
 
-async function signup(tag) {
+async function signup(tag, invitedEmail) {
   const s = new Session();
-  const email = `e2e-${tag}-${Date.now()}@example.com`;
+  const email = invitedEmail ?? `e2e-${tag}-${Date.now()}@example.com`;
   const r = await s.req("POST", "/api/auth/signup", { email, password: PASSWORD, full_name: `E2E ${tag}` });
   return { s, email, r };
 }
@@ -102,6 +102,21 @@ async function fresh() {
   const cookieFlags = owner.s.setCookies.join("\n");
   check("A-05", "session cookies are HttpOnly and SameSite=Lax", /deku_at=[^\n]*HttpOnly/i.test(cookieFlags) && /deku_rt=[^\n]*HttpOnly/i.test(cookieFlags) && /SameSite=Lax/i.test(cookieFlags), cookieFlags.replace(/=[^;]+/g, "=…"));
   check("A-06", "signup response has no tokens", !/access_token|refresh_token/.test(owner.r.text));
+  const blocked = new Session();
+  r = await blocked.req("POST", "/api/auth/signup", { email: `e2e-blocked-${Date.now()}@example.com`, password: PASSWORD, full_name: "E2E Blocked" });
+  check("S-01", "second signup with no invitation is refused", r.status === 403 && r.json?.error === "signup_closed", `${r.status} ${r.text}`);
+  r = await fetch(`${BACKEND}/api/v1/auth/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: `e2e-direct-${Date.now()}@example.com`, password: PASSWORD, full_name: "E2E Direct" }),
+  });
+  check("S-01b", "going straight to the backend is refused too", r.status === 403, r.status);
+  r = await blocked.req("POST", "/api/auth/demo", { type: "owner" });
+  check("S-02a", "demo sign-in is off without the demo seed", r.status === 404, r.status);
+  const html = await (await fetch(`${BASE}/login`)).text();
+  const chunks = [...new Set(html.match(/\/_next\/static\/[^"' ]+\.js/g) ?? [])];
+  const bundles = await Promise.all(chunks.map((c) => fetch(BASE + c).then((x) => x.text())));
+  check("S-02b", "no demo password in the login page's scripts", chunks.length > 0 && !bundles.some((b) => b.includes("DekuDemo")), `${chunks.length} chunks`);
   r = await owner.s.api("GET", "/organisations");
   check("O-02", "new user sees no companies (no demo leakage)", r.status === 200 && r.json?.data?.length === 0, r.text);
 
@@ -110,6 +125,12 @@ async function fresh() {
   check("O-03", "company created", r.status === 200 && !!r.json?.organisation_id, `${r.status} ${r.text}`);
   const org = r.json?.organisation_id;
   if (!org) return false;
+
+  r = await owner.s.api("POST", "/organisations", { name: "E2E Second Company", slug: `${slug}-second` });
+  check("O-08", "a second company is refused", r.status === 409 && r.json?.error === "single_organisation", `${r.status} ${r.text}`);
+  r = await owner.s.api("GET", `/organisations/${org}/subscription`);
+  const sub = r.json?.data ?? r.json;
+  check("O-09", "company has no trial or end date", sub?.plan?.code === "single_org" && !sub?.current_period_end, r.text.slice(0, 300));
 
   r = await owner.s.api("POST", `/organisations/${org}/accounts/seed`);
   check("O-04", "chart of accounts seeded", r.status === 200, `${r.status} ${r.text}`);
@@ -180,15 +201,19 @@ async function fresh() {
   check("W-01h", "audit trail recorded events", r.status === 200 && (r.json?.data ?? []).length > 0, `${r.status} ${r.text.slice(0, 200)}`);
 
   // Plan §8: forbidden, no membership, low role
-  const stranger = await signup("stranger");
+  const strangerEmail = `e2e-stranger-${Date.now()}@example.com`;
+  await owner.s.api("POST", `/organisations/${org}/invitations`, { email: strangerEmail, role: "viewer" });
+  const stranger = await signup("stranger", strangerEmail);
+  check("A-06b", "invited address can sign up", stranger.r.status === 200, stranger.r.status);
   r = await stranger.s.api("GET", `/organisations/${org}/accounts`);
   check("A-07", "non-member reads no accounts", (r.json?.data ?? []).length === 0, r.text.slice(0, 200));
   r = await stranger.s.api("POST", `/organisations/${org}/journals`, voucher("E2E/STRANGER", 1, 1));
   check("A-08", "non-member can't create a voucher", r.status !== 200, r.status);
 
-  const viewer = await signup("viewer");
-  r = await owner.s.api("POST", `/organisations/${org}/invitations`, { email: viewer.email, role: "viewer" });
+  const viewerEmail = `e2e-viewer-${Date.now()}@example.com`;
+  r = await owner.s.api("POST", `/organisations/${org}/invitations`, { email: viewerEmail, role: "viewer" });
   check("A-09", "owner invites a viewer", r.status === 200, `${r.status} ${r.text}`);
+  const viewer = await signup("viewer", viewerEmail);
   r = await owner.s.api("GET", `/organisations/${org}/invitations`);
   const token = (r.json?.data ?? []).find((i) => i.email === viewer.email)?.token;
   r = await viewer.s.api("POST", "/organisations/invitations/accept", { token });
@@ -252,8 +277,8 @@ async function persisted() {
 // D-11: only in a stack started with DEKU_SEED_DEMO=true.
 async function demo() {
   const s = new Session();
-  const r = await s.req("POST", "/api/auth/login", { email: "demo-owner@deku.finance", password: "DekuDemo#2026" });
-  check("D-11a", "demo login works in demo mode", r.status === 200, r.status);
+  const r = await s.req("POST", "/api/auth/demo", { type: "owner" });
+  check("D-11a", "demo login works in demo mode", r.status === 200, `${r.status} ${r.text}`);
   const orgs = await s.api("GET", "/organisations");
   check("D-11b", "demo user has a demo company", (orgs.json?.data ?? []).length > 0, orgs.text.slice(0, 200));
 }

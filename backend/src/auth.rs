@@ -118,6 +118,15 @@ pub fn normalize_email(email: &str) -> String {
     email.trim().to_lowercase()
 }
 
+/// May this address become the first administrator? In production that needs DEKU_ADMIN_EMAIL, or
+/// whoever finds a fresh deployment first would own it.
+pub fn may_be_first_admin(email: &str, admin_email: Option<&str>, production: bool) -> bool {
+    match admin_email {
+        Some(admin) => normalize_email(admin) == normalize_email(email),
+        None => !production,
+    }
+}
+
 fn is_valid_email(email: &str) -> bool {
     if email.len() > 254 || email.chars().any(char::is_whitespace) {
         return false;
@@ -153,6 +162,15 @@ mod tests {
     use super::*;
 
     const SECRET: &str = "test-secret-that-is-at-least-32-bytes-long";
+
+    #[test]
+    fn first_admin_rules() {
+        assert!(may_be_first_admin("me@co.in", None, false));
+        assert!(!may_be_first_admin("me@co.in", None, true));
+        assert!(may_be_first_admin("me@co.in", Some(" ME@co.in "), true));
+        assert!(!may_be_first_admin("you@co.in", Some("me@co.in"), true));
+        assert!(!may_be_first_admin("you@co.in", Some("me@co.in"), false));
+    }
 
     #[test]
     fn access_token_round_trips() {

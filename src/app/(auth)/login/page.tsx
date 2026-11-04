@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeNextPath } from "@/lib/auth/next-path";
 import { useAuth } from "@/context/AuthContext";
 import {
   ReceiptText,
@@ -34,10 +35,20 @@ function LoginForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [demoEnabled, setDemoEnabled] = useState(false);
+  // client.ts sends ?next= after a lost session, /join sends ?redirect= with the invitation.
+  const nextPath = safeNextPath(searchParams.get("next") ?? searchParams.get("redirect"));
+
+  useEffect(() => {
+    fetch("/api/auth/demo")
+      .then((r) => r.json())
+      .then((d) => setDemoEnabled(d.enabled === true))
+      .catch(() => setDemoEnabled(false));
+  }, []);
 
   // If already logged in, redirect
   if (user) {
-    router.push("/gateway");
+    router.push(nextPath);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +60,7 @@ function LoginForm() {
     if (res.error) {
       setErrorMsg(res.error);
     } else {
-      router.push("/gateway");
+      router.push(nextPath);
     }
   };
 
@@ -58,7 +69,7 @@ function LoginForm() {
     setErrorMsg("");
     try {
       await loginDemo(type);
-      router.push("/gateway");
+      router.push(nextPath);
     } catch {
       setErrorMsg("Failed to start demo session");
     } finally {
@@ -98,6 +109,7 @@ function LoginForm() {
           )}
 
           {/* Quick Sandbox / Instant Demo Options */}
+          {demoEnabled && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
               <span className="flex items-center gap-1.5 text-brand">
@@ -138,6 +150,7 @@ function LoginForm() {
               </button>
             </div>
           </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -171,7 +184,7 @@ function LoginForm() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        alert("Please use the Instant Demo Sandbox or contact support at +91 7506461004.");
+                        alert("Password reset isn't available yet. Please contact your administrator.");
                       }}
                       className="text-[11px] font-medium text-brand hover:underline"
                     >

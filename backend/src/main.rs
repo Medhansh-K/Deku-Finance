@@ -27,7 +27,14 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "deku_backend=debug,tower_http=debug,axum::rejection=trace".into()),
+                // Debug request spans carry query strings, such as Razorpay's OAuth code.
+                .unwrap_or_else(|_| {
+                    if std::env::var("DEKU_ENV").as_deref() == Ok("production") {
+                        "deku_backend=info,tower_http=info".into()
+                    } else {
+                        "deku_backend=debug,tower_http=debug,axum::rejection=trace".into()
+                    }
+                }),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -61,6 +68,8 @@ async fn main() {
         db: PostgrestClient::new(&config),
         jwt_secret: config.jwt_secret.clone(),
         cron_secret: config.cron_secret.clone(),
+        admin_email: config.admin_email.clone(),
+        production: config.deku_env.as_deref() == Some("production"),
         cipher: config.data_encryption_key.as_deref().and_then(crypto::Cipher::from_base64),
         razorpay: razorpay::Razorpay::from_config(&config),
     };

@@ -153,6 +153,7 @@ export default function PlanBillingPage() {
             </>
           )}
 
+          {subscription?.plan?.code !== "single_org" && (
           <section className="bg-surface rounded-2xl p-6 border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-black text-ink">Upgrade or renew</h3>
@@ -168,6 +169,7 @@ export default function PlanBillingPage() {
               <span>+91 7506461004</span>
             </a>
           </section>
+          )}
         </div>
       </WorkspaceLayout>
     </AppShell>

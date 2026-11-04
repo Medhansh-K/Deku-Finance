@@ -65,6 +65,8 @@ services:
       GSP_PROVIDER: ${GSP_PROVIDER:-}
       KYC_PROVIDER: ${KYC_PROVIDER:-}
       DEKU_ENV: ${DEKU_ENV:-development}
+      # Only this address may become the first administrator. Empty locally = whoever signs up first.
+      DEKU_ADMIN_EMAIL: ${DEKU_ADMIN_EMAIL:-}
     ports:
       - "127.0.0.1:8080:8080"
     healthcheck:
@@ -81,6 +83,8 @@ services:
     restart: unless-stopped
     environment:
       BACKEND_URL: http://backend:8080
+      # Turns the demo sign-in on, for the accounts migrate seeds with the same setting.
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3000:3000"

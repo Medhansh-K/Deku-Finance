@@ -148,7 +148,7 @@ everything and later releases update it:
   `postgrest/postgrest:v12.2.3`, `PGRST_DB_URI`/`PGRST_JWT_SECRET` from secrets, `PGRST_DB_SCHEMAS=public`,
   `PGRST_DB_ANON_ROLE=anon`, `PGRST_JWT_AUD=deku`, port 3000);
 - `gcloud run deploy deku-backend --network=default --subnet=default --vpc-egress=all-traffic` with
-  `POSTGREST_URL` = postgrest's `status.url`, and `JWT_SECRET` and `CRON_SECRET` from Secret Manager;
+  `DEKU_ADMIN_EMAIL` = the substitution `_ADMIN_EMAIL` (without it nobody can create the first account), `POSTGREST_URL` = postgrest's `status.url`, and `JWT_SECRET` and `CRON_SECRET` from Secret Manager;
 - `gcloud run deploy deku-frontend` with `BACKEND_URL` = backend's `status.url` and `JWT_SECRET`.
 
 ```bash

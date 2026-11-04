@@ -33,15 +33,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-// Sandbox accounts from the demo seed (seed.sql). They belong only to fictional demo companies,
-// so row-level security keeps demo visitors out of every real tenant.
-const DEMO_ACCOUNTS = {
-  owner: "demo-owner@deku.finance",
-  accountant: "demo-accountant@deku.finance",
-  freelancer: "demo-freelancer@deku.finance",
-} as const;
-const DEMO_PASSWORD = "DekuDemo#2026";
-
 // The user object our /api/auth/* handlers return (tokens stay in httpOnly cookies).
 interface SessionUser {
   id: string;
@@ -54,11 +45,13 @@ interface SessionUser {
 const AUTH_ERRORS: Record<string, string> = {
   invalid_credentials: "Incorrect email or password.",
   email_taken: "An account with this email already exists.",
+  signup_closed: "Sign-ups are closed. Ask your administrator to invite this email address.",
+  demo_disabled: "The demo isn't available here.",
   backend_unavailable: "Deku Finance is unreachable right now. Please try again shortly.",
 };
 
 async function authRequest(
-  path: "login" | "signup" | "me" | "logout",
+  path: "login" | "signup" | "me" | "logout" | "demo",
   body?: unknown
 ): Promise<{ user?: SessionUser; error?: string }> {
   const res = await fetch(
@@ -236,10 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginDemo = async (type: "owner" | "accountant" | "freelancer") => {
     setIsLoading(true);
     try {
-      const { user: u, error } = await authRequest("login", {
-        email: DEMO_ACCOUNTS[type],
-        password: DEMO_PASSWORD,
-      });
+      const { user: u, error } = await authRequest("demo", { type });
       if (error || !u) throw new Error(error || "Demo sign-in failed.");
       await startSession(u);
     } finally {
