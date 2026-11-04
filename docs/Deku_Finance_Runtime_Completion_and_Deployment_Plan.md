@@ -102,7 +102,7 @@ On 4 November 2026, the complete baseline validation was executed against the ac
 | **Rust release build** | `cargo build --release` | **PASS** | Finished `release` profile [optimized] binary `backend/target/release/backend.exe` cleanly in 2m 15s. |
 | **Keyboard shortcuts** | `npx vitest run tests/shortcuts.test.ts` | **PASS** | **11 passed, 0 failed** in 47ms. Outdated test expectations reconciled with active `F1`–`F11` navigation map, `Escape` to `/gateway`, `Ctrl+K` command palette, and local voucher desk shortcuts. |
 | **Transaction-entry protection** | Unit tests in `shortcuts.test.ts` | **PASS** | Fortified `isTargetInteractive` in `src/lib/keyboard/shortcuts.ts` to detect `input`, `textarea`, `select`, `contenteditable`, `combobox`, `listbox`, and code editors, suppressing accidental navigation while typing. |
-| **Docker environment readiness** | `docker-compose.yml` & `.env.example` audit | **PASS** | Service topology audited; matching `JWT_SECRET` across PostgREST, Rust, and Next.js; database credentials aligned; optional integrations safely fall back to HTTP 503 without crashing. |
+| **Docker environment readiness** | `docker-compose.yml` & `.env.example` audit | **NOT TESTED** (file review only, see §3A.2) | Service topology audited; matching `JWT_SECRET` across PostgREST, Rust, and Next.js; database credentials aligned; optional integrations safely fall back to HTTP 503 without crashing. |
 
 ### 3.2 Today's Tasks Completed (4 November 2026)
 1. **Executed Step 1 Baseline Validation**: Confirmed all 5 test/build suites pass cleanly with zero mocks or skipped checks.
@@ -172,6 +172,190 @@ providers. They must not prevent the core application from starting when
 credentials are absent. Clearly label sandbox/simulation behaviour.
 
 ------------------------------------------------------------------------
+
+## 3A. Repository audit (first deliverable, 4 November 2026)
+
+Audited at commit `8b1a1ed` by reading the code. **Nothing in this section was run**, so every feature status below is a code-reading result, not a test `PASS` under rule 8. The master checklist is in [`docs/runtime/README.md`](runtime/README.md).
+
+### 3A.1 Verdict
+
+The test suites are green and the service topology matches the brief, but **the application is not ready for a customer**. The baseline in §3.1 shows that the code compiles and its unit tests pass. It doesn't show that the stack runs end to end: **no one has yet recorded a run of the full stack with real sign-in and voucher posting.** CI's `docker` job only builds images.
+
+Blockers, in order:
+
+| # | Blocker | Why it matters | Evidence |
+|---|---|---|---|
+| 1 | Uploaded documents are never stored | No bytes are saved anywhere; there is no multipart handling, bucket or file volume. §11, D-14, G-08 and tutorial Path 7 can't pass | `VoucherWorkspace.tsx:423-475`, `routes/documents.rs:72-88`, `documentsApi` has no callers |
+| 2 | Fake voucher proof is written to the audit trail | Any file is stamped `verified: true` and "Verified statutory document"; blank references get a random UTR or CFO memo number; the approver is hardcoded as the CFO | `VoucherWorkspace.tsx:453-471, 789, 813` |
+| 3 | Cash Flow always shows ₹0.00 | The page reads `cash_flows` and `summary`; the SQL returns `operating_activities` and friends. The badge still says "Positive" | `CashFlowView.tsx:66-73`, migration 023 line 223 |
+| 4 | Consultant sidebar invents figures | ₹15,45,339 revenue, ₹6,40,000 cash, 14.5 months runway and 32.5 days DSO appear whenever real data is missing, under an "Audited Health · Live" label | `DekuConsultantView.tsx:603-606` |
+| 5 | Anyone can sign up | No switch exists and the backend is public on GCP. Strangers get accounts with no email check | `routes/auth.rs:17` |
+| 6 | The customer is locked out after 20 days | Every company starts on a 15+5 day trial, then issuing invoices returns 402. There is no payment flow, and licensing is out of scope for this delivery | migration 039 lines 34, 99, 190 |
+| 7 | Demo password ships in the client bundle | With the seed loaded, anyone can sign in. Compose hardcodes the seed on, so §7 clean customer mode can't be tested | `AuthContext.tsx:43`, `docker-compose.yml:28` |
+| 8 | GCP release would fail at the backend deploy | A literal `\n` sits in the backend deploy command before `--set-env-vars`, so `POSTGREST_URL` and `DEKU_ENV=production` are never applied (read from the file, not executed) | `deploy/gcp/cloudbuild.yaml:94` |
+
+Blockers 2–4 are older than commit `8b1a1ed`. They were missed by the earlier data-honesty audit, whose report that fabricated figures had been removed was wrong for these three screens.
+
+### 3A.2 Corrections to §3
+
+| Reported in §3 | Actual |
+|---|---|
+| Docker readiness `PASS` | **`NOT TESTED`.** That row was a file review. No containers were recorded starting |
+| PostgREST v12 | Compose uses `postgrest/postgrest:latest`; `cloudbuild.yaml` pins `v12.2.3`. Breaks rule 14 and §13 |
+| "Optional integrations fall back to 503" | Confirmed in code: unset means off. An unknown `GSP_PROVIDER` or `KYC_PROVIDER` name, or a malformed `DATA_ENCRYPTION_KEY`, stops the backend at startup, which is the safer behaviour |
+| Ports 3000, 8080, 5433 | Confirmed, all bound to `127.0.0.1` |
+| Migrations 000–044 (45 files) | Confirmed: 45 files, tracked with checksums in `public.schema_migrations`. A fresh local Postgres 18 run on 31 Oct passed. Not yet recorded on Postgres 16 in Compose |
+| Session flow | Confirmed in code, with the gaps in §3A.8 |
+| Local-storage active organisation | UI preference only. The organisation comes from the URL and membership is enforced by RLS. Service-token paths in `integrations/mod.rs` and `payments.rs` still need tracing (task S-11) |
+
+Commit `8b1a1ed` also deleted `docs/INTEGRATIONS.md`, `docs/HSN_IMPORT.md` and `docs/IMPLEMENTATION_PLAN.md`, which `.env.example`, `backend/.env.example`, `db/import_hsn.sh` and `deploy/gcp/README.md` still reference (task X-02).
+
+### 3A.3 Repository structure
+
+| Path | Contents |
+|---|---|
+| `src/app` | 47 pages plus `api/auth/*` and the `api/backend/[...path]` proxy |
+| `src/proxy.ts`, `src/lib/auth/session.ts` | Session verification and refresh |
+| `src/modules`, `src/components`, `src/layouts` | Feature views, shared UI, `AppShell` |
+| `backend/src` | Axum service: `routes/` (25 route modules), `gst/`, `integrations/`, `razorpay.rs`, `crypto.rs`, `auth.rs` |
+| `supabase/migrations`, `supabase/seed.sql`, `supabase/tests` | Schema (folder name is historical; no Supabase at runtime), demo seed, 18 SQL suites |
+| `db/` | `migrate.sh`, `import_hsn.sh`, migrate image |
+| `Dockerfile`, `backend/Dockerfile`, `db/Dockerfile`, `docker-compose.yml` | Images and local stack |
+| `deploy/gcp` | `cloudbuild.yaml`, `README.md` |
+| `.github/workflows/ci.yml` | Jobs: frontend, backend, sql, docker |
+
+### 3A.4 Runtime components
+
+| Component | Container | Port | Depends on | Health check | Persistent data |
+|---|---|---|---|---|---|
+| Frontend (Next.js standalone, user `node`) | `frontend` | 3000 | backend (start order only) | None | None |
+| Backend (Axum, uid 10001) | `backend` | 8080 | postgrest (start order only) | `/health` and `/ready` exist; not wired to anything | None |
+| PostgREST | `postgrest` | 3000, internal | migrate completed | None | None |
+| PostgreSQL 16 | `postgres` | 5432, host 5433 | – | `pg_isready` | Volume `pgdata` |
+| Migration runner | `migrate` | – | postgres healthy | Exit code | `public.schema_migrations` |
+
+No service has a `restart:` policy. Only extensions used: `pgcrypto` and `pg_trgm` (best-effort).
+
+### 3A.5 Environment variables
+
+| Variable | Consumer | Required | Secret | When omitted | Must match |
+|---|---|---|---|---|---|
+| `POSTGRES_PASSWORD` | postgres, compose | Compose default | Yes | Dev default | `DATABASE_URL` |
+| `POSTGRES_DB`, `POSTGRES_USER` | postgres | Set in compose | No | – | `DATABASE_URL`, `PGRST_DB_URI` |
+| `DATABASE_URL` | `migrate.sh`, `import_hsn.sh` | Yes | Yes | Script exits | Database credentials |
+| `AUTHENTICATOR_PASSWORD` | `migrate.sh` | Effectively yes | Yes | Warns; a new DB's role has no password, so PostgREST can't connect | `PGRST_DB_URI` |
+| `DEKU_SEED_DEMO` | `migrate.sh` | No | No | false, but compose hardcodes `"true"` | – |
+| `MIGRATIONS_DIR`, `SEED_FILE` | `migrate.sh` | No | No | `/migrations`, `/seed.sql` | – |
+| `PGRST_DB_URI` | postgrest | Yes | Yes | Set in compose and cloudbuild | `AUTHENTICATOR_PASSWORD` |
+| `PGRST_JWT_SECRET` | postgrest | Yes | Yes | Set in compose and cloudbuild | `JWT_SECRET` |
+| `PGRST_JWT_AUD` | postgrest | Yes | No | Set to `deku` | `auth.rs:12` |
+| `PGRST_DB_SCHEMAS`, `PGRST_DB_ANON_ROLE` | postgrest | Yes | No | Set in compose and cloudbuild | – |
+| `JWT_SECRET` | backend, frontend | Yes | Yes | Backend stops if missing or under 32 bytes. **Frontend doesn't stop**: tokens can't be verified, so every request refreshes | PostgREST, backend, frontend |
+| `PORT` | backend | No | No | 8080; invalid value stops startup | – |
+| `POSTGREST_URL` | backend | Yes | No | Stops at startup | – |
+| `CORS_ALLOWED_ORIGINS` | backend | No | No | None allowed; invalid value stops startup | – |
+| `CRON_SECRET` | backend | No | Yes | Notification job returns 404 | Cloud Scheduler header |
+| `DATA_ENCRYPTION_KEY` | backend | No | Yes | Integrations off; malformed value stops startup. **Losing or changing it makes stored Razorpay, GSP and KYC credentials unreadable** | – |
+| `RAZORPAY_CLIENT_ID`, `_CLIENT_SECRET`, `_REDIRECT_URI`, `_WEBHOOK_SECRET` | backend | All four or none | Yes, except URI | Payment routes return 503 | – |
+| `GSP_PROVIDER`, `KYC_PROVIDER` | backend | No | No | Off; routes return 503. Unknown value stops startup. `sandbox` is refused in production | – |
+| `DEKU_ENV` | backend | Production: yes | No | Only effect today: refuses sandbox providers | – |
+| `RUST_LOG` | backend | No | No | **Debug level, including in production** | – |
+| `BACKEND_URL` | frontend | Yes | No | Auth and proxy return 502 | – |
+| `NODE_ENV`, `HOSTNAME`, `NEXT_TELEMETRY_DISABLED` | frontend image | Set in image | No | Image always sets production, so cookies are `Secure` and need HTTPS or localhost | – |
+
+Secret dev defaults exist only in `docker-compose.yml` and `.env.example`, not in application code. Nothing refuses them in production (task S-03).
+
+### 3A.6 Migrations and runner
+
+Numbered files 000–044, in order: platform_auth, core_identity, organisations_tenancy, parties, catalogue_items, accounting_foundation, accounting_posting_reporting, sales_invoices_gst, invoice_documents, audit_events_and_performance, fix_invoice_issuance_atomic_journal, alerx_coa_hierarchy, organisation_licenses, departments_members, user_activity_logs_and_security, agentic_memory_core, superadmin_and_7_role_rbac_matrix, universal_financial_rollup_wcm_fpa, lock_down_function_access, bank_reconciliation, journal_approvals, reports_include_reversed_entries, guard_payroll_and_licenses, honest_wcm_fpa_metrics, purchase_bills, sales_invoice_channel, lock_down_auth_functions, allow_journal_reversal, gst_return_filings, ledger_functions, organisation_profile, sales_notes, invoice_types, hsn_sac_master, notifications, marketplace_settlements, payments_razorpay, gsp_integration, kyc, subscriptions, invoice_status_guard, membership_bootstrap_and_marketplace_ar, inventory, import_jobs, business_documents.
+
+| §7 question | Answer from the code |
+|---|---|
+| Tracks versions and checksums | Yes; refuses a changed file |
+| Failed migration stops the run, not recorded | Yes (`set -eu`, `ON_ERROR_STOP`) |
+| Rerun safe | Yes |
+| Transactional | **No.** Files run without a transaction because 016 adds enum values and uses them in the same file. A partial failure needs manual repair (task M-02) |
+| Concurrent runs prevented | **No lock** (task M-01) |
+| RLS | Enabled on all 58 `public` tables plus `schema_migrations`, by name match. Policy quality is covered by SQL suites, not reviewed here |
+| Default chart of accounts | **Not created with the company.** Only onboarding, a manual button or the seed call it, so a company that skips onboarding has none (task O-02) |
+| Cloud SQL compatibility | Nothing found that should fail; not run on Cloud SQL |
+
+The demo seed re-runs on each `migrate` start. It's written to be idempotent, except that it aborts if a demo email belongs to another user.
+
+### 3A.7 Files, jobs and integrations
+
+- **Uploads:** see blocker 1. CSV and Tally imports are parsed in the browser and send rows only. The 2 MiB backend body limit also caps large import payloads.
+- **PDFs:** browser `window.print()` only.
+- **Backups of files:** nothing to back up today, because nothing is stored.
+- **Background jobs:** the backend has no scheduler. The only job is `POST /api/v1/internal/notifications/generate`, triggered by hand locally and by a manually created hourly Cloud Scheduler job on GCP. It is idempotent per company through a dedupe key. Expired refresh tokens are never purged.
+- **Razorpay webhook:** signature-checked. Idempotency in `record_gateway_payment` not reviewed.
+- **Consultant:** answers come from `answer_from_ledger`. No LLM or third party is involved, so "AI CFO" labels overstate it.
+
+### 3A.8 Security gaps
+
+| ID | Gap | Evidence |
+|---|---|---|
+| S-01 | Open signup, including direct to the backend | `routes/auth.rs:17` |
+| S-02 | Demo password and demo buttons in the client bundle | `AuthContext.tsx:43`, `login/page.tsx:112,127` |
+| S-03 | Production doesn't refuse dev secrets | `integrations/mod.rs:74` covers sandbox only |
+| S-04 | No CSRF check beyond `SameSite=Lax`; login CSRF is possible because the auth routes force a JSON content type | `session.ts:181`, `app/api/backend/[...path]/route.ts` |
+| S-05 | No login rate limit or lockout | `routes/auth.rs:13-14` |
+| S-06 | No password reset or change; "Forgot password?" is an alert | `login/page.tsx:172-174` |
+| S-07 | Any refresh failure, even a brief backend outage, signs the user out. Parallel refreshes across instances can trigger reuse detection and revoke every session | `session.ts:96,108-109,152`, migration 000 lines 228-232 |
+| S-08 | Production logs at debug level; Razorpay callback `code` and `state` can reach logs | `main.rs:29,85` |
+| S-09 | Proxy allows `api/v1/auth/*`, which can return raw tokens to JavaScript | `session.ts:52-53,156` |
+| S-10 | A vendor email is seeded as an inert superadmin row in every database | migration 016 line 615 |
+| S-11 | Membership checks on service-token paths not traced | `integrations/mod.rs:123`, `payments.rs:214,237,356` |
+| S-12 | Invite squatting: signup has no email check, so anyone can register an invited address | migration 041 lines 48-55 |
+
+Logout revokes the refresh token; the access token stays valid for up to one hour by design.
+
+### 3A.9 Route status
+
+Status: **R** real against the API, **S** needs a sandbox or provider, **M** mock or fabricated content present, **O** not reachable from navigation. From code reading. Purchases, Marketplace, Import, Inventory, Approvals, Parties and the Builder body were checked through their API calls, not line by line. Loading, empty and error states and test evidence get recorded per route in `LOCAL_DOCKER_TEST_REPORT.md` as they're run.
+
+| Route | Status | Note |
+|---|---|---|
+| `/` | R | Marketing; claims below |
+| `/login`, `/signup`, `/join`, `/onboarding` | R | Signup drops plan and UPI; `/join` loses its token after login |
+| `/gateway` | R | Load errors swallowed; "PostgreSQL Active" and "AI CFO Live" are unconditional |
+| `/executive` | R | "GSTIN Active" and "Regular GST Taxpayer" are unconditional |
+| `/consultant` | R, M | Blocker 4; five invented chat histories; dead controls |
+| `/vouchers` and `/contra`, `/journal`, `/payment`, `/purchase`, `/receipt`, `/sales` | R, M | Blocker 2; random entry numbers; fictional sample bills can be posted; `/sales` links to missing `/gst/sales-invoices` |
+| `/day-book`, `/approvals`, `/banking/reconciliation`, `/collect`, `/purchases` | R | |
+| `/builder` | R | Random promo code; slabs lack 40% (check against current notifications) |
+| `/gst`, `/gst/file` | R, S | IRN, e-way bill and direct filing need a provider |
+| `/gst/returns` | R | "Legally exempt" text is unconditional |
+| `/gst/guide` | R | Static |
+| `/masters/chart-of-accounts` | R | "Liquid" total includes 1030 Trade Debtors |
+| `/masters/parties`, `/masters/products-services` | R | Price prefilled at 10000 |
+| `/inventory`, `/marketplace`, `/import`, `/export` | R, O | Built, but no menu or palette entry |
+| `/reports/trial-balance`, `/balance-sheet`, `/debtors`, `/creditors`, `/operating-expenses` | R | Debtors and Creditors show 0 counts while loading |
+| `/reports/profit-loss` | R | "FY 2026-27" hardcoded |
+| `/reports/cash-flow` | M | Blocker 3; start date fixed at 2026-04-01 |
+| `/reports/fpa` | R, M | Metrics real; "Healthy" and "Safe" verdicts unconditional; errors never shown; budget use not from the ledger |
+| `/companies` | R | Allows unlimited companies, which conflicts with single-organisation scope |
+| `/departments-members`, `/audit`, `/settings` | R | Migration 013 seeds invented budgets when the org name matches `deku` |
+| `/logs` | R, O | Duplicate of `/audit` |
+| `/kyc` | S | Disabled when unconfigured; only reachable from Settings |
+| `/settings/license` | R | Failed load spins forever |
+
+**Marketing claims with nothing behind them:** GSTR-2B matching, Shopify and bulk marketplace sync, automated WhatsApp, automated GSTN filing without a provider, logo and stamp on documents.
+
+**Keyboard (commit `8b1a1ed`):**
+- With focus in a field or a dialog open, F5 reloads and discards the form, and F1 and F11 reach the browser.
+- Ctrl+F5 and Shift+F5 are caught as navigation.
+- The unsaved-changes check covers four areas and misses fields with no explicit `type`, including voucher number and narration.
+- `VoucherWorkspace` F-keys fire while typing and overwrite the narration.
+- `AppSidebar.tsx` is now unused, which is why those four routes lost their menu entries.
+
+### 3A.10 Deployment gaps (GCP, §16–19)
+
+Don't start until local acceptance passes. Known so far: blocker 8; Cloud SQL isn't created with a private IP; the restore steps omit redeploying services against the clone; no document storage; no Cloud Run probes; secrets use `:latest`; Artifact Registry isn't created with immutable tags; the README has a duplicated line and two conflicting NAT recipes.
+
+### 3A.11 Environment limits for this work
+
+The machine this audit ran on has no Docker and no Rust linker, and WSL has no distribution installed. Node, Postgres 18 and `gcloud` are present. Part B's tests can run on GitHub Actions, which has Docker, and those results will be labelled as CI runs; checks on a developer laptop stay `NOT TESTED` until someone runs them there.
 
 ## 4. Engineering rules
 
