@@ -1,5 +1,5 @@
 //! GST Suvidha Provider seam: GST portal sessions (OTP), return filing with EVC, e-invoice IRNs and
-//! e-way bills. No GSP has been chosen (docs/IMPLEMENTATION_PLAN.md §6), so only `NotConfigured` and a
+//! e-way bills. No GSP has been chosen (docs/INTEGRATIONS.md), so only `NotConfigured` and a
 //! clearly labelled `Sandbox` exist.
 
 use chrono::{DateTime, Duration, Utc};

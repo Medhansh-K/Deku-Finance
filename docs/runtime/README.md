@@ -27,7 +27,7 @@ Status values: Not Started, In Progress, Blocked, Passed. Passed needs a recorde
 | F-01 | Files | Store and serve uploaded documents with size, type and access checks | Passed | CI `ceab44e`, docker job: F-01a to F-01j, D-14; `document_files_test.sql` | Migration 048, `routes/files.rs`, voucher and Day Book views | Postgres, 10 MB limit, immutable once attached. Found and fixed: Next silently truncated bodies over 10 MB. Upload screens not exercised in a browser |
 | S-01 | Security | Switch to close public signup; first admin bootstrap | Passed | CI `bd36cdd`, docker job: S-01, S-01b; `single_customer_test.sql` | Migration 047, `routes/auth.rs`, `auth.rs`, `config.rs` | Only the first administrator and invited addresses can register |
 | S-02 | Security | Demo credentials and buttons only in demo mode | Passed | CI `bd36cdd`, docker job: S-02a, S-02b, D-11a | `api/auth/demo/route.ts`, `AuthContext.tsx`, login page | Blocker 7 |
-| S-03 | Security | Production refuses dev secrets; frontend fails fast without `JWT_SECRET` | In Progress | Backend unit test, CI `bd36cdd` | `config.rs` | Backend half only. Frontend still doesn't stop without `JWT_SECRET` |
+| S-03 | Security | Production refuses dev secrets; frontend fails fast without `JWT_SECRET` | In Progress | CI step "Misconfigured services refuse to start", pending | `config.rs`, `src/instrumentation.ts`, `ci.yml` | Backend refuses dev secrets in production; frontend refuses to start without `JWT_SECRET` or `BACKEND_URL` |
 | S-04 | Security | Origin check on cookie-authenticated writes and auth routes | Passed | CI `ceab44e`, docker job: S-04a, S-04b; `tests/session.test.ts` | `session.ts` | Checks Sec-Fetch-Site, then Origin, on every `/api/` write |
 | S-05 | Security | Login rate limit | Passed | CI `ceab44e`, docker job: S-05a to S-05c; `single_customer_test.sql` | Migration 049, `routes/auth.rs`, `error.rs` | 10 failures locks an address for 15 minutes. Someone guessing can keep an account locked; add IP limits at the load balancer if that happens |
 | S-06 | Security | Password change and admin-driven reset | In Progress | `password_reset_test.sql`; recovery script run locally; CI pending | Migration 051, `routes/auth.rs`, `routes/organisations.rs`, `/reset-password`, Settings, Departments & Members, `db/issue_password_reset.sh` | One-time links, 24 hours. An admin can't reset an owner. The server script covers a locked-out sole owner |
@@ -46,19 +46,19 @@ Status values: Not Started, In Progress, Blocked, Passed. Passed needs a recorde
 | N-03 | Navigation | One path for switching company; stale state after switching | Not Started | | | |
 | K-01 | Keyboard | Fix F5/F1/F11 in fields, modifier keys, unsaved check, voucher F-keys while typing | In Progress | `tests/shortcuts.test.ts`, tsc and build; not exercised in a browser |  | Fixed: F5, F1, F11 in fields, modifier keys, unsaved check, voucher F-keys while typing. Open: header links skip the unsaved check; Gateway and Executive keys ignore the preference |
 | M-01 | Migrations | Advisory lock in `migrate.sh` | Passed | Local: two concurrent runners on Postgres 18, second applied 0 of 51, no locks left. Not run in Compose | `db/migrate.sh` |  |
-| M-02 | Migrations | Decide per-file transaction handling; document repair | Not Started | | | 016 can't run in one transaction |
+| M-02 | Migrations | Decide per-file transaction handling; document repair | Blocked | Decision recorded | None | Files can't all run in one transaction (016). A failed file stops the run and isn't recorded, but its partial work stays. Recovery needs manual repair or a backup; goes in `DATABASE_AND_MIGRATIONS.md` |
 | W-01 | Workflows | Scripted critical proof: voucher → Day Book → ledger → Trial Balance → debits equal credits | Passed | CI `2381911`, docker job: W-01a to W-01i | `tests/e2e/stack.mjs` | Found both report bugs below |
 | W-02 | Workflows | Scripted: auth matrix from §8 (no token, permitted, forbidden, no membership, low role, expired, logout) | In Progress | CI `2381911`, docker job: A-01 to A-17 | `tests/e2e/stack.mjs` | Expired access token is simulated with a refresh cookie, not a real expired JWT |
 | W-03 | Workflows | Scripted: clean onboarding with demo seed off | Passed | CI `2381911`, docker job: O-01 to O-07 | `tests/e2e/stack.mjs` | API level, not through the onboarding page |
 | W-05 | Workflows | Fix found by W-01: drafts and unbalanced vouchers counted in Trial Balance and account balances | Passed | CI `2381911`; `report_views_test.sql` failed before the fix | Migration 045 | Open since migration 017 |
 | W-06 | Workflows | Fix found by W-01: cash, COGS, DSO, DPO and working capital read zero in Cash Flow, FP&A and the Consultant | Passed | CI `2381911`; `report_views_test.sql` | Migration 046 | Migration 023 compared the wrong chart columns |
-| W-04 | Workflows | Sales, purchases, reports and remaining modules from §10 | Not Started | | | |
+| W-04 | Workflows | Sales, purchases, reports and remaining modules from §10 | In Progress | `tests/e2e/workflows.mjs`, M-01 to M-12; first CI run pending | `tests/e2e/workflows.mjs` | Bank reconciliation, payroll and marketplace not covered yet |
 
 ## Phases 2–4: persistence, images, local acceptance
 
 | ID | Workstream | Task | Status | Evidence | Files changed | Notes |
 |---|---|---|---|---|---|---|
-| C-01 | Docker | Pin PostgREST to the same version as GCP | Passed | CI `2381911`, docker job | `docker-compose.yml` |  |
+| C-01 | Docker | Pin PostgREST to the same version as GCP | Passed | Re-pinned to `v12.2.3` after commit `507c421` moved it back to `latest` | `docker-compose.yml` | `platform: linux/amd64` from that commit kept |
 | C-02 | Docker | `DEKU_SEED_DEMO` configurable, off by default | Passed | CI `2381911`, docker job: fresh and demo stages | `docker-compose.yml`, `.env.example` |  |
 | C-03 | Docker | Health checks, restart policies, health-based start order | In Progress | CI `2381911`, docker job: containers report healthy | `docker-compose.yml`, `backend/Dockerfile` | PostgREST has no check of its own (its image has no shell); the backend's `/ready` covers it |
 | C-04 | Docker | Root `.dockerignore` excludes nested `.env` files | In Progress | Not separately tested | `.dockerignore` |  |
@@ -83,4 +83,4 @@ Gated on local acceptance. Needs a GCP project, billing and Parth's approval bef
 |---|---|---|---|---|---|---|
 | T-01 | Tutorials | Tutorial centre, paths 1–9, acceptance from §23 | Not Started | | | Paths 5 and 7 depend on real features |
 | X-01 | Docs | The 12 documents in §24 | Not Started | | | |
-| X-02 | Docs | Restore or repoint references to deleted docs | Not Started | | | `.env.example`, `db/import_hsn.sh`, `deploy/gcp/README.md` |
+| X-02 | Docs | Restore or repoint references to deleted docs | Passed | Files restored from `a6bd216` | `docs/INTEGRATIONS.md`, `docs/HSN_IMPORT.md`, `gsp.rs`, `kyc.rs` | Migrations 037 and 038 still mention the removed plan in comments; applied files can't change |

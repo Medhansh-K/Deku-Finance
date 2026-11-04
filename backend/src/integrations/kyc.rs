@@ -1,5 +1,5 @@
 //! KYC seam: PAN, Udyam and GSTIN checks plus the DigiLocker / EntityLocker consent flow. No provider has
-//! been chosen (docs/IMPLEMENTATION_PLAN.md §6), so only `NotConfigured` and a labelled `Sandbox` exist.
+//! been chosen (docs/INTEGRATIONS.md), so only `NotConfigured` and a labelled `Sandbox` exist.
 //! Adapters return the outcome and the provider's reference only: never an Aadhaar number or a document
 //! (migration 038 refuses both).
 

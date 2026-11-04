@@ -75,6 +75,14 @@ jobs:
           DEKU_SEED_DEMO=true docker compose -p deku-demo up -d
           COMPOSE_PROJECT_NAME=deku-demo bash tests/e2e/wait.sh
           node tests/e2e/stack.mjs demo
+      - name: Misconfigured services refuse to start
+        run: |
+          docker compose -p deku-demo down
+          # 124 would mean it was still running when the timeout hit.
+          code=0; timeout 30 docker run --rm deku-finance-frontend || code=$?
+          if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::frontend started without JWT_SECRET (exit $code)"; exit 1; fi
+          code=0; timeout 30 docker run --rm -e DEKU_ENV=production -e POSTGREST_URL=http://x -e JWT_SECRET=dev-only-jwt-secret-change-me-0123456789abcdef deku-finance-backend || code=$?
+          if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::backend started in production with a dev secret (exit $code)"; exit 1; fi
       - name: Publish container state on failure
         if: failure()
         run: |

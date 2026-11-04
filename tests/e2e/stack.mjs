@@ -2,6 +2,7 @@
 // Usage: node tests/e2e/stack.mjs fresh|persisted|demo   (env: E2E_BASE, E2E_BACKEND, E2E_STATE, E2E_CRON_SECRET)
 // Plan §7, §8 and §10. Records created here use throwaway addresses and a fictional company.
 import { readFileSync, writeFileSync } from "node:fs";
+import { runWorkflows } from "./workflows.mjs";
 
 const BASE = process.env.E2E_BASE ?? "http://localhost:3000";
 const BACKEND = process.env.E2E_BACKEND ?? "http://localhost:8080";
@@ -54,9 +55,9 @@ async function signup(tag, invitedEmail, inviteToken) {
   return { s, email, r };
 }
 
-async function login(email) {
+async function login(email, password = PASSWORD) {
   const s = new Session();
-  const r = await s.req("POST", "/api/auth/login", { email, password: PASSWORD });
+  const r = await s.req("POST", "/api/auth/login", { email, password });
   return { s, r };
 }
 
@@ -294,6 +295,8 @@ async function fresh() {
   const listed = await me.api("GET", `/organisations/${org}/files`);
   const fileRow = (listed.json?.data ?? []).find((f) => f.id === fileId);
   check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));
+
+  await runWorkflows({ me, org, fy, date, check, invite: inviteToken, login, signup, voucherPeriod: period, accounts, viewer, base: BASE, PASSWORD });
 
   // S-04, S-09: what a hostile page or script can reach through the proxy.
   r = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/fiscal-periods`, {
