@@ -6,6 +6,7 @@ use axum::{
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
+use crate::auth;
 use crate::error::AppError;
 use crate::models::organisation::CreateOrgRequest;
 use crate::routes::AppState;
@@ -42,6 +43,10 @@ pub fn routes(state: AppState) -> Router {
         .route(
             "/:id/workbench-members/:member_id",
             patch(update_member_role).delete(remove_member),
+        )
+        .route(
+            "/:id/workbench-members/:member_id/password-reset",
+            post(create_password_reset),
         )
         .with_state(state)
 }
@@ -280,6 +285,26 @@ async fn update_settings(
     }
 
     Ok(Json(json!({ "success": true, "data": res })))
+}
+
+/// The token goes back once, for the admin to pass on; only its hash is stored.
+async fn create_password_reset(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, member_id)): Path<(String, String)>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let reset_token = auth::new_refresh_token();
+    let body = json!({
+        "p_org_id": org_id,
+        "p_member_id": member_id,
+        "p_token_hash": auth::hash_refresh_token(&reset_token),
+    });
+    let expires_at = state.db.rpc("create_password_reset", &body, token).await?;
+    Ok(Json(json!({
+        "success": true,
+        "data": { "token": reset_token, "expires_at": expires_at }
+    })))
 }
 
 async fn invite_member(

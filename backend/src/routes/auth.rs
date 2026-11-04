@@ -20,6 +20,8 @@ pub fn routes(state: AppState) -> Router {
         .route("/refresh", post(refresh))
         .route("/logout", post(logout))
         .route("/me", get(me))
+        .route("/change-password", post(change_password))
+        .route("/reset-password", post(reset_password))
         .with_state(state)
 }
 
@@ -236,6 +238,88 @@ async fn logout(
             json!({ "p_token_hash": auth::hash_refresh_token(&payload.refresh_token) }),
         )
         .await?;
+    }
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(Deserialize)]
+struct ChangePasswordRequest {
+    #[serde(default)]
+    current_password: String,
+    #[serde(default)]
+    new_password: String,
+}
+
+/// Other sessions end; this one continues on the new session returned here.
+async fn change_password(
+    State(app): State<AppState>,
+    headers: HeaderMap,
+    Json(payload): Json<ChangePasswordRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = headers
+        .get("Authorization")
+        .and_then(|h| h.to_str().ok())
+        .and_then(|h| h.strip_prefix("Bearer "))
+        .ok_or_else(|| AppError::Unauthorized("invalid_token".into()))?;
+    let claims = auth::verify_access_token(&app.jwt_secret, token)?;
+    let user_id = claims.sub.unwrap_or_default();
+    auth::validate_password(&payload.new_password)?;
+
+    let row = fetch_user(&app, &user_id)
+        .await?
+        .ok_or_else(|| AppError::Unauthorized("invalid_token".into()))?;
+    let email = row["email"].as_str().unwrap_or_default().to_string();
+
+    // A stolen session shouldn't get unlimited guesses at the password either.
+    let blocked = rpc_service(&app, "auth_login_blocked", json!({ "p_email": email })).await?;
+    if blocked == Value::Bool(true) {
+        return Err(AppError::TooManyRequests("too_many_attempts".into()));
+    }
+    let rows = rpc_service(&app, "auth_credentials", json!({ "p_email": email })).await?;
+    let stored_hash = rows
+        .as_array()
+        .and_then(|r| r.first())
+        .and_then(|r| r.get("password_hash"))
+        .and_then(Value::as_str)
+        .map(str::to_string);
+    let current = payload.current_password;
+    let valid = blocking(move || auth::verify_password(&current, stored_hash.as_deref())).await?;
+    if !valid {
+        rpc_service(&app, "auth_login_failed", json!({ "p_email": email })).await?;
+        return Err(invalid_credentials());
+    }
+
+    let new_password = payload.new_password;
+    let new_hash = blocking(move || auth::hash_password(&new_password)).await??;
+    rpc_service(&app, "auth_change_password", json!({ "p_user": user_id, "p_password_hash": new_hash })).await?;
+
+    let user = user_json(&user_id, &email, &row["meta"]);
+    start_session(&app, &user_id, &email, user).await
+}
+
+#[derive(Deserialize)]
+struct ResetPasswordRequest {
+    #[serde(default)]
+    token: String,
+    #[serde(default)]
+    new_password: String,
+}
+
+async fn reset_password(
+    State(app): State<AppState>,
+    Json(payload): Json<ResetPasswordRequest>,
+) -> Result<StatusCode, AppError> {
+    auth::validate_password(&payload.new_password)?;
+    let new_password = payload.new_password;
+    let new_hash = blocking(move || auth::hash_password(&new_password)).await??;
+    let user_id = rpc_service(
+        &app,
+        "auth_consume_password_reset",
+        json!({ "p_token_hash": auth::hash_refresh_token(&payload.token), "p_password_hash": new_hash }),
+    )
+    .await?;
+    if user_id.is_null() {
+        return Err(AppError::BadRequest("invalid_reset".into()));
     }
     Ok(StatusCode::NO_CONTENT)
 }

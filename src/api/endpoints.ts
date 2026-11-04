@@ -145,6 +145,11 @@ export const organisationsApi = {
         body: JSON.stringify({ role }),
       }
     ),
+  createPasswordReset: (orgId: string, memberId: string) =>
+    apiClient<ApiResponse<{ token: string; expires_at: string }>>(
+      `/api/v1/organisations/${orgId}/workbench-members/${memberId}/password-reset`,
+      { method: "POST" }
+    ),
   removeMember: (orgId: string, memberId: string) =>
     apiClient<{ success: boolean; data: any }>(
       `/api/v1/organisations/${orgId}/workbench-members/${memberId}`,

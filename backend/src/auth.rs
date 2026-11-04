@@ -144,13 +144,18 @@ fn is_valid_email(email: &str) -> bool {
 }
 
 /// Expects an already normalised email and trimmed full name.
+pub fn validate_password(password: &str) -> Result<(), AppError> {
+    if password.chars().count() < MIN_PASSWORD_LEN {
+        return Err(AppError::BadRequest("password_too_short".into()));
+    }
+    Ok(())
+}
+
 pub fn validate_signup(email: &str, password: &str, full_name: &str) -> Result<(), AppError> {
     if !is_valid_email(email) {
         return Err(AppError::BadRequest("invalid_email".into()));
     }
-    if password.chars().count() < MIN_PASSWORD_LEN {
-        return Err(AppError::BadRequest("password_too_short".into()));
-    }
+    validate_password(password)?;
     if full_name.is_empty() {
         return Err(AppError::BadRequest("full_name_required".into()));
     }

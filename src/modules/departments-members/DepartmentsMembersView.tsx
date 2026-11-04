@@ -59,6 +59,7 @@ export function DepartmentsMembersView() {
 
   const [invite, setInvite] = useState({ email: "", role: "viewer", designation: "", department_id: "" });
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [resetLink, setResetLink] = useState<{ name: string; url: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [dept, setDept] = useState({ name: "", code: "", description: "", budget: "" });
   const [period, setPeriod] = useState(() => (subscription?.server_time ?? new Date().toISOString()).slice(0, 7));
@@ -192,6 +193,13 @@ export function DepartmentsMembersView() {
 
       {tab === "members" && (
         <Panel title={`Members of ${organisation.name}`}>
+          {resetLink && (
+            <div className="space-y-1">
+              <p className="text-ink-soft">Send this link to {resetLink.name}. Anyone who has it can set their password.</p>
+              <CopyRow text={resetLink.url} copied={copied === resetLink.url} onCopy={copy} />
+            </div>
+          )}
+
           <table className="w-full text-left">
             <thead className="text-ink-muted">
               <tr>
@@ -233,6 +241,24 @@ export function DepartmentsMembersView() {
                     </td>
                     <td className="text-ink-soft">{date(m.created_at)}</td>
                     <td className="text-right">
+                      {editable && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={busy}
+                          onClick={() =>
+                            act(async () => {
+                              const res = await organisationsApi.createPasswordReset(orgId, m.id);
+                              setResetLink({
+                                name: memberName(m),
+                                url: `${window.location.origin}/reset-password?token=${res.data?.token}`,
+                              });
+                            }, "Reset link created. It works once, for 24 hours.")
+                          }
+                        >
+                          Reset password
+                        </Button>
+                      )}
                       {editable && (
                         <Button
                           variant="ghost"

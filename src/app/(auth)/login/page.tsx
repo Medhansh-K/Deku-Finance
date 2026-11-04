@@ -184,7 +184,7 @@ function LoginForm() {
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        alert("Password reset isn't available yet. Please contact your administrator.");
+                        alert("Ask your company's owner or administrator for a password reset link. They can create one under Departments & Members.");
                       }}
                       className="text-[11px] font-medium text-brand hover:underline"
                     >

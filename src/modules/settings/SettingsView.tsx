@@ -16,6 +16,7 @@ import { PaymentsCard } from "./PaymentsCard";
 import { GspCard } from "./GspCard";
 import { KycCard } from "./KycCard";
 import { KeyboardPreferencesCard } from "./KeyboardPreferencesCard";
+import { ChangePasswordCard } from "./ChangePasswordCard";
 
 export function SettingsView() {
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
@@ -97,6 +98,7 @@ export function SettingsView() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
       <CompanyProfileCard />
+      <ChangePasswordCard />
       <KeyboardPreferencesCard />
       {orgId && <CompanyControlsCard orgId={orgId} />}
       {orgId && <PaymentsCard orgId={orgId} />}

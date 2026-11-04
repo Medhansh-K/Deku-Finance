@@ -6,7 +6,7 @@ const ACCESS_MAX_AGE = 3600;
 const REFRESH_MAX_AGE = 30 * 24 * 3600;
 
 // Pages anyone may open; every other page needs a signed-in user.
-const PUBLIC_PATHS = ["/login", "/signup", "/join", "/api/auth"];
+const PUBLIC_PATHS = ["/login", "/signup", "/join", "/reset-password", "/api/auth"];
 
 export { safeNextPath } from "./next-path";
 
@@ -215,10 +215,14 @@ export async function sessionFromBackend(path: "login" | "signup", request: Next
   return startSession(path, await request.text());
 }
 
-export function startSession(path: "login" | "signup", body: string) {
+export function startSession(path: "login" | "signup" | "change-password", body: string, bearer?: string) {
   return backendAuth(
     path,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body },
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}) },
+      body,
+    },
     (data) => {
       const res = NextResponse.json({ user: data.user });
       setSessionCookies(res, data as unknown as BackendSession);
