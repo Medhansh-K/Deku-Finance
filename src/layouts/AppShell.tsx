@@ -11,6 +11,8 @@ import {
   Keyboard,
   HelpCircle,
   BookOpen,
+  Upload,
+  Download,
   LogOut,
   Building2,
   Calendar,
@@ -54,7 +56,7 @@ function isModalOrDrawerOpen(): boolean {
 }
 
 /** Pages whose forms lose work on navigation; report filters elsewhere aren't worth a prompt. */
-const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking", "/inventory", "/import", "/marketplace", "/masters", "/settings", "/consultant"];
+const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking", "/inventory", "/import", "/reconciliation", "/masters", "/settings", "/consultant"];
 
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
@@ -300,6 +302,13 @@ export function AppShell({ children }: AppShellProps) {
                 }`}
               />
             </button>
+
+            <Link href="/import" className="rounded-lg p-1.5 text-slate-400 hover:bg-panel hover:text-slate-200 transition-colors" title="Import from Tally or CSV" aria-label="Import data">
+              <Upload className="h-4 w-4" />
+            </Link>
+            <Link href="/export" className="rounded-lg p-1.5 text-slate-400 hover:bg-panel hover:text-slate-200 transition-colors" title="Export to CSV" aria-label="Export data">
+              <Download className="h-4 w-4" />
+            </Link>
 
             {/* Notification Bell */}
             <NotificationBell />

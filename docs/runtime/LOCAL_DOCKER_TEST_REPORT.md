@@ -22,7 +22,7 @@
 | D-02 | Images build | PASS | NOT TESTED | `docker compose build` |
 | D-03 | Services start in order | PASS | NOT TESTED | `tests/e2e/wait.sh` |
 | D-04 | PostgreSQL health | PASS | NOT TESTED | Compose health check |
-| D-05 | Migrations complete and are tracked | PASS | NOT TESTED | 53 files; `migrate` exits 0; `wait.sh` fails on a non-zero exit |
+| D-05 | Migrations complete and are tracked | PASS | NOT TESTED | 54 files; `migrate` exits 0; `wait.sh` fails on a non-zero exit |
 | D-06 | PostgREST reaches the database | PASS | NOT TESTED | `D-06`, through the backend's `/ready` |
 | D-07 | Backend health | PASS | NOT TESTED | `D-07` |
 | D-08 | Frontend responds | PASS | NOT TESTED | `D-08` |

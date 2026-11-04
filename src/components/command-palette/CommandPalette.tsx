@@ -294,11 +294,11 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     icon: Layers,
   },
   {
-    id: "marketplace",
-    title: "Marketplace Settlements",
-    subtitle: "Import Amazon and Flipkart settlement files and post one journal",
+    id: "reconciliation-settlements",
+    title: "Reconciliation & Settlements",
+    subtitle: "Bank statement matching and marketplace payout reports",
     category: "Utilities",
-    route: "/marketplace",
+    route: "/reconciliation?tab=marketplace",
     icon: Layers,
   },
   {

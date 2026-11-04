@@ -606,16 +606,10 @@ export function GatewayLanding() {
                     </kbd>
                   </Link>
                   <Link
-                    href="/inventory"
+                    href="/reconciliation"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
-                    <span>Inventory &amp; Stock</span>
-                  </Link>
-                  <Link
-                    href="/marketplace"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>Marketplace Settlements</span>
+                    <span>Reconciliation &amp; Settlements</span>
                   </Link>
                   <Link
                     href="/import"

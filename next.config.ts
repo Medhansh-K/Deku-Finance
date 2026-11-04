@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/executive", destination: "/executive", permanent: true },
       { source: "/dashboard/invoices/:path*", destination: "/gst", permanent: true },
       { source: "/invoices", destination: "/gst", permanent: true },
+      { source: "/marketplace", destination: "/reconciliation?tab=marketplace", permanent: true },
     ];
   },
 };
