@@ -142,9 +142,10 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
       bill_date: date,
       place_of_supply: "27",
       taxable_amount: 600,
-      cgst: 54,
-      sgst: 54,
-      igst: 0,
+      // Karnataka supplier into Maharashtra, so IGST.
+      cgst: 0,
+      sgst: 0,
+      igst: 108,
       cess: 0,
       total_amount: 708,
       itc_eligibility: "eligible",
@@ -152,11 +153,11 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
     });
     const bill = Array.isArray(r.json?.data) ? r.json.data[0] : r.json?.data;
     check("M-04a", "purchase bill saved", r.status === 200 && !!bill?.id, `${r.status} ${r.text.slice(0, 300)}`);
-    const entry = await postJournal("E2E-P-1", [["5010", 600, 0], ["1081", 54, 0], ["1082", 54, 0], ["2010", 0, 708, ids.vendor]]);
+    const entry = await postJournal("E2E-P-1", [["5010", 600, 0], ["1083", 108, 0], ["2010", 0, 708, ids.vendor]]);
     const link = await me.api("PATCH", `${O}/purchases/${need(bill?.id, "bill")}`, { journal_entry_id: entry });
     check("M-04b", "bill links to its journal", link.status === 200, `${link.status} ${link.text.slice(0, 200)}`);
     const after = await balances();
-    check("M-04c", "vendor payable 708 and input GST 108", moved(before, after, "2010") === -708 && moved(before, after, "1081") + moved(before, after, "1082") === 108, `${moved(before, after, "2010")} ${moved(before, after, "1081")}`);
+    check("M-04c", "vendor payable 708 and input IGST 108", moved(before, after, "2010") === -708 && moved(before, after, "1083") === 108, `${moved(before, after, "2010")} ${moved(before, after, "1083")}`);
   });
 
   await section("M-05", "stock", async () => {
@@ -207,7 +208,7 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
     // 2,000 + 1,000 + 1,500 sold, less the 1,000 credit note.
     check("M-07b", "GSTR-3B outward: taxable 3,500, CGST 225, SGST 225, IGST 180", Number(o?.txval) === 3500 && Number(o?.camt) === 225 && Number(o?.samt) === 225 && Number(o?.iamt) === 180, JSON.stringify(o ?? g3.text.slice(0, 300)));
     const itc = g3.json?.data?.json?.itc_elg?.itc_net;
-    check("M-07c", "GSTR-3B net ITC: CGST 54, SGST 54", Number(itc?.camt) === 54 && Number(itc?.samt) === 54, JSON.stringify(itc ?? null));
+    check("M-07c", "GSTR-3B net ITC: IGST 108", Number(itc?.iamt) === 108 && Number(itc?.camt) === 0, JSON.stringify(itc ?? null));
   });
 
   await section("M-08", "maker-checker", async () => {

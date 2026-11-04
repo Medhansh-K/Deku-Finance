@@ -69,9 +69,22 @@ jobs:
           docker compose up -d
           bash tests/e2e/wait.sh
           node tests/e2e/stack.mjs persisted
+      # Plan D-17: the same commands as docs/runtime/BACKUP_AND_RESTORE.md, into an empty database.
+      - name: Backup restores into a new database
+        run: |
+          docker compose exec -T postgres pg_dumpall -U postgres --roles-only > roles.sql
+          docker compose exec -T postgres pg_dump -U postgres -Fc deku > deku.dump
+          docker compose down
+          docker compose -p deku-restore up -d postgres
+          until docker compose -p deku-restore exec -T postgres pg_isready -h 127.0.0.1 -U postgres -d deku; do sleep 2; done
+          docker compose -p deku-restore exec -T postgres psql -U postgres -d postgres -q < roles.sql
+          docker compose -p deku-restore exec -T postgres pg_restore -U postgres -d deku --exit-on-error < deku.dump
+          docker compose -p deku-restore up -d
+          COMPOSE_PROJECT_NAME=deku-restore bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs persisted
+          docker compose -p deku-restore down
       - name: Demo mode, separate project and volume
         run: |
-          docker compose down
           DEKU_SEED_DEMO=true docker compose -p deku-demo up -d
           COMPOSE_PROJECT_NAME=deku-demo bash tests/e2e/wait.sh
           node tests/e2e/stack.mjs demo
@@ -86,7 +99,7 @@ jobs:
       - name: Publish container state on failure
         if: failure()
         run: |
-          for p in deku-finance deku-demo; do
+          for p in deku-finance deku-restore deku-demo; do
             out=$(docker compose -p "$p" ps -a 2>&1; docker compose -p "$p" logs --no-color --tail 25 2>&1 | cut -c1-220 | tail -70)
             echo "::error title=$p containers::${out//$'\n'/%0A}"
           done

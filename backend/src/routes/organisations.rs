@@ -142,15 +142,7 @@ fn all_bytes(s: &str, f: impl Fn(u8) -> bool) -> bool {
 }
 
 fn is_gstin(s: &str) -> bool {
-    let b = s.as_bytes();
-    b.len() == 15
-        && b[0..2].iter().all(u8::is_ascii_digit)
-        && b[2..7].iter().all(u8::is_ascii_uppercase)
-        && b[7..11].iter().all(u8::is_ascii_digit)
-        && b[11].is_ascii_uppercase()
-        && (b[12].is_ascii_uppercase() || (b'1'..=b'9').contains(&b[12]))
-        && b[13] == b'Z'
-        && (b[14].is_ascii_uppercase() || b[14].is_ascii_digit())
+    crate::gst::is_valid_gstin(s)
 }
 
 fn is_state_code(s: &str) -> bool {
@@ -497,7 +489,7 @@ mod tests {
     fn valid_profile_is_normalised() {
         let body = settings_body(
             req(json!({
-                "gstin": " 27aabcd1234f1z6 ", "state_code": "27", "upi_vpa": "shop.name@okhdfc",
+                "gstin": " 27aapfu0939f1zv ", "state_code": "27", "upi_vpa": "shop.name@okhdfc",
                 "bank_account_number": "5020 0012 345678", "bank_ifsc": "hdfc0001234",
                 "udyam_number": "udyam-mh-01-0001234", "operating_mode": "gst", "composition_scheme": true,
                 "registered_address": {"city": "Pune"}, "onboarded": true
@@ -505,7 +497,7 @@ mod tests {
             "2026-10-31T00:00:00Z",
         )
         .unwrap();
-        assert_eq!(body["gstin"], "27AABCD1234F1Z6");
+        assert_eq!(body["gstin"], "27AAPFU0939F1ZV");
         assert_eq!(body["bank_ifsc"], "HDFC0001234");
         assert_eq!(body["bank_account_number"], "50200012345678");
         assert_eq!(body["udyam_number"], "UDYAM-MH-01-0001234");
