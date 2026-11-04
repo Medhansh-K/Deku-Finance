@@ -42,9 +42,7 @@ import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
 import {
   extractFromFile,
-  extractFromSample,
   ExtractedVoucherData,
-  SAMPLE_DOCUMENTS,
 } from "@/lib/vouchers/document-extractor";
 import { BuilderDraftsInbox } from "./BuilderDraftsInbox";
 import type { BusinessDocument } from "@/lib/builder/business-documents";
@@ -227,22 +225,18 @@ export function VoucherWorkspace({
   const [fiscalPeriods, setFiscalPeriods] = useState<FiscalPeriod[]>([]);
 
   // Header State - initialize with stable deterministic values for SSR/prerender
-  const [voucherNumber, setVoucherNumber] = useState<string>(
-    `${activeConfig.prefix}-2026-0001`
-  );
+  const [voucherNumber, setVoucherNumber] = useState<string>("");
+  const [numberRequest, setNumberRequest] = useState(0);
   const [entryDate, setEntryDate] = useState<string>("2026-10-21");
   const [reference, setReference] = useState<string>("");
   const [narration, setNarration] = useState<string>(
     propDefaultNarration || activeConfig.defaultNarration
   );
 
-  // Defer dynamic date and unique voucher number computation to client mount
+  // Defer the date to client mount
   useEffect(() => {
-    setVoucherNumber(
-      `${activeConfig.prefix}-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-    );
     setEntryDate(toISODateString());
-  }, [activeMode, activeConfig.prefix]);
+  }, [activeMode]);
 
   // Line Items State
   const [lines, setLines] = useState<VoucherLineState[]>([
@@ -499,9 +493,6 @@ export function VoucherWorkspace({
   const handleSwitchMode = (newMode: VoucherMode) => {
     setActiveMode(newMode);
     const cfg = VOUCHER_CONFIGS[newMode];
-    setVoucherNumber(
-      `${cfg.prefix}-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-    );
     if (!extractedData) {
       // Replace only the previous mode's default, never something the user typed.
       setNarration((prev) =>
@@ -515,6 +506,25 @@ export function VoucherWorkspace({
       );
     }
   };
+
+  // The server issues the next number. If it can't, the field stays blank for the user rather than inventing one.
+  useEffect(() => {
+    if (!orgId) return;
+    const now = new Date();
+    const fyStart = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+    let stale = false;
+    accountingApi
+      .nextVoucherNumber(orgId, `${activeConfig.prefix}-${fyStart}`)
+      .then((res) => {
+        if (!stale) setVoucherNumber(res.data ?? "");
+      })
+      .catch(() => {
+        if (!stale) setVoucherNumber("");
+      });
+    return () => {
+      stale = true;
+    };
+  }, [orgId, activeConfig.prefix, numberRequest]);
 
   // Keyboard shortcut listener for F4 - F9 inside this voucher page. Through a ref, so the
   // single listener always switches with the current parties and narration.
@@ -625,9 +635,7 @@ export function VoucherWorkspace({
   const handleClearExtracted = () => {
     setExtractedData(null);
     const cfg = VOUCHER_CONFIGS[activeMode];
-    setVoucherNumber(
-      `${cfg.prefix}-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-    );
+    setNumberRequest((n) => n + 1);
     setReference("");
     setNarration(cfg.defaultNarration);
     setLines([
@@ -652,7 +660,7 @@ export function VoucherWorkspace({
     ]);
   };
 
-  // Read a file or sample bill into the voucher form
+  // Read a file into the voucher form
   const triggerDocumentExtraction = async (
     extractFn: () => Promise<ExtractedVoucherData> | ExtractedVoucherData
   ) => {
@@ -690,10 +698,6 @@ export function VoucherWorkspace({
     if (!file) return;
 
     triggerDocumentExtraction(() => extractFromFile(file, accounts, parties, orgGstin));
-  };
-
-  const handleSampleSelect = (sampleId: string) => {
-    triggerDocumentExtraction(() => extractFromSample(sampleId, accounts, parties, orgGstin));
   };
 
   // Submit Voucher (Draft or Post)
@@ -837,11 +841,7 @@ export function VoucherWorkspace({
         setDocumentProof(null);
         setSelectedInvoiceId("");
         setProofRefInput("");
-        setVoucherNumber(
-          `${activeConfig.prefix}-${new Date().getFullYear()}-${Math.floor(
-            1000 + Math.random() * 9000
-          )}`
-        );
+        setNumberRequest((n) => n + 1);
         setLines([
           {
             id: `line-${Date.now()}-1`,
@@ -1122,34 +1122,6 @@ export function VoucherWorkspace({
                 </div>
               </div>
             )}
-
-            {/* Quick Sample Invoices */}
-            <div className="mt-3 pt-2.5 border-t border-line">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1.5">
-                Try a sample (fictional data)
-              </div>
-              <div className="space-y-1">
-                {SAMPLE_DOCUMENTS.map((sample) => (
-                  <button
-                    key={sample.id}
-                    suppressHydrationWarning
-                    onClick={() => handleSampleSelect(sample.id)}
-                    disabled={isExtracting}
-                    className="w-full flex items-center justify-between px-2 py-1.5 rounded bg-canvas hover:bg-canvas-sunken border border-line text-left text-[10px] transition-colors disabled:opacity-50"
-                  >
-                    <div className="truncate pr-1">
-                      <span className="font-bold text-ink block">
-                        {sample.title}
-                      </span>
-                      <span className="text-ink-muted font-mono text-[9px]">
-                        {sample.type.toUpperCase()} • {sample.amountFormatted}
-                      </span>
-                    </div>
-                    <Sparkles className="h-3 w-3 text-brand shrink-0" />
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         )}
       </div>

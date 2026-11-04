@@ -78,6 +78,12 @@ export function FpaExecutiveView() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {error && (
+        <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800">
+          {error}. The figures below are unavailable until this loads.
+        </div>
+      )}
+
       {/* Top Action & Control Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
         <div className="flex items-center gap-3">
@@ -211,7 +217,6 @@ export function FpaExecutiveView() {
               </div>
               <h4 className="text-sm font-bold text-ink">Solvency Ratios</h4>
             </div>
-            <Badge variant="teal" size="sm">Healthy</Badge>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-3">
             <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
@@ -219,14 +224,12 @@ export function FpaExecutiveView() {
               <div className="text-xl font-black font-mono text-emerald-700 mt-1">
                 {num(liq.current_ratio, "x")}
               </div>
-              <div className="text-[10px] text-ink-subtle mt-0.5">Benchmark: &gt; 1.5x</div>
             </div>
             <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
               <div className="text-xs text-ink-muted font-medium">Quick Ratio</div>
               <div className="text-xl font-black font-mono text-blue-700 mt-1">
                 {num(liq.quick_ratio, "x")}
               </div>
-              <div className="text-[10px] text-ink-subtle mt-0.5">Benchmark: &gt; 1.0x</div>
             </div>
           </div>
         </div>
@@ -255,7 +258,7 @@ export function FpaExecutiveView() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-ink-muted">Runway Horizon:</span>
-              <span className="text-emerald-700 font-medium">Safe (&gt;12 months)</span>
+              <span className="text-ink font-mono font-semibold">{num(runway.cash_runway_months, " months")}</span>
             </div>
           </div>
         </div>
@@ -272,10 +275,10 @@ export function FpaExecutiveView() {
           </div>
           <div className="flex items-center gap-4 text-xs">
             <span className="text-ink-muted">
-              Total Allocated: <strong className="font-mono text-ink">{formatINR(budgetVariance?.total_budget_allocated || 0)}</strong>
+              Total Allocated: <strong className="font-mono text-ink">{budgetVariance?.total_budget_allocated == null ? "–" : formatINR(budgetVariance.total_budget_allocated)}</strong>
             </span>
             <span className="text-ink-muted">
-              Total Utilized: <strong className="font-mono text-amber-700">{formatINR(budgetVariance?.total_budget_utilized || 0)}</strong>
+              Total Utilized: <strong className="font-mono text-amber-700">{budgetVariance?.total_budget_utilized == null ? "–" : formatINR(budgetVariance.total_budget_utilized)}</strong>
             </span>
           </div>
         </div>
@@ -338,7 +341,7 @@ export function FpaExecutiveView() {
                       <td className="py-3 px-4 text-center">
                         <span className="inline-flex items-center gap-1 bg-canvas-sunken px-2 py-0.5 rounded text-[11px] text-ink border border-line font-medium">
                           <Users className="h-3 w-3 text-ink-muted" />
-                          {d.headcount || 0}
+                          {d.headcount ?? "–"}
                         </span>
                       </td>
                     </tr>

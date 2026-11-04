@@ -24,9 +24,18 @@ export function SettingsView() {
 
   const [isFpModalOpen, setIsFpModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fpName, setFpName] = useState("FY 2027-28 Annual");
-  const [fpStart, setFpStart] = useState("2027-04-01");
-  const [fpEnd, setFpEnd] = useState("2028-03-31");
+  const [fpName, setFpName] = useState("");
+  const [fpStart, setFpStart] = useState("");
+  const [fpEnd, setFpEnd] = useState("");
+
+  // Prefill the current financial year; after mount, because a prerendered page has no "today".
+  useEffect(() => {
+    const today = new Date();
+    const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+    setFpName(`FY ${y}-${String((y + 1) % 100).padStart(2, "0")} Annual`);
+    setFpStart(`${y}-04-01`);
+    setFpEnd(`${y + 1}-03-31`);
+  }, []);
 
   const [orgId, setOrgId] = useState<string>("");
 

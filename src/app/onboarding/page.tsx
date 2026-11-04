@@ -84,7 +84,6 @@ function Wizard({ organisation }: { organisation: Organisation }) {
 
   const finish = () =>
     run(async () => {
-      await accountingApi.seedAccounts(orgId);
       await organisationsApi.updateSettings(orgId, { onboarded: true });
       await refreshOrganisations();
       router.replace("/gateway");

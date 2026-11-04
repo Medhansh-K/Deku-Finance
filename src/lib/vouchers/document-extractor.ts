@@ -29,53 +29,6 @@ export interface ExtractedVoucherData {
   }[];
 }
 
-export interface SampleDocumentOption {
-  id: string;
-  title: string;
-  fileName: string;
-  type: VoucherMode;
-  amountFormatted: string;
-  description: string;
-  /** Fictional invoice text; `ourGstin` is put where the buyer or seller GSTIN goes. */
-  text: (ourGstin: string) => string;
-}
-
-export const SAMPLE_DOCUMENTS: SampleDocumentOption[] = [
-  {
-    id: "sample-cloud",
-    title: "Cloud hosting bill (fictional)",
-    fileName: "Cloudnine-Hosting-0042.txt",
-    type: "purchase",
-    amountFormatted: "₹ 1,18,000.00",
-    description: "Inter-state purchase with IGST",
-    text: (ours) => `TAX INVOICE
-Cloudnine Hosting Pvt Ltd   GSTIN: 29AABCT1332L1ZA
-Bill To: Our Company        GSTIN: ${ours}
-Invoice No: CNH/26-27/0042
-Invoice Date: 14/10/2026
-Taxable Value              1,00,000.00
-IGST @ 18%                   18,000.00
-Grand Total             ₹ 1,18,000.00`,
-  },
-  {
-    id: "sample-sale",
-    title: "Consulting sales invoice (fictional)",
-    fileName: "Our-Invoice-S-101.txt",
-    type: "sales",
-    amountFormatted: "₹ 59,000.00",
-    description: "Intra-state sale with CGST + SGST",
-    text: (ours) => `TAX INVOICE
-GSTIN: ${ours}
-Buyer: Fictional Retail LLP   GSTIN: 27AAPFU0939F1ZV
-Invoice No: S-101
-Dated: 02-Oct-2026
-Taxable Value     50,000.00
-CGST @ 9%          4,500.00
-SGST @ 9%          4,500.00
-Total Amount      59,000.00`,
-  },
-];
-
 const postable = (accounts: Account[]) => accounts.filter((a) => a.is_postable !== false);
 const accountId = (accounts: Account[], re: RegExp) => postable(accounts).find((a) => re.test(a.name))?.id ?? "";
 const money = (n: number | null) => (n === null ? "" : n.toFixed(2));
@@ -193,15 +146,4 @@ export async function extractFromFile(
   const kb = Math.max(1, Math.round(file.size / 1024));
   const size = kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
   return buildVoucherFromText(text, file.name, size, accounts, parties, orgGstin);
-}
-
-export function extractFromSample(
-  sampleId: string,
-  accounts: Account[],
-  parties: Party[],
-  orgGstin?: string | null
-): ExtractedVoucherData {
-  const sample = SAMPLE_DOCUMENTS.find((s) => s.id === sampleId) ?? SAMPLE_DOCUMENTS[0];
-  // Without our GSTIN the sample can't tell sales from purchase; the parser reports that honestly.
-  return buildVoucherFromText(sample.text(orgGstin || ""), sample.fileName, "sample", accounts, parties, orgGstin);
 }

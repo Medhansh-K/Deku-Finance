@@ -91,11 +91,11 @@ export function formatKpis(kp: LedgerKpis, from: string, asOf: string): Formatte
     kp.turnoverPaise === null
       ? [DASH, "safe" as const]
       : kp.turnoverPaise <= 30_00_000_00
-      ? ["Below Sec 22 limit", "safe" as const]
+      ? ["Below ₹40L goods limit", "safe" as const]
       : kp.turnoverPaise <= SEC22_LIMIT_PAISE
-      ? ["Near Sec 22 limit", "warn" as const]
-      : ["Above Sec 22 limit", "corp" as const];
-  const sec22Sub = s22 === null ? "Turnover not computed" : `${s22}% of ₹40L limit`;
+      ? ["Near ₹40L goods limit", "warn" as const]
+      : ["Above ₹40L goods limit", "corp" as const];
+  const sec22Sub = s22 === null ? "Turnover not computed" : `${s22}% of ₹40L goods limit (services: ₹20L)`;
   const gstNet =
     kp.gstOutputPaise === null && kp.gstInputPaise === null
       ? null

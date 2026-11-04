@@ -255,6 +255,10 @@ export const accountingApi = {
     apiClient<ApiResponse<JournalEntry[]>>(
       `/api/v1/organisations/${orgId}/journals`
     ),
+  nextVoucherNumber: (orgId: string, prefix: string) =>
+    apiClient<ApiResponse<string>>(
+      `/api/v1/organisations/${orgId}/journals/next-number?prefix=${encodeURIComponent(prefix)}`
+    ),
   createJournal: (orgId: string, payload: CreateJournalRequest) =>
     apiClient<{ success: boolean; entry: any; lines: any }>(
       `/api/v1/organisations/${orgId}/journals`,

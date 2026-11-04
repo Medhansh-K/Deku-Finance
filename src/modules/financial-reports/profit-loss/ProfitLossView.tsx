@@ -66,7 +66,7 @@ export function ProfitLossView() {
             {isNetProfit ? "Net Profit" : "Net Loss"}: {formatINR(Math.abs(netProfit))}
           </Badge>
           <span className="text-ink-muted font-mono text-[11px]">
-            Fiscal Period FY 2026-27
+            From posted ledger entries
           </span>
         </div>
 

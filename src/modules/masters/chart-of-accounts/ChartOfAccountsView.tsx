@@ -391,22 +391,7 @@ export function ChartOfAccountsView() {
   const isLiquidAccount = (acc: Account) => {
     const grp = (acc.account_group || acc.type).toLowerCase();
     if (grp !== "asset") return false;
-    const ledger = (acc.ledger || "").toLowerCase();
-    const name = acc.name.toLowerCase();
-    const label = (acc.label || "").toLowerCase();
-    const code = parseInt(acc.code, 10);
-    return (
-      ledger.includes("cash") ||
-      ledger.includes("bank") ||
-      ledger.includes("liquid") ||
-      name.includes("cash") ||
-      name.includes("bank") ||
-      name.includes("hdfc") ||
-      name.includes("icici") ||
-      name.includes("petty") ||
-      label.includes("liquid") ||
-      (!isNaN(code) && code >= 1010 && code <= 1040)
-    );
+    return acc.ledger === "Cash & Liquid Capital";
   };
 
   const liquidAccounts = React.useMemo(() => {

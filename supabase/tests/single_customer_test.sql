@@ -35,6 +35,7 @@ BEGIN
   INSERT INTO public.profiles (id, email, full_name) VALUES (v_admin, 'first@test.local', 'First') ON CONFLICT (id) DO NOTHING;
   PERFORM pg_temp.as_user(v_admin);
   v_org := public.create_organisation('Only Co', 'only-co-test');
+  ASSERT (SELECT count(*) FROM public.accounts WHERE organisation_id = v_org) > 10, 'company has no chart of accounts';
   SELECT * INTO s FROM public.subscriptions WHERE organisation_id = v_org;
   ASSERT s.plan_code = 'single_org' AND s.status = 'active' AND s.current_period_end IS NULL, 'company started on a trial';
   ASSERT public.subscription_limits(v_org)->>'max_monthly_invoices' IS NULL, 'invoice limit applies';

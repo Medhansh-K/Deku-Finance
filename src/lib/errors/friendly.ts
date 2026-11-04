@@ -19,6 +19,10 @@ export function friendlyError(body: unknown, status?: number, limits?: Entitleme
     return "This deployment is set up for one company, and it already has one.";
   }
 
+  if (text.includes("uk_journal_entries_org_num")) {
+    return "That voucher number is already used. Change it and try again.";
+  }
+
   const limit = obj.error === "plan_limit" ? String(obj.limit ?? "") : text.match(/plan_limit:(\w+)/)?.[1];
   if (limit !== undefined) {
     const n = limits?.[limit as keyof Entitlements];

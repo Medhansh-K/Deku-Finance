@@ -132,9 +132,8 @@ async function fresh() {
   const sub = r.json?.data ?? r.json;
   check("O-09", "company has no trial or end date", sub?.plan?.code === "single_org" && !sub?.current_period_end, r.text.slice(0, 300));
 
-  r = await owner.s.api("POST", `/organisations/${org}/accounts/seed`);
-  check("O-04", "chart of accounts seeded", r.status === 200, `${r.status} ${r.text}`);
   r = await owner.s.api("GET", `/organisations/${org}/accounts`);
+  check("O-04", "company starts with its chart of accounts", (r.json?.data ?? []).length > 10, (r.json?.data ?? []).length);
   const accounts = r.json?.data ?? [];
   const seededCount = accounts.length;
   check("O-05", "default chart has accounts", seededCount > 10, seededCount);
@@ -164,6 +163,9 @@ async function fresh() {
     ],
   });
   const journalId = (res) => res.json?.entry?.[0]?.id;
+
+  r = await owner.s.api("GET", `/organisations/${org}/journals/next-number?prefix=PMT-2026`);
+  check("W-00b", "server issues the first voucher number", r.json?.data === "PMT-2026-0001", r.text);
 
   // Unbalanced: must not reach the ledger, whichever step refuses it.
   r = await owner.s.api("POST", `/organisations/${org}/journals`, voucher("E2E/BAD/1", 1000, 900));

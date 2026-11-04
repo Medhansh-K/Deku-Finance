@@ -39,10 +39,10 @@ export default function ReturnsHubPage() {
           <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <strong className="block text-emerald-950 text-sm font-bold">
-              Exempt under Section 22 of the CGST Act
+              Accounting-only mode, no GST registration
             </strong>
             <p className="text-emerald-800 leading-relaxed">
-              Your business is operating in Pure Accounting mode with an aggregate turnover under ₹40 Lakhs. You are legally exempt from mandatory GST return filing. You can generate commercial reports or switch to GST Enterprise mode anytime your turnover approaches ₹40 Lakhs.
+              This company is set to Pure Accounting, so Deku prepares no GST returns for it. That assumes it's under the Section 22 registration limit: ₹40 lakh for most goods suppliers, ₹20 lakh for services, and lower in some states. Check which limit applies to you.
             </p>
           </div>
         </div>

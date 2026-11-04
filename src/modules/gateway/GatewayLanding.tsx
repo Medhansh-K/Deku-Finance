@@ -330,13 +330,6 @@ export function GatewayLanding() {
                   ALERX 4-Tier Double Entry
                 </span>
               </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-ink-muted">Authoritative Ledger:</span>
-                <span className="font-mono text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                  PostgreSQL Active
-                </span>
-              </div>
             </div>
           </div>
 
@@ -371,9 +364,6 @@ export function GatewayLanding() {
               <div className="pb-0.5">
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-1 px-1.5 flex items-center justify-between">
                   <span>Executive Overview</span>
-                  <span className="text-[9px] font-mono text-[#00F5A0] bg-[#141C1E] px-1.5 py-0.5 rounded border border-[#233134] font-bold">
-                    AI CFO Live
-                  </span>
                 </div>
                 <Link
                   href="/consultant"

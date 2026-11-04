@@ -123,5 +123,21 @@ BEGIN
   END IF;
 END $$;
 
+-- Migration 50: voucher numbers continue from the highest used under exactly this prefix.
+DO $$
+DECLARE
+  v_org uuid := 'd0000000-0000-4000-8000-000000000001';
+  v_period uuid;
+BEGIN
+  SELECT id INTO v_period FROM public.fiscal_periods WHERE organisation_id = v_org LIMIT 1;
+  ASSERT public.next_voucher_number(v_org, 'NUM-2026') = 'NUM-2026-0001', 'first number is wrong';
+  INSERT INTO public.journal_entries (organisation_id, fiscal_period_id, entry_number, entry_date, status, narration)
+  SELECT v_org, v_period, n, current_date, 'draft', 'numbering test'
+  FROM unnest(ARRAY['NUM-2026-0009', 'NUM-2026-0002', 'NUM-2026-abc', 'NUM-2026-7-X', 'NUM-20261-0050']) AS n;
+  ASSERT public.next_voucher_number(v_org, 'NUM-2026') = 'NUM-2026-0010', 'did not continue from the highest';
+  ASSERT public.next_voucher_number(v_org, 'NUM-2027') = 'NUM-2027-0001', 'prefix leaked';
+  ASSERT public.next_voucher_number(v_org, 'N_M-2026') = 'N_M-2026-0001', 'prefix treated as a pattern';
+END $$;
+
 ROLLBACK;
 \echo report_views_test passed

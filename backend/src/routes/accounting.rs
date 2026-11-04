@@ -31,6 +31,14 @@ pub struct PeriodQuery {
     pub to: String,
 }
 
+/// 1 April of the Indian financial year containing today.
+fn current_fy_start() -> String {
+    use chrono::Datelike;
+    let today = chrono::Utc::now().date_naive();
+    let year = if today.month() >= 4 { today.year() } else { today.year() - 1 };
+    format!("{}-04-01", year)
+}
+
 pub fn routes(state: AppState) -> Router {
     Router::new()
         // Chart of Accounts
@@ -41,6 +49,7 @@ pub fn routes(state: AppState) -> Router {
         .route("/fiscal-periods", post(create_fiscal_period).get(list_fiscal_periods))
         // Journal Entries
         .route("/journals", post(create_journal).get(list_journals))
+        .route("/journals/next-number", get(next_voucher_number))
         .route("/journals/:entry_id/post", post(post_journal))
         .route("/journals/:entry_id/submit", post(submit_journal))
         .route("/journals/:entry_id/reject", post(reject_journal))
@@ -344,6 +353,23 @@ async fn list_journals(
     Ok(Json(json!({ "success": true, "data": res })))
 }
 
+#[derive(Debug, Deserialize)]
+struct NextNumberQuery {
+    prefix: String,
+}
+
+async fn next_voucher_number(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(org_id): Path<String>,
+    Query(params): Query<NextNumberQuery>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let payload = json!({ "p_org_id": org_id, "p_prefix": params.prefix });
+    let res = state.db.rpc("next_voucher_number", &payload, token).await?;
+    Ok(Json(json!({ "success": true, "data": res })))
+}
+
 async fn post_journal(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -516,7 +542,7 @@ async fn get_cash_flow(
     let token = extract_auth_token(&headers);
     let payload = json!({
         "p_org_id": org_id,
-        "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
+        "p_start_date": params.start_date.unwrap_or_else(current_fy_start),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
     let res = state.db.rpc("get_cash_flow_statement", &payload, token).await?;
@@ -545,7 +571,7 @@ async fn get_fpa_metrics(
     let token = extract_auth_token(&headers);
     let payload = json!({
         "p_org_id": org_id,
-        "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
+        "p_start_date": params.start_date.unwrap_or_else(current_fy_start),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
     let res = state.db.rpc("get_fpa_corporate_metrics", &payload, token).await?;
@@ -575,7 +601,7 @@ async fn get_account_statement_handler(
     let payload = json!({
         "p_org_id": org_id,
         "p_account_id": account_id,
-        "p_start_date": params.start_date.unwrap_or_else(|| "2026-04-01".to_string()),
+        "p_start_date": params.start_date.unwrap_or_else(current_fy_start),
         "p_end_date": params.end_date.unwrap_or_else(|| chrono::Utc::now().format("%Y-%m-%d").to_string())
     });
     let res = state.db.rpc("get_account_statement", &payload, token).await?;

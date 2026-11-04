@@ -23,6 +23,27 @@ until pg_isready -q -d "$DATABASE_URL"; do
   sleep 2
 done
 
+# Two runners at once would apply the same files. Each file gets its own psql session, so a background
+# session holds the lock; the second runner waits for the first and then finds nothing left to apply.
+lock_id=7274261
+lock_name="deku-migrate-$(od -An -N4 -tu4 /dev/urandom | tr -d ' ')"
+PGAPPNAME="$lock_name" psql -X -q -d "$DATABASE_URL" \
+  -c "SELECT pg_advisory_lock($lock_id); SELECT pg_sleep(86400)" >/dev/null 2>&1 &
+lock_holder=$!
+# Ended from the server as well: killing the client doesn't always close its connection.
+release_lock() {
+  kill "$lock_holder" 2>/dev/null || true
+  psql -X -q -d "$DATABASE_URL" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name = '$lock_name'" >/dev/null 2>&1 || true
+}
+trap release_lock EXIT
+until [ "$(db -At -c "SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a USING (pid) WHERE l.locktype = 'advisory' AND l.objid = $lock_id AND l.granted AND a.application_name = '$lock_name'")" = "1" ]; do
+  if ! kill -0 "$lock_holder" 2>/dev/null; then
+    echo "migrate: could not take the migration lock" >&2
+    exit 1
+  fi
+  sleep 1
+done
+
 # RLS with no policies keeps the ledger out of reach of the API roles; the owner bypasses it.
 db <<'SQL'
 SET client_min_messages = warning;

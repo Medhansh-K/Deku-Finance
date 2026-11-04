@@ -322,8 +322,7 @@ export default function ExecutiveDashboardPage() {
                   <div className="bg-emerald-500 h-full rounded-full w-full" />
                 </div>
                 <div className="flex justify-between text-[10px] text-ink-muted font-mono">
-                  <span>Regular GST Taxpayer</span>
-                  <span className="text-emerald-700 font-bold">GSTIN Active</span>
+                  <span>GST accounting mode</span>
                 </div>
               </div>
             )}
