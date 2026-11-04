@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, organisationsApi, partiesApi, OrgSummary } from "@/api/endpoints";
+import { accountingApi, filesApi, MAX_DOCUMENT_BYTES, organisationsApi, partiesApi, OrgSummary } from "@/api/endpoints";
 import { JournalEntry, JournalStatus } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
@@ -126,16 +126,37 @@ export function DayBookView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [res, accounts, parties] = await Promise.all([
+      const [res, accounts, parties, files] = await Promise.all([
         accountingApi.listJournals(orgId),
         accountingApi.listAccounts(orgId),
         partiesApi.list(orgId),
+        // The day book is still useful if its attachments can't be listed.
+        filesApi.list(orgId).catch(() => ({ data: [] })),
       ]);
+      const fileByJournal = new Map((files.data ?? []).filter((f) => f.journal_entry_id).map((f) => [f.journal_entry_id, f]));
       const accountMap = new Map((accounts.data ?? []).map((a) => [a.id, a]));
       const partyMap = new Map((parties.data ?? []).map((p) => [p.id, p]));
-      const apiVouchers = (res.data ?? []).map((j) =>
-        journalToVoucher(j, accountMap, partyMap, taxProfile?.regime)
-      );
+      const apiVouchers = (res.data ?? []).map((j) => {
+        const voucher = journalToVoucher(j, accountMap, partyMap, taxProfile?.regime);
+        const file = fileByJournal.get(j.id);
+        return file
+          ? {
+              ...voucher,
+              document_proof: {
+                id: file.id,
+                fileId: file.id,
+                proofType: "receipt_vendor_invoice" as const,
+                categoryLabel: file.category ?? "Attached document",
+                title: file.filename,
+                fileName: file.filename,
+                fileSize: `${(file.byte_size / 1024).toFixed(1)} KB`,
+                refNumber: file.reference ?? undefined,
+                uploadedAt: file.created_at,
+                verified: false,
+              },
+            }
+          : voucher;
+      });
       setJournals(apiVouchers);
     } catch (err: any) {
       setError(err?.message || "Could not load the day book");
@@ -161,6 +182,24 @@ export function DayBookView() {
       window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber: vch.entry_number } }));
     } catch (err: any) {
       alert(`Posting failed: ${err?.message || "Unknown error"}`);
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
+  const handleAttachDocument = async (vch: VoucherItem, file: File | undefined) => {
+    if (!file) return;
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      alert("That file is over the 10 MB limit.");
+      return;
+    }
+    setIsActionPending(true);
+    try {
+      await filesApi.upload(orgId, file, { journal_entry_id: vch.id });
+      setIsDetailOpen(false);
+      await fetchJournals();
+    } catch (err: any) {
+      alert(`Couldn't attach the document: ${err?.message || "Unknown error"}`);
     } finally {
       setIsActionPending(false);
     }
@@ -303,7 +342,7 @@ export function DayBookView() {
               {hasProof ? (
                 <span className="text-[9px] font-mono text-emerald-800 flex items-center gap-0.5 mt-0.5 font-bold">
                   <ShieldCheck className="h-2.5 w-2.5 text-emerald-600" />
-                  Proof Verified
+                  Document Attached
                 </span>
               ) : (
                 <span className="text-[9px] font-mono text-slate-400 block mt-0.5">
@@ -645,12 +684,12 @@ export function DayBookView() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  Statutory Document Proof &amp; Verification
+                  Supporting Document
                 </span>
                 {selectedEntry.document_proof ? (
                   <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-700" />
-                    Verified Proof Attached
+                    Document Attached
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
@@ -684,6 +723,14 @@ export function DayBookView() {
                             File: <strong>{selectedEntry.document_proof.fileName} ({selectedEntry.document_proof.fileSize})</strong>
                           </span>
                         )}
+                        {selectedEntry.document_proof.fileId && (
+                          <a
+                            href={filesApi.downloadUrl(orgId, selectedEntry.document_proof.fileId)}
+                            className="font-bold text-brand-strong underline hover:no-underline"
+                          >
+                            Download
+                          </a>
+                        )}
                         {selectedEntry.document_proof.approvedBy && (
                           <span className="text-emerald-900 bg-emerald-200 px-1.5 py-0.2 rounded font-bold">
                             ✓ {selectedEntry.document_proof.approvedBy}
@@ -706,6 +753,16 @@ export function DayBookView() {
                       <strong>Proof Missing:</strong> Indian GAAP statutory compliance requires verifiable document proof before this entry can update the Chart of Accounts, P&amp;L, or Balance Sheet.
                     </span>
                   </div>
+                  <label className="text-xs font-bold text-brand-strong underline cursor-pointer shrink-0">
+                    Attach document
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.webp"
+                      className="sr-only"
+                      disabled={isActionPending}
+                      onChange={(e) => handleAttachDocument(selectedEntry, e.target.files?.[0])}
+                    />
+                  </label>
                   {selectedEntry.status === "draft" && (
                     <Button
                       variant="tally"

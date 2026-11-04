@@ -17,7 +17,7 @@ export async function apiClient<T>(
   const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
 
   const headers = new Headers(customHeaders);
-  if (!headers.has("Content-Type") && !(rest.body instanceof FormData)) {
+  if (!headers.has("Content-Type") && !(rest.body instanceof FormData) && !(rest.body instanceof Blob)) {
     headers.set("Content-Type", "application/json");
   }
 

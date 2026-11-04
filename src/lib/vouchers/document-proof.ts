@@ -21,6 +21,8 @@ export interface DocumentProofAttachment {
   fileName?: string;
   fileSize?: string;
   fileData?: string; // Data URL or preview
+  file?: File; // Uploaded with the voucher
+  fileId?: string; // Once stored
   refNumber?: string; // UTR #, Deposit Slip #, CFO Memo #, Inv #
   approvedBy?: string; // e.g. "CFO / Finance Controller"
   uploadedAt: string;

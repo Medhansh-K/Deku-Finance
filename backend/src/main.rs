@@ -90,7 +90,7 @@ async fn main() {
 
     // 5. Build Router
     let app = create_router(state)
-        .layer(RequestBodyLimitLayer::new(2 * 1024 * 1024))
+        .layer(RequestBodyLimitLayer::new(routes::files::MAX_FILE_BYTES + 1024))
         .layer(TraceLayer::new_for_http())
         .layer(cors);
 

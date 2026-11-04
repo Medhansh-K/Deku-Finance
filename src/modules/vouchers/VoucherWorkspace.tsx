@@ -36,7 +36,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, businessDocumentsApi, invoicesApi, organisationsApi, partiesApi } from "@/api/endpoints";
+import { accountingApi, businessDocumentsApi, invoicesApi, organisationsApi, partiesApi , filesApi, MAX_DOCUMENT_BYTES } from "@/api/endpoints";
 import { Account, CreateJournalRequest, FiscalPeriod, Party, SalesInvoice } from "@/types/accounting";
 import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
@@ -433,6 +433,11 @@ export function VoucherWorkspace({
   const handleProofFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      setApiError("That file is over the 10 MB limit.");
+      if (proofFileInputRef.current) proofFileInputRef.current.value = "";
+      return;
+    }
 
     let pType: ProofType = "receipt_vendor_invoice";
     let cat = "Attached Proof Document";
@@ -466,9 +471,10 @@ export function VoucherWorkspace({
       fileSize: `${(file.size / 1024).toFixed(1)} KB`,
       refNumber: proofRefInput.trim() || undefined,
       uploadedAt: new Date().toISOString(),
-      // Nothing checks the file and it is not stored yet (runtime checklist F-01).
+      file,
+      // Stored with the voucher. Nothing checks what the document says.
       verified: false,
-      notes: "Attached for this session only. The file itself isn't saved yet, so keep your copy.",
+      notes: "Saved with the voucher when you submit it.",
     });
 
     if (proofFileInputRef.current) proofFileInputRef.current.value = "";
@@ -765,6 +771,23 @@ export function VoucherWorkspace({
     try {
       const draftRes = await accountingApi.createJournal(orgId, payload);
       const createdEntryId = draftRes.entry?.[0]?.id;
+
+      // Before posting, so a voucher doesn't reach the ledger without its document.
+      if (createdEntryId && documentProof?.file) {
+        try {
+          await filesApi.upload(orgId, documentProof.file, {
+            journal_entry_id: createdEntryId,
+            category: documentProof.categoryLabel,
+            reference: documentProof.refNumber,
+          });
+        } catch (uploadErr: any) {
+          setApiError(
+            `Voucher ${voucherNumber} was saved as a draft, but its document didn't upload: ${uploadErr?.message || "unknown error"}. Attach it again from the Day Book, then post.`
+          );
+          window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber } }));
+          return;
+        }
+      }
 
       const posted = shouldPost && !requireApproval;
       if (shouldPost && requireApproval && createdEntryId) {

@@ -258,13 +258,45 @@ async function fresh() {
   const cron = await fetch(`${BACKEND}/api/v1/internal/notifications/generate`, { method: "POST", headers: { "X-Deku-Cron-Secret": CRON } });
   check("J-01", "notification job runs", cron.ok, cron.status);
 
-  writeFileSync(STATE, JSON.stringify({ email: owner.email, org, seededCount, tb }));
+  // F-01, plan section 11: documents are stored, access-checked and limited.
+  const pdf = Buffer.concat([Buffer.from("%PDF-1.7\n"), Buffer.alloc(300000, 7)]);
+  const upload = (who, body, name = "bill.pdf") =>
+    fetch(`${BASE}/api/backend/api/v1/organisations/${org}/files?filename=${name}&journal_entry_id=${entry}&category=Vendor%20bill`, {
+      method: "POST",
+      headers: { Cookie: `deku_at=${who.cookies.deku_at}`, "Content-Type": "application/octet-stream" },
+      body,
+    });
+  const fetchFile = (who, id) =>
+    fetch(`${BASE}/api/backend/api/v1/organisations/${org}/files/${id}`, { headers: { Cookie: `deku_at=${who.cookies.deku_at}` } });
+  const sent = await upload(me, pdf);
+  const sentJson = await sent.json().catch(() => null);
+  check("F-01a", "owner attaches a PDF to the voucher", sent.ok && !!sentJson?.data?.id, `${sent.status} ${JSON.stringify(sentJson)}`);
+  check("F-01b", "upload response doesn't echo the bytes", !JSON.stringify(sentJson ?? {}).includes("\\x25"));
+  const fileId = sentJson?.data?.id;
+  const got = await fetchFile(me, fileId);
+  check("F-01c", "download returns the exact bytes", got.ok && Buffer.from(await got.arrayBuffer()).equals(pdf), got.status);
+  check("F-01d", "download is an attachment and can't be sniffed as a page", /attachment/.test(got.headers.get("content-disposition") ?? "") && got.headers.get("x-content-type-options") === "nosniff", got.headers.get("content-disposition"));
+  const viewerGot = await fetchFile(viewer.s, fileId);
+  check("F-01e", "viewer can download", viewerGot.ok, viewerGot.status);
+  const strangerGot = await fetchFile(stranger.s, fileId);
+  check("F-01f", "non-member can't download", strangerGot.status === 404, strangerGot.status);
+  const viewerSent = await upload(viewer.s, pdf);
+  check("F-01g", "viewer can't attach", viewerSent.status === 403, viewerSent.status);
+  const webPage = await upload(me, Buffer.from("<html><script>alert(1)</script></html>"), "x.pdf");
+  check("F-01h", "a web page named .pdf is refused", webPage.status === 400, webPage.status);
+  const huge = await upload(me, Buffer.concat([Buffer.from("%PDF-"), Buffer.alloc(11 * 1024 * 1024)]));
+  check("F-01i", "a file over 10 MB is refused", huge.status === 413, huge.status);
+  const listed = await me.api("GET", `/organisations/${org}/files`);
+  const fileRow = (listed.json?.data ?? []).find((f) => f.id === fileId);
+  check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));
+
+  writeFileSync(STATE, JSON.stringify({ email: owner.email, org, seededCount, tb, fileId, fileBase64: pdf.toString("base64") }));
   return true;
 }
 
 // D-13: run after the containers are removed and recreated on the same volume.
 async function persisted() {
-  const { email, org, seededCount, tb } = JSON.parse(readFileSync(STATE, "utf8"));
+  const { email, org, seededCount, tb, fileId, fileBase64 } = JSON.parse(readFileSync(STATE, "utf8"));
   const { s, r } = await login(email);
   check("D-13a", "user can sign in after recreation", r.status === 200, r.status);
   let res = await s.api("GET", `/organisations/${org}/accounts`);
@@ -272,6 +304,8 @@ async function persisted() {
   res = await s.api("GET", `/organisations/${org}/reports/trial-balance`);
   const now = tbTotals(res.json?.data ?? []);
   check("D-13c", "posted ledger survived", now.debit === tb.debit && now.credit === tb.credit, JSON.stringify(now));
+  const file = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/files/${fileId}`, { headers: { Cookie: `deku_at=${s.cookies.deku_at}` } });
+  check("D-14", "attached document survived, byte for byte", file.ok && Buffer.from(await file.arrayBuffer()).equals(Buffer.from(fileBase64, "base64")), file.status);
 }
 
 // D-11: only in a stack started with DEKU_SEED_DEMO=true.

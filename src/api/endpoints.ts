@@ -915,3 +915,34 @@ export const importsApi = {
       body: JSON.stringify({ rows }),
     }),
 };
+
+export interface DocumentFile {
+  id: string;
+  journal_entry_id: string | null;
+  filename: string;
+  content_type: string;
+  byte_size: number;
+  category: string | null;
+  reference: string | null;
+  created_at: string;
+}
+
+export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+
+export const filesApi = {
+  list: (orgId: string) => apiClient<ApiResponse<DocumentFile[]>>(`/api/v1/organisations/${orgId}/files`),
+  upload: (
+    orgId: string,
+    file: File,
+    meta: { journal_entry_id?: string; category?: string; reference?: string }
+  ) => {
+    const query = new URLSearchParams({ filename: file.name });
+    for (const [key, value] of Object.entries(meta)) if (value) query.set(key, value);
+    return apiClient<ApiResponse<DocumentFile>>(`/api/v1/organisations/${orgId}/files?${query}`, {
+      method: "POST",
+      body: file,
+      timeoutMs: 60000,
+    });
+  },
+  downloadUrl: (orgId: string, fileId: string) => `/api/backend/api/v1/organisations/${orgId}/files/${fileId}`,
+};
