@@ -79,7 +79,20 @@ async function completeOnboarding(browser) {
       break;
     }
     const title = await page.locator("h1").innerText();
-    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    const proceed = page.getByRole("button", { name: "Continue", exact: true });
+    const clicked = await proceed.click({ timeout: 10000 }).then(() => null, (e) => e.message);
+    if (clicked) {
+      const seen = await proceed.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        return { disabled: el.disabled, rect: [r.x, r.y, r.width, r.height], viewport: [innerWidth, innerHeight], covering: top ? `${top.tagName}.${String(top.className).slice(0, 80)} ${top.textContent.slice(0, 60)}` : null, same: top === el || el.contains(top) };
+      }).catch((e) => e.message);
+      const reasons = clicked.split(/?
+/).filter((l) => /intercept|not enabled|not stable|not visible|outside|detached/.test(l)).slice(0, 3).join(" ");
+      check("O-W-click", "Continue can be clicked", false, `${JSON.stringify(seen)} ${reasons}`);
+      await page.screenshot({ path: join(SHOTS, "wizard-stuck.png") });
+      break;
+    }
     // The button is disabled while saving and then relabelled, so wait for the step itself to change.
     const moved = await page.waitForFunction((t) => document.querySelector("h1")?.innerText !== t, title, { timeout: 15000 }).then(() => true, () => false);
     if (!moved) break;
@@ -298,6 +311,7 @@ try {
       await run();
     } catch (e) {
       check("X-00", "browser section stopped early", false, e?.stack ?? e);
+      if (run === sections[0]) wizardBlocked = true;
     }
   }
 } finally {
