@@ -52,7 +52,7 @@ Status values: Not Started, In Progress, Blocked, Passed. Passed needs a recorde
 | W-03 | Workflows | Scripted: clean onboarding with demo seed off | Passed | CI `2381911`, docker job: O-01 to O-07 | `tests/e2e/stack.mjs` | API level, not through the onboarding page |
 | W-05 | Workflows | Fix found by W-01: drafts and unbalanced vouchers counted in Trial Balance and account balances | Passed | CI `2381911`; `report_views_test.sql` failed before the fix | Migration 045 | Open since migration 017 |
 | W-06 | Workflows | Fix found by W-01: cash, COGS, DSO, DPO and working capital read zero in Cash Flow, FP&A and the Consultant | Passed | CI `2381911`; `report_views_test.sql` | Migration 046 | Migration 023 compared the wrong chart columns |
-| W-07 | Workflows | Fixes found reading the screens: receipts shown as journals, drafts stuck with approvals on, voucher period by date, invented Mumbai city, Day Book account filter, audit trail hiding database events, reconciliation listing non-bank accounts | In Progress | tsc, vitest, SQL; CI pending | Migration 052, Day Book, vouchers, parties, reconciliation, `routes/audit.rs` | Not checked in a browser |
+| W-07 | Workflows | Fixes found reading the screens: receipts shown as journals, drafts stuck with approvals on, voucher period by date, invented Mumbai city, Day Book account filter, audit trail hiding database events, reconciliation listing non-bank accounts | In Progress | CI `d76ec6a`: 140 of 140; screens not checked in a browser | Migration 052, Day Book, vouchers, parties, reconciliation, `routes/audit.rs` | Not checked in a browser |
 | W-04 | Workflows | Sales, purchases, reports and remaining modules from §10 | Passed | CI `d8a7840`, docker job: M-01 to M-12 | `tests/e2e/workflows.mjs` | Bank reconciliation, payroll and marketplace not covered. Found: wrong-check-digit GSTINs were accepted |
 
 ## Phases 2–4: persistence, images, local acceptance
@@ -66,7 +66,7 @@ Status values: Not Started, In Progress, Blocked, Passed. Passed needs a recorde
 | C-05 | Docker | Image sizes, tags, SBOM and scan | Not Started | | | §13 |
 | C-06 | Docker | CI job runs the full stack and the W scripts | Passed | CI `2381911`, docker job: 47 of 47 | `.github/workflows/ci.yml`, `tests/e2e/` | CI runner, not a developer machine |
 | B-01 | Backup | Database and file backup and restore, tested | Passed | CI `d8a7840`, docker job: step "Backup restores into a new database" then 4 of 4 persistence checks | `.github/workflows/ci.yml`, `BACKUP_AND_RESTORE.md` | Database and files together; restored on a CI runner |
-| D-01 to D-18 | Local acceptance | Plan §15 | Not Started | | | Results go in `LOCAL_DOCKER_TEST_REPORT.md` |
+| D-01 to D-18 | Local acceptance | Plan §15 | In Progress | [Test report](LOCAL_DOCKER_TEST_REPORT.md): CI passes all except D-16 | CI, `tests/e2e` | Owner: other developer, for the run on a real machine |
 
 ## Phases 5–7: GCP
 
@@ -83,5 +83,5 @@ Gated on local acceptance. Needs a GCP project, billing and Parth's approval bef
 | ID | Workstream | Task | Status | Evidence | Files changed | Notes |
 |---|---|---|---|---|---|---|
 | T-01 | Tutorials | Tutorial centre, paths 1–9, acceptance from §23 | In Progress | `tests/tutorials.test.ts`: routes and targets exist in the source; not walked in a browser | `src/lib/tutorials`, `TutorialCoach.tsx`, `HelpCentreView.tsx`, `/help` | Plan §23 acceptance needs a browser pass at desktop and mobile widths |
-| X-01 | Docs | The 12 documents in §24 | In Progress | Written in `docs/runtime` | `docs/runtime/*` | Commands in `LOCAL_DOCKER_SETUP.md` ran in CI, not on a developer machine |
+| X-01 | Docs | The 12 documents in §24 | In Progress | All 12 written in `docs/runtime` | `docs/runtime/*` | Local commands ran in CI, not on a developer machine; GCP documents can't be finished until deployment |
 | X-02 | Docs | Restore or repoint references to deleted docs | Passed | Files restored from `a6bd216` | `docs/INTEGRATIONS.md`, `docs/HSN_IMPORT.md`, `gsp.rs`, `kyc.rs` | Migrations 037 and 038 still mention the removed plan in comments; applied files can't change |

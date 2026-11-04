@@ -177,7 +177,7 @@ credentials are absent. Clearly label sandbox/simulation behaviour.
 
 Audited at commit `8b1a1ed` by reading the code. **Nothing in this section was run**, so every feature status below is a code-reading result, not a test `PASS` under rule 8. The master checklist is in [`docs/runtime/README.md`](runtime/README.md).
 
-> **Update, 4 November 2026.** This section records the state at `8b1a1ed`. Blockers 2 to 7 are fixed and passing in CI, except that proof files still aren't stored (blocker 1). Blocker 8 is fixed but hasn't been run on GCP. Current status is in `docs/runtime/README.md`. The first full-stack CI run also found two report bugs this code-reading audit missed (W-05, W-06).
+> **Update, 4 November 2026.** This section records the state at `8b1a1ed`. All 8 blockers are fixed; blocker 8 hasn't been run on GCP. Full-stack CI now passes 140 of 140 checks, including persistence, backup and restore. Current status is in `docs/runtime/README.md`, and results are in `docs/runtime/LOCAL_DOCKER_TEST_REPORT.md`. The first full-stack runs found bugs this code-reading audit missed.
 
 ### 3A.1 Verdict
 

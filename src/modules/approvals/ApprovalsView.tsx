@@ -202,7 +202,7 @@ export function ApprovalsView() {
               isOpen={rejecting}
               onClose={() => setRejecting(false)}
               title={`Send back ${selected.entry_number}`}
-              description="The maker sees this reason and can fix and resubmit the voucher."
+              description="The maker sees this reason. They can resubmit it unchanged from the Day Book, or enter a corrected voucher."
             >
               <label className="block text-xs font-semibold text-ink-soft" htmlFor="reject-reason">
                 Reason

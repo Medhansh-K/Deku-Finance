@@ -160,7 +160,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "maker-checker",
         title: "Maker-checker approval",
-        body: "When Maker-checker approvals is on in Settings, a voucher reaches the ledger only after a second person (owner, CFO or admin) presses Approve & post; nobody can approve their own. An approver can press Send back with a reason, and the voucher then waits under Sent back. There is no screen to edit it yet, so enter a corrected voucher as a new one.",
+        body: "When Maker-checker approvals is on in Settings, a voucher reaches the ledger only after a second person (owner, CFO or admin) presses Approve & post; nobody can approve their own. An approver can press Send back with a reason, and the voucher then waits under Sent back. Vouchers can't be edited once saved, so the maker either resubmits it unchanged from the Day Book, using Post to Ledger, or enters a corrected voucher.",
         route: "/approvals",
         target: "approvals-queue",
       },
