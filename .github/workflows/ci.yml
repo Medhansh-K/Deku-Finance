@@ -69,11 +69,9 @@ jobs:
             trivy="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD/image-reports:/out aquasec/trivy:0.57.0 image --quiet"
             $trivy --format cyclonedx --output "/out/$image.sbom.json" "$image:latest"
             $trivy --severity HIGH,CRITICAL --ignore-unfixed --output "/out/$image.txt" "$image:latest"
-            echo "::notice::$image: $(grep -hE '^Total:' "image-reports/$image.txt" | tr '
-' ' ')"
+            echo "::notice::$image: $(grep -hE '^Total:' "image-reports/$image.txt" | tr '\n' ' ')"
           done
-          echo "::notice::image sizes: $(tr '
-' ';' < image-reports/sizes.txt)"
+          echo "::notice::image sizes: $(tr '\n' ';' < image-reports/sizes.txt)"
       # Plan D-01 to D-16. Failures are published as annotations: run logs need a GitHub login.
       - name: Full stack, clean install
         run: |
