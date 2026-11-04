@@ -334,3 +334,10 @@ table {
     page-break-inside: avoid !important;
   }
 }
+
+/* The element a tutorial step is pointing at. */
+.tour-highlight {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+}

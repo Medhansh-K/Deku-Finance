@@ -71,7 +71,7 @@ export function BalanceSheetView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
+      <div data-tour="balance-sheet-status" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         <div className="flex items-center gap-2">
           <Badge variant={isBalanced ? "success" : "warning"}>
             {isBalanced ? "Balance Sheet Equated" : `Difference: ${formatINR(difference)}`}

@@ -10,6 +10,7 @@ import {
   Search,
   Keyboard,
   HelpCircle,
+  BookOpen,
   LogOut,
   Building2,
   Calendar,
@@ -22,6 +23,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useKeyboardNav } from "@/context/KeyboardNavContext";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
+import { TutorialCoach } from "@/components/tutorial/TutorialCoach";
 import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
@@ -302,6 +304,15 @@ export function AppShell({ children }: AppShellProps) {
             {/* Notification Bell */}
             <NotificationBell />
 
+            <Link
+              href={`/help?route=${encodeURIComponent(pathname)}`}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-panel hover:text-slate-200 transition-colors"
+              title="Help & Tutorials"
+              aria-label="Help and tutorials"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Link>
+
             {/* Keyboard Help Modal Trigger */}
             <button
               onClick={() => setIsHelpOpen(true)}
@@ -362,6 +373,8 @@ export function AppShell({ children }: AppShellProps) {
           onOpenHelp={() => setIsHelpOpen(true)}
           onOpenGoTo={() => setIsCommandPaletteOpen(true)}
         />
+
+        <TutorialCoach />
 
         {/* Global Dialogs */}
         <CommandPalette

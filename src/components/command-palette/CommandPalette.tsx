@@ -361,6 +361,14 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     icon: ShieldAlert,
   },
   {
+    id: "help",
+    title: "Help & Tutorials",
+    subtitle: "Guided walkthroughs for setup, accounting, reports and administration",
+    category: "Utilities",
+    route: "/help",
+    icon: Layers,
+  },
+  {
     id: "settings",
     title: "Settings & Configuration",
     subtitle: "Company preferences, operating mode and currencies",

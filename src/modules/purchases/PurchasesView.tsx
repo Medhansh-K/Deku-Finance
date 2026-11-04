@@ -163,7 +163,7 @@ export function PurchasesView() {
       </div>
 
       <div className="rounded-xl border border-line bg-surface shadow-card">
-        <div role="tablist" className="flex gap-1 border-b border-line px-2">
+        <div data-tour="purchases-tabs" role="tablist" className="flex gap-1 border-b border-line px-2">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -438,7 +438,7 @@ function AddBill({
           <span className={labelClass}>ITC eligibility</span>
           <select
             className={fieldClass}
-            value={f.eligibility}
+            data-tour="purchases-itc" value={f.eligibility}
             onChange={(e) => update({ eligibility: e.target.value as ItcEligibility })}
           >
             {(Object.keys(ITC_ELIGIBILITY_LABEL) as ItcEligibility[]).map((k) => (
@@ -460,7 +460,7 @@ function AddBill({
         )}
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-lg border border-line bg-canvas p-3">
+      <fieldset data-tour="purchases-voucher" className="space-y-3 rounded-lg border border-line bg-canvas p-3">
         <label className="flex items-center gap-2 text-sm text-ink">
           <input
             type="checkbox"

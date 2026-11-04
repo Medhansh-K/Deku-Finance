@@ -1,0 +1,603 @@
+/**
+ * Content of the in-product tutorials (plan sections 20-23). Written from the screens as they are now:
+ * if a screen changes, its steps here change with it. `target` is the value of a data-tour attribute.
+ */
+
+export interface TutorialStep {
+  id: string;
+  title: string;
+  body: string;
+  route?: string;
+  target?: string;
+}
+
+export interface TutorialPath {
+  id: string;
+  title: string;
+  summary: string;
+  audience: "everyone" | "admin" | "implementer";
+  prerequisites: string;
+  outcome: string;
+  steps: TutorialStep[];
+}
+
+export const TUTORIAL_PATHS: TutorialPath[] = [
+  {
+    id: "first-setup",
+    title: "First-time setup",
+    summary: "Find your way around and get the company ready for its first entries.",
+    audience: "everyone",
+    prerequisites: "None",
+    outcome: "You can move around the app, check the company details, financial year and chart of accounts, and add your first party and team member.",
+    steps: [
+      {
+        id: "welcome",
+        title: "Welcome to Deku Finance",
+        body: "Deku Finance keeps double-entry books and GST records for one company. This tour only points things out and never saves or posts anything for you. Everything that changes your books needs you to press the button yourself.",
+      },
+      {
+        id: "gateway",
+        title: "The Gateway and navigation",
+        body: "The Gateway lists every module under Masters, Transactions & Registers, Financial Reports and Utilities & Statutory. F1 to F11 jump between modules, Ctrl+K opens the command palette to search for one, and Esc comes back here. The F-Keys button in the top bar turns the function keys on or off.",
+        route: "/gateway",
+        target: "gateway-menu",
+      },
+      {
+        id: "organisation",
+        title: "Your company",
+        body: "The company is created when the first administrator signs up, and a short setup wizard then asks for the operating mode, business details and first financial year. Each deployment holds one company, so a second one is refused even though a New Company button is on the Companies screen. Signup closes after the first administrator, and everyone else joins by invitation.",
+      },
+      {
+        id: "business-details",
+        title: "Business details",
+        body: "Company Profile holds the state of registration, registered address, Udyam number, and the UPI and bank details printed on invoices. Change what you need and press Save profile; only owners and admins can save. The company name is set at signup and isn't edited here.",
+        route: "/settings",
+        target: "settings-company-profile",
+      },
+      {
+        id: "financial-year",
+        title: "Financial year and preferences",
+        body: "Vouchers can only be posted inside an open period listed under Fiscal Accounting Periods. Use New Fiscal Period to add a year and press Establish Period to save it. Maker-checker approvals and keyboard preferences are also on this page.",
+        route: "/settings",
+        target: "settings-fiscal-periods",
+      },
+      {
+        id: "chart-of-accounts",
+        title: "Review the chart of accounts",
+        body: "Your company received a standard chart of accounts automatically, so you don't need to build one. Browse the Assets, Liabilities, Equity, Revenue and Expenses tabs to see what is there. Vouchers can only use accounts marked Postable Leaf; a Group Header only adds up the accounts under it.",
+        route: "/masters/chart-of-accounts",
+        target: "coa-tabs",
+      },
+      {
+        id: "gst-details",
+        title: "GST details",
+        body: "Operating mode decides how invoices work: GST registered needs a valid GSTIN, and Not GST registered issues bills of supply with no GST. The GSTIN and the composition scheme tick box appear only in GST mode. If you aren't sure whether you must register or which scheme applies, check with your accountant.",
+        route: "/settings",
+        target: "settings-operating-mode",
+      },
+      {
+        id: "first-party",
+        title: "Add your first customer or supplier",
+        body: "Press New Party, choose Customer or Vendor / Supplier, and fill in Legal Name, GSTIN and contact details. The State field starts at Maharashtra, so change it if needed. Nothing is saved until you press Save Counterparty.",
+        route: "/masters/parties",
+        target: "parties-new",
+      },
+      {
+        id: "team",
+        title: "Users and roles",
+        body: "An owner, CFO or admin invites people from the Invitations tab here: enter the Email and Role, then press Send invitation. You get a link to share yourself, which expires in 7 days, and the person joins using the invited email. Members & roles lists what each role is for.",
+        route: "/departments-members",
+        target: "members-tabs",
+      },
+      {
+        id: "help",
+        title: "Help and settings",
+        body: "This page, Help & Tutorials, is always behind the book icon in the top bar; the question-mark icon lists keyboard shortcuts, and Settings is on the Gateway. The Consultant (F2) answers questions from your ledger figures and uses no external AI service. For GST or legal questions, ask your accountant.",
+        route: "/help",
+      },
+    ],
+  },
+  {
+    id: "accounting-fundamentals",
+    title: "Accounting fundamentals",
+    summary: "Learn how double-entry works in Deku using one fictional voucher.",
+    audience: "everyone",
+    prerequisites: "A company with an open financial year.",
+    outcome: "You can explain a debit and a credit, enter a balanced voucher, and trace it to the Day Book and Trial Balance.",
+    steps: [
+      {
+        id: "chart",
+        title: "The chart of accounts",
+        body: "Every amount in your books sits in an account, and accounts are grouped as assets, liabilities, equity, revenue and expenses. Assets are what the business owns or is owed, liabilities are what it owes, and equity is the owners' stake. Revenue and expenses record what it earns and spends.",
+        route: "/masters/chart-of-accounts",
+        target: "coa-tabs",
+      },
+      {
+        id: "debit-credit",
+        title: "Debit and credit",
+        body: "A debit increases assets and expenses, and decreases liabilities, equity and revenue. A credit does the opposite. Debit doesn't mean bad and credit doesn't mean good; they are just the two sides of an entry.",
+      },
+      {
+        id: "double-entry",
+        title: "Double entry, with a sample",
+        body: "Fictional sample: the bank deducts ₹1,000 as bank charges. Debit Bank & Payment Processing Charges ₹1,000, because an expense went up, and credit the bank account ₹1,000, because an asset went down. Total debits equal total credits, which is the rule for every voucher.",
+      },
+      {
+        id: "voucher-types",
+        title: "Voucher types",
+        body: "Contra moves money between cash and bank, Payment records money going out, and Receipt records money coming in. Journal is for non-cash adjustments, and Sales and Purchase record sales and purchases. On this page F4 to F9 switch the voucher type instead of jumping to another module.",
+        route: "/vouchers",
+        target: "voucher-types",
+      },
+      {
+        id: "draft",
+        title: "Create a draft",
+        body: "The server fills in the voucher number. For the sample you would pick the expense on the Dr line and the bank on the To (Cr) line, enter 1000 on each and press Save Draft, but don't save the sample in your real books. Nothing is saved until you press a button yourself, and a saved draft can't be edited afterwards, only posted from the Day Book.",
+        route: "/vouchers",
+        target: "voucher-lines",
+      },
+      {
+        id: "balance",
+        title: "Check that it balances",
+        body: "This strip shows Out of Balance with the difference until debits equal credits. The post button stays disabled until then. The server checks the balance again when the voucher is posted.",
+        route: "/vouchers",
+        target: "voucher-balance",
+      },
+      {
+        id: "supporting-document",
+        title: "Attach the supporting document",
+        body: "This form won't post a voucher without a supporting document, such as a payment screenshot or a bill. It takes a PDF, PNG, JPEG or WebP up to 10 MB, which is stored with the voucher when you save or post it. Nothing checks what the document says, so whoever reviews the voucher still has to read it.",
+        route: "/vouchers",
+        target: "voucher-document",
+      },
+      {
+        id: "post",
+        title: "Post the voucher",
+        body: "Post & Validate Voucher puts the entry in the ledger, and it reads Submit for Approval when approvals are on. Nothing is posted until you press it, and only an owner, CFO or admin can post; accountants can save drafts and submit. A posted voucher can't be edited: you correct it by reversing it.",
+        route: "/vouchers",
+        target: "voucher-actions",
+      },
+      {
+        id: "maker-checker",
+        title: "Maker-checker approval",
+        body: "When Maker-checker approvals is on in Settings, a voucher reaches the ledger only after a second person (owner, CFO or admin) presses Approve & post; nobody can approve their own. An approver can press Send back with a reason, and the voucher then waits under Sent back. There is no screen to edit it yet, so enter a corrected voucher as a new one.",
+        route: "/approvals",
+        target: "approvals-queue",
+      },
+      {
+        id: "day-book",
+        title: "Find it in the Day Book",
+        body: "The Day Book lists every voucher by date; use the status tabs, voucher type, date and search to find one, and click a row to see its debit and credit lines. To correct a posted voucher, press Reverse Voucher and give a date and reason. That keeps the original and posts an opposite entry, and it is the only way to correct one.",
+        route: "/day-book",
+        target: "day-book-filters",
+      },
+      {
+        id: "trial-balance",
+        title: "Check the Trial Balance",
+        body: "The Trial Balance shows each account's debit total, credit total and balance from posted entries, and the two totals should match. The sample would add ₹1,000 of debit to the charges account and ₹1,000 of credit to the bank. There is no separate General Ledger screen, so use the Day Book, or the Day book export for line-by-line detail.",
+        route: "/reports/trial-balance",
+        target: "trial-balance-table",
+      },
+    ],
+  },
+  {
+    id: "sales-invoicing",
+    title: "Sales and invoicing",
+    summary: "Go from a new customer to an issued GST invoice and a recorded payment.",
+    audience: "everyone",
+    prerequisites: "Company profile saved, with a valid GSTIN for tax invoices.",
+    outcome: "You can issue an invoice, print it, record the customer's payment and see what is still owed.",
+    steps: [
+      {
+        id: "customer",
+        title: "Create a customer",
+        body: "Press New Party and keep Party Type as Customer (Debtor). A valid GSTIN fills in the place of supply on invoices, and a mobile number in Phone enables WhatsApp reminders later. Nothing is saved until you press Save Counterparty.",
+        route: "/masters/parties",
+        target: "parties-new",
+      },
+      {
+        id: "product",
+        title: "Set up a product or service",
+        body: "New Catalogue Item records an item's SKU, name, HSN or SAC code, default GST rate and price, and for goods it can turn on inventory tracking; nothing is saved until you press Save Item. The invoice form doesn't pick from this list yet, so you type the item, code and rate on each invoice line.",
+        route: "/masters/products-services",
+        target: "products-new",
+      },
+      {
+        id: "create-invoice",
+        title: "Create an invoice",
+        body: "Open the Create GST Invoice tab, then choose the Invoice type and Customer, and type the Invoice number, dates and Place of supply. Add lines with item, HSN/SAC, Qty, Rate and GST %. Save draft invoice stores it as a draft, and nothing reaches your ledger until you issue it.",
+        route: "/gst",
+        target: "gst-tabs",
+      },
+      {
+        id: "gst-calculation",
+        title: "How GST is worked out",
+        body: "The form compares your company's state with the place of supply: the same state gives CGST and SGST, and a different state gives IGST. You choose the GST rate on each line, so the app doesn't decide which rate applies to your goods or services. Check rates with your accountant.",
+        route: "/gst",
+      },
+      {
+        id: "totals",
+        title: "Totals and rounding",
+        body: "The Tax summary beside the invoice lines shows Taxable value, tax, Round off and Grand total as you type. Round off to the nearest rupee is ticked by default, and you can untick it for an invoice. Compare the total with what you expect before saving.",
+        route: "/gst",
+      },
+      {
+        id: "issue-print",
+        title: "Issue and print",
+        body: "In Sales Invoices Register, click the draft and press Issue & Post Double Entry, then confirm; this locks the invoice and posts its journal, debiting the customer and crediting sales and GST. Print Invoice opens your browser's print dialog, where you can print or save a PDF; there is no separate download. Fix an issued invoice with a credit or debit note, or Cancel Invoice; direct e-invoicing stays off until configured.",
+        route: "/gst",
+      },
+      {
+        id: "record-payment",
+        title: "Record a payment",
+        body: "On a Receipt voucher, debit your bank, because money came in, and credit Accounts Receivable (code 1030) with the customer as Counterparty, because they now owe less. Option 1: Settle Open Sales Invoice fills in the amount and narration, but you still choose both accounts. Nothing is saved until you press Post & Validate Voucher, and a posted voucher can only be corrected by reversing it.",
+        route: "/vouchers/receipt",
+        target: "voucher-document",
+      },
+      {
+        id: "receivables",
+        title: "Review what customers owe",
+        body: "Collections sorts issued invoices into Uncollected, Overdue, Due in 7 days, Partially paid and Paid, using the customer's ledger with payments applied to the oldest invoices first. WhatsApp reminder opens WhatsApp with a written message for you to send. Razorpay payment links stay off until configured; Reports also has a debtors ageing view.",
+        route: "/collect",
+      },
+    ],
+  },
+  {
+    id: "purchases-expenses",
+    title: "Purchases and expenses",
+    summary: "Record supplier bills and expenses, and see what you owe.",
+    audience: "everyone",
+    prerequisites: "A company with an open financial year.",
+    outcome: "You can record a purchase bill with its ITC treatment, review payables and find the entry in your books.",
+    steps: [
+      {
+        id: "supplier",
+        title: "Create a supplier",
+        body: "Press New Party and set Party Type to Vendor / Supplier (Creditor). Purchase bills require a valid supplier GSTIN, so enter it if the supplier has one. Nothing is saved until you press Save Counterparty.",
+        route: "/masters/parties",
+        target: "parties-new",
+      },
+      {
+        id: "record-bill",
+        title: "Record a purchase bill",
+        body: "Add purchase bill takes the supplier, bill number, date, place of supply and tax amounts, Bulk upload imports a CSV after you confirm, and Register lists saved bills. The form requires a supplier GSTIN, so record an expense from an unregistered supplier with a Payment or Purchase voucher instead. Bulk upload adds to the register only and doesn't create vouchers.",
+        route: "/purchases",
+        target: "purchases-tabs",
+      },
+      {
+        id: "bill-voucher",
+        title: "Create its voucher",
+        body: "With Also create the purchase voucher ticked, you pick the ledger to debit for the purchase and the supplier payable ledger to credit, because the business now owes the supplier. Nothing is saved until you press Save bill and post voucher (Save bill and submit voucher when approvals are on). Posting requires an owner, CFO or admin, and a posted voucher can only be corrected by reversing it.",
+        route: "/purchases",
+        target: "purchases-voucher",
+      },
+      {
+        id: "itc",
+        title: "Tax and ITC",
+        body: "ITC eligibility can be Eligible, Blocked u/s 17(5) or Ineligible (other), and the last two need a reason. Eligible tax is debited to the Input CGST, SGST or IGST ledgers, and blocked or ineligible tax is added to the purchase cost. The app records your choice but doesn't decide it, so check with your accountant whether credit is allowed.",
+        route: "/purchases",
+        target: "purchases-itc",
+      },
+      {
+        id: "payables",
+        title: "Review what you owe",
+        body: "This report shows total payables and ageing from the supplier ledger (code 2010 in the standard chart), so only posted entries on that ledger appear. Issue Payment opens a Payment voucher, where you debit the supplier ledger, because you owe less, and credit your bank, because money left. As with any voucher, nothing is saved until you press post, and a posted voucher can only be corrected by reversing it.",
+        route: "/reports/creditors",
+        target: "creditors-summary",
+      },
+      {
+        id: "find-in-reports",
+        title: "Find it in your books",
+        body: "In the Day Book, choose Purchase Bill (F9) in the voucher type filter or search by supplier or voucher number. The posted amounts also appear in the Trial Balance and Profit & Loss. In the purchases Register, the Voucher column shows Linked or Not in books for each bill.",
+        route: "/day-book",
+        target: "day-book-filters",
+      },
+    ],
+  },
+  {
+    id: "banking-reconciliation",
+    title: "Banking and reconciliation",
+    summary: "Compare a bank statement file with the entries in your bank ledger.",
+    audience: "everyone",
+    prerequisites: "Posted vouchers on your bank account, and your bank statement as a CSV file.",
+    outcome: "You can load a statement, confirm matches, deal with unmatched lines and see what remains.",
+    steps: [
+      {
+        id: "bank-accounts",
+        title: "Bank accounts are ledgers",
+        body: "A bank account in Deku is a ledger in the chart of accounts; the standard chart has one with code 1020. If you have others, use Add Account with Parent Ledger Group set to Cash & Liquid Capital. The bank details in Company Profile are only printed on invoices and aren't connected to these ledgers or to your bank.",
+        route: "/masters/chart-of-accounts",
+        target: "coa-add-account",
+      },
+      {
+        id: "statement-import",
+        title: "Load a statement file",
+        body: "Choose the Bank account, then a CSV under Statement (CSV); there is no live bank feed, and PDF statements aren't accepted. The file is read in your browser, never uploaded and not kept, so choose it again each time you open this page. Rows that can't be read are listed and left out of the matching.",
+        route: "/banking/reconciliation",
+        target: "recon-statement",
+      },
+      {
+        id: "match",
+        title: "Confirm suggested matches",
+        body: "The Suggested tab proposes a posted bank entry with the same amount and direction, dated within 5 days or sharing a reference, and shows why. Press Confirm to save a match; a Tie: pick one label means you choose between entries. Nothing is saved until you press Confirm, and a deposit on the statement matches a debit on your bank ledger.",
+        route: "/banking/reconciliation",
+      },
+      {
+        id: "unmatched",
+        title: "Resolve unmatched lines",
+        body: "Lines with no match appear under Unmatched, where Create receipt voucher or Create payment voucher opens a voucher filled with the amount, date, narration and bank. You choose the other account, attach a document and press post; nothing is saved until then, and a posted voucher can only be corrected by reversing it. Afterwards, choose the statement file again and the new entry appears as a suggestion.",
+        route: "/banking/reconciliation",
+      },
+      {
+        id: "complete",
+        title: "Finishing a reconciliation",
+        body: "There is no finish or sign-off button and no closing balance check. You are done when every statement line is under Matched, so compare the totals with your statement yourself. Undo on a matched line removes that match if you confirmed the wrong one.",
+        route: "/banking/reconciliation",
+      },
+      {
+        id: "status",
+        title: "Review the status",
+        body: "The Matched, Suggested and Unmatched tabs show counts for the loaded statement, with In and Out totals for the open tab. Confirmed matches are saved on the server but only show when you load the same statement again, and there is no separate reconciliation report. A Balance break label means the statement's running balance doesn't follow from that line's amount, so check the file.",
+        route: "/banking/reconciliation",
+        target: "recon-controls",
+      },
+    ],
+  },
+  {
+    id: "reports-control",
+    title: "Reports and financial control",
+    summary: "Read the main registers and statements, and know their limits.",
+    audience: "everyone",
+    prerequisites: "Some posted vouchers make the reports more useful.",
+    outcome: "You can read the Day Book, Trial Balance, Profit & Loss, Balance Sheet and Cash Flow, and export or print them.",
+    steps: [
+      {
+        id: "day-book",
+        title: "Open the Day Book",
+        body: "The Day Book lists vouchers by date with their status: posted, draft or reversed. Only posted entries count in the financial statements. Click a row to see its lines and any attached document.",
+        route: "/day-book",
+        target: "day-book-filters",
+      },
+      {
+        id: "ledger-detail",
+        title: "Ledger detail",
+        body: "There is no General Ledger screen. The Day book export lists every posted voucher line between two dates with account code, party, debit and credit, so you can filter by account in a spreadsheet. Clicking an account in a report opens the Day Book but doesn't yet filter it to that account.",
+        route: "/export",
+        target: "export-day-book",
+      },
+      {
+        id: "trial-balance",
+        title: "Understand the Trial Balance",
+        body: "The Trial Balance lists each account's debit total, credit total and balance from posted entries. If total debits and credits match, the footer shows Balanced (0.00). Matching totals show the entries balance, not that each one uses the right account, so it doesn't replace review.",
+        route: "/reports/trial-balance",
+        target: "trial-balance-table",
+      },
+      {
+        id: "profit-loss",
+        title: "Read Profit & Loss",
+        body: "Profit & Loss sets income against expenses from posted entries and shows the net result. The screen has no date selector, so don't read it as a single month or year without checking.",
+        route: "/reports/profit-loss",
+        target: "profit-loss-summary",
+      },
+      {
+        id: "balance-sheet",
+        title: "Read the Balance Sheet",
+        body: "The Balance Sheet shows assets on one side and capital and liabilities on the other. The label here reads Balance Sheet Equated when they agree and shows the difference when they don't. Ask your accountant to look into any difference before relying on the figures.",
+        route: "/reports/balance-sheet",
+        target: "balance-sheet-status",
+      },
+      {
+        id: "cash-flow",
+        title: "Understand Cash Flow",
+        body: "Cash Flow shows money in and out of cash and bank ledgers, grouped as operating, investing and financing activities. The period shown here runs from 1 April of the current financial year to today, and you can't change it on this screen.",
+        route: "/reports/cash-flow",
+        target: "cash-flow-period",
+      },
+      {
+        id: "filters",
+        title: "Date and period filters",
+        body: "The Day Book filters by one date here, and the Day book export takes a From and To range. Purchases, Collections and GST returns each have their own month selector. Trial Balance, Profit & Loss and Balance Sheet have no date filter at the moment.",
+        route: "/day-book",
+        target: "day-book-date",
+      },
+      {
+        id: "export",
+        title: "Export and print",
+        body: "These buttons download the Chart of accounts, Parties, Items and Trial balance as CSV files built in your browser. Profit & Loss, Balance Sheet and Cash Flow have no CSV; use their print button and your browser's save as PDF option. Tally XML export of vouchers isn't available yet.",
+        route: "/export",
+        target: "export-masters",
+      },
+    ],
+  },
+  {
+    id: "documents-operations",
+    title: "Documents and operations",
+    summary: "Attach and find voucher documents, create business documents, and follow what happened.",
+    audience: "everyone",
+    prerequisites: "A company with some vouchers helps, but isn't required.",
+    outcome: "You can attach and download voucher documents, use the Document Builder, and read the audit trail, notifications and approvals.",
+    steps: [
+      {
+        id: "upload",
+        title: "Attach a document",
+        body: "Documents are attached to vouchers; there is no separate document library. Supporting Document takes a PDF, PNG, JPEG or WebP up to 10 MB and saves it with the voucher only when you press save or post, and a posted voucher can only be corrected by reversing it. Nothing verifies what a document says, and Smart OCR is different: it reads a file on this device to pre-fill the form and doesn't store it.",
+        route: "/vouchers",
+        target: "voucher-document",
+      },
+      {
+        id: "find",
+        title: "Find and download a document",
+        body: "Search for the voucher in the Day Book, click its row, and use Download under Supporting Document; the file downloads rather than opening in the app. If a voucher has none, Attach document adds one. An attached file can't be changed or removed, so check it first.",
+        route: "/day-book",
+        target: "day-book-search",
+      },
+      {
+        id: "builder",
+        title: "Use the Document Builder",
+        body: "Choose Commercial Quote, Proforma Invoice, Delivery Challan or Purchase Order here, then fill in the form. Discount Coupon can be downloaded but not saved, and Tax Invoice and the credit and debit notes take you to the GST hub. Builder documents don't post anything to your ledger.",
+        route: "/builder",
+        target: "builder-templates",
+      },
+      {
+        id: "builder-output",
+        title: "Save, download and convert",
+        body: "Save draft stores the document, and Documents lists saved ones with Mark as… to change their status. Download offers PDF (through your browser's print dialog), Word, text and JSON. Convert turns a quotation or proforma into a draft sales invoice, and Purchase voucher opens a pre-filled voucher for a purchase order; neither posts until you issue or post it yourself.",
+        route: "/builder",
+        target: "builder-download",
+      },
+      {
+        id: "access",
+        title: "Who can see documents",
+        body: "Everyone in the company can list and download attached voucher documents; there are no per-document permissions. Owners, CFOs, admins and accountants can attach them. Don't attach anything that not every member should see.",
+      },
+      {
+        id: "audit",
+        title: "The audit trail",
+        body: "This page lists the activity the app has recorded, with who did what and when. Search it, or filter by time, status and operation. Export Logs, at the top of the page, downloads it as CSV or JSON.",
+        route: "/audit",
+        target: "audit-filters",
+      },
+      {
+        id: "notifications-approvals",
+        title: "Notifications and approvals",
+        body: "The bell shows GST due dates, overdue invoices, vouchers waiting over 24 hours for approval and periods ending soon, once your implementer's scheduled job has generated them. Check GST dates against the portal or with your accountant. This page holds vouchers awaiting a second person's approval when approvals are on.",
+        route: "/approvals",
+        target: "notification-bell",
+      },
+    ],
+  },
+  {
+    id: "administrator",
+    title: "Administrator and system management",
+    summary: "Manage people, company settings, masters and integrations, and know what sits outside the app.",
+    audience: "admin",
+    prerequisites: "Owner or admin role.",
+    outcome: "You can manage members and settings, understand integration modes and audit logs, and know what to ask your implementer for.",
+    steps: [
+      {
+        id: "users",
+        title: "Manage users",
+        body: "Invitations creates a link for a new member, valid for 7 days, and Members & roles lists current members. Reset password creates a one-time link for that person, valid for 24 hours, which you send them yourself; anyone who has it can set the password. Remove takes someone out of the company.",
+        route: "/departments-members",
+        target: "members-tabs",
+      },
+      {
+        id: "roles",
+        title: "Assign roles",
+        body: "Change a member's role from the Role list; each role's purpose is described here, and only an owner can grant the owner role. Only owners, CFOs and admins can post or approve vouchers, while accountants save drafts and submit them. The server enforces these rules, so a screen can open for a role that can't complete the action.",
+        route: "/departments-members",
+        target: "members-roles",
+      },
+      {
+        id: "organisation-settings",
+        title: "Organisation settings",
+        body: "Settings holds the Company Profile, fiscal periods, password change and this switch for Maker-checker approvals. Turn approvals on if a second person should review every voucher, and make sure at least two people can approve. There is no button to close a fiscal period at the moment.",
+        route: "/settings",
+        target: "settings-approvals",
+      },
+      {
+        id: "masters",
+        title: "Chart of accounts and masters",
+        body: "Add Account creates a ledger; accounts you added can be deactivated or removed, while system accounts can't, and this screen has no rename option. Parties and items have their own screens under Masters. To bring in existing data, Import from Tally or CSV on the Gateway shows a review before you apply anything.",
+        route: "/masters/chart-of-accounts",
+        target: "coa-add-account",
+      },
+      {
+        id: "integrations",
+        title: "Integrations",
+        body: "Payments (Razorpay), GST portal (GSP) and Identity (KYC) stay off until the server is configured, and their cards say Not available until then. Without GSP you download the return JSON from File GST returns and upload it on gst.gov.in yourself. Each card lists what would be shared with the provider, so read it before connecting.",
+        route: "/settings",
+        target: "settings-payments",
+      },
+      {
+        id: "sandbox-live",
+        title: "Sandbox and live modes",
+        body: "A sandbox exists for GSP and KYC on local installs only: the app labels it Sandbox, not legally valid, nothing goes to the GST portal or any registry, and what it returns is marked SANDBOX. Production refuses to run with it. This version has no live GSP or KYC provider connected, so direct filing, e-invoicing and identity checks need one to be added first.",
+        route: "/settings",
+        target: "settings-gsp",
+      },
+      {
+        id: "audit-logs",
+        title: "Review audit logs",
+        body: "Use the audit page to see who did what, and Export Logs here to keep a CSV or JSON copy. Review it after role changes and around period ends. Every company member can read this log, so it isn't limited to admins.",
+        route: "/audit",
+        target: "audit-actions",
+      },
+      {
+        id: "backup",
+        title: "Backup and restore",
+        body: "The app has no backup button; backups are run on the server by whoever manages the deployment. Vouchers and their documents are all in the database, so one database backup covers both. Ask your implementer how often backups run and to prove a restore works, because this project doesn't have a tested procedure yet.",
+      },
+      {
+        id: "updates",
+        title: "Updates and maintenance",
+        body: "Updates aren't installed from inside the app; your implementer rebuilds and redeploys it, and database changes run as part of that. Agree a time with them, and ask for a backup first. Database changes only go forward, so undoing one takes a new change or a restore.",
+      },
+      {
+        id: "health",
+        title: "System health and troubleshooting",
+        body: "There is no system health screen in the app; your implementer checks the backend's /health and /ready addresses and the service logs. Tell them what you did, the time and the exact message on screen. If every owner and admin is locked out, they can create a one-time reset link from the server.",
+      },
+    ],
+  },
+  {
+    id: "implementer",
+    title: "Developer and implementation guide",
+    summary: "Install, configure, check and update a Deku Finance deployment.",
+    audience: "implementer",
+    prerequisites: "Docker with Compose, command-line access to the server, and a copy of the repository.",
+    outcome: "You can run the stack, configure it, apply migrations, read health and logs, and find the guides for updates and GCP.",
+    steps: [
+      {
+        id: "install",
+        title: "Install locally",
+        body: "From the repository root run docker compose up --build, then open http://localhost:3000. The stack starts with no company or demo data, and the first signup becomes the administrator when DEKU_ADMIN_EMAIL is empty. Ports are bound to 127.0.0.1: frontend 3000, backend 8080, Postgres 5433.",
+      },
+      {
+        id: "environment",
+        title: "Environment variables",
+        body: "Compose reads .env, and .env.example lists the variables with development defaults that must never be reused on a real deployment. DEKU_SEED_DEMO=true loads fictional demo accounts and must stay false for a customer, and DEKU_ADMIN_EMAIL names the only address that may become the first administrator. DEKU_ENV defaults to development; with DEKU_ENV=production the backend refuses dev-only secrets and sandbox providers, and first signup needs DEKU_ADMIN_EMAIL.",
+      },
+      {
+        id: "docker-stack",
+        title: "The Docker stack",
+        body: "docker-compose.yml starts postgres, then the one-shot migrate service, then postgrest, backend and frontend, each waiting on the one before it. Database data lives in the pgdata volume. To remove everything, docker compose down -v also deletes that volume and all its data, so never run it on books you need.",
+      },
+      {
+        id: "architecture",
+        title: "Architecture",
+        body: "The browser talks only to the Next.js frontend, which proxies API calls to the Rust backend. The backend holds the business logic and reaches PostgreSQL through PostgREST, generally with the caller's token so row-level security applies. See docs/PLATFORM_ARCHITECTURE.md for details.",
+      },
+      {
+        id: "migrations",
+        title: "Database migrations",
+        body: "db/migrate.sh applies supabase/migrations/*.sql in filename order and records each in public.schema_migrations; it runs as the migrate service when the stack starts. It stops if an applied file has changed, so every fix goes in a new migration. Files aren't wrapped in a transaction, so a failed file can leave partial work that needs manual repair.",
+      },
+      {
+        id: "logs-health",
+        title: "Logs and health",
+        body: "docker compose logs backend (or migrate, postgrest, frontend, postgres) shows a service's logs. GET /health on the backend (http://localhost:8080) confirms the process is up. GET /ready also checks it can reach PostgREST and returns 503 with postgrest_unreachable if not.",
+      },
+      {
+        id: "integrations",
+        title: "Configure integrations",
+        body: "Razorpay stays off until RAZORPAY_CLIENT_ID, RAZORPAY_CLIENT_SECRET, RAZORPAY_REDIRECT_URI, RAZORPAY_WEBHOOK_SECRET and DATA_ENCRYPTION_KEY are all set. GSP_PROVIDER and KYC_PROVIDER are off when unset, and sandbox gives a labelled local demo that production refuses. No live GSP or KYC adapter exists yet, any other value stops the backend starting, and docs/INTEGRATIONS.md explains how to add one.",
+      },
+      {
+        id: "backup-restore",
+        title: "Back up and restore",
+        body: "docs/runtime/BACKUP_AND_RESTORE.md gives the commands: a pg_dump of the database plus the roles. CI runs that same restore into an empty database on every push. Everything, including voucher documents, is in Postgres, so one backup covers the data. Keep DATA_ENCRYPTION_KEY safe too, and schedule backups yourself, because nothing does it for you.",
+      },
+      {
+        id: "update-redeploy",
+        title: "Update and redeploy",
+        body: "Locally, get the new code and run docker compose up --build again: the pgdata volume is kept and migrate applies only pending files. For GCP, deploy/gcp/README.md describes the release and rollback steps; treat it as a guide to verify on your own project. Migrations are forward-only, so take a backup first.",
+      },
+      {
+        id: "troubleshooting",
+        title: "Troubleshoot common failures",
+        body: "Check docker compose logs first: migrate names a changed file with \"was changed after it was applied\", the backend names a setting with \"refusing to start in production\", and a 503 from /ready points at postgrest. Signup is refused after the first administrator exists, so everyone else needs an invitation. For an administrator locked out with nobody to help, run DATABASE_URL=... APP_URL=... sh db/issue_password_reset.sh person@company.com and treat the printed link like a password.",
+      },
+    ],
+  },
+];

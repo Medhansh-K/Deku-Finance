@@ -119,7 +119,7 @@ export function CreditorsDpoView() {
       </div>
 
       {/* DPO KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-tour="creditors-summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-surface p-4 rounded-xl border border-line shadow-2xs">
           <div className="flex items-center justify-between text-xs text-ink-muted mb-1.5">
             <span className="font-mono font-bold uppercase tracking-wider text-[10px]">

@@ -906,7 +906,7 @@ export function DocumentBuilderView() {
         </div>
 
         {/* Document Navigation Menu */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div data-tour="builder-templates" className="flex-1 overflow-y-auto p-2 space-y-1">
           <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Document Templates
           </div>
@@ -1125,7 +1125,7 @@ export function DocumentBuilderView() {
             )}
 
             {/* DOWNLOAD DROPDOWN BUTTON */}
-            <div className="relative" ref={downloadDropdownRef}>
+            <div data-tour="builder-download" className="relative" ref={downloadDropdownRef}>
               <button
                 suppressHydrationWarning
                 onClick={() => setIsDownloadOpen((prev) => !prev)}

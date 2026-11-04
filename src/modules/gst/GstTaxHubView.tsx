@@ -312,7 +312,7 @@ export function GstTaxHubView() {
     <div className="space-y-4 font-sans text-xs">
       {/* Navigation Tabs */}
       <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
-        <div className="flex items-center gap-1 font-semibold">
+        <div data-tour="gst-tabs" className="flex items-center gap-1 font-semibold">
           <button
             onClick={() => setActiveTab("invoices")}
             className={`px-3 py-1.5 rounded transition-colors ${

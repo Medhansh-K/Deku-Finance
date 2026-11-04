@@ -85,7 +85,7 @@ export function ApprovalsView() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,22rem)_1fr]">
-      <section aria-label="Approval queue" className="space-y-4">
+      <section data-tour="approvals-queue" aria-label="Approval queue" className="space-y-4">
         {requireApproval === false && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             Approvals are off for this company, so vouchers post directly. An owner or admin can turn on

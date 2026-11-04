@@ -254,7 +254,7 @@ export function PartiesView() {
           <Button
             variant="tally"
             size="sm"
-            onClick={() => setIsCreateOpen(true)}
+            data-tour="parties-new" onClick={() => setIsCreateOpen(true)}
             className="gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" /> New Party

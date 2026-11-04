@@ -107,7 +107,7 @@ export function ProfitLossView() {
       )}
 
       {/* Summary KPI Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div data-tour="profit-loss-summary" className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
           <span className="text-ink-subtle font-mono text-[10px] uppercase block">
             Operating Revenue & Income

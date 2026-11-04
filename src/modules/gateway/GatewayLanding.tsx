@@ -344,7 +344,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 2 (Center): Gateway of Deku Navigation Menu (Enlarged & Focused)  */}
         {/* ========================================================================= */}
-        <div className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
+        <div data-tour="gateway-menu" className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
           <div>
             {/* Menu Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">

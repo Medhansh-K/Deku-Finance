@@ -373,7 +373,7 @@ export function AuditTrailView() {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center flex-wrap gap-1.5">
+        <div data-tour="audit-actions" className="flex items-center flex-wrap gap-1.5">
           <Button
             variant="outline"
             size="sm"
@@ -496,7 +496,7 @@ export function AuditTrailView() {
       {/* ========================================================================= */}
       {/* 3. Search Bar & Filter Categories                                         */}
       {/* ========================================================================= */}
-      <div className="bg-surface p-3 rounded-lg border border-line-strong shadow-2xs space-y-2.5">
+      <div data-tour="audit-filters" className="bg-surface p-3 rounded-lg border border-line-strong shadow-2xs space-y-2.5">
         <div className="flex flex-col md:flex-row items-center gap-2">
           {/* Live Search */}
           <div className="relative flex-1 w-full">

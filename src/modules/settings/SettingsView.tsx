@@ -106,7 +106,7 @@ export function SettingsView() {
       {orgId && <KycCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
-      <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
+      <div data-tour="settings-fiscal-periods" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
             <h3 className="text-sm font-bold uppercase text-ink font-mono">

@@ -168,7 +168,7 @@ export function DepartmentsMembersView() {
         <Stat label="Departments" value={String(departments.length)} />
       </div>
 
-      <div role="tablist" className="flex flex-wrap gap-1 border-b border-line pb-1">
+      <div data-tour="members-tabs" role="tablist" className="flex flex-wrap gap-1 border-b border-line pb-1">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -278,7 +278,7 @@ export function DepartmentsMembersView() {
               })}
             </tbody>
           </table>
-          <dl className="grid sm:grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-line text-ink-muted">
+          <dl data-tour="members-roles" className="grid sm:grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-line text-ink-muted">
             {ROLES.map((r) => (
               <div key={r.value}>
                 <dt className="inline font-semibold text-ink-soft">{r.label}:</dt> <dd className="inline">{r.duty}</dd>

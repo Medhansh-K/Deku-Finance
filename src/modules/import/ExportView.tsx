@@ -58,7 +58,7 @@ export function ExportView() {
       )}
       <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-3">
         <h2 className="text-sm font-semibold text-ink">Masters and reports</h2>
-        <div className="flex flex-wrap gap-3">
+        <div data-tour="export-masters" className="flex flex-wrap gap-3">
           {exports.map((x) => (
             <Button key={x.id} variant="outline" isLoading={busy === x.id} onClick={() => run(x.id, x.build)}>
               <Download className="mr-2 h-4 w-4" />
@@ -70,7 +70,7 @@ export function ExportView() {
       <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-3">
         <h2 className="text-sm font-semibold text-ink">Journal day book</h2>
         <p className="text-xs text-ink-muted">Every posted voucher line between the two dates.</p>
-        <div className="flex flex-wrap items-end gap-3">
+        <div data-tour="export-day-book" className="flex flex-wrap items-end gap-3">
           <div className="w-44">
             <Input label="From" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>

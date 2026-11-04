@@ -101,7 +101,7 @@ export function NotificationBell() {
   return (
     <>
       <button
-        ref={buttonRef}
+        data-tour="notification-bell" ref={buttonRef}
         type="button"
         onClick={() => (open ? close() : setOpen(true))}
         className="relative rounded-md p-1.5 text-ink-subtle hover:bg-panel hover:text-brand-soft focus-visible:ring-2 focus-visible:ring-brand"

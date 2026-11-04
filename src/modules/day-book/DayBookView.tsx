@@ -518,7 +518,7 @@ export function DayBookView() {
       )}
 
       {/* Filters Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs">
+      <div data-tour="day-book-filters" className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Tabs */}
           <div className="flex items-center gap-1">
@@ -555,7 +555,7 @@ export function DayBookView() {
           </select>
 
           {/* Date Picker Filter */}
-          <div className="flex items-center gap-1.5">
+          <div data-tour="day-book-date" className="flex items-center gap-1.5">
             <span className="text-slate-500 font-mono text-[11px]">Filter Date:</span>
             <input
               type="date"
@@ -575,7 +575,7 @@ export function DayBookView() {
         </div>
 
         {/* Search */}
-        <div className="relative min-w-[220px]">
+        <div data-tour="day-book-search" className="relative min-w-[220px]">
           <Search className="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"

@@ -125,7 +125,7 @@ export function TrialBalanceView() {
       )}
 
       {/* Trial Balance Statement Sheet */}
-      <div className="bg-surface border border-edge rounded-lg shadow-sm overflow-hidden">
+      <div data-tour="trial-balance-table" className="bg-surface border border-edge rounded-lg shadow-sm overflow-hidden">
         {/* Statement Header */}
         <div className="bg-panel text-white p-4 border-b border-edge flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>

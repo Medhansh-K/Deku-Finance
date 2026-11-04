@@ -101,7 +101,7 @@ export function CashFlowView() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-canvas-sunken px-3 py-1.5 rounded-lg border border-line text-xs font-mono text-ink-soft">
+          <div data-tour="cash-flow-period" className="flex items-center gap-1.5 bg-canvas-sunken px-3 py-1.5 rounded-lg border border-line text-xs font-mono text-ink-soft">
             <Calendar className="h-3.5 w-3.5 text-ink-subtle" />
             <span>{startDate}</span>
             <span className="text-ink-subtle">to</span>

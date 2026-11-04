@@ -33,7 +33,7 @@ export function CompanyControlsCard({ orgId }: { orgId: string }) {
   };
 
   return (
-    <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+    <div data-tour="settings-approvals" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
       <div className="flex items-center gap-2 border-b border-line pb-3">
         <ShieldCheck className="h-4 w-4 text-ink-soft" />
         <h3 className="text-sm font-bold uppercase text-ink font-mono">Maker-checker approvals</h3>

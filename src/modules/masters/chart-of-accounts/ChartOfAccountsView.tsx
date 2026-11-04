@@ -619,7 +619,7 @@ export function ChartOfAccountsView() {
       {/* Top Controls: Tab filters, Add Account, Refresh, and Seed */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
         {/* ALERX Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
+        <div data-tour="coa-tabs" className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
           {[
             { id: "all", label: "All Accounts" },
             { id: "asset", label: "Assets" },
@@ -664,7 +664,7 @@ export function ChartOfAccountsView() {
           <Button
             variant="tally"
             size="sm"
-            onClick={openCreateModal}
+            data-tour="coa-add-account" onClick={openCreateModal}
             className="gap-1.5"
             title="Create new accounting ledger (Alt+C)"
             shortcutHint="Alt+C"

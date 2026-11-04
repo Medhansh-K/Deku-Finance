@@ -45,7 +45,7 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
   };
 
   return (
-    <form onSubmit={save} className="space-y-4 rounded-lg border border-line-strong bg-surface p-5 shadow-xs">
+    <form data-tour="settings-company-profile" onSubmit={save} className="space-y-4 rounded-lg border border-line-strong bg-surface p-5 shadow-xs">
       <div className="flex items-center gap-2 border-b border-line pb-3">
         <Landmark className="h-4 w-4 text-ink-muted" />
         <h3 className="font-mono text-sm font-bold uppercase text-ink">Company Profile</h3>
@@ -54,7 +54,7 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
           <label htmlFor="cp-mode" className="block text-sm font-medium text-ink-soft">Operating mode</label>
-          <select id="cp-mode" value={form.mode} className={selectClass}
+          <select data-tour="settings-operating-mode" id="cp-mode" value={form.mode} className={selectClass}
             onChange={(e) => set("mode", e.target.value as ProfileForm["mode"])}>
             <option value="gst">GST registered</option>
             <option value="pure">Not GST registered (Section 22)</option>

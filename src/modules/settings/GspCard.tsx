@@ -53,7 +53,7 @@ export function GspCard({ orgId }: { orgId: string }) {
   const off = !status?.configured;
 
   return (
-    <section aria-labelledby="gsp-card-title" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+    <section data-tour="settings-gsp" aria-labelledby="gsp-card-title" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
       <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-ink-soft" aria-hidden />

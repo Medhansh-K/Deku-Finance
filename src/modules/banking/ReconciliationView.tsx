@@ -214,7 +214,7 @@ export function ReconciliationView() {
 
   return (
     <div className="space-y-4 font-sans text-xs">
-      <div className="flex flex-col md:flex-row md:items-end gap-3 bg-surface p-3 rounded border border-line">
+      <div data-tour="recon-controls" className="flex flex-col md:flex-row md:items-end gap-3 bg-surface p-3 rounded border border-line">
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[11px] text-ink-muted">Bank account</span>
           <select
@@ -232,7 +232,7 @@ export function ReconciliationView() {
         </label>
         <label className="flex flex-col gap-1">
           <span className="font-mono text-[11px] text-ink-muted">Statement (CSV)</span>
-          <span className="inline-flex items-center gap-2 border border-dashed border-line-strong rounded px-3 py-1.5 cursor-pointer hover:bg-canvas">
+          <span data-tour="recon-statement" className="inline-flex items-center gap-2 border border-dashed border-line-strong rounded px-3 py-1.5 cursor-pointer hover:bg-canvas">
             <UploadCloud className="h-4 w-4 text-ink-muted" />
             {fileName || "Choose file"}
             <input

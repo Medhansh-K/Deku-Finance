@@ -880,7 +880,7 @@ export function VoucherWorkspace({
       {/* ============================================================ */}
       <div className="w-full lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-0 lg:self-start">
         {/* Card 1: Voucher Types Selector */}
-        <div className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs">
+        <div data-tour="voucher-types" className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-line">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink">
               Voucher Type
@@ -1234,7 +1234,7 @@ export function VoucherWorkspace({
         </div>
 
         {/* Line Items Table */}
-        <div className="bg-surface border border-edge rounded-lg overflow-hidden shadow-xs">
+        <div data-tour="voucher-lines" className="bg-surface border border-edge rounded-lg overflow-hidden shadow-xs">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono text-[11px]">
             <div className="flex items-center gap-2">
               <span>Accounting Allocation Table</span>
@@ -1393,7 +1393,7 @@ export function VoucherWorkspace({
 
           {/* Balance Status Indicator */}
           <div
-            className={`p-2.5 flex items-center justify-between font-mono text-xs border-t ${
+            data-tour="voucher-balance" className={`p-2.5 flex items-center justify-between font-mono text-xs border-t ${
               isBalanced
                 ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                 : "bg-amber-50 text-amber-800 border-amber-200"
@@ -1420,7 +1420,7 @@ export function VoucherWorkspace({
         {/* ============================================================ */}
         {/* SUPPORTING DOCUMENT */}
         {/* ============================================================ */}
-        <div className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
+        <div data-tour="voucher-document" className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-line gap-2">
             <div className="flex items-center gap-2">
               <div
@@ -1926,7 +1926,7 @@ export function VoucherWorkspace({
         )}
 
         {/* Action Toolbar */}
-        <div className="flex items-center justify-between pt-2">
+        <div data-tour="voucher-actions" className="flex items-center justify-between pt-2">
           <Button
             variant="outline"
             size="sm"
