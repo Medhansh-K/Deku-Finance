@@ -19,6 +19,7 @@ use crate::routes::AppState;
 pub type ProviderFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, ProviderError>> + Send + 'a>>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum ProviderError {
     /// No provider selected (or no encryption key for one that stores credentials).
     NotConfigured,

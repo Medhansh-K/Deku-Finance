@@ -94,6 +94,7 @@ pub struct Invoice {
 
 /// The invoice a note adjusts, embedded as `sales_invoices(...)`.
 #[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
 pub struct NoteInvoice {
     pub invoice_number: String,
     pub invoice_type: Option<String>,

@@ -1,91 +1,311 @@
-# Deku Finance: Platform Architecture (self-hosted, GCP)
+# Deku Finance — Platform & Client Runtime Architecture
+## Self-Hosted, Containerised Multi-Tier Financial Architecture
 
-Decided 31 Oct 2026: **no Supabase**. Postgres on Cloud SQL, login handled by the Rust backend, and open-source PostgREST as an internal data-access container. Everything is containerised and runs on GCP.
+> **Document Status**: Production Specification  
+> **Deployment Scope**: Single-Organisation Self-Hosted (Local Docker Compose & Google Cloud Platform)  
+> **Key Architecture Decisions**: Fully decoupled from Supabase managed services; PostgreSQL 16 on Cloud SQL or local container; Rust/Axum application backend; PostgREST v12 internal data access layer; Next.js 16 App Router frontend with same-origin secure proxy.
+
+---
+
+## 1. High-Level Runtime Architecture
+
+Deku Finance operates as a 4-tier containerised stack. Browser clients communicate exclusively with the Next.js frontend over HTTPS; Next.js proxies all API requests server-side to the Rust/Axum backend; the backend executes business logic, tax math, and statutory rules before interacting with PostgREST and PostgreSQL.
+
+```mermaid
+graph TD
+    subgraph CLIENT ["Client Runtime (Browser)"]
+        Browser["Desktop & Mobile Browsers"]
+    end
+
+    subgraph FRONTEND ["Frontend Runtime (Next.js 16 Cloud Run / :3000)"]
+        NextApp["Next.js App Router (54 Routes, Server & Client Components)"]
+        NextProxy["Same-Origin API Proxy (/api/backend/*)"]
+        NextAuth["Auth Handlers (/api/auth/*: Login, Signup, Refresh, Logout)"]
+        Cookies["HTTP-Only Secure Cookies: deku_at (Access JWT), deku_rt (Refresh Token)"]
+    end
+
+    subgraph BACKEND ["Backend Runtime (Rust / Axum Cloud Run / :8080)"]
+        AxumApp["Axum HTTP Server & Route Dispatcher (26 Route Modules)"]
+        AuthEngine["Auth Engine (Bcrypt Cost 12, HS256 JWT, Refresh Token Rotation)"]
+        BusinessEngines["Financial Engines (ALERX GAAP, Indian GST, Maker-Checker, DSO/DPO)"]
+        ConsultantEngine["Deku Consultant Orchestrator (10 Depts / 50 Workflows)"]
+        VaultEngine["AES-256-GCM Credential Vault (Razorpay, GSP, KYC)"]
+    end
+
+    subgraph DATA ["Data Access Layer (PostgREST v12, Internal Ingress Only)"]
+        PGRST["PostgREST v12 (Translates REST/RPC to Optimized SQL)"]
+        PGRST_Auth["JWT Claims to Database Roles: anon, authenticated, service_role"]
+    end
+
+    subgraph DATABASE ["Database Engine (PostgreSQL 16 Cloud SQL / :5432)"]
+        AuthSchema["auth Schema: users, refresh_tokens, uid(), jwt(), role()"]
+        PublicSchema["public Schema: ALERX CoA, Invoices, Vouchers, Inventory, Parties"]
+        RLSEngine["Row-Level Security (RLS) & Multi-Tenant Isolation (organisation_id)"]
+        LedgerTriggers["Debits = Credits Invariant Triggers & Append-Only Immutability"]
+    end
+
+    Browser -->|HTTPS Same-Origin| NextApp
+    NextApp --> Cookies
+    NextApp --> NextProxy
+    NextProxy -->|Authorization: Bearer deku_at| AxumApp
+    NextAuth -->|Internal Calls| AxumApp
+    AxumApp -->|Forward User JWT / Service Token| PGRST
+    PGRST --> PGRST_Auth
+    PGRST_Auth --> DATABASE
+```
+
+---
+
+## 2. Client-Side Application Runtime Architecture
+
+### 2.1 Next.js 16 App Router Topology
+The client-side application is built on Next.js 16 using the App Router, React 19, TypeScript, and Tailwind CSS.
+- **54 Application Routes**: Spanning the Executive Gateway, Universal Voucher Desk, Sales Invoicing, Purchases & ITC, Document Builder, Day Book, Approvals, Banking Reconciliation, GST Filing, Financial Statements (P&L, Balance Sheet, Cash Flow), Inventory, Settings, and Deku Consultant AI.
+- **Server vs. Client Component Separation**:
+  - Layouts and shell containers leverage React Server Components for initial static skeleton rendering and metadata injection.
+  - Interactive data tables, financial form editors, comboboxes, and conversational streams are encapsulated as Client Components (`"use client"`).
+
+### 2.2 AppShell & Keyboard Navigation Architecture
+Deku Finance features an enterprise-grade, keyboard-first navigation shell designed for high-speed professional accounting:
 
 ```
-Browser ──HTTPS──> frontend (Next.js, Cloud Run, public)
-                     │  httpOnly cookies: deku_at (access JWT), deku_rt (refresh token)
-                     │  /api/auth/*        → login/signup/refresh/logout (sets cookies)
-                     │  /api/backend/*     → proxy, adds Authorization: Bearer <deku_at>
-                     ▼
-                   backend (Rust/Axum, Cloud Run)
-                     │  /api/v1/auth/*     → issues/rotates JWTs, bcrypt passwords
-                     │  /api/v1/...        → business routes, forward the user's JWT
-                     ▼
-                   postgrest (PostgREST v12, Cloud Run, internal ingress only)
-                     │  verifies JWT (HS256, shared secret), SET ROLE + request.jwt.claims
-                     ▼
-                   Cloud SQL Postgres 16  ← migrate job (Cloud Run Job) applies supabase/migrations/*.sql
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TOP BAR: Company Context │ Financial Year │ Notifications │ Help │ Profile  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                         ACTIVE MODULE VIEWPORT                              │
+│             (Vouchers, Day Book, Invoices, Financial Reports)               │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SHORTCUT BAR: F1 Executive │ F2 Consultant │ F3 Vouchers │ ... │ ESC Gateway │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Contract (all components must match exactly)
+1. **Global Function Key Map (`GLOBAL_FUNCTION_KEY_MAP`)**:
+   - `F1`: Executive Dashboard (`/executive`)
+   - `F2`: Deku Consultant AI Copilot (`/consultant`)
+   - `F3`: Universal Double-Entry Voucher Desk (`/vouchers`)
+   - `F4`: Sales Invoicing & GST (`/gst`)
+   - `F5`: Purchases Register & ITC (`/purchases`)
+   - `F6`: Receivables & Collections (`/collect`)
+   - `F7`: Business Document Builder (`/builder`)
+   - `F8`: Day Book Chronological Ledger (`/day-book`)
+   - `F9`: Maker-Checker Approvals Queue (`/approvals`)
+   - `F10`: Bank Reconciliation Matcher (`/banking/reconciliation`)
+   - `F11`: GST Return Filing (`/gst/file`)
+   - `Escape`: Instant return to Gateway (`/gateway`) or close active dialogs.
+2. **Context-Aware Voucher Desk Shortcuts**: Inside `/vouchers`, local shortcuts dynamically remap to standard transaction modes (`F4` Contra, `F5` Payment, `F6` Receipt, `F7` Journal, `F8` Sales, `F9` Purchase), while preserving top-level global keys on all other pages.
+3. **Omnibox & Command Palette (`CommandPalette`)**: Triggered globally via `Ctrl+K`, `Cmd+K`, or `Alt+G`, enabling instant fuzzy search and navigation to any account, voucher, invoice, or setting.
+4. **Transaction-Entry Protection (`isTargetInteractive`)**:
+   - Form inputs (`<input>`, `<textarea>`, `<select>`), editable elements (`contenteditable="true"`), dropdowns (`role="combobox"`, `role="listbox"`), and Monaco code editors are actively detected.
+   - When user focus is within an interactive target, global function-key jumps are suppressed to prevent accidental page transitions during voucher entry. Pressing `Escape` while typing blurs the active field safely rather than immediately leaving the page.
 
-### JWT
-- HS256, secret from env `JWT_SECRET` (at least 32 random bytes, Secret Manager in GCP). The same value is used by the backend (signing), PostgREST (`PGRST_JWT_SECRET`) and the frontend server (middleware verification).
-- **Access token** claims: `{ sub: <user uuid>, role: "authenticated", email, aud: "deku", iat, exp: iat + 3600 }`.
-- **Service token** (backend-internal only, never leaves the backend): `{ role: "service_role", aud: "deku", iat, exp: iat + 60 }`. Used only to call the `auth_*` functions below and the scheduler's `generate_notifications`.
-- PostgREST: `PGRST_JWT_AUD=deku`, `PGRST_DB_ANON_ROLE=anon`, `PGRST_DB_SCHEMAS=public`.
-- In SQL, `auth.uid()` = `(current_setting('request.jwt.claims', true)::json->>'sub')::uuid`; `auth.jwt()` = the claims as `jsonb`; `auth.role()` = the `role` claim (default `current_user`). Both fall back to the legacy `request.jwt.claim.sub` / `.role` settings, which SQL tests use to impersonate.
+### 2.3 Client State & API Security Model
+- **Zero Client-Side Token Exposure**:
+  - The browser client JavaScript has **zero access** to access tokens or refresh tokens (`document.cookie` cannot read HTTP-only cookies).
+  - All client data-fetching operations target the relative path `/api/backend/*`.
+  - Next.js server route handlers intercept requests, read the `deku_at` HTTP-only cookie, and attach `Authorization: Bearer <deku_at>` when dispatching to the Rust backend.
+- **Session Lifecycle & Silent Token Rotation**:
+  - `deku_at`: Short-lived HS256 access token (lifetime: 1 hour).
+  - `deku_rt`: Cryptographically secure 32-byte base64url refresh token (lifetime: 30 days).
+  - Next.js Edge Middleware checks `deku_at`. If expired, it triggers an internal call to `/api/v1/auth/refresh` using `deku_rt`, rotates both tokens in the database, and rewrites the response cookies seamlessly without user interruption.
+- **Client Cache Management**: React Query (`@tanstack/react-query`) manages client-side caching with a 30-second stale window (`staleTime: 30000`), disabling aggressive window refetches and coordinating surgical cache invalidations following mutations.
 
-### Database identity layer (migration `20261018000000_platform_auth.sql`, runs before 001)
-- Roles: `anon`, `authenticated`, `service_role` (BYPASSRLS where the server allows it; Cloud SQL may not, which is harmless because service_role only calls the SECURITY DEFINER `auth_*` functions), all NOLOGIN; `authenticator` LOGIN NOINHERIT granted the three. The password is set by the migrate job from env `AUTHENTICATOR_PASSWORD`, never in SQL files.
-- Schema `auth`:
-  - `auth.users` (columns compatible with `supabase/seed.sql`: id, email unique, encrypted_password, email_confirmed_at, raw_user_meta_data, raw_app_meta_data, created_at, updated_at, plus legacy columns the seed fills);
-  - `auth.identities` (kept for seed compatibility);
-  - `auth.refresh_tokens` (id, user_id, token_hash unique, expires_at, revoked_at, created_at).
-- Schema `storage`: `buckets` and `objects` (metadata only, needed by migration 008; file bytes go to GCS later).
-- Grants: table privileges on `public` for `anon` (none), `authenticated` (SELECT/INSERT/UPDATE/DELETE) and `service_role` (ALL), plus matching `ALTER DEFAULT PRIVILEGES`. RLS policies remain the real gate.
-- Functions callable **only by `service_role`** (`REVOKE ... FROM PUBLIC, anon, authenticated`; migration 026 re-revokes after migration 018's `GRANT EXECUTE ON ALL FUNCTIONS`, so no later migration may grant on all functions again):
-  - `public.auth_register(p_email text, p_password_hash text, p_meta jsonb) returns uuid`: inserts into auth.users with email lowercased and trimmed, raising exactly `RAISE EXCEPTION 'email_taken'` (PostgREST error body `message`) if it exists. `is_demo` is stripped from `p_meta`; only the seed creates demo users.
-  - `public.auth_credentials(p_email text) returns table(id uuid, password_hash text, email text, meta jsonb)`.
-  - `public.auth_user(p_id uuid) returns table(id uuid, email text, meta jsonb)`.
-  - `public.auth_store_refresh(p_user uuid, p_token_hash text, p_expires timestamptz) returns void`.
-  - `public.auth_rotate_refresh(p_old_hash text, p_new_hash text, p_expires timestamptz) returns uuid`: revokes the old token, inserts the new one and returns the user id. It **returns NULL** (never raises) if the old token is unknown, revoked or expired; the backend maps NULL to `401 invalid_refresh`. Reuse of a revoked token revokes all of that user's tokens (raising would roll that back).
-  - `public.auth_revoke_refresh(p_token_hash text) returns void`.
-- Refresh tokens: 32 random bytes, base64url; only their SHA-256 hex is stored. Lifetime 30 days, rotated on every refresh.
-- Passwords: **bcrypt** (cost 12). `$2a$`/`$2b$` hashes from pgcrypto `crypt(.., gen_salt('bf'))` in `seed.sql` verify with the same code.
+---
 
-### Backend auth API (Rust, no JWT required)
-| Method & path | Body | Response |
+## 3. Client Personas & Interface RBAC Matrix
+
+Deku Finance enforces a 7-Role Role-Based Access Control (RBAC) hierarchy plus a Platform Superadmin Watcher Tier.
+
+```
+Superadmin (Platform Watcher)
+   └── Organisation Tenant
+         ├── Owner (Root License Authority)
+         ├── CFO (Finance Director & Maker-Checker Authority)
+         ├── Admin (Operations & Master Data Manager)
+         ├── Accountant (Bookkeeper & Statutory Tax Filer)
+         ├── Analyst (FP&A & AI Financial Query Specialist)
+         ├── Auditor (Independent Read-Only Ledger Reviewer)
+         └── Viewer (Passive Stakeholder / Board Member)
+```
+
+### 3.1 Role Capabilities & Interface Entitlements
+
+| Role | Target Persona | Accessible Screens & Interfaces | Permitted Actions | Restrictions & Red Lines |
+|---|---|---|---|---|
+| **`owner`** | Business Founder, Managing Director | **Full Platform Access**: Executive Gateway, Settings, Bank Setup, Danger Zone, Billing, Licences, All Modules. | Create/delete organisation, invite admins, configure operating mode, override maker-checker, manage bank accounts. | None within organisation boundary. |
+| **`cfo`** | Chief Financial Officer, Finance Director | Executive Dashboard, Approvals Desk (`/approvals`), FP&A Forecasting, Cash Flow, Bank Reconciliation, Tax Sign-off, Deku Consultant. | Authorize vouchers exceeding threshold, approve payment proposals, sign off GST returns, adjust budgets. | Cannot delete organisation or transfer ownership. |
+| **`admin`** | Operations Manager, General Manager | Document Builder (`/builder`), Team Management (`/settings/team`), Master Catalogue (`/catalogue`), Parties (`/parties`), Inventory. | Manage staff invitations, configure customer/vendor masters, set pricing rules, manage warehouse godowns. | Cannot approve financial vouchers or alter Chart of Accounts. |
+| **`accountant`** | Bookkeeper, Senior Accountant, Practicing CA | Universal Voucher Desk (`/vouchers`), Sales Invoicing (`/gst`), Purchases (`/purchases`), Day Book (`/day-book`), Bank Reconciliation (`/banking/reconciliation`), GST Filing (`/gst/file`). | Draft and post journal vouchers (up to limit), issue tax invoices, record vendor bills, reconcile bank statements, prepare GSTR-1/3B. | Vouchers above org threshold route to `cfo` for sign-off. Cannot invite users or delete bank accounts. |
+| **`analyst`** | FP&A Specialist, Investment Analyst | Executive Gateway, FP&A Forecasting, DSO/DPO metric views, Financial Statements, Deku Consultant AI interface. | Execute financial stress testing, generate 12-month forecasts, run natural language financial queries. | **Read-Only**: Cannot create or modify vouchers, invoices, or master data. |
+| **`auditor`** | Statutory Auditor, Tax Inspector | Immutable Day Book, Audit Trails (`/audit`), Trial Balance, General Ledger, Balance Sheet, P&L, Reversal Lineage. | Inspect posted vouchers, audit debit-credit parity, verify cryptographic hash lineage, download audit sign-off packs. | **Strictly Read-Only**: Cannot post, edit, approve, or reverse entries. |
+| **`viewer`** | Board Member, Passive Investor | High-level financial statements (`/reports/balance-sheet`, `/reports/profit-loss`, `/reports/cash-flow`). | View summary KPIs and financial statements. | Cannot view granular transaction entries, customer lists, or system logs. |
+| **`superadmin`** | Platform Operations Watcher | Global tenant health monitoring, system performance. | Read-only global observability across organisations. | Cannot post accounting vouchers or mutate customer data. |
+
+### 3.2 Client Operating Modes
+The interface dynamically adapts based on the organisation's statutory operating mode:
+1. **Pure Accounting / GST Exempt Mode (Section 22 Exemption)**:
+   - For unregistered small businesses and freelancers with annual turnover below ₹20L/₹40L.
+   - Hides CGST, SGST, IGST tax breakdown fields in invoice editors.
+   - Converts invoices into legal **Bills of Supply** / Commercial Invoices with ₹0 tax rate.
+   - Replaces multi-step GST workflows with simplified single-line voucher entry.
+2. **Enterprise GST Mode**:
+   - For GST-registered enterprises.
+   - Enables full tax engine: Place of Supply (POS) auto-computation, HSN/SAC master search, Reverse Charge Mechanism (RCM), Section 17(5) blocked ITC warnings, E-Invoicing IRP registration, and GSTR-2B reconciliation.
+
+---
+
+## 4. Connected Backend APIs & Functional Catalog
+
+The Rust/Axum backend exposes **26 route modules** serving business operations, statutory logic, and external integrations:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          RUST / AXUM ROUTE MODULES                          │
+├──────────────────────┬──────────────────────┬───────────────────────────────┤
+│ 1. Core Platform     │ 2. Financial Engines │ 3. Integrations & Extensions  │
+│ • auth.rs            │ • accounting.rs      │ • payments.rs (Razorpay)      │
+│ • organisations.rs   │ • gst.rs             │ • gsp.rs (GST Suvidha)        │
+│ • audit.rs           │ • purchases.rs       │ • kyc.rs (PAN / Aadhaar)      │
+│ • health.rs          │ • banking.rs         │ • consultant.rs (Deku AI)     │
+│ • notifications.rs   │ • notes.rs           │ • departments.rs (10 CFO Dept)│
+│ • subscriptions.rs   │ • inventory.rs       │ • imports.rs (Bulk ETL)       │
+│ • documents.rs       │ • documents_builder  │ • marketplace.rs              │
+│ • parties.rs         │ • catalogue.rs       │ • hsn.rs (HSN/SAC Directory)  │
+└──────────────────────┴──────────────────────┴───────────────────────────────┘
+```
+
+### 4.1 Route Catalog & API Responsibilities
+
+| Route Module | HTTP Endpoints | Responsibility & Data Flow |
 |---|---|---|
-| `POST /api/v1/auth/signup` | `{email, password, full_name, business_name?, operating_mode?, state?}` | `200 {access_token, refresh_token, expires_in, user}` · `409 email_taken` · `400` (password at least 10 chars, valid email) |
-| `POST /api/v1/auth/login` | `{email, password}` | `200 {access_token, refresh_token, expires_in, user}` · `401 invalid_credentials` (same message for unknown email or wrong password) |
-| `POST /api/v1/auth/refresh` | `{refresh_token}` | `200 {access_token, refresh_token, expires_in, user}` · `401 invalid_refresh` |
-| `POST /api/v1/auth/logout` | `{refresh_token}` | `204` |
-| `GET /api/v1/auth/me` | Bearer access token | `200 {user}` · `401` |
+| **`auth.rs`** | `POST /api/v1/auth/signup`<br>`POST /api/v1/auth/login`<br>`POST /api/v1/auth/refresh`<br>`POST /api/v1/auth/logout`<br>`GET /api/v1/auth/me` | User registration, password verification (bcrypt cost 12), JWT issuance, refresh token generation, session inspection. |
+| **`organisations.rs`** | `GET/POST /api/v1/organisations`<br>`GET/PATCH /api/v1/organisations/:id`<br>`POST /api/v1/organisations/:id/members/invite`<br>`GET /api/v1/organisations/:id/members` | Tenant creation, company profile management, GSTIN/PAN updates, member invitations, role assignments. |
+| **`accounting.rs`** | `GET /api/v1/accounting/trial-balance`<br>`GET /api/v1/accounting/balance-sheet`<br>`GET /api/v1/accounting/profit-loss`<br>`GET /api/v1/accounting/general-ledger`<br>`POST /api/v1/accounting/journals`<br>`POST /api/v1/accounting/journals/:id/reverse`<br>`GET /api/v1/accounting/approvals/pending`<br>`POST /api/v1/accounting/approvals/:id/approve` | Double-entry ledger management, real-time trial balance aggregation, atomic journal voucher posting, compensating voucher reversals, maker-checker authorization queues. |
+| **`gst.rs`** | `GET/POST /api/v1/gst/invoices`<br>`GET /api/v1/gst/invoices/:id`<br>`POST /api/v1/gst/invoices/:id/issue`<br>`GET /api/v1/gst/invoices/:id/pdf` | Sales tax invoices, Place of Supply (POS) calculation, CGST/SGST/IGST tax splits, Section 22 exemption bills of supply, PDF invoice rendering. |
+| **`purchases.rs`** | `GET/POST /api/v1/purchases/bills`<br>`GET /api/v1/purchases/bills/:id`<br>`POST /api/v1/purchases/reconcile-gstr2b` | Vendor bills inward register, Section 17(5) blocked credit evaluation, automatic GSTR-2B purchase matching. |
+| **`notes.rs`** | `GET/POST /api/v1/notes/credit`<br>`GET/POST /api/v1/notes/debit` | Statutory credit and debit notes (Section 34 compliance) with linked tax invoice references. |
+| **`banking.rs`** | `GET/POST /api/v1/banking/accounts`<br>`POST /api/v1/banking/statements/upload`<br>`POST /api/v1/banking/reconcile/match` | Bank accounts registry, CSV/Excel bank statement parsing, automated rule-based reconciliation with posted journal legs. |
+| **`documents_builder.rs`** | `GET/POST /api/v1/builder/quotations`<br>`GET/POST /api/v1/builder/proformas`<br>`GET/POST /api/v1/builder/challans`<br>`GET/POST /api/v1/builder/purchase-orders`<br>`POST /api/v1/builder/:id/convert-to-invoice` | Quotations, proforma invoices, Rule 55 delivery challans, purchase orders, and 1-click conversion into posted tax invoices. |
+| **`inventory.rs`** | `GET/POST /api/v1/inventory/items`<br>`GET/POST /api/v1/inventory/warehouses`<br>`POST /api/v1/inventory/movements` | Stock items, godowns/warehouses, FIFO and weighted-average stock valuation, stock transfer journals. |
+| **`parties.rs`** | `GET/POST /api/v1/parties`<br>`GET/PATCH /api/v1/parties/:id` | Customer (Sundry Debtors) and vendor (Sundry Creditors) directories, GSTIN verification, credit terms, billing addresses. |
+| **`catalogue.rs`** | `GET/POST /api/v1/catalogue/items`<br>`GET/PATCH /api/v1/catalogue/items/:id` | Products and services catalogue, pricing tiers, linked sales/purchase revenue sub-ledgers. |
+| **`hsn.rs`** | `GET /api/v1/hsn/search?q=...` | Fast searchable directory of official Indian HSN (goods) and SAC (services) codes and statutory GST rates. |
+| **`consultant.rs`** | `POST /api/v1/consultant/chat`<br>`POST /api/v1/consultant/ocr-extract`<br>`POST /api/v1/consultant/proposals/:id/commit` | Deku Consultant AI conversational interface, document OCR transcription via Sarvam AI, staged human-in-the-loop proposals. |
+| **`departments.rs`** | `GET /api/v1/departments`<br>`POST /api/v1/departments/:id/workflows/:wf_id/execute` | 10 CFO departments and execution routes for the 50 autonomous financial workflows. |
+| **`payments.rs`** | `GET /api/v1/payments/razorpay/connect`<br>`GET /api/v1/payments/razorpay/callback`<br>`POST /api/v1/payments/links`<br>`GET /api/v1/payments/status`<br>`POST /api/v1/webhooks/razorpay` | Razorpay OAuth flow, instant payment link generation, Bharat UPI QR codes, HMAC webhook listener for auto-reconciliation. |
+| **`gsp.rs`** | `POST /api/v1/gsp/gstin-verify`<br>`POST /api/v1/gsp/e-invoice`<br>`POST /api/v1/gsp/e-way-bill`<br>`POST /api/v1/gsp/gstr1/file`<br>`POST /api/v1/gsp/gstr3b/file`<br>`POST /api/v1/gsp/gstr2b/sync` | ASP ➔ GSP communication pipe: real-time GSTIN validation, IRP INV-01 e-invoicing with IRN/signed QR, E-Way bills, GSTR-1/3B filing. |
+| **`kyc.rs`** | `POST /api/v1/kyc/verify-pan`<br>`POST /api/v1/kyc/verify-aadhaar`<br>`POST /api/v1/kyc/verify-bank` | Third-party merchant identity verification and penny-drop bank account validation. |
+| **`imports.rs`** | `POST /api/v1/imports/jobs`<br>`GET /api/v1/imports/jobs/:id`<br>`POST /api/v1/imports/jobs/:id/process` | Bulk data ETL engine: imports data from Tally XML/TCP, Busy, Zoho, and bank spreadsheets with staged validation. |
+| **`audit.rs`** | `GET /api/v1/audit/logs`<br>`GET /api/v1/audit/events` | Immutable security audit trail, user activity tracking, cryptographic hash verification. |
+| **`notifications.rs`** | `GET /api/v1/notifications`<br>`PATCH /api/v1/notifications/:id/read`<br>`POST /api/v1/internal/notifications/generate` | In-app user notifications, internal cron endpoint protected by `X-Deku-Cron-Secret`. |
+| **`documents.rs`** | `POST /api/v1/documents/upload`<br>`GET /api/v1/documents/:id/download` | Document storage vault integration, metadata registration, SHA-256 deduplication. |
+| **`marketplace.rs`** | `GET /api/v1/marketplace/extensions`<br>`POST /api/v1/marketplace/settlements` | Add-on modules directory and settlement reconciliation. |
+| **`subscriptions.rs`** | `GET /api/v1/subscriptions/current`<br>`GET /api/v1/subscriptions/plans` | Subscription tiers, feature flag entitlements. |
+| **`health.rs`** | `GET /healthz`<br>`GET /readyz` | Liveness and readiness probes for container orchestration. |
 
-`user` = `{id, email, full_name, is_demo}` from `raw_user_meta_data` (`full_name`, `is_demo`; signup stores `business_name`, `operating_mode` and `state` too).
+---
 
-### Backend → PostgREST
-- Env `POSTGREST_URL` (e.g. `http://postgrest:3000`). Paths: `/{table}` and `/rpc/{fn}` (no `/rest/v1` prefix, no `apikey` header).
-- Every business request forwards the user's `Authorization: Bearer <access JWT>`; there's no fallback.
+## 5. Database Migrations & Module Dependency Inventory
 
-### Frontend
-- Server env: `BACKEND_URL` (backend base URL) and `JWT_SECRET`. No `NEXT_PUBLIC_SUPABASE_*`.
-- Cookies (httpOnly, `SameSite=Lax`, `Secure` in production, `Path=/`):
-  - `deku_at`: access JWT, max-age 3600;
-  - `deku_rt`: refresh token, max-age 30 days.
-- Route handlers:
-  - `POST /api/auth/login|signup` call the backend and set both cookies;
-  - `POST /api/auth/logout` revokes the refresh token and clears the cookies;
-  - `GET /api/auth/me` returns the user.
-- `ALL /api/backend/[...path]` forwards to `${BACKEND_URL}/[...path]` with `Authorization: Bearer <deku_at>`. Same-origin, so no CORS and no token in JS.
-- Middleware verifies `deku_at` (HS256 via Web Crypto). If it's expired and `deku_rt` exists, it refreshes through the backend and resets the cookies; otherwise it redirects non-public paths to `/login?next=…`.
-- The browser `apiClient` base is `/api/backend`; it never reads tokens.
+The application database is constructed through **45 sequential SQL migrations** (`000` through `044`). Each migration establishes schemas, tables, functions, triggers, and Row-Level Security policies supporting specific application runtime modules:
 
-### Containers
-| Image | Source | Notes |
-|---|---|---|
-| `deku-frontend` | `Dockerfile` (repo root) | Next `output: "standalone"`, node:22-alpine, port 3000 |
-| `deku-backend` | `backend/Dockerfile` | multi-stage rust → debian bookworm-slim, port 8080 |
-| `deku-migrate` | `db/Dockerfile` | postgres:16-alpine + `db/migrate.sh`; applies `supabase/migrations/*.sql` in order (one psql run per file, no single transaction), records them with a SHA-256 in `public.schema_migrations` (RLS on, no policies) and refuses to run if an applied file changed; sets the authenticator password; optional demo seed (`DEKU_SEED_DEMO=true`); ends with `NOTIFY pgrst, 'reload schema'` |
-| PostgREST | `postgrest/postgrest:v12.2.3` | configured purely by env |
+```mermaid
+graph LR
+    subgraph FOUNDATION ["1. Foundation & Identity"]
+        M000["000 Auth Schema"] --> M001["001 Identity"]
+        M001 --> M002["002 Tenancy"]
+        M002 --> M016["016 7-Role RBAC"]
+    end
 
-Local: `docker compose up --build` (postgres, migrate, postgrest, backend, frontend).
-GCP: Artifact Registry images, Cloud SQL Postgres 16, Secret Manager (`JWT_SECRET`, `AUTHENTICATOR_PASSWORD`, `CRON_SECRET`, DB URLs), Cloud Run services (frontend public; backend public, JWT-guarded; postgrest internal ingress), a Cloud Run Job for migrations, and an hourly Cloud Scheduler job that calls `POST /api/v1/internal/notifications/generate` with header `X-Deku-Cron-Secret` (the backend then uses a service token for `generate_notifications`; 404 when `CRON_SECRET` is unset). See `deploy/gcp/README.md`.
+    subgraph ACCOUNTING ["2. Double-Entry Core"]
+        M002 --> M005["005 Double-Entry"]
+        M005 --> M006["006 Reporting"]
+        M006 --> M011["011 ALERX CoA"]
+        M011 --> M020["020 Maker-Checker"]
+        M011 --> M021["021 Reversals"]
+    end
 
-### Third-party integrations
-These are switched off until configured (GSP, KYC, Razorpay). Each has a `*_connections` table and an adapter in Rust behind a config flag, and the UI shows "not connected" honestly.
+    subgraph COMMERCIAL ["3. Commercial Operations"]
+        M005 --> M007["007 Invoicing"]
+        M002 --> M003["003 Parties"]
+        M003 --> M004["004 Catalogue"]
+        M007 --> M024["024 Purchases"]
+        M007 --> M044["044 Doc Builder"]
+        M005 --> M042["042 Inventory"]
+    end
 
-- **Razorpay** (migration 036, `backend/src/razorpay.rs`, `routes/payments.rs`): each company connects its own account via OAuth. Needs `RAZORPAY_CLIENT_ID`, `RAZORPAY_CLIENT_SECRET`, `RAZORPAY_REDIRECT_URI`, `RAZORPAY_WEBHOOK_SECRET` and `DATA_ENCRYPTION_KEY`; otherwise every payment route returns `503 payments_not_configured` and `GET .../payments/status` reports `configured: false`. Tokens are AES-GCM encrypted, their columns are not granted to `authenticated`, and only `service_role` functions read them. The OAuth callback goes through the frontend proxy (`/api/backend/api/v1/payments/razorpay/callback`) so the `state` can be bound to the signed-in user; the webhook (`POST /api/v1/webhooks/razorpay`) hits the backend directly and is checked by HMAC signature. `record_gateway_payment` books Dr Razorpay clearing (1025) / bank charges (5090) / input GST, Cr trade debtors, or submits it for approval under maker-checker. Setup: `deploy/gcp/README.md` §11.
-GSP and KYC: env `GSP_PROVIDER` / `KYC_PROVIDER` (unset = off, routes answer `503 {error:"gsp_not_configured"}` / `"kyc_not_configured"`; `sandbox` is a labelled demo refused when `DEKU_ENV=production`). See `docs/INTEGRATIONS.md`.
+    subgraph INTEGRATIONS ["4. Integrations & Intelligence"]
+        M005 --> M019["019 Bank Recon"]
+        M007 --> M036["036 Razorpay"]
+        M007 --> M037["037 GSP Filing"]
+        M002 --> M015["015 Agentic Memory"]
+    end
+```
+
+### 5.1 Complete Migration Inventory by Functional Domain
+
+#### 1. Platform Identity, Authentication & Multi-Tenancy
+- **`20261018000000_platform_auth.sql`**: Self-contained auth layer. Creates `auth.users`, `auth.refresh_tokens`, `auth.uid()`, `auth.jwt()`, and `auth.role()`. Creates database roles `anon`, `authenticated`, `service_role`, `authenticator`.
+- **`20261018000001_core_identity.sql`**: Core user profiles, avatar storage, and system settings.
+- **`20261018000002_organisations_tenancy.sql`**: Multi-tenant organisations table, `organisation_role` enum (`owner`, `admin`, `accountant`, `member`, `viewer`), `organisation_memberships`, `is_org_member()`, `has_role()`.
+- **`20261018000016_superadmin_and_7_role_rbac_matrix.sql`**: Expands `organisation_role` to full 7-role RBAC matrix (adds `cfo`, `analyst`, `auditor`). Installs `public.superadmins` watcher tier and `is_superadmin()`.
+- **`20261031000026_lock_down_auth_functions.sql`**: Revokes public execution on `auth_*` stored procedures; restricts execution exclusively to `service_role`.
+- **`20261031000041_membership_bootstrap_and_marketplace_ar.sql`**: Auto-membership bootstrapping for organisation creators; accounts receivable link for marketplace orders.
+
+#### 2. Double-Entry Accounting Foundation & ALERX Engine
+- **`20261018000005_accounting_foundation.sql`**: Creates `account_groups`, `ledgers`, `sub_ledgers`, `journal_entries`, `journal_entry_lines`. Installs `trg_verify_journal_entry_lines_parity` ensuring $\sum Dr - \sum Cr = 0$.
+- **`20261018000006_accounting_posting_reporting.sql`**: Creates authoritative SQL views: `view_trial_balance`, `view_balance_sheet`, `view_profit_and_loss`, `view_general_ledger`.
+- **`20261018000010_fix_invoice_issuance_atomic_journal.sql`**: Atomic database RPC `post_sales_invoice_journal()` linking invoice issuance directly to double-entry ledger posting.
+- **`20261018000011_alerx_coa_hierarchy.sql`**: Full ALERX 4-tier Chart of Accounts master hierarchy with statutory Indian default accounts.
+- **`20261028000021_reports_include_reversed_entries.sql`**: Updates reporting views to handle voided vouchers and display compensating reversal audit trails.
+- **`20261031000027_allow_journal_reversal.sql`**: Creates `reverse_journal_entry()` RPC for atomic, immutable ledger reversals.
+- **`20261031000029_ledger_functions.sql`**: High-performance ledger balance RPCs and sub-ledger trial balance computations.
+
+#### 3. Sales Invoicing, Credit/Debit Notes & Indian GST Engine
+- **`20261018000007_sales_invoices_gst.sql`**: Creates `sales_invoices`, `sales_invoice_items`, POS evaluation rules, CGST/SGST/IGST tax split fields.
+- **`20261028000025_sales_invoice_channel.sql`**: Invoicing sales channels (B2B, B2C, Export, SEZ, Deemed Export).
+- **`20261031000031_sales_notes.sql`**: Credit and debit notes tables with linkage to original tax invoices (Section 34 compliance).
+- **`20261031000032_invoice_types.sql`**: Support for Tax Invoices vs. Section 22 Bills of Supply / Commercial Invoices for exempt businesses.
+- **`20261031000033_hsn_sac_master.sql`**: Master HSN/SAC table with full-text search indexing and statutory GST slab rates.
+- **`20261031000040_invoice_status_guard.sql`**: Trigger guard preventing status regression on posted invoices.
+
+#### 4. Parties, Catalogue & Purchases
+- **`20261018000003_parties.sql`**: Creates `parties` table for customers and vendors with PAN, GSTIN, credit limits, billing/shipping addresses.
+- **`20261018000004_catalogue_items.sql`**: Products and services catalogue with default sales/purchase prices and HSN codes.
+- **`20261028000024_purchase_bills.sql`**: Purchase bills register, vendor invoice recording, Section 17(5) blocked credit flags.
+
+#### 5. Banking & Automated Reconciliation
+- **`20261028000019_bank_reconciliation.sql`**: Bank accounts table, uploaded bank statements, statement lines, and automated rule-based reconciliation matcher.
+
+#### 6. Maker-Checker Approvals & Internal Governance
+- **`20261028000020_journal_approvals.sql`**: Configurable approval limits, pending approvals queue, maker-checker authorization audit triggers.
+
+#### 7. Document Vault & Business Document Builder
+- **`20261018000008_invoice_documents.sql`**: Storage metadata tables and file attachments for `invoice-vault`.
+- **`20261031000044_business_documents.sql`**: Quotations, proformas, Rule 55 delivery challans, purchase orders, and 1-click conversion to posted invoices.
+
+#### 8. Inventory Management & Stock Valuation
+- **`20261031000042_inventory.sql`**: Inventory items, warehouses/godowns, stock journals, FIFO and weighted-average valuation.
+
+#### 9. Integrations: Payments, GSP & KYC
+- **`20261031000036_payments_razorpay.sql`**: Razorpay OAuth tokens table, AES-GCM encrypted credentials, payment links, payment webhook logs, auto-reconciliation RPC `record_gateway_payment()`.
+- **`20261031000037_gsp_integration.sql`**: GSP configuration, e-invoice IRN/QR storage, e-way bill numbers, return filing logs.
+- **`20261031000038_kyc.sql`**: Merchant and vendor KYC verification records (PAN, Aadhaar, bank penny-drop).
+
+#### 10. Analytics, Agentic Memory, Imports & System Infrastructure
+- **`20261018000009_audit_events_and_performance.sql`**: System audit events log and query performance optimization indexes.
+- **`20261018000012_organisation_licenses.sql`**: License key validation and entitlement controls.
+- **`20261018000013_departments_members.sql`**: 10 CFO departments, employee directory, and departmental workflows.
+- **`20261018000014_user_activity_logs_and_security.sql`**: User security logs, session audit trail, IP tracking.
+- **`20261018000015_agentic_memory_core.sql`**: Deku Consultant memory system (Document, Event, and Accounting Memory).
+- **`20261018000017_universal_financial_rollup_wcm_fpa.sql`**: Working capital metrics, DSO/DPO dynamic calculations, forward cash flow projections.
+- **`20261028000018_lock_down_function_access.sql`**: Security lockdown revoking unneeded function access from public roles.
+- **`20261028000022_guard_payroll_and_licenses.sql`**: Guard constraints on payroll and license records.
+- **`20261028000023_honest_wcm_fpa_metrics.sql`**: Refined FP&A metric functions eliminating synthetic data.
+- **`20261031000028_gst_return_filings.sql`**: Prepared GSTR-1 outward and GSTR-3B summary tables.
+- **`20261031000030_organisation_profile.sql`**: Extended organisation profile attributes.
+- **`20261031000034_notifications.sql`**: In-app notifications table and delivery status tracking.
+- **`20261031000035_marketplace_settlements.sql`**: Marketplace vendor settlement tables.
+- **`20261031000039_subscriptions.sql`**: Subscription tiers and billing cycles.
+- **`20261031000043_import_jobs.sql`**: Bulk CSV/Excel/XML ETL import jobs with staged validation.

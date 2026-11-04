@@ -222,7 +222,7 @@ export function GatewayLanding() {
                   Current Active Company
                 </span>
                 <span className="text-[9px] font-mono font-bold text-brand bg-panel px-1.5 py-0.5 rounded">
-                  F3 Shift
+                  Shift
                 </span>
               </div>
 
@@ -268,7 +268,7 @@ export function GatewayLanding() {
                   className="text-brand-strong hover:text-brand transition-colors"
                   title="Manage and create companies (F3)"
                 >
-                  + Add (F3)
+                  + Add / Switch
                 </Link>
               </div>
 
@@ -342,7 +342,7 @@ export function GatewayLanding() {
 
           <div className="pt-2 mt-1.5 border-t border-line text-[10px] text-ink-muted">
             <p className="font-mono text-[9px] text-ink-subtle">
-              Press <strong>F3</strong> or click above to shift company. Highlighted keys open menu items directly.
+              Click above or use header to shift company. Highlighted keys open menu items directly.
             </p>
           </div>
         </div>
@@ -907,3 +907,4 @@ export function GatewayLanding() {
     </div>
   );
 }
+

@@ -9,6 +9,7 @@ use super::{not_configured, random_hex, ready, sha_hex, ProviderError, ProviderF
 
 /// What a provider needs to act for one company. Some GSPs use separate e-invoice / e-way bill API
 /// credentials; mapping these onto them is the adapter's job.
+#[allow(dead_code)]
 pub struct Ctx<'a> {
     pub gstin: &'a str,
     pub username: &'a str,
@@ -21,6 +22,7 @@ pub struct Session {
     pub expires_at: DateTime<Utc>,
 }
 
+#[allow(dead_code)]
 pub struct Evc<'a> {
     pub pan: &'a str,
     pub otp: &'a str,
@@ -38,6 +40,7 @@ pub struct Irn {
     pub raw: Value,
 }
 
+#[allow(dead_code)]
 pub struct EwbRequest<'a> {
     pub vehicle_no: Option<&'a str>,
     pub transporter_id: Option<&'a str>,

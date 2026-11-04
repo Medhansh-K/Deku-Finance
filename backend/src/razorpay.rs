@@ -194,6 +194,7 @@ impl PaymentSplit {
     }
 
     /// Debited to the Razorpay clearing account.
+    #[allow(dead_code)]
     pub fn net_paise(&self) -> i64 {
         self.amount_paise - self.fee_paise - self.tax_on_fee_paise
     }

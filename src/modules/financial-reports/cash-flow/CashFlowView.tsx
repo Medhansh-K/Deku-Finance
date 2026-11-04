@@ -2,18 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  DollarSign,
   TrendingUp,
   TrendingDown,
   RefreshCw,
   Printer,
-  Download,
   Calendar,
-  CheckCircle2,
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
   Layers,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -27,7 +25,6 @@ export function CashFlowView() {
   const [orgId, setOrgId] = useState<string>("");
 
   const [startDate, setStartDate] = useState("2026-04-01");
-  // Set on mount: "today" must not be frozen into the prerendered page at build time.
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
@@ -80,28 +77,28 @@ export function CashFlowView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 max-w-7xl mx-auto">
       {/* Top Action & Control Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400">
+          <div className="p-2.5 bg-brand/10 border border-brand/20 rounded-lg text-brand-strong">
             <Wallet className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">
+            <h3 className="text-sm font-bold text-ink">
               Universal Cash Flow Rollup (Direct Method)
             </h3>
-            <p className="text-xs text-ink-subtle">
-              Operating, Investing, and Financing activities computed from posted journal lines
+            <p className="text-xs text-ink-muted">
+              Operating, Investing, and Financing activities computed dynamically from posted ledger journals
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs text-slate-300">
-            <Calendar className="h-3.5 w-3.5 text-ink-muted" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-canvas-sunken px-3 py-1.5 rounded-lg border border-line text-xs font-mono text-ink-soft">
+            <Calendar className="h-3.5 w-3.5 text-ink-subtle" />
             <span>{startDate}</span>
-            <span className="text-ink-soft">to</span>
+            <span className="text-ink-subtle">to</span>
             <span>{endDate}</span>
           </div>
           <Button
@@ -109,171 +106,203 @@ export function CashFlowView() {
             size="sm"
             onClick={fetchCashFlow}
             disabled={isLoading}
-            className="border-slate-800 hover:bg-slate-800"
+            className="gap-1.5"
           >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => window.print()}
-            className="border-slate-800 hover:bg-slate-800"
+            className="gap-1.5"
           >
-            <Printer className="h-3.5 w-3.5 mr-1.5" />
+            <Printer className="h-3.5 w-3.5" />
             Print
           </Button>
         </div>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingDown className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <button onClick={fetchCashFlow} className="font-bold underline hover:no-underline">
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Opening Cash & Bank</span>
-            <span className="text-xs text-ink-muted">Reserves</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Card 1: Opening */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Opening Cash &amp; Bank</span>
+              <span className="text-[11px] font-mono text-ink-subtle bg-canvas-sunken px-1.5 py-0.5 rounded">Reserves</span>
+            </div>
+            <div className="text-2xl font-black font-mono text-ink tracking-tight">
+              {formatINR(summary.opening_cash)}
+            </div>
           </div>
-          <div className="text-xl font-bold text-slate-100">
-            {formatINR(summary.opening_cash)}
+          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
+            Cash &amp; bank balance at period start
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">Cash balance at period start</div>
         </div>
 
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Operating Cash Flow</span>
-            {operating.net_operating_cash >= 0 ? (
-              <span className="text-xs text-emerald-400 flex items-center">
-                <ArrowUpRight className="h-3.5 w-3.5 mr-0.5" /> Positive
+        {/* Card 2: Operating */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Operating Cash Flow</span>
+              {operating.net_operating_cash >= 0 ? (
+                <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
+                  <ArrowUpRight className="h-3 w-3" /> Positive
+                </span>
+              ) : (
+                <span className="text-[11px] font-mono text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
+                  <ArrowDownRight className="h-3 w-3" /> Negative
+                </span>
+              )}
+            </div>
+            <div className={`text-2xl font-black font-mono tracking-tight ${operating.net_operating_cash >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+              {formatINR(operating.net_operating_cash)}
+            </div>
+          </div>
+          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
+            Core business operations yield
+          </div>
+        </div>
+
+        {/* Card 3: Net Change */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Net Cash Change</span>
+              <span className="text-[11px] font-mono text-brand-strong bg-brand/10 border border-brand/20 px-1.5 py-0.5 rounded font-bold">
+                Δ Movement
               </span>
-            ) : (
-              <span className="text-xs text-rose-400 flex items-center">
-                <ArrowDownRight className="h-3.5 w-3.5 mr-0.5" /> Negative
-              </span>
-            )}
+            </div>
+            <div className={`text-2xl font-black font-mono tracking-tight ${summary.net_cash_flow >= 0 ? "text-brand-strong" : "text-amber-700"}`}>
+              {formatINR(summary.net_cash_flow)}
+            </div>
           </div>
-          <div className={`text-xl font-bold ${operating.net_operating_cash >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-            {formatINR(operating.net_operating_cash)}
+          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
+            Operating + Investing + Financing
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">Core business operations yield</div>
         </div>
 
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Net Period Cash Change</span>
-            <span className="text-xs text-teal-400">Δ Cash</span>
+        {/* Card 4: Closing */}
+        <div className="bg-gradient-to-br from-emerald-500/10 via-surface to-brand/5 border border-brand/40 rounded-xl p-4 shadow-2xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-mono uppercase tracking-wider text-emerald-800 font-bold">Closing Cash &amp; Bank</span>
+              <Badge variant="teal" size="sm">Active Reserves</Badge>
+            </div>
+            <div className="text-2xl font-black font-mono text-emerald-800 tracking-tight">
+              {formatINR(summary.closing_cash)}
+            </div>
           </div>
-          <div className={`text-xl font-bold ${summary.net_cash_flow >= 0 ? "text-teal-400" : "text-amber-400"}`}>
-            {formatINR(summary.net_cash_flow)}
+          <div className="text-[11px] text-emerald-800/80 font-medium mt-2 pt-2 border-t border-emerald-500/20">
+            Live liquid treasury balance available
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">Operating + Investing + Financing</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-emerald-500/10 via-slate-900/80 to-slate-900/70 border border-emerald-500/30 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-emerald-400">Closing Cash & Bank</span>
-            <Badge variant="teal" size="sm">Active Reserves</Badge>
-          </div>
-          <div className="text-xl font-bold text-emerald-400">
-            {formatINR(summary.closing_cash)}
-          </div>
-          <div className="text-[11px] text-emerald-400/70 mt-1">Live liquid balance available</div>
         </div>
       </div>
 
       {/* Main Statement Breakdown Table */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-2xs">
+        <div className="px-5 py-3.5 bg-canvas-sunken border-b border-line flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-emerald-400" />
-            <h4 className="font-semibold text-slate-100 text-sm">
-              Statement of Cash Flows
+            <Layers className="h-4 w-4 text-brand-strong" />
+            <h4 className="font-bold text-ink text-sm">
+              Statement of Cash Flows (Direct Method)
             </h4>
           </div>
-          <Badge variant="outline" className="border-slate-700 text-ink-subtle text-xs">
+          <Badge variant="outline" className="text-xs font-mono">
             Ind AS 7 / AS 3 Compliant
           </Badge>
         </div>
 
-        <div className="divide-y divide-slate-800/80 text-sm">
+        <div className="divide-y divide-line text-xs font-sans">
           {/* 1. Operating Activities */}
-          <div className="p-5 bg-slate-950/30">
-            <div className="flex items-center justify-between font-semibold text-slate-200 mb-3">
+          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
+            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                A. Cash Flows from Operating Activities
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+                <span>A. Cash Flows from Operating Activities</span>
               </span>
-              <span className={operating.net_operating_cash >= 0 ? "text-emerald-400" : "text-rose-400"}>
+              <span className={`font-mono text-base ${operating.net_operating_cash >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
                 {formatINR(operating.net_operating_cash)}
               </span>
             </div>
-            <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-ink-subtle">
-                <span>Cash receipts from customers & debtors (Receivables collected)</span>
-                <span className="text-slate-200 font-medium">+{formatINR(operating.inflows)}</span>
+            <div className="space-y-2 pl-4 border-l-2 border-emerald-500/30">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-ink-soft">Cash receipts from customers &amp; debtors (Receivables collected)</span>
+                <span className="text-emerald-700 font-bold font-mono">+{formatINR(operating.inflows)}</span>
               </div>
-              <div className="flex justify-between text-ink-subtle">
-                <span>Cash paid to suppliers, vendors, and operating expenses</span>
-                <span className="text-rose-400 font-medium">-{formatINR(operating.outflows)}</span>
+              <div className="flex justify-between items-center py-1 border-t border-line/40">
+                <span className="text-ink-soft">Cash paid to suppliers, vendors, and operating expenditures</span>
+                <span className="text-rose-700 font-bold font-mono">-{formatINR(operating.outflows)}</span>
               </div>
             </div>
           </div>
 
           {/* 2. Investing Activities */}
-          <div className="p-5 bg-slate-950/20">
-            <div className="flex items-center justify-between font-semibold text-slate-200 mb-3">
+          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
+            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal-400"></span>
-                B. Cash Flows from Investing Activities
+                <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0"></span>
+                <span>B. Cash Flows from Investing Activities</span>
               </span>
-              <span className="text-slate-300">
+              <span className="font-mono text-base text-ink">
                 {formatINR(investing.net_investing_cash)}
               </span>
             </div>
-            <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-ink-subtle">
-                <span>Capital expenditures, office equipment, and fixed asset additions</span>
-                <span className="text-slate-200 font-medium">{formatINR(investing.net_investing_cash)}</span>
+            <div className="space-y-2 pl-4 border-l-2 border-teal-500/30">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-ink-soft">Capital expenditures, office equipment, and fixed asset additions</span>
+                <span className="text-ink font-semibold font-mono">{formatINR(investing.net_investing_cash)}</span>
               </div>
             </div>
           </div>
 
           {/* 3. Financing Activities */}
-          <div className="p-5 bg-slate-950/30">
-            <div className="flex items-center justify-between font-semibold text-slate-200 mb-3">
+          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
+            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
               <span className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                C. Cash Flows from Financing Activities
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0"></span>
+                <span>C. Cash Flows from Financing Activities</span>
               </span>
-              <span className="text-slate-300">
+              <span className="font-mono text-base text-ink">
                 {formatINR(financing.net_financing_cash)}
               </span>
             </div>
-            <div className="space-y-2 pl-4 text-xs">
-              <div className="flex justify-between text-ink-subtle">
-                <span>Capital contributions, debt financing, and bank borrowings</span>
-                <span className="text-slate-200 font-medium">{formatINR(financing.net_financing_cash)}</span>
+            <div className="space-y-2 pl-4 border-l-2 border-cyan-500/30">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-ink-soft">Capital contributions, partner drawings, debt financing, and bank borrowings</span>
+                <span className="text-ink font-semibold font-mono">{formatINR(financing.net_financing_cash)}</span>
               </div>
             </div>
           </div>
 
           {/* Reconciliation Footers */}
-          <div className="p-5 bg-slate-900">
-            <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between font-semibold text-slate-300">
-                <span>Net Increase / (Decrease) in Cash & Cash Equivalents (A + B + C)</span>
-                <span className={summary.net_cash_flow >= 0 ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
-                  {formatINR(summary.net_cash_flow)}
-                </span>
-              </div>
-              <div className="flex justify-between text-ink-subtle">
-                <span>Cash & Cash Equivalents at Beginning of Period</span>
-                <span className="text-slate-200">{formatINR(summary.opening_cash)}</span>
-              </div>
-              <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-sm text-emerald-400">
-                <span>Cash & Cash Equivalents at End of Period</span>
-                <span>{formatINR(summary.closing_cash)}</span>
-              </div>
+          <div className="p-5 bg-canvas-sunken/70 border-t-2 border-line space-y-3">
+            <div className="flex justify-between items-center font-bold text-xs text-ink">
+              <span>Net Increase / (Decrease) in Cash &amp; Cash Equivalents (A + B + C)</span>
+              <span className={`font-mono text-sm ${summary.net_cash_flow >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                {formatINR(summary.net_cash_flow)}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-ink-muted">
+              <span>Cash &amp; Cash Equivalents at Beginning of Period</span>
+              <span className="font-mono text-ink-soft font-semibold">{formatINR(summary.opening_cash)}</span>
+            </div>
+            <div className="pt-3 border-t border-line flex justify-between items-center font-black text-sm text-emerald-800 bg-brand/10 p-3 rounded-lg border border-brand/20">
+              <span>Cash &amp; Cash Equivalents at End of Period</span>
+              <span className="font-mono text-base text-emerald-900">{formatINR(summary.closing_cash)}</span>
             </div>
           </div>
         </div>

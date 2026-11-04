@@ -2,7 +2,7 @@
 # Defaults match .env.example and are for local development only.
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
       POSTGRES_DB: deku
       POSTGRES_USER: postgres
@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
       # TCP check: the image's init-time server listens on the socket only.
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d deku"]
@@ -31,7 +31,7 @@ services:
         condition: service_healthy
 
   postgrest:
-    image: postgrest/postgrest:v12.2.3
+    image: postgrest/postgrest:latest
     environment:
       PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}@postgres:5432/deku
       PGRST_DB_SCHEMAS: public

@@ -18,6 +18,7 @@ import {
   Clock,
   Briefcase,
   Layers,
+  ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -76,18 +77,18 @@ export function FpaExecutiveView() {
   const depts = budgetVariance?.departments || [];
 
   return (
-    <div className="space-y-6">
-      {/* Top Action Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Action & Control Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-lg text-cyan-400">
+          <div className="p-2.5 bg-brand/10 border border-brand/20 rounded-lg text-brand-strong">
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">
-              FP&A Strategic Intelligence & Corporate Health
+            <h3 className="text-sm font-bold text-ink">
+              FP&A Strategic Intelligence &amp; Corporate Health
             </h3>
-            <p className="text-xs text-ink-subtle">
+            <p className="text-xs text-ink-muted">
               Profitability margins, liquidity ratios, working capital gap, and departmental budget variances
             </p>
           </div>
@@ -99,7 +100,7 @@ export function FpaExecutiveView() {
             size="sm"
             onClick={fetchFpaData}
             disabled={isLoading}
-            className="border-slate-800 hover:bg-slate-800"
+            className="text-xs font-semibold"
           >
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
@@ -108,7 +109,7 @@ export function FpaExecutiveView() {
             variant="outline"
             size="sm"
             onClick={() => window.print()}
-            className="border-slate-800 hover:bg-slate-800"
+            className="text-xs font-semibold"
           >
             <Printer className="h-3.5 w-3.5 mr-1.5" />
             Print Report
@@ -118,157 +119,173 @@ export function FpaExecutiveView() {
 
       {/* KPI Section 1: Margins & Profitability */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        {/* Topline Revenue */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Total Topline Revenue</span>
-            <span className="text-xs text-ink-muted">Gross</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Total Topline Revenue</span>
+            <span className="text-[11px] font-semibold text-ink-subtle">Gross</span>
           </div>
-          <div className="text-xl font-bold text-slate-100">
+          <div className="text-2xl font-black font-mono text-ink">
             {formatINR(prof.total_revenue)}
           </div>
-          <div className="text-[11px] text-emerald-400 flex items-center mt-1">
-            <TrendingUp className="h-3 w-3 mr-1" /> Recognized billings
+          <div className="text-xs text-emerald-700 flex items-center mt-2 font-medium">
+            <TrendingUp className="h-3.5 w-3.5 mr-1 shrink-0" /> Recognized billings
           </div>
         </div>
 
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        {/* Gross Margin */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Gross Margin %</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Gross Margin %</span>
             <Badge variant="teal" size="sm">{num(prof.gross_margin_pct, "%")}</Badge>
           </div>
-          <div className="text-xl font-bold text-teal-400">
+          <div className="text-2xl font-black font-mono text-brand-strong">
             {formatINR(prof.gross_profit)}
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">Revenue minus COGS direct cost</div>
+          <div className="text-xs text-ink-muted mt-2">Revenue minus COGS direct cost</div>
         </div>
 
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        {/* Operating Expenses */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Operating Expenses</span>
-            <span className="text-xs text-amber-400">OPEX</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Operating Expenses</span>
+            <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">OPEX</span>
           </div>
-          <div className="text-xl font-bold text-amber-400">
+          <div className="text-2xl font-black font-mono text-amber-700">
             {formatINR(prof.opex)}
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">SG&A, payroll, departmental burns</div>
+          <div className="text-xs text-ink-muted mt-2">SG&amp;A, payroll, departmental burns</div>
         </div>
 
-        <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-4">
+        {/* Net Profit Margin */}
+        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink-subtle">Net Profit Margin</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Net Profit Margin</span>
             <Badge variant={prof.net_profit >= 0 ? "teal" : "danger"} size="sm">
               {num(prof.net_margin_pct, "%")}
             </Badge>
           </div>
-          <div className={`text-xl font-bold ${prof.net_profit >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+          <div className={`text-2xl font-black font-mono ${prof.net_profit >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
             {formatINR(prof.net_profit)}
           </div>
-          <div className="text-[11px] text-ink-subtle mt-1">Net surplus to retained earnings</div>
+          <div className="text-xs text-ink-muted mt-2">Net surplus to retained earnings</div>
         </div>
       </div>
 
       {/* KPI Section 2: Liquidity, Working Capital & Runway */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Working Capital Box */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-cyan-400" />
-              <h4 className="text-sm font-semibold text-slate-200">Working Capital Buffer</h4>
+              <div className="p-1.5 bg-blue-50 text-blue-700 rounded-md">
+                <Briefcase className="h-4 w-4" />
+              </div>
+              <h4 className="text-sm font-bold text-ink">Working Capital Buffer</h4>
             </div>
-            <Badge variant="outline" className="border-slate-700 text-slate-300">Net Gap</Badge>
+            <span className="text-[11px] font-semibold text-ink-soft bg-canvas-sunken px-2 py-0.5 rounded border border-line">
+              Net Gap
+            </span>
           </div>
-          <div className="text-2xl font-bold text-slate-100">
+          <div className="text-2xl font-black font-mono text-ink">
             {formatINR(liq.working_capital)}
           </div>
-          <div className="mt-3 space-y-1.5 text-xs text-ink-subtle border-t border-slate-800/80 pt-3">
-            <div className="flex justify-between">
-              <span>Current Assets (Receivables, Cash, Bank):</span>
-              <span className="text-slate-200 font-medium">{formatINR(liq.current_assets)}</span>
+          <div className="mt-4 space-y-2 text-xs border-t border-line pt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-ink-muted">Current Assets (AR, Cash, Bank):</span>
+              <span className="text-ink font-mono font-semibold">{formatINR(liq.current_assets)}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Current Liabilities (Payables, Taxes, Due):</span>
-              <span className="text-rose-400 font-medium">{formatINR(liq.current_liabilities)}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-ink-muted">Current Liabilities (AP, Taxes):</span>
+              <span className="text-rose-700 font-mono font-semibold">{formatINR(liq.current_liabilities)}</span>
             </div>
           </div>
         </div>
 
         {/* Corporate Health Ratios */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              <h4 className="text-sm font-semibold text-slate-200">Solvency Ratios</h4>
+              <div className="p-1.5 bg-emerald-50 text-emerald-700 rounded-md">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <h4 className="text-sm font-bold text-ink">Solvency Ratios</h4>
             </div>
             <Badge variant="teal" size="sm">Healthy</Badge>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
-              <div className="text-xs text-ink-subtle">Current Ratio</div>
-              <div className="text-lg font-bold text-emerald-400 mt-1">
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
+              <div className="text-xs text-ink-muted font-medium">Current Ratio</div>
+              <div className="text-xl font-black font-mono text-emerald-700 mt-1">
                 {num(liq.current_ratio, "x")}
               </div>
-              <div className="text-[10px] text-ink-muted">Benchmark: &gt; 1.5x</div>
+              <div className="text-[10px] text-ink-subtle mt-0.5">Benchmark: &gt; 1.5x</div>
             </div>
-            <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-800/60">
-              <div className="text-xs text-ink-subtle">Quick Ratio</div>
-              <div className="text-lg font-bold text-cyan-400 mt-1">
+            <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
+              <div className="text-xs text-ink-muted font-medium">Quick Ratio</div>
+              <div className="text-xl font-black font-mono text-blue-700 mt-1">
                 {num(liq.quick_ratio, "x")}
               </div>
-              <div className="text-[10px] text-ink-muted">Benchmark: &gt; 1.0x</div>
+              <div className="text-[10px] text-ink-subtle mt-0.5">Benchmark: &gt; 1.0x</div>
             </div>
           </div>
         </div>
 
         {/* Runway & Burn Engine */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-400" />
-              <h4 className="text-sm font-semibold text-slate-200">Treasury Runway</h4>
+              <div className="p-1.5 bg-amber-50 text-amber-700 rounded-md">
+                <Clock className="h-4 w-4" />
+              </div>
+              <h4 className="text-sm font-bold text-ink">Treasury Runway</h4>
             </div>
-            <span className="text-xs text-amber-400 font-semibold flex items-center">
-              <Flame className="h-3.5 w-3.5 mr-0.5" />
+            <span className="text-xs text-amber-700 font-semibold flex items-center bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              <Flame className="h-3.5 w-3.5 mr-1" />
               {num(runway.cash_runway_months, " months")}
             </span>
           </div>
-          <div className="text-2xl font-bold text-amber-400">
+          <div className="text-2xl font-black font-mono text-amber-700">
             {formatINR(runway.cash_and_bank_reserves)}
           </div>
-          <div className="mt-3 space-y-1.5 text-xs text-ink-subtle border-t border-slate-800/80 pt-3">
-            <div className="flex justify-between">
-              <span>Trailing Monthly Burn:</span>
-              <span className="text-slate-200 font-medium">{formatINR(runway.estimated_monthly_burn)} / mo</span>
+          <div className="mt-4 space-y-2 text-xs border-t border-line pt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-ink-muted">Trailing Monthly Burn:</span>
+              <span className="text-ink font-mono font-semibold">{formatINR(runway.estimated_monthly_burn)} / mo</span>
             </div>
-            <div className="flex justify-between">
-              <span>Runway Horizon:</span>
-              <span className="text-emerald-400 font-medium">Safe (&gt;12 months)</span>
+            <div className="flex justify-between items-center">
+              <span className="text-ink-muted">Runway Horizon:</span>
+              <span className="text-emerald-700 font-medium">Safe (&gt;12 months)</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Section 3: Departmental Budget vs. Actual Variance Rollup */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-2xs">
+        <div className="px-5 py-4 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-canvas-sunken/40">
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-cyan-400" />
-            <h4 className="font-semibold text-slate-100 text-sm">
+            <Building2 className="h-4 w-4 text-brand-strong" />
+            <h4 className="font-bold text-ink text-sm">
               Departmental Budget vs. Actual Utilization Rollup
             </h4>
           </div>
-          <div className="flex items-center gap-3 text-xs text-ink-subtle">
-            <span>Total Allocated: <strong className="text-slate-200">{formatINR(budgetVariance?.total_budget_allocated || 0)}</strong></span>
-            <span>Total Utilized: <strong className="text-amber-400">{formatINR(budgetVariance?.total_budget_utilized || 0)}</strong></span>
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-ink-muted">
+              Total Allocated: <strong className="font-mono text-ink">{formatINR(budgetVariance?.total_budget_allocated || 0)}</strong>
+            </span>
+            <span className="text-ink-muted">
+              Total Utilized: <strong className="font-mono text-amber-700">{formatINR(budgetVariance?.total_budget_utilized || 0)}</strong>
+            </span>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/70 border-b border-slate-800 text-ink-subtle uppercase tracking-wider font-semibold">
+            <thead className="bg-canvas-sunken border-b border-line text-ink-muted uppercase tracking-wider font-semibold text-[11px]">
               <tr>
                 <th className="py-3 px-4">Department</th>
-                <th className="py-3 px-4">Code</th>
+                <th className="py-3 px-4 font-mono">Code</th>
                 <th className="py-3 px-4 text-right">Allocated Budget</th>
                 <th className="py-3 px-4 text-right">Utilized to Date</th>
                 <th className="py-3 px-4 text-right">Remaining Headroom</th>
@@ -276,7 +293,7 @@ export function FpaExecutiveView() {
                 <th className="py-3 px-4 text-center">Headcount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-line/60">
               {depts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-ink-muted">
@@ -288,38 +305,38 @@ export function FpaExecutiveView() {
                   const burnPct = Number(d.burn_percentage) || 0;
                   const isHighBurn = burnPct > 80;
                   return (
-                    <tr key={d.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4 font-medium text-slate-200 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                    <tr key={d.id} className="hover:bg-canvas-sunken/50 transition-colors">
+                      <td className="py-3 px-4 font-medium text-ink flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
                         {d.name}
                       </td>
-                      <td className="py-3 px-4 text-ink-subtle font-mono">{d.code}</td>
-                      <td className="py-3 px-4 text-right font-medium text-slate-200">
+                      <td className="py-3 px-4 text-ink-muted font-mono">{d.code}</td>
+                      <td className="py-3 px-4 text-right font-mono font-medium text-ink">
                         {formatINR(d.budget_allocated)}
                       </td>
-                      <td className="py-3 px-4 text-right font-medium text-amber-400">
+                      <td className="py-3 px-4 text-right font-mono font-medium text-amber-700">
                         {formatINR(d.budget_utilized)}
                       </td>
-                      <td className="py-3 px-4 text-right font-medium text-emerald-400">
+                      <td className="py-3 px-4 text-right font-mono font-medium text-emerald-700">
                         {formatINR(d.budget_remaining)}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-24 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-24 bg-canvas-sunken rounded-full h-2 overflow-hidden border border-line/60">
                             <div
                               className={`h-full rounded-full ${
-                                isHighBurn ? "bg-rose-500" : "bg-cyan-500"
+                                isHighBurn ? "bg-rose-500" : "bg-brand"
                               }`}
                               style={{ width: `${Math.min(100, burnPct)}%` }}
                             />
                           </div>
-                          <span className={`font-mono text-[11px] ${isHighBurn ? "text-rose-400" : "text-slate-300"}`}>
+                          <span className={`font-mono text-[11px] font-semibold ${isHighBurn ? "text-rose-700" : "text-ink"}`}>
                             {burnPct}%
                           </span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded text-[11px] text-slate-300 border border-slate-800">
+                        <span className="inline-flex items-center gap-1 bg-canvas-sunken px-2 py-0.5 rounded text-[11px] text-ink border border-line font-medium">
                           <Users className="h-3 w-3 text-ink-muted" />
                           {d.headcount || 0}
                         </span>
