@@ -108,6 +108,11 @@ async fn create_purchase_bill(
     if payload.bill_number.trim().is_empty() {
         return Err(AppError::BadRequest("bill_number is required".into()));
     }
+    if !payload.supplier_gstin.trim().is_empty()
+        && !crate::gst::is_valid_gstin(&payload.supplier_gstin.trim().to_uppercase())
+    {
+        return Err(AppError::BadRequest("That supplier GSTIN isn't valid. Check it for typing mistakes.".into()));
+    }
     if payload.supplier_gstin.trim().is_empty() {
         return Err(AppError::BadRequest("supplier_gstin is required".into()));
     }

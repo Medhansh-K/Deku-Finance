@@ -131,6 +131,8 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
   });
 
   await section("M-04", "purchases", async () => {
+    const opening = await me.api("POST", `${O}/inventory/adjustments`, { item_id: need(ids.item, "item"), kind: "opening", direction: "in", qty: 10, unit_cost: 100, date, reason: "E2E opening" });
+    check("M-05a", "opening stock recorded", opening.status === 200, `${opening.status} ${opening.text.slice(0, 200)}`);
     const before = await balances();
     const r = await me.api("POST", `${O}/purchases`, {
       party_id: need(ids.vendor, "vendor"),
@@ -138,7 +140,7 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
       supplier_gstin: "29AABCT1332L1ZA",
       bill_number: "E2E-B-1",
       bill_date: date,
-      place_of_supply: "27-Maharashtra",
+      place_of_supply: "27",
       taxable_amount: 600,
       cgst: 54,
       sgst: 54,
@@ -158,9 +160,7 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
   });
 
   await section("M-05", "stock", async () => {
-    // Runs after the purchase above: 10 opening at 100, 5 bought at 120, then 3 sold first-in-first-out.
-    const opening = await me.api("POST", `${O}/inventory/adjustments`, { item_id: need(ids.item, "item"), kind: "opening", direction: "in", qty: 10, unit_cost: 100, date, reason: "E2E opening" });
-    check("M-05a", "opening stock recorded", opening.status === 200, `${opening.status} ${opening.text.slice(0, 200)}`);
+    // 10 opening at 100, then the 5 bought at 120 above, then 3 sold first-in-first-out.
     const summary = async () => ((await me.api("GET", `${O}/inventory/summary`)).json?.data ?? []).find((s) => s.item_id === ids.item);
     let s = await summary();
     check("M-05b", "15 on hand worth 1,600", Number(s?.qty_on_hand) === 15 && Number(s?.fifo_value) === 1600, JSON.stringify(s ?? null));
@@ -194,15 +194,19 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
   });
 
   await section("M-07", "GST returns", async () => {
+    const noGstin = await me.api("GET", `${O}/gst/${date.slice(5, 7)}${date.slice(0, 4)}/gstr1`);
+    check("M-07-gstin", "a return can't be exported without a company GSTIN", noGstin.json?.data?.json === null && (noGstin.json?.data?.errors ?? []).length > 0, noGstin.text.slice(0, 200));
+    const profile = await me.api("PATCH", `${O}/settings`, { gstin: "27AAACR5055K1Z7", state_code: "27" });
+    check("M-07-profile", "company GSTIN saved", profile.status === 200, `${profile.status} ${profile.text.slice(0, 200)}`);
     const period = `${date.slice(5, 7)}${date.slice(0, 4)}`;
     const g1 = await me.api("GET", `${O}/gst/${period}/gstr1`);
     const text = JSON.stringify(g1.json?.data ?? {});
     check("M-07a", "GSTR-1 lists the invoices and the credit note", g1.status === 200 && text.includes("E2E-S-1") && text.includes("E2E-S-2") && text.includes("E2E-CN-1"), `${g1.status} ${text.slice(0, 300)}`);
     const g3 = await me.api("GET", `${O}/gst/${period}/gstr3b`);
-    const o = g3.json?.data?.sup_details?.osup_det;
+    const o = g3.json?.data?.json?.sup_details?.osup_det;
     // 2,000 + 1,000 + 1,500 sold, less the 1,000 credit note.
     check("M-07b", "GSTR-3B outward: taxable 3,500, CGST 225, SGST 225, IGST 180", Number(o?.txval) === 3500 && Number(o?.camt) === 225 && Number(o?.samt) === 225 && Number(o?.iamt) === 180, JSON.stringify(o ?? g3.text.slice(0, 300)));
-    const itc = g3.json?.data?.itc_elg?.itc_net;
+    const itc = g3.json?.data?.json?.itc_elg?.itc_net;
     check("M-07c", "GSTR-3B net ITC: CGST 54, SGST 54", Number(itc?.camt) === 54 && Number(itc?.samt) === 54, JSON.stringify(itc ?? null));
   });
 

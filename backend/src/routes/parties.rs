@@ -31,12 +31,17 @@ async fn create_party(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
 
+    let gstin = payload.gstin.as_deref().map(|g| g.trim().to_uppercase()).filter(|g| !g.is_empty());
+    if gstin.as_deref().is_some_and(|g| !crate::gst::is_valid_gstin(g)) {
+        return Err(AppError::BadRequest("That GSTIN isn't valid. Check it for typing mistakes.".into()));
+    }
+
     let body = json!({
         "organisation_id": org_id,
         "type": payload.r#type,
         "legal_name": payload.legal_name,
         "display_name": payload.display_name,
-        "gstin": payload.gstin,
+        "gstin": gstin,
         "pan": payload.pan,
         "email": payload.email,
         "phone": payload.phone,
