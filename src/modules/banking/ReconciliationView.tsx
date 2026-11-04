@@ -5,12 +5,13 @@ import Link from "next/link";
 import { AlertTriangle, Check, FilePlus2, Undo2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { accountingApi, bankingApi, BankReconciliation, partiesApi } from "@/api/endpoints";
+import { accountingApi, bankingApi, BankPosition, BankReconciliation, partiesApi, ReconciliationStatement } from "@/api/endpoints";
 import { Account, JournalEntry } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally } from "@/lib/formatters/date";
 import { parseStatement, ParsedStatement, StatementLine } from "@/lib/bank/statement-parser";
 import { CandidateLine, matchStatement, ScoredCandidate } from "@/lib/bank/matcher";
+import { summariseStatement } from "@/lib/bank/reconciliation";
 
 type Tab = "matched" | "suggested" | "unmatched";
 
@@ -53,11 +54,44 @@ export function ReconciliationView() {
   const [isLoading, setIsLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("suggested");
+  const [statements, setStatements] = useState<ReconciliationStatement[]>([]);
+  const [statementDate, setStatementDate] = useState("");
+  const [closing, setClosing] = useState("");
+  const [position, setPosition] = useState<BankPosition | null>(null);
+  // The amount the user ticked, so a figure that moves afterwards needs ticking again.
+  const [acceptedPaise, setAcceptedPaise] = useState<number | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("deku_active_org_id");
     if (saved) setOrgId(saved);
   }, []);
+
+  useEffect(() => {
+    if (!orgId) return;
+    bankingApi
+      .listStatements(orgId)
+      .then((res) => setStatements(res.data || []))
+      .catch((err) => setError(err.message || "Completed reconciliations could not be loaded"));
+  }, [orgId]);
+
+  // Depends on recs so the figures follow each Confirm and Undo.
+  useEffect(() => {
+    setPosition(null);
+    if (!orgId || !accountId || !statementDate) return;
+    let stale = false;
+    bankingApi
+      .position(orgId, accountId, statementDate)
+      .then((res) => {
+        if (!stale) setPosition(res.data);
+      })
+      .catch((err) => {
+        if (!stale) setError(err.message || "The book balance could not be loaded");
+      });
+    return () => {
+      stale = true;
+    };
+  }, [orgId, accountId, statementDate, recs]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -134,11 +168,47 @@ export function ReconciliationView() {
   const suggested = results.filter((r) => r.status !== "unmatched");
   const unmatched = results.filter((r) => r.status === "unmatched");
 
+  const closingPaise = closing.trim() === "" || isNaN(Number(closing)) ? null : Math.round(Number(closing) * 100);
+  const summary =
+    position && closingPaise !== null
+      ? summariseStatement(position, closingPaise, results.map((r) => r.line), statementDate)
+      : null;
+  const alreadyCompleted = statements.some((s) => s.bank_account_id === accountId && s.statement_date === statementDate);
+  const visibleStatements = accountId ? statements.filter((s) => s.bank_account_id === accountId) : statements;
+
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
+    const parsed = parseStatement(await file.text());
     setFileName(file.name);
-    setStatement(parseStatement(await file.text()));
+    setStatement(parsed);
     setTab("suggested");
+    if (!statementDate && parsed.lines.length) {
+      setStatementDate(parsed.lines.map((l) => l.date).sort().at(-1)!);
+    }
+  };
+
+  const complete = async () => {
+    if (!summary || closingPaise === null) return;
+    setIsCompleting(true);
+    setError(null);
+    try {
+      const res = await bankingApi.completeStatement(orgId, {
+        bank_account_id: accountId,
+        statement_date: statementDate,
+        closing_balance: closingPaise / 100,
+        statement_only_amount: summary.statementOnlyPaise / 100,
+        accepted_difference: summary.unexplainedPaise === 0 ? null : summary.unexplainedPaise / 100,
+      });
+      setClosing("");
+      setAcceptedPaise(null);
+      setStatements((prev) =>
+        [...(res.data || []), ...prev].sort((a, b) => b.statement_date.localeCompare(a.statement_date))
+      );
+    } catch (err: any) {
+      setError(err.message || "Failed to complete the reconciliation");
+    } finally {
+      setIsCompleting(false);
+    }
   };
 
   const confirm = async (line: StatementLine, c: CandidateLine) => {
@@ -219,7 +289,11 @@ export function ReconciliationView() {
           <span className="font-mono text-[11px] text-ink-muted">Bank account</span>
           <select
             value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
+            onChange={(e) => {
+              setAccountId(e.target.value);
+              setClosing("");
+              setAcceptedPaise(null);
+            }}
             className="border border-line-strong rounded px-2 py-1.5 text-xs min-w-64 bg-surface"
           >
             <option value="">Select a bank account…</option>
@@ -376,6 +450,135 @@ export function ReconciliationView() {
           </div>
         </div>
       )}
+
+      {accountId && (
+        <div className="bg-surface border border-line rounded-lg p-3 space-y-3">
+          <h2 className="font-bold text-ink">Finish this statement</h2>
+          <div className="flex flex-col md:flex-row md:items-end gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[11px] text-ink-muted">Statement date</span>
+              <input
+                type="date"
+                value={statementDate}
+                onChange={(e) => setStatementDate(e.target.value)}
+                className="border border-line-strong rounded px-2 py-1.5 text-xs bg-surface"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[11px] text-ink-muted">Closing balance on the statement (₹)</span>
+              <input
+                type="number"
+                step="0.01"
+                value={closing}
+                onChange={(e) => setClosing(e.target.value)}
+                className="border border-line-strong rounded px-2 py-1.5 text-xs bg-surface font-mono"
+              />
+            </label>
+          </div>
+
+          {!summary && (
+            <p className="text-ink-muted">Enter the statement date and closing balance to compare them with your books.</p>
+          )}
+          {summary && (
+            <>
+              <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
+                {[
+                  { label: "Book balance at this date", paise: summary.bookPaise },
+                  { label: "Matched", paise: summary.matchedPaise },
+                  { label: "In the books, not on the statement", paise: summary.unclearedPaise },
+                  { label: "On the statement, not matched", paise: summary.statementOnlyPaise },
+                  { label: "Difference (closing less book)", paise: summary.differencePaise },
+                  { label: "Unexplained", paise: summary.unexplainedPaise },
+                ].map((f) => (
+                  <div key={f.label}>
+                    <dt className="font-mono text-[11px] text-ink-muted">{f.label}</dt>
+                    <dd className="font-mono font-bold">{formatINR(f.paise / 100)}</dd>
+                  </div>
+                ))}
+              </dl>
+              {!statement && (
+                <p className="text-[11px] text-ink-muted">No statement is loaded, so no statement lines are counted as unmatched.</p>
+              )}
+              {summary.unexplainedPaise !== 0 && !alreadyCompleted && (
+                <label className="flex items-start gap-2 p-3 rounded bg-amber-50 border border-amber-300 text-amber-800">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={acceptedPaise === summary.unexplainedPaise}
+                    onChange={(e) => setAcceptedPaise(e.target.checked ? summary.unexplainedPaise : null)}
+                  />
+                  <span>
+                    {formatINR(summary.unexplainedPaise / 100)} is not explained by the matched and unmatched amounts. Record
+                    this reconciliation with that difference showing. It can&apos;t be changed afterwards.
+                  </span>
+                </label>
+              )}
+              {alreadyCompleted ? (
+                <p className="text-ink-muted">This bank account already has a completed reconciliation for this date.</p>
+              ) : (
+                <Button
+                  variant="tally"
+                  size="sm"
+                  isLoading={isCompleting}
+                  disabled={summary.unexplainedPaise !== 0 && acceptedPaise !== summary.unexplainedPaise}
+                  onClick={complete}
+                >
+                  <Check className="h-3.5 w-3.5" /> Complete reconciliation
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="bg-surface border border-line rounded-lg overflow-hidden">
+        <h2 className="font-bold text-ink px-3 py-2 border-b border-line">Completed reconciliations</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
+                <th className="py-2 px-3">Statement date</th>
+                <th className="py-2 px-3">Bank account</th>
+                <th className="py-2 px-3 text-right">Closing balance (₹)</th>
+                <th className="py-2 px-3 text-right">Book balance (₹)</th>
+                <th className="py-2 px-3 text-right">Difference (₹)</th>
+                <th className="py-2 px-3">Status</th>
+                <th className="py-2 px-3">Recorded</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {visibleStatements.map((s) => {
+                const account = accounts.find((a) => a.id === s.bank_account_id);
+                return (
+                  <tr key={s.id}>
+                    <td className="py-2 px-3 font-mono whitespace-nowrap">{formatDateTally(s.statement_date)}</td>
+                    <td className="py-2 px-3">{account ? `${account.code} · ${account.name}` : "—"}</td>
+                    <td className="py-2 px-3 text-right font-mono whitespace-nowrap">{formatINR(s.closing_balance, { showCurrencySymbol: false })}</td>
+                    <td className="py-2 px-3 text-right font-mono whitespace-nowrap">{formatINR(s.book_balance, { showCurrencySymbol: false })}</td>
+                    <td className="py-2 px-3 text-right font-mono whitespace-nowrap">{formatINR(s.difference, { showCurrencySymbol: false })}</td>
+                    <td className="py-2 px-3">
+                      {Number(s.unexplained_difference) === 0 ? (
+                        <Badge variant="success">Explained</Badge>
+                      ) : (
+                        <Badge variant="warning">{formatINR(s.unexplained_difference)} unexplained</Badge>
+                      )}
+                    </td>
+                    <td className="py-2 px-3">
+                      {s.recorded_by_name || "—"}
+                      <span className="block text-[11px] text-ink-muted">{formatDateTally(s.recorded_at)}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+              {visibleStatements.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-ink-muted">No reconciliations completed yet.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
