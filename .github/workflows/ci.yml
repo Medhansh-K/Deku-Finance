@@ -56,3 +56,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose build
+      # Plan D-01 to D-16. Failures are published as annotations: run logs need a GitHub login.
+      - name: Full stack, clean install
+        run: |
+          docker compose config -q
+          docker compose up -d
+          bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs fresh
+      - name: Data survives container recreation
+        run: |
+          docker compose down
+          docker compose up -d
+          bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs persisted
+      - name: Demo mode, separate project and volume
+        run: |
+          docker compose down
+          DEKU_SEED_DEMO=true docker compose -p deku-demo up -d
+          COMPOSE_PROJECT_NAME=deku-demo bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs demo
+      - name: Publish container state on failure
+        if: failure()
+        run: |
+          for p in deku-finance deku-demo; do
+            out=$(docker compose -p "$p" ps -a 2>&1; docker compose -p "$p" logs --no-color --tail 25 2>&1 | cut -c1-220 | tail -70)
+            echo "::error title=$p containers::${out//$'\n'/%0A}"
+          done

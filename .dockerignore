@@ -4,5 +4,5 @@ backend/target
 Media
 .claude
 .git
-.env*
+**/.env*
 !.env.example

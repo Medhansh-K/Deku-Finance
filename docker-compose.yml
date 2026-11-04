@@ -1,8 +1,10 @@
 # Local stack: docker compose up --build, then open http://localhost:3000.
+# Clean by default; set DEKU_SEED_DEMO=true for the demo accounts.
 # Defaults match .env.example and are for local development only.
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: deku
       POSTGRES_USER: postgres
@@ -25,13 +27,14 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-dev-only-postgres-password}@postgres:5432/deku
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}
-      DEKU_SEED_DEMO: "true"
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
     depends_on:
       postgres:
         condition: service_healthy
 
   postgrest:
-    image: postgrest/postgrest:latest
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
     environment:
       PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}@postgres:5432/deku
       PGRST_DB_SCHEMAS: public
@@ -44,6 +47,7 @@ services:
 
   backend:
     build: ./backend
+    restart: unless-stopped
     environment:
       PORT: "8080"
       POSTGREST_URL: http://postgrest:3000
@@ -63,18 +67,31 @@ services:
       DEKU_ENV: ${DEKU_ENV:-development}
     ports:
       - "127.0.0.1:8080:8080"
+    healthcheck:
+      # /ready also checks the backend can reach PostgREST.
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     depends_on:
       - postgrest
 
   frontend:
     build: .
+    restart: unless-stopped
     environment:
       BACKEND_URL: http://backend:8080
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:

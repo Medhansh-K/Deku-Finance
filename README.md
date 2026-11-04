@@ -124,10 +124,10 @@ On the **Gateway of Deku** (`/gateway`), pressing highlighted keys instantly nav
 ```bash
 cp .env.example .env      # optional: compose falls back to the same dev-only values
 docker compose up --build
-# http://localhost:3000 (demo sandbox loaded; backend on :8080)
+# http://localhost:3000 (clean database; backend on :8080). DEKU_SEED_DEMO=true loads the demo sandbox.
 ```
 Compose runs Postgres 16, the `migrate` job (applies `supabase/migrations/*.sql` in order, records them in
-`public.schema_migrations`, loads `supabase/seed.sql`), PostgREST, the Rust backend and the Next.js frontend.
+`public.schema_migrations`, loads `supabase/seed.sql` only with `DEKU_SEED_DEMO=true`), PostgREST, the Rust backend and the Next.js frontend.
 There is no Supabase: login is handled by the backend (see `docs/PLATFORM_ARCHITECTURE.md`).
 Production runs on GCP: `deploy/gcp/README.md`.
 
