@@ -39,7 +39,7 @@
 
 - Browser tests cover page loads, tutorials, keyboard and navigation, but forms aren't filled in screen by screen. Business flows are tested through the API.
 - HR screens have no end-to-end test.
-- No test has run on a developer machine or on GCP.
+- No test has run on a developer machine or on GCP, and only Chromium has been used.
 - Razorpay, GSP and KYC adapters have never been run against a real provider.
 
 ## Marketing

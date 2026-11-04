@@ -48,4 +48,4 @@ These steps describe what exists rather than what plan §22 assumed.
 
 `tests/tutorials.test.ts` fails if a step points at a page or `data-tour` target that no longer exists, so removed screens are caught in CI. It can't tell whether the words are still true, so when a gap above gets fixed, update the matching step.
 
-**Last verified:** text against the source at commit `d76ec6a`. No tutorial has been walked through in a browser yet, which plan §23 requires at desktop and mobile widths.
+**Last verified:** commit `2e32342`. CI walks every step of every path in Chromium at desktop width, confirming each page opens and each highlighted element is visible, and checks pause, resume, restart, search and that a viewer doesn't see administrator paths. At phone width it checks the guide card fits, on the first path only. Whether the words are right is still a human review.
