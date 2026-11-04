@@ -58,6 +58,33 @@ function watch(page) {
   return problems;
 }
 
+// The real setup wizard, once: every signed-in page redirects here until it's finished.
+async function completeOnboarding(browser) {
+  const { context, page } = await signIn(browser, STATE.email, { width: 1366, height: 800 });
+  await page.waitForURL(/\/onboarding/, { timeout: 15000 });
+  const problems = watch(page);
+  check("O-W1", "a new company is sent to the setup wizard", true);
+  for (let i = 0; i < 8 && new URL(page.url()).pathname === "/onboarding"; i++) {
+    if (await page.locator("#ob-state").isVisible()) {
+      await page.locator("#ob-state").selectOption("27");
+      await page.getByLabel("Registered address").fill("1 E2E Road");
+      await page.getByLabel("City").fill("Pune");
+      await page.getByLabel("PIN code").fill("411001");
+    }
+    const finish = page.getByRole("button", { name: "Finish setup" });
+    if (await finish.isVisible()) {
+      await finish.click();
+      await page.waitForURL(/\/gateway/, { timeout: 15000 });
+      break;
+    }
+    await page.getByRole("button", { name: /^(Next|Continue|Save and continue)/ }).first().click();
+    await page.waitForTimeout(700);
+  }
+  check("O-W2", "the setup wizard finishes on the Gateway", new URL(page.url()).pathname === "/gateway", `${page.url()} ${(await page.locator("body").innerText()).slice(0, 300)}`);
+  check("O-W3", "the wizard makes no failed requests", problems.length === 0, problems.join(" | "));
+  await context.close();
+}
+
 async function visitAll(browser, label, viewport) {
   const { context, page } = await signIn(browser, STATE.email, viewport);
   const problems = watch(page);
@@ -252,6 +279,7 @@ async function navigationAndKeyboard(browser) {
 const browser = await chromium.launch();
 try {
   const sections = [
+    () => completeOnboarding(browser),
     () => visitAll(browser, "desktop", { width: 1366, height: 800 }),
     () => visitAll(browser, "mobile", { width: 390, height: 844 }),
     () => navigationAndKeyboard(browser),
