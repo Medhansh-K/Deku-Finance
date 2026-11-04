@@ -332,8 +332,10 @@ async function fresh() {
   const elsewhere = await login(owner.email);
   check("S-05c", "other users are unaffected", elsewhere.r.status === 200, elsewhere.r.status);
 
+  // Payroll and imports add accounts, so these are compared as they stand now.
+  const finalAccounts = ((await me.api("GET", `/organisations/${org}/accounts`)).json?.data ?? []).length;
   const finalTb = tbTotals((await me.api("GET", `/organisations/${org}/reports/trial-balance`)).json?.data ?? []);
-  writeFileSync(STATE, JSON.stringify({ email: owner.email, viewerEmail: viewer.email, org, seededCount, tb: finalTb, fileId, fileBase64: pdf.toString("base64") }));
+  writeFileSync(STATE, JSON.stringify({ email: owner.email, viewerEmail: viewer.email, org, seededCount: finalAccounts, tb: finalTb, fileId, fileBase64: pdf.toString("base64") }));
   return true;
 }
 
