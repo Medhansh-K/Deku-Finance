@@ -195,7 +195,7 @@ export function OperatingExpensesView() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
-            <span>Create Payment Voucher (F5)</span>
+            <span>Create Payment Voucher</span>
           </Link>
         </div>
       </div>

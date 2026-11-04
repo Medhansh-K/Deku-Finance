@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   STANDARD_SHORTCUTS,
   GLOBAL_FUNCTION_KEY_MAP,
-  isTargetInteractive,
+  isTargetInteractive, isPlainKey,
 } from '@/lib/keyboard/shortcuts';
 
 describe('Global Function Key Map (F1–F11 Navigation)', () => {
@@ -164,5 +164,16 @@ describe('Transaction-Entry Protection (isTargetInteractive)', () => {
     expect(document.activeElement).not.toBe(input);
 
     document.body.removeChild(input);
+  });
+});
+
+describe("isPlainKey", () => {
+  const none = { ctrlKey: false, metaKey: false, altKey: false, shiftKey: false };
+  it("leaves modified function keys to the browser", () => {
+    expect(isPlainKey(none)).toBe(true);
+    expect(isPlainKey({ ...none, ctrlKey: true })).toBe(false);
+    expect(isPlainKey({ ...none, shiftKey: true })).toBe(false);
+    expect(isPlainKey({ ...none, altKey: true })).toBe(false);
+    expect(isPlainKey({ ...none, metaKey: true })).toBe(false);
   });
 });

@@ -56,6 +56,7 @@ import {
   PROOF_REQUIREMENTS,
   ProofType,
 } from "@/lib/vouchers/document-proof";
+import { isPlainKey, isTargetInteractive } from "@/lib/keyboard/shortcuts";
 
 export type VoucherMode = "payment" | "receipt" | "contra" | "journal" | "sales" | "purchase";
 
@@ -186,6 +187,15 @@ export const getDefaultPartyForMode = (
     default:
       return "self";
   }
+};
+
+const VOUCHER_MODE_KEYS: Record<string, VoucherMode> = {
+  F4: "contra",
+  F5: "payment",
+  F6: "receipt",
+  F7: "journal",
+  F8: "sales",
+  F9: "purchase",
 };
 
 export function VoucherWorkspace({
@@ -487,7 +497,10 @@ export function VoucherWorkspace({
       `${cfg.prefix}-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
     );
     if (!extractedData) {
-      setNarration(cfg.defaultNarration);
+      // Replace only the previous mode's default, never something the user typed.
+      setNarration((prev) =>
+        !prev.trim() || prev === VOUCHER_CONFIGS[activeMode].defaultNarration ? cfg.defaultNarration : prev
+      );
       setLines((prev) =>
         prev.map((l, idx) => ({
           ...l,
@@ -497,34 +510,20 @@ export function VoucherWorkspace({
     }
   };
 
-  // Keyboard shortcut listener for F4 - F9 inside this voucher page
+  // Keyboard shortcut listener for F4 - F9 inside this voucher page. Through a ref, so the
+  // single listener always switches with the current parties and narration.
+  const switchModeRef = useRef(handleSwitchMode);
+  useEffect(() => {
+    switchModeRef.current = handleSwitchMode;
+  });
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      const isInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable;
-
-      if (e.key === "F4") {
-        e.preventDefault();
-        handleSwitchMode("contra");
-      } else if (e.key === "F5") {
-        e.preventDefault();
-        handleSwitchMode("payment");
-      } else if (e.key === "F6") {
-        e.preventDefault();
-        handleSwitchMode("receipt");
-      } else if (e.key === "F7") {
-        e.preventDefault();
-        handleSwitchMode("journal");
-      } else if (e.key === "F8") {
-        e.preventDefault();
-        handleSwitchMode("sales");
-      } else if (e.key === "F9") {
-        e.preventDefault();
-        handleSwitchMode("purchase");
-      }
+      const mode = VOUCHER_MODE_KEYS[e.key];
+      if (!mode || !isPlainKey(e)) return;
+      e.preventDefault();
+      if (e.repeat || isTargetInteractive(e.target) || document.querySelector('[role="dialog"], [aria-modal="true"]')) return;
+      switchModeRef.current(mode);
     };
 
     window.addEventListener("keydown", handleKeyDown);

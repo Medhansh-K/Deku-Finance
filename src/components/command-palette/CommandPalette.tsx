@@ -103,7 +103,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Record vendor and expense bank/cash payouts",
     category: "Transactions",
     route: "/vouchers/payment",
-    shortcut: "F5",
     icon: Receipt,
   },
   {
@@ -112,7 +111,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Customer inward payments and collections",
     category: "Transactions",
     route: "/vouchers/receipt",
-    shortcut: "F6",
     icon: Receipt,
   },
   {
@@ -121,7 +119,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Bank deposit, withdrawal or inter-bank transfer",
     category: "Transactions",
     route: "/vouchers/contra",
-    shortcut: "F4",
     icon: Receipt,
   },
   {
@@ -130,7 +127,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Atomic double-entry adjustment voucher",
     category: "Transactions",
     route: "/vouchers/journal",
-    shortcut: "F7",
     icon: Receipt,
   },
   {
@@ -139,7 +135,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "GST tax invoices & bills of supply creation",
     category: "Transactions",
     route: "/vouchers/sales",
-    shortcut: "F8",
     icon: Receipt,
   },
   {
@@ -148,7 +143,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Inward supply and purchase vouchers",
     category: "Transactions",
     route: "/vouchers/purchase",
-    shortcut: "F9",
     icon: Receipt,
   },
   {
@@ -292,6 +286,38 @@ export const COMMAND_REGISTRY: CommandItem[] = [
 
   // Utilities
   {
+    id: "inventory",
+    title: "Inventory & Stock",
+    subtitle: "Warehouses, stock movements and FIFO valuation",
+    category: "Utilities",
+    route: "/inventory",
+    icon: Layers,
+  },
+  {
+    id: "marketplace",
+    title: "Marketplace Settlements",
+    subtitle: "Import Amazon and Flipkart settlement files and post one journal",
+    category: "Utilities",
+    route: "/marketplace",
+    icon: Layers,
+  },
+  {
+    id: "import",
+    title: "Import from Tally or CSV",
+    subtitle: "Bring in masters, opening balances and vouchers",
+    category: "Utilities",
+    route: "/import",
+    icon: Layers,
+  },
+  {
+    id: "export",
+    title: "Export to CSV",
+    subtitle: "Chart of accounts, parties, items, day book and trial balance",
+    category: "Utilities",
+    route: "/export",
+    icon: Layers,
+  },
+  {
     id: "gst",
     title: "GST Returns & Tax Engine",
     subtitle: "Tax calculations, supply breakdown & GSTR summary",
@@ -323,7 +349,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     subtitle: "Switch active organisation or fiscal period",
     category: "Utilities",
     route: "/companies",
-    shortcut: "F3",
     icon: Building2,
   },
   {

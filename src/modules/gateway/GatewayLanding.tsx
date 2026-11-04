@@ -143,7 +143,7 @@ export function GatewayLanding() {
       const key = e.key.toUpperCase();
       switch (key) {
         case "E":
-          router.push("/consultant");
+          router.push("/executive");
           break;
         case "A":
           router.push("/masters/chart-of-accounts");
@@ -266,7 +266,7 @@ export function GatewayLanding() {
                 <Link
                   href="/companies"
                   className="text-brand-strong hover:text-brand transition-colors"
-                  title="Manage and create companies (F3)"
+                  title="Manage companies"
                 >
                   + Add / Switch
                 </Link>
@@ -616,6 +616,30 @@ export function GatewayLanding() {
                     </kbd>
                   </Link>
                   <Link
+                    href="/inventory"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>Inventory &amp; Stock</span>
+                  </Link>
+                  <Link
+                    href="/marketplace"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>Marketplace Settlements</span>
+                  </Link>
+                  <Link
+                    href="/import"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>Import from Tally or CSV</span>
+                  </Link>
+                  <Link
+                    href="/export"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>Export to CSV</span>
+                  </Link>
+                  <Link
                     href="/audit"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
@@ -893,7 +917,7 @@ export function GatewayLanding() {
               <span>Deku Konsultant (K)</span>
             </Link>
             <Link
-              href="/consultant"
+              href="/executive"
               className="inline-flex items-center gap-1 font-bold text-ink hover:text-brand transition-colors"
               title="Open Executive Dashboard & AI CFO (E)"
             >

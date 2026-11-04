@@ -30,6 +30,11 @@ export const GLOBAL_FUNCTION_KEY_MAP: Record<string, string> = {
   F11: "/gst/file",
 };
 
+/** A function key with no modifier; Ctrl+F5, Shift+F5 and Alt+F4 belong to the browser and the OS. */
+export function isPlainKey(e: Pick<KeyboardEvent, "ctrlKey" | "metaKey" | "altKey" | "shiftKey">): boolean {
+  return !(e.ctrlKey || e.metaKey || e.altKey || e.shiftKey);
+}
+
 /**
  * Detect if an active element is an input, editable area, combobox, or code editor.
  * Protects transaction entry from accidental global shortcut navigation.

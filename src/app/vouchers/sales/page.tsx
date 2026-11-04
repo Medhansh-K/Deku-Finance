@@ -17,7 +17,7 @@ export default function SalesVoucherPage() {
         subtitle="Record outward sales transactions and credit customer receivables"
         badge={<Badge variant="teal">F8: Sales</Badge>}
         actions={
-          <Link href="/gst/sales-invoices">
+          <Link href="/gst">
             <Button variant="outline" size="sm" className="gap-1.5">
               <FileText className="h-3.5 w-3.5 text-brand" />
               GST Invoicing Hub <ArrowRight className="h-3 w-3" />

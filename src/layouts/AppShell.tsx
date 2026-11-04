@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
-import { GLOBAL_FUNCTION_KEY_MAP, isTargetInteractive } from "@/lib/keyboard/shortcuts";
+import { GLOBAL_FUNCTION_KEY_MAP, isPlainKey, isTargetInteractive } from "@/lib/keyboard/shortcuts";
 
 // Create React Query client once
 const queryClient = new QueryClient({
@@ -49,31 +49,40 @@ function isModalOrDrawerOpen(): boolean {
   return !!activeDialog;
 }
 
-/** Helper: detect if user has active, unsaved form inputs on transaction pages */
-function hasActiveUnsavedEntries(pathname: string): boolean {
-  if (typeof document === "undefined") return false;
-  const isEditingPath =
-    pathname.startsWith("/vouchers") ||
-    pathname.startsWith("/builder") ||
-    pathname.startsWith("/gst") ||
-    pathname.startsWith("/purchases");
-
-  if (!isEditingPath) return false;
-
-  const textInputs = Array.from(
-    document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-      'main input[type="text"], main input[type="number"], main textarea'
-    )
-  );
-
-  return textInputs.some((el) => el.value && el.value.trim() !== "");
-}
+/** Pages whose forms lose work on navigation; report filters elsewhere aren't worth a prompt. */
+const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking", "/inventory", "/import", "/marketplace", "/masters", "/settings", "/consultant"];
 
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
   const { user, logout } = useAuth();
   const { keyboardNavEnabled, toggleKeyboardNav } = useKeyboardNav();
+
+  // Set by what the user types, because forms start out prefilled and a field's value proves nothing.
+  const dirtyRef = useRef(false);
+  const hasActiveUnsavedEntries = useCallback(
+    (path: string) => dirtyRef.current && EDITING_PATHS.some((p) => path.startsWith(p)),
+    []
+  );
+
+  useEffect(() => {
+    dirtyRef.current = false;
+    const markDirty = (e: Event) => {
+      const el = e.target as HTMLElement;
+      if (el.closest?.("main") && el.getAttribute?.("type") !== "search") dirtyRef.current = true;
+    };
+    const markSaved = () => {
+      dirtyRef.current = false;
+    };
+    document.addEventListener("input", markDirty);
+    document.addEventListener("change", markDirty);
+    window.addEventListener("deku_ledger_updated", markSaved);
+    return () => {
+      document.removeEventListener("input", markDirty);
+      document.removeEventListener("change", markDirty);
+      window.removeEventListener("deku_ledger_updated", markSaved);
+    };
+  }, [pathname]);
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -169,8 +178,10 @@ export function AppShell({ children }: AppShellProps) {
 
       // 4. Function Key Navigation: F1 - F11
       const destination = GLOBAL_FUNCTION_KEY_MAP[e.key];
-      if (destination) {
-        if (isInput || isDialogActive) {
+      if (destination && isPlainKey(e)) {
+        // Even when not navigating: F5 would reload the page and lose what's been typed.
+        e.preventDefault();
+        if (e.repeat || isInput || isDialogActive) {
           return;
         }
 

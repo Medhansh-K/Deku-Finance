@@ -113,7 +113,7 @@ export function CreditorsDpoView() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
-            <span>Issue Payment (F5)</span>
+            <span>Issue Payment</span>
           </Link>
         </div>
       </div>
@@ -342,7 +342,7 @@ export function CreditorsDpoView() {
                                 href="/vouchers/payment"
                                 className="px-2.5 py-1 text-xs font-bold bg-brand hover:bg-brand-soft text-panel-deep rounded-md shadow-2xs transition-colors inline-block"
                               >
-                                Pay (F5)
+                                Pay
                               </Link>
                             </td>
                           </tr>

@@ -130,7 +130,7 @@ export function DebtorsDsoView() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" />
-            <span>Record Receipt (F6)</span>
+            <span>Record Receipt</span>
           </Link>
         </div>
       </div>

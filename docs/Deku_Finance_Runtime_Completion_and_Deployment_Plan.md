@@ -177,6 +177,8 @@ credentials are absent. Clearly label sandbox/simulation behaviour.
 
 Audited at commit `8b1a1ed` by reading the code. **Nothing in this section was run**, so every feature status below is a code-reading result, not a test `PASS` under rule 8. The master checklist is in [`docs/runtime/README.md`](runtime/README.md).
 
+> **Update, 4 November 2026.** This section records the state at `8b1a1ed`. Blockers 2 to 7 are fixed and passing in CI, except that proof files still aren't stored (blocker 1). Blocker 8 is fixed but hasn't been run on GCP. Current status is in `docs/runtime/README.md`. The first full-stack CI run also found two report bugs this code-reading audit missed (W-05, W-06).
+
 ### 3A.1 Verdict
 
 The test suites are green and the service topology matches the brief, but **the application is not ready for a customer**. The baseline in §3.1 shows that the code compiles and its unit tests pass. It doesn't show that the stack runs end to end: **no one has yet recorded a run of the full stack with real sign-in and voucher posting.** CI's `docker` job only builds images.
