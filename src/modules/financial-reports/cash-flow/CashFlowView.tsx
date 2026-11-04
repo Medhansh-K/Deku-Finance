@@ -24,11 +24,15 @@ export function CashFlowView() {
   const [error, setError] = useState<string | null>(null);
   const [orgId, setOrgId] = useState<string>("");
 
-  const [startDate, setStartDate] = useState("2026-04-01");
+  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    setEndDate(new Date().toISOString().split("T")[0]);
+    const today = new Date();
+    // shortcut: assumes an April financial year, add a date picker when companies need another start month.
+    const fyStart = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+    setStartDate(`${fyStart}-04-01`);
+    setEndDate(today.toISOString().split("T")[0]);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -63,17 +67,19 @@ export function CashFlowView() {
     };
   }, [orgId, startDate, endDate]);
 
-  const operating = data?.cash_flows?.operating || {
-    inflows: 0,
-    outflows: 0,
-    net_operating_cash: 0,
+  // Keys from get_cash_flow_statement (migration 023). Nothing loaded shows "–", never a zero.
+  const money = (v: number | undefined) => (v == null ? "–" : formatINR(v));
+  const operating = {
+    inflows: data?.operating_activities?.cash_receipts_from_sales as number | undefined,
+    outflows: data?.operating_activities?.cash_paid_for_operations as number | undefined,
+    net_operating_cash: data?.operating_activities?.net_cash_from_operating_activities as number | undefined,
   };
-  const investing = data?.cash_flows?.investing || { net_investing_cash: 0 };
-  const financing = data?.cash_flows?.financing || { net_financing_cash: 0 };
-  const summary = data?.summary || {
-    opening_cash: 0,
-    net_cash_flow: 0,
-    closing_cash: 0,
+  const investing = { net_investing_cash: data?.investing_activities?.net_cash_used_in_investing as number | undefined };
+  const financing = { net_financing_cash: data?.financing_activities?.net_cash_from_financing as number | undefined };
+  const summary = {
+    opening_cash: data?.opening_cash_equivalents as number | undefined,
+    net_cash_flow: data?.net_change_in_cash as number | undefined,
+    closing_cash: data?.closing_cash_equivalents as number | undefined,
   };
 
   return (
@@ -142,10 +148,10 @@ export function CashFlowView() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Opening Cash &amp; Bank</span>
-              <span className="text-[11px] font-mono text-ink-subtle bg-canvas-sunken px-1.5 py-0.5 rounded">Reserves</span>
+              <span className="text-[11px] font-mono text-ink-subtle bg-canvas-sunken px-1.5 py-0.5 rounded">Opening</span>
             </div>
             <div className="text-2xl font-black font-mono text-ink tracking-tight">
-              {formatINR(summary.opening_cash)}
+              {money(summary.opening_cash)}
             </div>
           </div>
           <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
@@ -158,7 +164,7 @@ export function CashFlowView() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Operating Cash Flow</span>
-              {operating.net_operating_cash >= 0 ? (
+              {operating.net_operating_cash == null ? null : operating.net_operating_cash >= 0 ? (
                 <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
                   <ArrowUpRight className="h-3 w-3" /> Positive
                 </span>
@@ -168,8 +174,8 @@ export function CashFlowView() {
                 </span>
               )}
             </div>
-            <div className={`text-2xl font-black font-mono tracking-tight ${operating.net_operating_cash >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-              {formatINR(operating.net_operating_cash)}
+            <div className={`text-2xl font-black font-mono tracking-tight ${(operating.net_operating_cash ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+              {money(operating.net_operating_cash)}
             </div>
           </div>
           <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
@@ -186,8 +192,8 @@ export function CashFlowView() {
                 Δ Movement
               </span>
             </div>
-            <div className={`text-2xl font-black font-mono tracking-tight ${summary.net_cash_flow >= 0 ? "text-brand-strong" : "text-amber-700"}`}>
-              {formatINR(summary.net_cash_flow)}
+            <div className={`text-2xl font-black font-mono tracking-tight ${(summary.net_cash_flow ?? 0) >= 0 ? "text-brand-strong" : "text-amber-700"}`}>
+              {money(summary.net_cash_flow)}
             </div>
           </div>
           <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
@@ -200,14 +206,14 @@ export function CashFlowView() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-mono uppercase tracking-wider text-emerald-800 font-bold">Closing Cash &amp; Bank</span>
-              <Badge variant="teal" size="sm">Active Reserves</Badge>
+              <Badge variant="teal" size="sm">Closing</Badge>
             </div>
             <div className="text-2xl font-black font-mono text-emerald-800 tracking-tight">
-              {formatINR(summary.closing_cash)}
+              {money(summary.closing_cash)}
             </div>
           </div>
           <div className="text-[11px] text-emerald-800/80 font-medium mt-2 pt-2 border-t border-emerald-500/20">
-            Live liquid treasury balance available
+            From posted ledger entries
           </div>
         </div>
       </div>
@@ -221,9 +227,6 @@ export function CashFlowView() {
               Statement of Cash Flows (Direct Method)
             </h4>
           </div>
-          <Badge variant="outline" className="text-xs font-mono">
-            Ind AS 7 / AS 3 Compliant
-          </Badge>
         </div>
 
         <div className="divide-y divide-line text-xs font-sans">
@@ -234,18 +237,18 @@ export function CashFlowView() {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
                 <span>A. Cash Flows from Operating Activities</span>
               </span>
-              <span className={`font-mono text-base ${operating.net_operating_cash >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-                {formatINR(operating.net_operating_cash)}
+              <span className={`font-mono text-base ${(operating.net_operating_cash ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                {money(operating.net_operating_cash)}
               </span>
             </div>
             <div className="space-y-2 pl-4 border-l-2 border-emerald-500/30">
               <div className="flex justify-between items-center py-1">
                 <span className="text-ink-soft">Cash receipts from customers &amp; debtors (Receivables collected)</span>
-                <span className="text-emerald-700 font-bold font-mono">+{formatINR(operating.inflows)}</span>
+                <span className="text-emerald-700 font-bold font-mono">{operating.inflows == null ? "–" : `+${money(operating.inflows)}`}</span>
               </div>
               <div className="flex justify-between items-center py-1 border-t border-line/40">
                 <span className="text-ink-soft">Cash paid to suppliers, vendors, and operating expenditures</span>
-                <span className="text-rose-700 font-bold font-mono">-{formatINR(operating.outflows)}</span>
+                <span className="text-rose-700 font-bold font-mono">{operating.outflows == null ? "–" : `-${money(operating.outflows)}`}</span>
               </div>
             </div>
           </div>
@@ -258,13 +261,13 @@ export function CashFlowView() {
                 <span>B. Cash Flows from Investing Activities</span>
               </span>
               <span className="font-mono text-base text-ink">
-                {formatINR(investing.net_investing_cash)}
+                {money(investing.net_investing_cash)}
               </span>
             </div>
             <div className="space-y-2 pl-4 border-l-2 border-teal-500/30">
               <div className="flex justify-between items-center py-1">
                 <span className="text-ink-soft">Capital expenditures, office equipment, and fixed asset additions</span>
-                <span className="text-ink font-semibold font-mono">{formatINR(investing.net_investing_cash)}</span>
+                <span className="text-ink font-semibold font-mono">{money(investing.net_investing_cash)}</span>
               </div>
             </div>
           </div>
@@ -277,13 +280,13 @@ export function CashFlowView() {
                 <span>C. Cash Flows from Financing Activities</span>
               </span>
               <span className="font-mono text-base text-ink">
-                {formatINR(financing.net_financing_cash)}
+                {money(financing.net_financing_cash)}
               </span>
             </div>
             <div className="space-y-2 pl-4 border-l-2 border-cyan-500/30">
               <div className="flex justify-between items-center py-1">
                 <span className="text-ink-soft">Capital contributions, partner drawings, debt financing, and bank borrowings</span>
-                <span className="text-ink font-semibold font-mono">{formatINR(financing.net_financing_cash)}</span>
+                <span className="text-ink font-semibold font-mono">{money(financing.net_financing_cash)}</span>
               </div>
             </div>
           </div>
@@ -292,17 +295,17 @@ export function CashFlowView() {
           <div className="p-5 bg-canvas-sunken/70 border-t-2 border-line space-y-3">
             <div className="flex justify-between items-center font-bold text-xs text-ink">
               <span>Net Increase / (Decrease) in Cash &amp; Cash Equivalents (A + B + C)</span>
-              <span className={`font-mono text-sm ${summary.net_cash_flow >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-                {formatINR(summary.net_cash_flow)}
+              <span className={`font-mono text-sm ${(summary.net_cash_flow ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                {money(summary.net_cash_flow)}
               </span>
             </div>
             <div className="flex justify-between items-center text-xs text-ink-muted">
               <span>Cash &amp; Cash Equivalents at Beginning of Period</span>
-              <span className="font-mono text-ink-soft font-semibold">{formatINR(summary.opening_cash)}</span>
+              <span className="font-mono text-ink-soft font-semibold">{money(summary.opening_cash)}</span>
             </div>
             <div className="pt-3 border-t border-line flex justify-between items-center font-black text-sm text-emerald-800 bg-brand/10 p-3 rounded-lg border border-brand/20">
               <span>Cash &amp; Cash Equivalents at End of Period</span>
-              <span className="font-mono text-base text-emerald-900">{formatINR(summary.closing_cash)}</span>
+              <span className="font-mono text-base text-emerald-900">{money(summary.closing_cash)}</span>
             </div>
           </div>
         </div>

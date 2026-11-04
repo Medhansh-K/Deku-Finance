@@ -235,7 +235,7 @@ export function validateProofForVoucher(
     ) {
       return {
         isValid: false,
-        message: "Contra vouchers require a verified Bank Deposit Slip or Cash Withdrawal Slip.",
+        message: "Contra vouchers require a Bank Deposit Slip or Cash Withdrawal Slip.",
       };
     }
   } else if (mode === "payment") {

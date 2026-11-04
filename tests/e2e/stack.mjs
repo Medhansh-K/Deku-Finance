@@ -142,16 +142,20 @@ async function fresh() {
       { line_number: 2, account_id: bank, debit: 0, credit },
     ],
   });
-  const journalId = (res) => res.json?.data?.id ?? res.json?.data?.[0]?.id ?? res.json?.entry_id ?? res.json?.id;
+  const journalId = (res) => res.json?.entry?.[0]?.id;
 
   // Unbalanced: must not reach the ledger, whichever step refuses it.
   r = await owner.s.api("POST", `/organisations/${org}/journals`, voucher("E2E/BAD/1", 1000, 900));
-  let unbalancedPosted = false;
-  if (r.status === 200 && journalId(r)) {
+  if (r.status === 200) {
+    check("W-01a0", "create response has the entry id", !!journalId(r), r.text.slice(0, 200));
     const p = await owner.s.api("POST", `/organisations/${org}/journals/${journalId(r)}/post`);
-    unbalancedPosted = p.status === 200;
+    check("W-01a", "unbalanced voucher can't be posted", p.status !== 200, p.status);
+  } else {
+    check("W-01a", "unbalanced voucher refused at creation", true);
   }
-  check("W-01a", "unbalanced voucher refused", !unbalancedPosted);
+
+  r = await owner.s.api("GET", `/organisations/${org}/reports/trial-balance`);
+  check("W-01a1", "unposted vouchers stay out of the trial balance", tbTotals(r.json?.data ?? []).debit === 0, JSON.stringify(tbTotals(r.json?.data ?? [])));
 
   // Critical accounting proof (plan §10)
   r = await owner.s.api("POST", `/organisations/${org}/journals`, voucher("E2E/1", 1234.5, 1234.5));
@@ -170,6 +174,8 @@ async function fresh() {
   r = await owner.s.api("GET", `/organisations/${org}/reports/trial-balance`);
   const tb = tbTotals(r.json?.data ?? []);
   check("W-01g", "trial balance debits equal credits", tb.debit === tb.credit && tb.debit === 1234.5, JSON.stringify(tb));
+  r = await owner.s.api("GET", `/organisations/${org}/reports/cash-flow`);
+  check("W-01i", "cash flow shows the money leaving the bank", Number(r.json?.data?.closing_cash_equivalents) === -1234.5, r.text.slice(0, 300));
   r = await owner.s.api("GET", `/organisations/${org}/audit-events`);
   check("W-01h", "audit trail recorded events", r.status === 200 && (r.json?.data ?? []).length > 0, `${r.status} ${r.text.slice(0, 200)}`);
 
@@ -200,10 +206,12 @@ async function fresh() {
   refreshing.cookies.deku_rt = oldRefresh;
   r = await refreshing.req("GET", "/api/auth/me");
   check("A-14", "expired access token refreshes from refresh cookie", r.status === 200 && refreshing.cookies.deku_rt !== oldRefresh, r.status);
-  const reuse = new Session();
-  reuse.cookies.deku_rt = oldRefresh;
-  r = await reuse.req("GET", "/api/auth/me");
-  check("A-15", "reused refresh token is rejected", r.status === 401, r.status);
+  const reused = await fetch(`${BACKEND}/api/v1/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: oldRefresh }),
+  });
+  check("A-15", "reused refresh token is rejected by the backend", reused.status === 401, reused.status);
 
   const { s: out } = await login(owner.email);
   const outRefresh = out.cookies.deku_rt;

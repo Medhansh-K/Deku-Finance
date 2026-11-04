@@ -407,26 +407,17 @@ export function DekuConsultantView() {
   const [activeOrgName, setActiveOrgName] = useState<string>("");
   const [contextData, setContextData] = useState<any>(null);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
+  const [contextFailed, setContextFailed] = useState(false);
 
   // Chat conversation state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputQuery, setInputQuery] = useState("");
   const [searchFilter, setSearchFilter] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
 
   // Typewriter state for greeting
   const { user } = useAuth();
   const userName = user?.full_name || user?.email || "";
-
-  // History sessions list
-  const [historySessions] = useState([
-    { id: "h1", title: "Q3 Cash Runway & Burn Review", date: "Today" },
-    { id: "h2", title: "Debtor Aging (DSO) Velocity", date: "Yesterday" },
-    { id: "h3", title: "Department Budget Variance", date: "23 Oct" },
-    { id: "h4", title: "GST Input Tax Credit Match", date: "21 Oct" },
-    { id: "h5", title: "Monthly Expense Spikes Deep Dive", date: "18 Oct" },
-  ]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -455,13 +446,14 @@ export function DekuConsultantView() {
   // Fetch grounding context from backend
   const loadContext = async (orgIdToLoad: string) => {
     setIsLoadingContext(true);
+    setContextFailed(false);
     try {
       const res = await consultantApi.getContext(orgIdToLoad);
       if (res.context) {
         setContextData(res.context);
       }
     } catch {
-      // Graceful fallback
+      setContextFailed(true);
     } finally {
       setIsLoadingContext(false);
     }
@@ -491,7 +483,6 @@ export function DekuConsultantView() {
     setMessages([]);
     setInputQuery("");
     setSearchFilter("");
-    setActiveHistoryId(null);
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -598,12 +589,12 @@ export function DekuConsultantView() {
     },
   ];
 
-  // Grounded context metrics from backend or local profile fallback
+  // Only ledger figures from the backend; anything missing shows "–".
   const fpa = contextData?.fpa_metrics || {};
-  const prof = fpa.profitability || { total_revenue: 1545339, net_profit: 1351950, net_margin_pct: 87.5 };
-  const runway = fpa.treasury_and_runway || { cash_and_bank_reserves: 640000, cash_runway_months: 14.5 };
+  const prof = fpa.profitability || {};
+  const runway = fpa.treasury_and_runway || {};
   const aging = contextData?.ar_ap_aging || {};
-  const dso = aging.accounts_receivable?.dso_days ?? 32.5;
+  const dso = aging.accounts_receivable?.dso_days;
 
   // Filter messages if search query exists
   const filteredMessages = searchFilter.trim()
@@ -615,7 +606,7 @@ export function DekuConsultantView() {
   return (
     <div className="flex h-full w-full bg-canvas text-ink font-sans select-none overflow-hidden">
       {/* ========================================================================= */}
-      {/* 1. LEFT SIDEBAR (WORKBENCHES, AUDITED HEALTH, SESSIONS)                   */}
+      {/* 1. LEFT SIDEBAR (WORKBENCHES, LEDGER SNAPSHOT, SESSIONS)                   */}
       {/* ========================================================================= */}
       <aside className="w-64 xl:w-72 bg-surface border-r border-line-strong flex flex-col justify-between shrink-0 shadow-xs">
         <div className="p-3.5 space-y-4 overflow-y-auto">
@@ -682,61 +673,29 @@ export function DekuConsultantView() {
             </div>
           </div>
 
-          {/* Live Executive Snapshot (Audited Health) */}
+          {/* Ledger snapshot */}
           <div className="bg-canvas border border-line rounded-xl p-3 space-y-2">
             <div className="flex items-center justify-between text-[10px] font-mono text-ink-muted font-bold uppercase">
-              <span>Audited Health</span>
-              <span className="text-emerald-700 font-mono flex items-center gap-1 font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live
-              </span>
+              <span>Ledger Snapshot</span>
+              {contextFailed && <span className="text-rose-700 font-bold normal-case">Couldn't load</span>}
             </div>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between">
                 <span className="text-ink-muted">Turnover:</span>
-                <span className="font-bold text-ink font-mono">{formatINR(prof.total_revenue)}</span>
+                <span className="font-bold text-ink font-mono">{prof.total_revenue == null ? "–" : formatINR(prof.total_revenue)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ink-muted">Net Margin:</span>
-                <span className="font-bold text-emerald-700 font-mono">{prof.net_margin_pct}%</span>
+                <span className="font-bold text-emerald-700 font-mono">{prof.net_margin_pct == null ? "–" : `${prof.net_margin_pct}%`}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ink-muted">Runway:</span>
-                <span className="font-bold text-amber-700 font-mono">{runway.cash_runway_months} Mo</span>
+                <span className="font-bold text-amber-700 font-mono">{runway.cash_runway_months == null ? "–" : `${runway.cash_runway_months} Mo`}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ink-muted">Debtors DSO:</span>
-                <span className="font-bold text-blue-700 font-mono">{dso} Days</span>
+                <span className="font-bold text-blue-700 font-mono">{dso == null ? "–" : `${dso} Days`}</span>
               </div>
-            </div>
-          </div>
-
-          {/* Conversation History */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between px-2 text-[10px] font-mono uppercase tracking-wider text-ink-muted font-bold">
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-3 w-3 text-ink-subtle" />
-                History
-              </span>
-              <span className="text-[10px] font-mono text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line">
-                10 &gt;
-              </span>
-            </div>
-
-            <div className="space-y-0.5">
-              {historySessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => {
-                    setActiveHistoryId(session.id);
-                    handleSendMessage(session.title);
-                  }}
-                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-ink-soft hover:text-ink hover:bg-canvas-sunken truncate flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  <span className="truncate">{session.title}</span>
-                  <span className="text-[10px] text-ink-subtle shrink-0 ml-1 font-mono">{session.date}</span>
-                </button>
-              ))}
             </div>
           </div>
         </div>

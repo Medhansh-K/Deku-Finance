@@ -447,16 +447,6 @@ export function VoucherWorkspace({
       cat = "Vendor Tax Invoice";
     }
 
-    const generatedRef =
-      proofRefInput.trim() ||
-      (pType === "payment_digital_screenshot"
-        ? `UTR-${Math.floor(1000000000 + Math.random() * 9000000000)}`
-        : pType === "payment_cash_cfo_approval"
-        ? `CFO-MEMO-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`
-        : pType.startsWith("contra")
-        ? `SLIP-${Math.floor(10000 + Math.random() * 90000)}`
-        : `${activeConfig.prefix}-DOC-${Math.floor(1000 + Math.random() * 9000)}`);
-
     setDocumentProof({
       id: `proof-${Date.now()}`,
       proofType: pType,
@@ -464,11 +454,11 @@ export function VoucherWorkspace({
       title: `${cat} (${file.name})`,
       fileName: file.name,
       fileSize: `${(file.size / 1024).toFixed(1)} KB`,
-      refNumber: generatedRef,
-      approvedBy: pType === "payment_cash_cfo_approval" ? "Chief Financial Officer (Finance Head)" : undefined,
+      refNumber: proofRefInput.trim() || undefined,
       uploadedAt: new Date().toISOString(),
-      verified: true,
-      notes: `Verified statutory document uploaded on ${new Date().toLocaleDateString()}`,
+      // Nothing checks the file and it is not stored yet (runtime checklist F-01).
+      verified: false,
+      notes: "Attached for this session only. The file itself isn't saved yet, so keep your copy.",
     });
 
     if (proofFileInputRef.current) proofFileInputRef.current.value = "";
@@ -743,7 +733,7 @@ export function VoucherWorkspace({
       if (!proofCheck.isValid) {
         setApiError(
           proofCheck.message ||
-            "Mandatory Document Proof Missing: Indian GAAP compliance requires verified document proof before this voucher can be posted to the Chart of Accounts, P&L, or Balance Sheet."
+            "Mandatory Document Proof Missing: attach the supporting document before this voucher can be posted to the Chart of Accounts, P&L, or Balance Sheet."
         );
         return;
       }
@@ -786,7 +776,7 @@ export function VoucherWorkspace({
       } else if (posted && createdEntryId) {
         await accountingApi.postJournal(orgId, createdEntryId);
         setSubmissionSuccess(
-          `Voucher ${voucherNumber} successfully verified by [${documentProof?.title || "Document Proof"}] and posted to General Ledger & Financial Reports!`
+          `Voucher ${voucherNumber} posted to General Ledger & Financial Reports!`
         );
       } else {
         setSubmissionSuccess(
@@ -1434,7 +1424,7 @@ export function VoucherWorkspace({
         </div>
 
         {/* ============================================================ */}
-        {/* MANDATORY DOCUMENT PROOF & STATUTORY VERIFICATION */}
+        {/* SUPPORTING DOCUMENT */}
         {/* ============================================================ */}
         <div className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-line gap-2">
@@ -1451,12 +1441,12 @@ export function VoucherWorkspace({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="font-bold text-xs uppercase tracking-wider text-ink">
-                    Statutory Document Proof &amp; Verification
+                    Supporting Document
                   </h3>
                   {documentProof ? (
                     <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
                       <ShieldCheck className="h-3 w-3 text-emerald-700" />
-                      Verified Proof Attached
+                      Document Attached
                     </span>
                   ) : (
                     <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
