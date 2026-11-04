@@ -45,7 +45,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "organisation",
         title: "Your company",
-        body: "The company is created when the first administrator signs up, and a short setup wizard then asks for the operating mode, business details and first financial year. Each deployment holds one company, so a second one is refused even though a New Company button is on the Companies screen. Signup closes after the first administrator, and everyone else joins by invitation.",
+        body: "The company is created when the first administrator signs up, and a short setup wizard then asks for the operating mode, business details and first financial year. Each deployment holds one company, so there's no option to add a second once it exists. Signup closes after the first administrator, and everyone else joins by invitation.",
       },
       {
         id: "business-details",
@@ -132,7 +132,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "draft",
         title: "Create a draft",
-        body: "The server fills in the voucher number. For the sample you would pick the expense on the Dr line and the bank on the To (Cr) line, enter 1000 on each and press Save Draft, but don't save the sample in your real books. Nothing is saved until you press a button yourself, and a saved draft can't be edited afterwards, only posted from the Day Book.",
+        body: "The server fills in the voucher number. For the sample you would pick the expense on the Dr line and the bank on the To (Cr) line, enter 1000 on each and press Save Draft, but don't save the sample in your real books. Nothing is saved until you press a button yourself, and you can open a saved draft in the Day Book to edit or post it.",
         route: "/vouchers",
         target: "voucher-lines",
       },
@@ -160,7 +160,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "maker-checker",
         title: "Maker-checker approval",
-        body: "When Maker-checker approvals is on in Settings, a voucher reaches the ledger only after a second person (owner, CFO or admin) presses Approve & post; nobody can approve their own. An approver can press Send back with a reason, and the voucher then waits under Sent back. Vouchers can't be edited once saved, so the maker either resubmits it unchanged from the Day Book, using Post to Ledger, or enters a corrected voucher.",
+        body: "When Maker-checker approvals is on in Settings, a voucher reaches the ledger only after a second person (owner, CFO or admin) presses Approve & post; nobody can approve their own. An approver can press Send back with a reason, and the voucher then waits under Sent back. The maker opens it in the Day Book, edits it if needed, and submits it again with Post to Ledger. Drafts tied to an invoice, bill or other source document can't be edited, only resubmitted, so they stay in line with that source.",
         route: "/approvals",
         target: "approvals-queue",
       },
@@ -198,14 +198,14 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "product",
         title: "Set up a product or service",
-        body: "New Catalogue Item records an item's SKU, name, HSN or SAC code, default GST rate and price, and for goods it can turn on inventory tracking; nothing is saved until you press Save Item. The invoice form doesn't pick from this list yet, so you type the item, code and rate on each invoice line.",
+        body: "New Catalogue Item records an item's SKU, name, HSN or SAC code, default GST rate and price, and for goods it can turn on inventory tracking; nothing is saved until you press Save Item. The invoice form can pick from this list, which fills in the item, code, unit, price and rate, and moves stock for tracked goods. You can still type a line by hand.",
         route: "/masters/products-services",
         target: "products-new",
       },
       {
         id: "create-invoice",
         title: "Create an invoice",
-        body: "Open the Create GST Invoice tab, then choose the Invoice type and Customer, and type the Invoice number, dates and Place of supply. Add lines with item, HSN/SAC, Qty, Rate and GST %. Save draft invoice stores it as a draft, and nothing reaches your ledger until you issue it.",
+        body: "Open the Create GST Invoice tab, then choose the Invoice type and Customer, and type the Invoice number, dates and Place of supply. Add lines by picking a catalogue item or typing the item, HSN/SAC, Qty, Rate and GST %. Save draft invoice stores it as a draft, and nothing reaches your ledger until you issue it.",
         route: "/gst",
         target: "gst-tabs",
       },

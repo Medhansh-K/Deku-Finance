@@ -39,8 +39,6 @@ These steps describe what exists rather than what plan §22 assumed.
 | Plan step | What the tutorial says instead |
 |---|---|
 | Create the organisation, set legal details and financial year | The company is created at signup. Settings has no field for company name, PAN or financial-year start month; fiscal periods are managed there |
-| Edit a draft voucher | Saved drafts can't be edited. A sent-back voucher is resubmitted unchanged from Day Book, or entered again corrected |
-| Pick a product on an invoice | Invoice lines are typed; the form doesn't pick from the catalogue |
 | Download the invoice | Print only |
 | Bank statement import | CSV, read in the browser and not kept, so it's chosen again each visit |
 | Complete a reconciliation, review status | No finish step or closing balance check. Matches show only with a statement loaded |
