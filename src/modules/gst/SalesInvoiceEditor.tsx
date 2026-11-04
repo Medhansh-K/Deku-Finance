@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Plus, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { invoicesApi } from "@/api/endpoints";
+import { catalogueApi, invoicesApi } from "@/api/endpoints";
 import { useAuth } from "@/context/AuthContext";
-import { CreateInvoiceRequest, InvoiceType, Party } from "@/types/accounting";
+import { CatalogueItem, CreateInvoiceRequest, InvoiceType, Party } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
@@ -31,6 +31,9 @@ import { HsnCombobox } from "@/modules/hsn/HsnCombobox";
 import { hsnCodeError } from "@/modules/hsn/hsn";
 
 interface EditorLine {
+  /** Set only by the catalogue selector; a stocked item moves stock when the invoice is issued. */
+  item_id: string;
+  unit_code: string;
   item_name: string;
   hsn_sac_code: string;
   quantity: string;
@@ -50,7 +53,7 @@ export const INVOICE_TYPES: ReadonlyArray<{ value: InvoiceType; label: string }>
 const UNTAXED: ReadonlyArray<InvoiceType> = ["bill_of_supply", "export_without_payment", "sez_without_payment"];
 const EXPORT_POS = "96-Other Countries";
 
-const blankLine = (): EditorLine => ({ item_name: "", hsn_sac_code: "", quantity: "1", unit_price: "", gst_rate: "18" });
+const blankLine = (): EditorLine => ({ item_id: "", unit_code: "OTH", item_name: "", hsn_sac_code: "", quantity: "1", unit_price: "", gst_rate: "18" });
 const GST_RATES = ["0", "0.25", "3", "5", "12", "18", "28", "40"];
 const rs = (paise: number) => formatINR(paise / 100);
 
@@ -86,6 +89,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   const [lines, setLines] = useState<EditorLine[]>([blankLine()]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [catalogue, setCatalogue] = useState<CatalogueItem[]>([]);
 
   const gridRef = useRef<HTMLTableSectionElement>(null);
   const focusNewLine = useRef(false);
@@ -93,9 +97,16 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   useEffect(() => {
     if (!focusNewLine.current) return;
     focusNewLine.current = false;
-    const fields = gridRef.current?.querySelectorAll<HTMLElement>("[data-grid-field]");
-    fields?.[fields.length - 5]?.focus();
+    gridRef.current?.lastElementChild?.querySelector<HTMLElement>("[data-grid-field]")?.focus();
   }, [lines.length]);
+
+  useEffect(() => {
+    // Without the list, lines are still typed by hand.
+    catalogueApi
+      .list(orgId)
+      .then((res) => setCatalogue((res.data ?? []).filter((i) => i.is_active !== false)))
+      .catch(() => {});
+  }, [orgId]);
 
   const settlement = settlementFromOrg(organisation);
   const customer = customers.find((c) => c.id === customerId);
@@ -125,7 +136,32 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
   const settlementErrs = settlementErrors(settlement);
 
   const updateLine = (index: number, field: keyof EditorLine, value: string) =>
-    setLines((prev) => prev.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
+    setLines((prev) =>
+      prev.map((l, i) => {
+        if (i !== index) return l;
+        // A retyped name is no longer the catalogue item, so issuing it must not move that item's stock.
+        return field === "item_name" ? { ...l, item_name: value, item_id: "", unit_code: "OTH" } : { ...l, [field]: value };
+      })
+    );
+
+  const chooseItem = (index: number, itemId: string) => {
+    const item = catalogue.find((c) => c.id === itemId);
+    setLines((prev) =>
+      prev.map((l, i) => {
+        if (i !== index) return l;
+        if (!item) return { ...l, item_id: "", unit_code: "OTH" };
+        return {
+          ...l,
+          item_id: item.id,
+          item_name: item.name,
+          hsn_sac_code: item.hsn_sac_code ?? "",
+          unit_code: item.unit_code,
+          unit_price: String(Number(item.default_unit_price)),
+          gst_rate: item.is_taxable === false ? "0" : String(Number(item.default_gst_rate)),
+        };
+      })
+    );
+  };
 
   const addLine = () => setLines((prev) => [...prev, blankLine()]);
 
@@ -194,9 +230,10 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
         const rate = Number(l.gst_rate);
         return {
           line_number: i + 1,
+          item_id: l.item_id || null,
           item_name: l.item_name.trim(),
           hsn_sac_code: l.hsn_sac_code.trim() || null,
-          unit_code: "OTH",
+          unit_code: l.unit_code,
           quantity: Number(l.quantity),
           unit_price: toPaise(Number(l.unit_price)) / 100,
           discount_amount: 0,
@@ -372,7 +409,16 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                   return (
                     <tr key={idx}>
                       <td className="px-2 py-1.5 font-mono text-ink-muted">{n}</td>
-                      <td className="px-2 py-1.5">
+                      <td className="space-y-1 px-2 py-1.5">
+                        {catalogue.length > 0 && (
+                          <select data-grid-field aria-label={`Line ${n} catalogue item`} value={line.item_id}
+                            onChange={(e) => chooseItem(idx, e.target.value)} className={cellClass}>
+                            <option value="">Type it by hand</option>
+                            {catalogue.map((c) => (
+                              <option key={c.id} value={c.id}>{c.name} ({c.sku})</option>
+                            ))}
+                          </select>
+                        )}
                         <input data-grid-field aria-label={`Line ${n} item or service`} value={line.item_name}
                           onChange={(e) => updateLine(idx, "item_name", e.target.value)} className={cellClass} />
                       </td>
@@ -392,7 +438,9 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                       <td className="px-2 py-1.5">
                         <select data-grid-field aria-label={`Line ${n} GST rate`} value={line.gst_rate}
                           onChange={(e) => updateLine(idx, "gst_rate", e.target.value)} className={`${cellClass} text-right font-mono`}>
-                          {GST_RATES.map((r) => <option key={r} value={r}>{r}%</option>)}
+                          {(GST_RATES.includes(line.gst_rate) ? GST_RATES : [...GST_RATES, line.gst_rate]).map((r) => (
+                            <option key={r} value={r}>{r}%</option>
+                          ))}
                         </select>
                       </td>
                       <td className="px-2 py-1.5 text-right font-mono text-ink-soft">{rs(t.taxable)}</td>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { organisationsApi } from "@/api/endpoints";
+import { setActiveOrg } from "@/lib/organisation/active-org";
 import {
   Users,
   Building2,
@@ -64,8 +65,7 @@ function JoinWorkspaceContent() {
         });
 
         if (data.organisation_id) {
-          localStorage.setItem("deku_active_org_id", data.organisation_id);
-          localStorage.setItem("deku_active_org_name", data.organisation_name || "Organisation");
+          setActiveOrg({ id: data.organisation_id, name: data.organisation_name || "Organisation" });
         }
 
         setTimeout(() => {

@@ -39,6 +39,7 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { CustomizeKpiModal } from "@/modules/executive/CustomizeKpiModal";
 import { emptyKpis, loadKpis, FormattedKpiProfile } from "@/lib/kpi/kpi-service";
+import { setActiveOrg } from "@/lib/organisation/active-org";
 
 export default function ExecutiveDashboardPage() {
   const router = useRouter();
@@ -118,12 +119,7 @@ export default function ExecutiveDashboardPage() {
 
     setActiveOrgId(found.id);
     setActiveOrgName(found.name);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", found.id);
-      localStorage.setItem("deku_active_org_name", found.name);
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
+    setActiveOrg(found);
   };
 
   // Handle conversion of a Sec 22 organisation to GST Registered

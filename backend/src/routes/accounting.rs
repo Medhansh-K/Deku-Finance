@@ -1,7 +1,7 @@
 use axum::{
     extract::{Path, Query, State},
     http::HeaderMap,
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
     Json, Router,
 };
 use serde::Deserialize;
@@ -9,7 +9,7 @@ use serde_json::{json, Value};
 use crate::error::AppError;
 use crate::models::accounting::{
     CreateAccountRequest, CreateFiscalPeriodRequest, CreateJournalRequest, RejectJournalRequest,
-    ReverseJournalRequest,
+    ReverseJournalRequest, UpdateJournalRequest,
 };
 use crate::routes::AppState;
 
@@ -50,6 +50,7 @@ pub fn routes(state: AppState) -> Router {
         // Journal Entries
         .route("/journals", post(create_journal).get(list_journals))
         .route("/journals/next-number", get(next_voucher_number))
+        .route("/journals/:entry_id", put(update_journal))
         .route("/journals/:entry_id/post", post(post_journal))
         .route("/journals/:entry_id/submit", post(submit_journal))
         .route("/journals/:entry_id/reject", post(reject_journal))
@@ -368,6 +369,31 @@ async fn next_voucher_number(
     let payload = json!({ "p_org_id": org_id, "p_prefix": params.prefix });
     let res = state.db.rpc("next_voucher_number", &payload, token).await?;
     Ok(Json(json!({ "success": true, "data": res })))
+}
+
+/// Replaces a draft's header and lines in one transaction (see migration 55).
+async fn update_journal(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((org_id, entry_id)): Path<(String, String)>,
+    Json(payload): Json<UpdateJournalRequest>,
+) -> Result<Json<Value>, AppError> {
+    let token = extract_auth_token(&headers);
+    let rpc_payload = json!({
+        "p_org_id": org_id,
+        "p_entry_id": entry_id,
+        "p_entry_date": payload.entry_date,
+        "p_narration": payload.narration,
+        "p_reference": payload.reference,
+        "p_lines": payload.lines
+    });
+    let res = state.db.rpc("edit_draft_journal", &rpc_payload, token).await?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "Draft voucher updated",
+        "entry": res
+    })))
 }
 
 async fn post_journal(

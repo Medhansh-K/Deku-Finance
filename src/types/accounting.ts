@@ -154,6 +154,8 @@ export interface CreateJournalRequest {
   lines: CreateJournalLineRequest[];
 }
 
+export type UpdateJournalRequest = Omit<CreateJournalRequest, "fiscal_period_id" | "entry_number">;
+
 // Financial Report Contracts
 export interface GeneralLedgerRow {
   line_id: string;

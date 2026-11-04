@@ -4,6 +4,8 @@ import { toPaise, toRupees } from "./ledger";
 
 export interface VoucherLineDetail {
   dr_cr: "Dr" | "Cr";
+  account_id: string;
+  party_id?: string | null;
   account_name: string;
   category: "Asset" | "Liability" | "Equity" | "Revenue" | "Expense" | "";
   debit: number;
@@ -31,6 +33,9 @@ export interface VoucherItem {
   organisation_id: string;
   lines: VoucherLineDetail[];
   document_proof?: DocumentProofAttachment;
+  /** Waiting for a checker; the database refuses edits until it is sent back. */
+  submitted_at?: string | null;
+  rejection_reason?: string | null;
   reversal_ref?: string;
   reversal_reason?: string;
   reversed_at?: string;
@@ -85,10 +90,14 @@ export function journalToVoucher(
     dr_cr: "Dr",
     status: j.status === "posted" || j.status === "reversed" ? j.status : "draft",
     organisation_id: j.organisation_id,
+    submitted_at: j.submitted_at,
+    rejection_reason: j.rejection_reason,
     lines: lines.map((l) => {
       const a = accounts.get(l.account_id);
       return {
         dr_cr: toPaise(l.debit) > 0 ? "Dr" : "Cr",
+        account_id: l.account_id,
+        party_id: l.party_id,
         account_name: a?.name ?? "Unknown account",
         category: CATEGORY[a?.account_group ?? a?.type ?? ""] ?? "",
         debit: l.debit || 0,

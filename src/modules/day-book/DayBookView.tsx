@@ -25,6 +25,7 @@ import {
   ShieldAlert,
   FileCheck,
   Check,
+  Pencil,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -32,13 +33,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { accountingApi, filesApi, MAX_DOCUMENT_BYTES, organisationsApi, partiesApi, OrgSummary } from "@/api/endpoints";
-import { JournalEntry, JournalStatus } from "@/types/accounting";
+import { Account, JournalEntry, JournalStatus } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { loadOrgTaxProfile, OrgTaxProfile } from "@/lib/org-regime";
 import { VOUCHER_TYPE_STYLES } from "@/modules/executive/RecentlyAddedVouchers";
 import { journalToVoucher, VoucherItem } from "@/lib/reports/vouchers";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
+import { setActiveOrg } from "@/lib/organisation/active-org";
+import { EditDraftModal } from "./EditDraftModal";
 
 export function DayBookView() {
   const [mounted, setMounted] = useState(false);
@@ -67,6 +70,8 @@ export function DayBookView() {
   const [selectedEntry, setSelectedEntry] = useState<VoucherItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   // Reversal Modal State
   const [isReversalModalOpen, setIsReversalModalOpen] = useState(false);
@@ -105,12 +110,7 @@ export function DayBookView() {
     setOrgId(newId);
     if (found) setOrgName(found.name);
     loadOrgTaxProfile(newId).then(setTaxProfile);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", newId);
-      if (found) localStorage.setItem("deku_active_org_name", found.name);
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
+    if (found) setActiveOrg(found);
   };
 
   // Reactive listener for ledger changes from voucher posting or reversals
@@ -139,6 +139,7 @@ export function DayBookView() {
         filesApi.list(orgId).catch(() => ({ data: [] })),
       ]);
       const fileByJournal = new Map((files.data ?? []).filter((f) => f.journal_entry_id).map((f) => [f.journal_entry_id, f]));
+      setAccounts(accounts.data ?? []);
       const accountMap = new Map((accounts.data ?? []).map((a) => [a.id, a]));
       const partyMap = new Map((parties.data ?? []).map((p) => [p.id, p]));
       const apiVouchers = (res.data ?? []).map((j) => {
@@ -684,6 +685,17 @@ export function DayBookView() {
               </div>
             </div>
 
+            {selectedEntry.status === "draft" && selectedEntry.submitted_at && (
+              <div className="p-2.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-900">
+                This voucher is awaiting approval, so it can&apos;t be edited. The approver can send it back.
+              </div>
+            )}
+            {selectedEntry.status === "draft" && !selectedEntry.submitted_at && selectedEntry.rejection_reason && (
+              <div className="p-2.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800">
+                <strong>Sent back:</strong> {selectedEntry.rejection_reason}
+              </div>
+            )}
+
             {/* Narration */}
             <div>
               <span className="text-slate-400 block text-[10px] font-mono uppercase mb-1">
@@ -887,6 +899,21 @@ export function DayBookView() {
                   </Button>
                 )}
 
+                {selectedEntry.status === "draft" && !selectedEntry.submitted_at && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsDetailOpen(false);
+                      setIsEditOpen(true);
+                    }}
+                    className="gap-1.5 text-xs"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Edit
+                  </Button>
+                )}
+
                 {selectedEntry.status === "draft" && (
                   <Button
                     variant="tally"
@@ -909,6 +936,19 @@ export function DayBookView() {
             </div>
           </div>
         </Modal>
+      )}
+
+      {selectedEntry && isEditOpen && (
+        <EditDraftModal
+          orgId={orgId}
+          voucher={selectedEntry}
+          accounts={accounts}
+          onClose={() => setIsEditOpen(false)}
+          onSaved={() => {
+            setIsEditOpen(false);
+            fetchJournals();
+          }}
+        />
       )}
 
       {/* Reversal Confirmation Modal */}

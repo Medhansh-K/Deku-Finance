@@ -1,5 +1,6 @@
 import { ApiError, NetworkError } from "./errors";
 import { friendlyError } from "@/lib/errors/friendly";
+import { clearActiveOrg } from "@/lib/organisation/active-org";
 
 // Same-origin proxy: it attaches the httpOnly session cookie as a bearer token server-side.
 const API_BASE_URL = "/api/backend";
@@ -49,6 +50,7 @@ export async function apiClient<T>(
 
     // The middleware already tried a refresh; a 401 here means the session is gone.
     if (response.status === 401 && typeof window !== "undefined") {
+      clearActiveOrg();
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
     }
 

@@ -11,6 +11,7 @@ import {
   CreateNoteRequest,
   SalesNote,
   CreateJournalRequest,
+  UpdateJournalRequest,
   FiscalPeriod,
   GeneralLedgerRow,
   JournalEntry,
@@ -271,6 +272,11 @@ export const accountingApi = {
         method: "POST",
         body: JSON.stringify(payload),
       }
+    ),
+  updateJournal: (orgId: string, entryId: string, payload: UpdateJournalRequest) =>
+    apiClient<{ success: boolean; message: string; entry: JournalEntry }>(
+      `/api/v1/organisations/${orgId}/journals/${entryId}`,
+      { method: "PUT", body: JSON.stringify(payload) }
     ),
   postJournal: (orgId: string, entryId: string) =>
     apiClient<{ success: boolean; message: string; entry: any }>(

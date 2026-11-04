@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { organisationsApi, OrgSummary } from "@/api/endpoints";
 import { logUserActivity } from "@/lib/logging/activity-logger";
+import { setActiveOrg } from "@/lib/organisation/active-org";
 
 export function CompaniesView() {
   const router = useRouter();
@@ -47,14 +48,13 @@ export function CompaniesView() {
     }
   };
 
+  // One company per deployment: adding one is only for someone who has none yet.
+  const canAddCompany = !isLoading && !error && organisations.length === 0;
+
   const handleSelectOrg = (org: OrgSummary) => {
     const previousOrgName = typeof window !== "undefined" ? localStorage.getItem("deku_active_org_name") || "Previous Company" : "Previous Company";
     setActiveOrgId(org.id);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", org.id);
-      localStorage.setItem("deku_active_org_name", org.name);
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
+    setActiveOrg(org);
 
     logUserActivity({
       category: "SETTING",
@@ -115,20 +115,22 @@ export function CompaniesView() {
     <div className="max-w-4xl mx-auto space-y-4 font-sans text-xs">
       <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
         <div className="text-xs font-semibold text-ink-soft">
-          Switch active company workspace or register a new accounting tenant
+          {canAddCompany ? "Register your company to start" : "Switch active company workspace"}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={fetchOrgs} isLoading={isLoading}>
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
-          <Button
-            variant="tally"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            className="gap-1.5"
-          >
-            <Plus className="h-3.5 w-3.5" /> New Company
-          </Button>
+          {canAddCompany && (
+            <Button
+              variant="tally"
+              size="sm"
+              onClick={() => setIsCreateOpen(true)}
+              className="gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" /> New Company
+            </Button>
+          )}
         </div>
       </div>
 

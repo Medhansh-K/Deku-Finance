@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { consultantApi, organisationsApi, OrgSummary } from "@/api/endpoints";
 import { formatINR } from "@/lib/formatters/currency";
+import { setActiveOrg } from "@/lib/organisation/active-org";
 
 interface ChatMessage {
   id: string;
@@ -471,11 +472,7 @@ export function DekuConsultantView() {
   const handleSelectOrg = (org: OrgSummary) => {
     setActiveOrgId(org.id);
     setActiveOrgName(org.name);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", org.id);
-      localStorage.setItem("deku_active_org_name", org.name);
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
+    setActiveOrg(org);
     setMessages([]); // reset conversation for fresh workbench session
   };
 

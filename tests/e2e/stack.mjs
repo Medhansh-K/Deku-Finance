@@ -3,6 +3,7 @@
 // Plan §7, §8 and §10. Records created here use throwaway addresses and a fictional company.
 import { readFileSync, writeFileSync } from "node:fs";
 import { runWorkflows } from "./workflows.mjs";
+import { runEditingChecks } from "./editing.mjs";
 
 const BASE = process.env.E2E_BASE ?? "http://localhost:3000";
 const BACKEND = process.env.E2E_BACKEND ?? "http://localhost:8080";
@@ -299,6 +300,7 @@ async function fresh() {
   check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));
 
   await runWorkflows({ me, org, fy, date, check, invite: inviteToken, login, signup, voucherPeriod: period, accounts, viewer, base: BASE, PASSWORD });
+  await runEditingChecks({ me, org, date, voucherPeriod: period, accounts, check });
 
   // S-04, S-09: what a hostile page or script can reach through the proxy.
   r = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/fiscal-periods`, {

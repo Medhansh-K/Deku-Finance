@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { organisationsApi, OrgSummary, subscriptionApi } from "@/api/endpoints";
+import { clearActiveOrg, setActiveOrg } from "@/lib/organisation/active-org";
 import { orgFromRow } from "@/lib/organisation/profile";
 import type { Entitlements, Subscription } from "@/lib/subscription/entitlements";
 import { UserProfile, Organisation, OperatingMode } from "@/types";
@@ -84,13 +85,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const setOrganisation = (org: Organisation) => {
+  // Current at once, unlike state: the event fires before the state update has rendered.
+  const activeId = useRef<string | null>(null);
+
+  const selectOrg = (org: Organisation) => {
+    activeId.current = org.id;
     setOrg(org);
     setOperatingModeState(org.operating_mode);
+  };
+
+  const setOrganisation = (org: Organisation) => {
+    selectOrg(org);
     // Only the selected company (a per-browser choice) is remembered; its profile comes from the database.
-    localStorage.setItem("deku_active_org_id", org.id);
-    localStorage.setItem("deku_active_org_name", org.name);
-    window.dispatchEvent(new Event("deku_active_org_changed"));
+    setActiveOrg(org);
   };
 
   const toUser = (u: SessionUser): UserProfile => ({
@@ -163,6 +170,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const onRegimeChanged = () => void refreshOrganisations();
     window.addEventListener("deku_org_regime_changed", onRegimeChanged);
     return () => window.removeEventListener("deku_org_regime_changed", onRegimeChanged);
+  });
+
+  // Screens switch company through setActiveOrg. A company not in the list yet was just joined.
+  useEffect(() => {
+    const onActiveOrgChanged = () => {
+      const id = localStorage.getItem("deku_active_org_id");
+      if (!id || id === activeId.current) return;
+      const org = organisations.find((o) => o.id === id);
+      if (org) selectOrg(org);
+      else if (user) void loadOrganisations();
+    };
+    window.addEventListener("deku_active_org_changed", onActiveOrgChanged);
+    return () => window.removeEventListener("deku_active_org_changed", onActiveOrgChanged);
   });
 
   useEffect(() => {
@@ -248,12 +268,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn("Sign out err:", e);
     }
     setUser(null);
+    activeId.current = null;
     setOrg(null);
     setOrganisations([]);
     setSubscription(null);
-    for (const key of ["deku_active_org", "deku_active_org_id", "deku_active_org_name", "deku_operating_mode"]) {
-      localStorage.removeItem(key);
-    }
+    clearActiveOrg();
   };
 
   return (

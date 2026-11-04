@@ -23,13 +23,15 @@ import {
   FormattedKpiProfile,
   KpiKey,
 } from "@/lib/kpi/kpi-service";
+import { setActiveOrg } from "@/lib/organisation/active-org";
 
 export function GatewayLanding() {
   const router = useRouter();
 
   const [orgList, setOrgList] = useState<OrgSummary[]>([]);
+  const [orgsLoaded, setOrgsLoaded] = useState(false);
 
-  const [activeOrg, setActiveOrg] = useState({
+  const [activeOrg, setActiveOrgState] = useState({
     id: "",
     name: "",
     slug: "",
@@ -63,26 +65,21 @@ export function GatewayLanding() {
 
   // Handle switching company
   const handleSwitchCompany = (org: OrgSummary | { id: string; name: string; gstin?: string | null; currency?: string; slug?: string }) => {
-    setActiveOrg({
+    setActiveOrgState({
       id: org.id,
       name: org.name,
       slug: org.slug || org.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
       gstin: org.gstin ?? null,
       currency: org.currency || "INR",
     });
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("deku_active_org_id", org.id);
-      localStorage.setItem("deku_active_org_name", org.name);
-      // Notify the shell to sync the active company
-      window.dispatchEvent(new Event("deku_active_org_changed"));
-    }
+    setActiveOrg(org);
   };
 
   // Load all organisations from PostgreSQL backend
   const loadOrganisations = async () => {
     try {
       const res = await organisationsApi.list();
+      setOrgsLoaded(true);
       if (res.data && res.data.length > 0) {
         setOrgList(res.data);
         if (!localStorage.getItem("deku_active_org_id")) handleSwitchCompany(res.data[0]);
@@ -105,7 +102,7 @@ export function GatewayLanding() {
           .then((res) => {
             if (res.data && res.data.length > 0) {
               const org = res.data[0];
-              setActiveOrg({
+              setActiveOrgState({
                 id: org.id,
                 name: org.name,
                 slug: org.slug,
@@ -113,7 +110,7 @@ export function GatewayLanding() {
                 currency: org.currency || "INR",
               });
             } else if (savedName) {
-              setActiveOrg((prev) => ({
+              setActiveOrgState((prev) => ({
                 ...prev,
                 id: savedId,
                 name: savedName,
@@ -263,13 +260,16 @@ export function GatewayLanding() {
                 <span className="flex items-center gap-1">
                   <ArrowRightLeft className="h-3 w-3 text-brand" /> Shift Company
                 </span>
-                <Link
-                  href="/companies"
-                  className="text-brand-strong hover:text-brand transition-colors"
-                  title="Manage companies"
-                >
-                  + Add / Switch
-                </Link>
+                {/* One company per deployment: adding one is only for someone who has none yet. */}
+                {orgsLoaded && (
+                  <Link
+                    href="/companies"
+                    className="text-brand-strong hover:text-brand transition-colors"
+                    title="Manage companies"
+                  >
+                    {orgList.length > 0 ? "Switch" : "+ Add company"}
+                  </Link>
+                )}
               </div>
 
               <div className="space-y-1">
