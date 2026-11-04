@@ -306,7 +306,6 @@ console.log(`\nbrowser: ${results.length - failed.length}/${results.length} pass
 if (process.env.GITHUB_ACTIONS) {
   console.log(`::notice::e2e browser: ${results.length - failed.length}/${results.length} passed`);
   // One annotation: GitHub shows only ten per step, and logs need a login.
-  if (failed.length) console.log(`::error::${failed.map((f) => `${f.id} ${f.detail.slice(0, 260)}`.replaceAll("
-", " ")).join("%0A").slice(0, 9000)}`);
+  if (failed.length) console.log(`::error::${failed.map((f) => `${f.id} ${f.detail.slice(0, 260)}`.replaceAll("\n", " ")).join("%0A").slice(0, 9000)}`);
 }
 process.exit(failed.length ? 1 : 0);
