@@ -33,15 +33,12 @@ function SignupForm() {
   const inviteToken = new URLSearchParams(nextPath.split("?")[1] ?? "").get("token") ?? undefined;
   const { signup, user } = useAuth();
 
-  const initialPlan = searchParams.get("plan") === "pro" ? "pro" : "go";
-  const [selectedPlan, setSelectedPlan] = useState<"go" | "pro">(initialPlan);
   const [mode, setMode] = useState<OperatingMode>("pure_accounting");
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [state, setState] = useState("Maharashtra");
-  const [upiVpa, setUpiVpa] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -100,7 +97,7 @@ function SignupForm() {
           Complete Your Workspace Setup
         </h2>
         <p className="text-xs text-slate-400 max-w-md mx-auto">
-          Choose your plan and operating mode. Zero password sharing — your credentials stay 100% private.
+          Choose your operating mode. Zero password sharing — your credentials stay 100% private.
         </p>
       </div>
 
@@ -111,95 +108,6 @@ function SignupForm() {
             <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3.5 flex items-center gap-2.5 text-xs text-rose-300">
               <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {/* 2-Plan Selector (GO vs PRO) */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-                1. Select Subscription Plan (2 Plans Available)
-              </label>
-              <Link href="/#pricing" className="text-[11px] text-brand hover:underline">
-                View Feature Matrix ➔
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* GO Plan Card */}
-              <div
-                onClick={() => setSelectedPlan("go")}
-                className={`cursor-pointer rounded-2xl p-4 border transition-all text-left space-y-1.5 ${
-                  selectedPlan === "go"
-                    ? "bg-emerald-500/10 border-emerald-500 shadow-md ring-1 ring-emerald-500"
-                    : "bg-panel-deep border-edge hover:border-slate-600"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-white">GO Plan</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    <Sparkles className="h-2.5 w-2.5" />
-                    15-Day Free Trial
-                  </span>
-                </div>
-                <div className="text-xs text-slate-300 font-medium">
-                  ₹1,499/mo <span className="text-[10px] text-emerald-400 font-bold">(₹0 for 15 Days)</span>
-                </div>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  Standard invoice field customization, dynamic UPI QR on invoices, and up to 150 bills/mo.
-                </p>
-              </div>
-
-              {/* PRO Plan Card */}
-              <div
-                onClick={() => setSelectedPlan("pro")}
-                className={`cursor-pointer rounded-2xl p-4 border transition-all text-left space-y-1.5 ${
-                  selectedPlan === "pro"
-                    ? "bg-brand/10 border-brand shadow-md ring-1 ring-brand"
-                    : "bg-panel-deep border-edge hover:border-slate-600"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-white">PRO Plan</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand/20 text-brand-soft border border-brand/30">
-                    <Zap className="h-2.5 w-2.5" />
-                    Scaling Tier
-                  </span>
-                </div>
-                <div className="text-xs text-slate-300 font-medium">
-                  ₹4,999/mo <span className="text-[10px] text-slate-400">(₹3,999/mo billed annually)</span>
-                </div>
-                <p className="text-[10px] text-slate-400 leading-normal">
-                  Unlimited invoices, advanced field builder, 1-click GSTN offline JSON, and VIP helpline.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Plan Banner */}
-          {selectedPlan === "go" ? (
-            <div className="rounded-2xl bg-gradient-to-r from-emerald-500/15 via-emerald-500/10 to-transparent border border-emerald-500/30 p-3.5 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-emerald-300">
-                <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>15-Day Free Trial on GO Active</strong>: Full feature access enabled automatically upon signup (No credit card required).
-                </span>
-              </div>
-              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/30">
-                GO Trial
-              </span>
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-gradient-to-r from-brand/15 via-brand/10 to-transparent border border-brand/30 p-3.5 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-brand-soft">
-                <Zap className="h-4 w-4 text-brand shrink-0" />
-                <span>
-                  <strong>PRO Plan Selected</strong>: Dedicated onboarding assistance & VIP helpline (+91 7506461004) included.
-                </span>
-              </div>
-              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-brand/20 text-brand-soft text-[10px] font-bold uppercase border border-brand/30">
-                PRO Tier
-              </span>
             </div>
           )}
 
@@ -402,22 +310,6 @@ function SignupForm() {
                   </select>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Instant UPI VPA (For Scan-to-Pay on Bills)
-                </label>
-                <div className="relative">
-                  <QrCode className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={upiVpa}
-                    onChange={(e) => setUpiVpa(e.target.value)}
-                    placeholder="e.g. yourbusiness@okaxis"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                  />
-                </div>
-              </div>
             </div>
 
             <button
@@ -433,9 +325,7 @@ function SignupForm() {
               ) : (
                 <>
                   <span>
-                    {selectedPlan === "go"
-                      ? "Start 15-Day Free Trial (GO Plan)"
-                      : "Activate PRO Workspace"}
+                    Create account
                   </span>
                   <ArrowRight className="h-4 w-4" />
                 </>

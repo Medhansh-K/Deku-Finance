@@ -55,7 +55,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - run: docker compose build
+      # Plan section 13. Reported rather than blocking: base images pick up new findings on their own.
+      - name: Image sizes, SBOM and vulnerability scan
+        continue-on-error: true
+        run: |
+          mkdir -p image-reports
+          docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep -E 'deku-finance|postgres|postgrest' | tee image-reports/sizes.txt
+          for image in deku-finance-frontend deku-finance-backend deku-finance-migrate; do
+            trivy="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD/image-reports:/out aquasec/trivy:0.57.0 image --quiet"
+            $trivy --format cyclonedx --output "/out/$image.sbom.json" "$image:latest"
+            $trivy --severity HIGH,CRITICAL --ignore-unfixed --output "/out/$image.txt" "$image:latest"
+            echo "::notice::$image: $(grep -hE '^Total:' "image-reports/$image.txt" | tr '
+' ' ')"
+          done
+          echo "::notice::image sizes: $(tr '
+' ';' < image-reports/sizes.txt)"
       # Plan D-01 to D-16. Failures are published as annotations: run logs need a GitHub login.
       - name: Full stack, clean install
         run: |
@@ -63,6 +81,21 @@ jobs:
           docker compose up -d
           bash tests/e2e/wait.sh
           node tests/e2e/stack.mjs fresh
+      # Installed outside the repo: only CI needs a browser, and the app's lockfile stays as it is.
+      - name: Real browser, every page and tutorial
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          PW_HOME="$RUNNER_TEMP/pw" node --experimental-strip-types tests/e2e/browser.mjs
+      - name: Keep the browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-screenshots-and-image-reports
+          path: |
+            browser-screenshots
+            image-reports
+          if-no-files-found: ignore
       - name: Data survives container recreation
         run: |
           docker compose down

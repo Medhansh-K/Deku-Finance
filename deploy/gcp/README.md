@@ -22,7 +22,7 @@ gcloud services enable run.googleapis.com sqladmin.googleapis.com artifactregist
   secretmanager.googleapis.com cloudbuild.googleapis.com compute.googleapis.com \
   cloudscheduler.googleapis.com
 
-gcloud artifacts repositories create "$REPO" --repository-format=docker --location="$REGION"
+gcloud artifacts repositories create "$REPO" --repository-format=docker --location="$REGION" --immutable-tags
 ```
 
 ## 2. Cloud SQL
@@ -123,7 +123,6 @@ gcloud compute networks subnets update default --region="$REGION" --enable-priva
 ```
 
 With `all-traffic` the backend has no direct internet egress. Add Cloud NAT on `default` when an
-integration (GSP, KYC, Razorpay) needs to call out (steps in §11, "Cloud NAT for Razorpay calls").
 integration (GSP, KYC, Razorpay) needs to call out: provider calls fail with a 502 until it exists.
 GSPs usually allow-list caller IPs, so reserve a static address and give it to the provider:
 
@@ -200,10 +199,13 @@ Migrations run while the previous revision still serves traffic, so keep them ba
   ```
   Same for `deku-frontend`.
 - Schema: migrations are forward-only. Write a new migration that undoes the change. For data loss,
-  restore with point-in-time recovery into a new instance and switch the secrets' URIs:
+  restore with point-in-time recovery into a new instance:
   ```bash
   gcloud sql instances clone "$INSTANCE" deku-pg-restore --point-in-time=2026-11-01T10:00:00Z
   ```
+  Then update the database URIs in Secret Manager and redeploy `deku-postgrest` and the `deku-migrate`
+  job with `--set-cloudsql-instances` pointing at the clone. Changing the secrets alone isn't enough,
+  because Cloud Run mounts only the instance it was deployed with.
 
 ## 10. Scheduled notifications
 
@@ -269,13 +271,6 @@ company would have to reconnect.
 
 The backend's egress is `all-traffic` through the VPC (§5), so it reaches `auth.razorpay.com` and
 `api.razorpay.com` only through Cloud NAT. One router and NAT on `default` serve every integration
-(Razorpay, GSP, KYC); skip these commands if another integration already created them.
-
-```bash
-gcloud compute routers create deku-nat-router --network=default --region="$REGION"
-gcloud compute addresses create deku-nat-ip --region="$REGION"   # static egress IP, if a partner allow-lists IPs
-gcloud compute routers nats create deku-nat --router=deku-nat-router --region="$REGION" \
-  --nat-custom-subnet-ip-ranges=default --nat-external-ip-pool=deku-nat-ip
-```
+(Razorpay, GSP, KYC). Create it with the commands in §5 if it doesn't exist yet.
 
 A "Razorpay unreachable" error on "Create payment link" means the NAT is missing.

@@ -58,11 +58,10 @@ export default function PricingPlansSection() {
       highlights: [
         "Everything in GO, plus unlimited monthly invoices",
         "Advanced Invoice Field Customizer (E-Way, Batch, Serial No)",
-        "Custom Logo, Branding & Stamp on Invoices",
         "Payment Gateway Webhooks + Instant UPI QR settlement",
         "Official GSTR-1 & GSTR-3B offline JSON exports for gst.gov.in",
-        "Automated Input Tax Credit (ITC) reconciliation with GSTR-2B",
-        "Marketplace Bulk Sync (Amazon, Flipkart, Meesho, Shopify)",
+        "Input Tax Credit register with eligible and blocked tracking",
+        "Marketplace settlement file import (Amazon, Flipkart, Meesho)",
         "Unlimited team members with role-based RBAC access",
         "Priority VIP helpline & WhatsApp support (+91 7506461004)",
       ],
@@ -99,9 +98,9 @@ export default function PricingPlansSection() {
         },
         {
           name: "MSME Collect (45-Day Rule)",
-          description: "Automated WhatsApp payment reminders with direct UPI link for overdue invoices.",
+          description: "WhatsApp payment reminders with a direct UPI link for overdue invoices, sent by you.",
           go: "Manual WhatsApp Send",
-          pro: "Automated 45-day MSME Chase Schedules",
+          pro: "Manual WhatsApp Send, plus payment links",
         },
       ],
     },
@@ -130,7 +129,7 @@ export default function PricingPlansSection() {
           name: "Input Tax Credit (ITC) Matching",
           description: "Differentiate eligible vs Section 17(5) blocked credit and reconcile against GSTR-2B purchase logs.",
           go: "Basic Purchase Register",
-          pro: "Automated GSTR-2B Matching & Rule 36(4)",
+          pro: "Eligible vs blocked ITC in GSTR-3B",
         },
         {
           name: "Marketplace Sales (Section 14 ECO)",
@@ -195,7 +194,7 @@ export default function PricingPlansSection() {
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Start completely risk-free with a <strong>15-day free trial on GO</strong>. Upgrade to <strong>PRO</strong> when you need unlimited volume and automated GSTN filing.
+            Start completely risk-free with a <strong>15-day free trial on GO</strong>. Upgrade to <strong>PRO</strong> when you need unlimited volume and GST return exports.
           </p>
 
           {/* Billing Cycle Toggle */}

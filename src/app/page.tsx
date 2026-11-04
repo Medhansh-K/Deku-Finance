@@ -178,7 +178,7 @@ export default function Home() {
                 MSME Collect & WhatsApp Follow-Ups
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Stay compliant with the 45-day MSME Samadhaan rule. Trigger automated WhatsApp invoice delivery with embedded Bharat UPI QR links for instant buyer settlement.
+                Stay compliant with the 45-day MSME Samadhaan rule. Send WhatsApp reminders with UPI QR links so buyers can pay straight away.
               </p>
               <div className="pt-2 text-xs font-semibold text-emerald-700 flex items-center gap-1">
                 <span>Zero Delayed Receivables</span>
@@ -198,7 +198,7 @@ export default function Home() {
                 Upload vendor bills via drag-and-drop. Auto-differentiate between Eligible ITC and Ineligible Blocked ITC under Section 17(5) to prevent audit penalties.
               </p>
               <div className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1">
-                <span>GSTR-2B Ready Ingestion</span>
+                <span>GSTR-3B ITC Summary</span>
                 <ArrowRight className="h-3 w-3" />
               </div>
             </div>

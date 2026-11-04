@@ -2,7 +2,21 @@
 
 Owner: the developer handling GCP. Procedure: [`deploy/gcp/README.md`](../../deploy/gcp/README.md). **Nothing here has been run on GCP.**
 
-The plan (§16) requires an architecture decision before deploying. The current config assumes Cloud Run, Cloud SQL and Secret Manager. The deployer should confirm or change that.
+## Architecture decision (proposed; the deployer confirms it before deploying)
+
+**Recommendation: Cloud Run, Cloud SQL and Secret Manager, as `deploy/gcp` is already written.**
+
+| Need | Cloud Run + Cloud SQL | VM with Docker Compose |
+|---|---|---|
+| Same images as local | Yes | Yes, and the same startup too |
+| Backups and restore | Managed, with point-in-time recovery | You build and monitor them |
+| Patching and restarts | Managed | You run them |
+| Cost for one customer | Higher: always-on database plus services | Lower: one VM |
+| Connections and pooling | PostgREST pools; backend is stateless | Same |
+| Documents | In Postgres, so no bucket either way | Same |
+| Background job | Needs Cloud Scheduler | Needs cron |
+
+There's no streaming or WebSocket need, and no state outside Postgres. The VM is the fallback if cost matters more than managed backups. Costs haven't been estimated.
 
 ## Must be set for a customer
 
@@ -24,9 +38,7 @@ The plan (§16) requires an architecture decision before deploying. The current 
 |---|---|
 | Cloud SQL is created without a private IP | `--no-assign-ip` and networking still to add. Access is via the connector and password |
 | Backend is public | Needed for the Razorpay webhook. Login has a per-address lockout, but no IP rate limit |
-| Restore steps | The README omits redeploying services against a cloned instance |
 | No Cloud Run health probes | `/ready` exists and is unused there |
-| Secrets use `:latest`, and Artifact Registry isn't immutable | Plan §18 asks for immutable releases |
-| README | Has a duplicated line and two conflicting NAT recipes |
+| Secrets use `:latest` | Plan §18 asks for immutable releases. Pin versions at release time |
 | Scheduler | The hourly notifications job is created by hand |
 | Documents | Stored in Postgres, so Cloud SQL backups cover them. Size the disk with that in mind |
