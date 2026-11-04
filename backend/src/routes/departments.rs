@@ -762,7 +762,16 @@ async fn run_monthly_payroll_batch(
     let res = state
         .db
         .rpc("run_monthly_payroll", &rpc_payload, token)
-        .await?;
+        .await
+        .map_err(|e| match &e {
+            // The function's own refusals are written for the person running payroll.
+            AppError::Database(msg) if msg.contains("payroll_error: ") => {
+                let text = msg.split("payroll_error: ").nth(1).unwrap_or_default();
+                let reason = text.split('"').next().unwrap_or(text).trim_end_matches('\\');
+                AppError::Conflict(reason.to_string())
+            }
+            _ => e,
+        })?;
 
     Ok(Json(json!({
         "success": true,

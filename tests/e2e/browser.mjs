@@ -78,8 +78,11 @@ async function completeOnboarding(browser) {
       await page.waitForURL(/\/gateway/, { timeout: 15000 });
       break;
     }
-    await page.getByRole("button", { name: /^(Next|Continue|Save and continue)/ }).first().click();
-    await page.waitForTimeout(700);
+    const title = await page.locator("h1").innerText();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    // The button is disabled while saving and then relabelled, so wait for the step itself to change.
+    const moved = await page.waitForFunction((t) => document.querySelector("h1")?.innerText !== t, title, { timeout: 15000 }).then(() => true, () => false);
+    if (!moved) break;
   }
   const finished = new URL(page.url()).pathname === "/gateway";
   check("O-W2", "the setup wizard finishes on the Gateway", finished, `${page.url()} ${(await page.locator("body").innerText()).slice(0, 240)}`);
@@ -306,6 +309,6 @@ console.log(`\nbrowser: ${results.length - failed.length}/${results.length} pass
 if (process.env.GITHUB_ACTIONS) {
   console.log(`::notice::e2e browser: ${results.length - failed.length}/${results.length} passed`);
   // One annotation: GitHub shows only ten per step, and logs need a login.
-  if (failed.length) console.log(`::error::${failed.map((f) => `${f.id} ${f.detail.slice(0, 260)}`.replaceAll("\n", " ")).join("%0A").slice(0, 9000)}`);
+  if (failed.length) console.log(`::error::${failed.map((f) => `${f.id} ${f.detail.slice(0, 700)}`.replaceAll("\n", " ")).join("%0A").slice(0, 9000)}`);
 }
 process.exit(failed.length ? 1 : 0);

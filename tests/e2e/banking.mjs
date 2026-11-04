@@ -238,12 +238,19 @@ export async function runBankingChecks({ me, org, date, voucherPeriod, accounts,
     const status = (id) => staff.find((m) => m.id === id)?.payroll_status;
     check("B-12g", "active members are processed, the one on leave isn't", status(a?.id) === "processed" && status(b?.id) === "processed" && status(away?.id) === "pending", `${status(a?.id)} ${status(b?.id)} ${status(away?.id)}`);
 
-    // run_monthly_payroll posts no journal: this pins that gap so a change to it has to be looked at.
+    // Dr salaries 80,000; Cr net 67,400, TDS 3,000, EPF 9,600.
     const after = await balances();
-    check("B-13a", "payroll posts no journal (known gap): nothing reaches the ledger", (await journalCount()) === journalsBefore && moved(before, after, "5020") === 0 && moved(before, after, "1020") === 0, `${await journalCount()} vs ${journalsBefore}`);
+    check("B-13a", "payroll posts one journal with exact figures", (await journalCount()) === journalsBefore + 1 && moved(before, after, "5020") === 80000 && moved(before, after, "2091") === -67400 && moved(before, after, "2092") === -3000 && moved(before, after, "2093") === -9600, `${moved(before, after, "5020")} ${moved(before, after, "2091")} ${moved(before, after, "2092")} ${moved(before, after, "2093")}`);
+    check("B-13a2", "the run links to its voucher", !!result?.entry_number && (await runs())[0]?.journal_entry_id === result?.journal_entry_id, JSON.stringify(result ?? null).slice(0, 200));
 
     r = await run(me);
-    check("B-13b", "re-running a month keeps one run", r.status === 200 && (await runs()).length === 1, `${r.status} ${(await runs()).length}`);
+    check("B-13b", "the same month can't be posted twice", r.status === 409 && /already in the ledger/.test(r.text), `${r.status} ${r.text.slice(0, 200)}`);
+    check("B-13c", "and the ledger doesn't move", moved(before, await balances(), "5020") === 80000);
+
+    r = await me.api("POST", `${O}/journals/${result?.journal_entry_id}/reverse`, { reversal_date: date, narration: "E2E payroll correction" });
+    check("B-13d", "reversing the voucher nets it out", r.status === 200 && moved(before, await balances(), "5020") === 0, `${r.status} ${moved(before, await balances(), "5020")}`);
+    r = await run(me);
+    check("B-13e", "and reopens the month, keeping one run", r.status === 200 && (await runs()).length === 1 && moved(before, await balances(), "5020") === 80000, `${r.status} ${(await runs()).length} ${moved(before, await balances(), "5020")}`);
   });
 
   await section("B-20", "marketplace settlement", async () => {

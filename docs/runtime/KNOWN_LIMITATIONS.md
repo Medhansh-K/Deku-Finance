@@ -17,7 +17,7 @@
 - **The Consultant answers from ledger figures with fixed logic.** It isn't an external AI service.
 - **Report date defaults assume an April financial year,** though From and To can be changed.
 - **FP&A department budget use** reads a manually maintained field, not the ledger.
-- **Payroll doesn't post to the ledger.** A run records its totals and marks people processed, but salaries reach the P&L only through a voucher someone enters. Rerunning a month overwrites the run, and the run doesn't record who ran it. Invited people who haven't accepted count in its headcount.
+- **Payroll posts employee figures only.** A run debits salaries and credits net pay, TDS and EPF payable. Employer EPF and professional tax aren't recorded anywhere, and paying staff or the government is a voucher you enter. The account choices need your accountant's review. Invited people who haven't accepted count in the headcount.
 - **A completed bank reconciliation can't be corrected or redone** for that account and date. Undoing a match later makes it differ from its recorded snapshot.
 - **Vouchers tied to an invoice, bill, settlement or other source can't be edited,** only resubmitted, so they stay in line with that source.
 

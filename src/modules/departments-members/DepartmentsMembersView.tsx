@@ -446,7 +446,11 @@ export function DepartmentsMembersView() {
               <p role="status" className="text-emerald-700">
                 Payroll for {payrollResult.period}: {payrollResult.headcount} employees, net{" "}
                 {formatINR(payrollResult.total_net_disbursed)}, TDS {formatINR(payrollResult.total_tds)}, EPF{" "}
-                {formatINR(payrollResult.total_epf)}.
+                {formatINR(payrollResult.total_epf)}.{" "}
+                {payrollResult.entry_number &&
+                  (payrollResult.submitted_for_approval
+                    ? `Voucher ${payrollResult.entry_number} is waiting for approval and reaches the ledger once approved.`
+                    : `Posted to the ledger as ${payrollResult.entry_number}. Record the salary, TDS and EPF payments as payment vouchers against the payable accounts.`)}
               </p>
             ) : (
               <p role="alert" className="text-rose-700">{payrollResult.message}</p>
