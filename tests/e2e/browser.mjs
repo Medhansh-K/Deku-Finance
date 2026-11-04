@@ -38,7 +38,7 @@ async function signIn(browser, email, viewport) {
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', PASSWORD);
   await page.click('button[type="submit"]');
-  await page.waitForURL(/\/gateway/, { timeout: 20000 });
+  await page.waitForURL(/\/(gateway|onboarding)/, { timeout: 20000 });
   return { context, page };
 }
 
