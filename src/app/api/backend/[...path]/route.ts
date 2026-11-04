@@ -2,6 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ACCESS_COOKIE, proxyTarget } from "@/lib/auth/session";
 
 // location: the Razorpay OAuth callback answers with a same-origin redirect to /settings.
+// Same as the backend's file limit. Refused here because the backend closes the connection on an
+// oversized body mid-send, which would surface as "backend unavailable" instead of this message.
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
+
 const PASS_RESPONSE_HEADERS = ["content-type", "content-disposition", "cache-control", "location", "x-content-type-options"];
 
 async function forward(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
@@ -17,12 +21,17 @@ async function forward(request: NextRequest, { params }: { params: Promise<{ pat
   const token = request.cookies.get(ACCESS_COOKIE)?.value;
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
+  const body = ["GET", "HEAD"].includes(request.method) ? undefined : await request.arrayBuffer();
+  if (body && body.byteLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "That file is over the 10 MB limit." }, { status: 413 });
+  }
+
   let upstream: Response;
   try {
     upstream = await fetch(target, {
       method: request.method,
       headers,
-      body: ["GET", "HEAD"].includes(request.method) ? undefined : await request.arrayBuffer(),
+      body,
       redirect: "manual",
       cache: "no-store",
     });
