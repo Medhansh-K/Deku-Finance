@@ -174,7 +174,7 @@ async function fresh() {
   r = await owner.s.api("GET", `/organisations/${org}/reports/trial-balance`);
   const tb = tbTotals(r.json?.data ?? []);
   check("W-01g", "trial balance debits equal credits", tb.debit === tb.credit && tb.debit === 1234.5, JSON.stringify(tb));
-  r = await owner.s.api("GET", `/organisations/${org}/reports/cash-flow`);
+  r = await owner.s.api("GET", `/organisations/${org}/reports/cash-flow?start_date=${fy.start_date}&end_date=${date}`);
   check("W-01i", "cash flow shows the money leaving the bank", Number(r.json?.data?.closing_cash_equivalents) === -1234.5, r.text.slice(0, 300));
   r = await owner.s.api("GET", `/organisations/${org}/audit-events`);
   check("W-01h", "audit trail recorded events", r.status === 200 && (r.json?.data ?? []).length > 0, `${r.status} ${r.text.slice(0, 200)}`);
