@@ -16,11 +16,13 @@ import {
   Sparkles,
   Check,
   X,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useKeyboardNav } from "@/context/KeyboardNavContext";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
+import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
 import { GLOBAL_FUNCTION_KEY_MAP, isPlainKey, isTargetInteractive } from "@/lib/keyboard/shortcuts";
@@ -55,7 +57,7 @@ const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking"
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
-  const { user, logout } = useAuth();
+  const { user, logout, loginDemo } = useAuth();
   const { keyboardNavEnabled, toggleKeyboardNav } = useKeyboardNav();
 
   // Set by what the user types, because forms start out prefilled and a field's value proves nothing.
@@ -86,6 +88,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
   // Active company context
   const [activeCompany, setActiveCompany] = useState<{ id: string; name: string }>({ id: "", name: "" });
@@ -330,6 +333,25 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
+        {/* Interactive Demo Mode Guide Banner */}
+        {user?.is_demo && (
+          <div className="bg-gradient-to-r from-brand/20 via-sky-500/10 to-brand/20 border-b border-brand/30 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between text-slate-200 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-brand animate-pulse" />
+              <span className="text-slate-300">
+                Exploring Interactive Demo: <strong className="text-white font-bold">{activeCompany.name || "Demo Company"}</strong>
+              </span>
+            </div>
+            <button
+              onClick={() => setIsTutorialOpen(true)}
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand hover:text-white transition-colors underline underline-offset-2"
+            >
+              <span>Compare GO Freelancer vs PRO Enterprise &amp; Tour</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+
         {/* Central Content Area (Full screen width, no permanent sidebar) */}
         <div className="relative flex flex-1 flex-col overflow-hidden print:overflow-visible print:h-auto print:flex-none">
           {children}
@@ -349,6 +371,15 @@ export function AppShell({ children }: AppShellProps) {
         <KeyboardHelpModal
           isOpen={isHelpOpen}
           onClose={() => setIsHelpOpen(false)}
+        />
+        <InteractivePlanTutorialModal
+          isOpen={isTutorialOpen}
+          onClose={() => setIsTutorialOpen(false)}
+          onLaunchDemo={async (type) => {
+            setIsTutorialOpen(false);
+            await loginDemo(type);
+            window.location.reload();
+          }}
         />
       </div>
     </QueryClientProvider>
