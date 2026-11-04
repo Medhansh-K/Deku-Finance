@@ -541,6 +541,12 @@ export function GatewayLanding() {
                     </kbd>
                   </Link>
                   <Link
+                    href="/reports/general-ledger"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>General Ledger</span>
+                  </Link>
+                  <Link
                     href="/reports/cash-flow"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >

@@ -1,23 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, RefreshCw, Printer, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, RefreshCw, Printer, AlertTriangle, ArrowUpRight, ArrowDownRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
 import { ProfitLossRow } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
+import { downloadFile } from "@/lib/download";
+import { profitLossCsv } from "@/lib/import/export";
+import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
+import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
 
 export function ProfitLossView() {
   const router = useRouter();
-  const [rows, setRows] = useState<ProfitLossRow[]>([]);
+  // Null until figures load, and after a failure: nothing to show must not read as zero.
+  const [loaded, setLoaded] = useState<ProfitLossRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [orgId, setOrgId] = useState<string>("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const latest = useRef(0);
+  const problem = rangeProblem(from, to);
 
   useEffect(() => {
+    const range = currentFyRange();
+    setFrom(range.from);
+    setTo(range.to);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -25,15 +37,21 @@ export function ProfitLossView() {
   }, []);
 
   const fetchPnL = async () => {
-    setIsLoading(true);
+    const request = ++latest.current;
+    setLoaded(null);
     setError(null);
-    try {
-      const res = await reportsApi.getProfitAndLoss(orgId);
-      setRows(res.data || []);
-    } catch (err: any) {
-      setError(err.message || "Failed to load authoritative Profit & Loss report");
-    } finally {
+    if (problem) {
       setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await reportsApi.getProfitAndLoss(orgId, { from, to });
+      if (request === latest.current) setLoaded(res.data || []);
+    } catch (err: any) {
+      if (request === latest.current) setError(err.message || "Failed to load authoritative Profit & Loss report");
+    } finally {
+      if (request === latest.current) setIsLoading(false);
     }
   };
 
@@ -47,8 +65,9 @@ export function ProfitLossView() {
       window.removeEventListener("deku_ledger_updated", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
-  }, [orgId]);
+  }, [orgId, from, to]);
 
+  const rows = loaded ?? [];
   const incomeAccounts = rows.filter((r) => r.account_type === "income");
   const expenseAccounts = rows.filter((r) => r.account_type === "expense");
 
@@ -56,21 +75,38 @@ export function ProfitLossView() {
   const totalExpense = expenseAccounts.reduce((sum, r) => sum + (r.net_amount || 0), 0);
   const netProfit = totalIncome - totalExpense;
   const isNetProfit = netProfit >= 0;
+  const money = (v: number) => (loaded ? formatINR(v) : "–");
 
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="flex items-center gap-2">
-          <Badge variant={isNetProfit ? "success" : "danger"}>
-            {isNetProfit ? "Net Profit" : "Net Loss"}: {formatINR(Math.abs(netProfit))}
-          </Badge>
-          <span className="text-ink-muted font-mono text-[11px]">
-            From posted ledger entries
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            {loaded ? (
+              <Badge variant={isNetProfit ? "success" : "danger"}>
+                {isNetProfit ? "Net Profit" : "Net Loss"}: {formatINR(Math.abs(netProfit))}
+              </Badge>
+            ) : (
+              <Badge variant="warning">Net Result: –</Badge>
+            )}
+            <span className="text-ink-muted font-mono text-[11px]">
+              From posted ledger entries
+            </span>
+          </div>
+          <ReportDateRange from={from} to={to} onFrom={setFrom} onTo={setTo} problem={orgId ? problem : null} />
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => loaded && downloadFile(`profit-and-loss-${from}-to-${to}.csv`, profitLossCsv(loaded, from, to), "text/csv;charset=utf-8")}
+            disabled={!loaded}
+            className="gap-1.5"
+          >
+            <Download className="h-3.5 w-3.5" /> Export CSV
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -84,6 +120,7 @@ export function ProfitLossView() {
             size="sm"
             onClick={fetchPnL}
             isLoading={isLoading}
+            disabled={!!problem}
             className="gap-1.5"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -114,7 +151,7 @@ export function ProfitLossView() {
           </span>
           <div className="flex items-center justify-between mt-1">
             <span className="text-base font-bold font-mono text-ink">
-              {formatINR(totalIncome)}
+              {money(totalIncome)}
             </span>
             <ArrowUpRight className="h-4 w-4 text-emerald-600" />
           </div>
@@ -126,7 +163,7 @@ export function ProfitLossView() {
           </span>
           <div className="flex items-center justify-between mt-1">
             <span className="text-base font-bold font-mono text-ink">
-              {formatINR(totalExpense)}
+              {money(totalExpense)}
             </span>
             <ArrowDownRight className="h-4 w-4 text-rose-600" />
           </div>
@@ -137,17 +174,23 @@ export function ProfitLossView() {
             Net Result for Period
           </span>
           <div className="flex items-center justify-between mt-1">
-            <span
-              className={`text-base font-bold font-mono ${
-                isNetProfit ? "text-emerald-700" : "text-rose-700"
-              }`}
-            >
-              {isNetProfit ? "+" : "-"}
-              {formatINR(Math.abs(netProfit))}
-            </span>
-            <Badge variant={isNetProfit ? "success" : "danger"}>
-              {isNetProfit ? "Surplus" : "Deficit"}
-            </Badge>
+            {loaded ? (
+              <>
+                <span
+                  className={`text-base font-bold font-mono ${
+                    isNetProfit ? "text-emerald-700" : "text-rose-700"
+                  }`}
+                >
+                  {isNetProfit ? "+" : "-"}
+                  {formatINR(Math.abs(netProfit))}
+                </span>
+                <Badge variant={isNetProfit ? "success" : "danger"}>
+                  {isNetProfit ? "Surplus" : "Deficit"}
+                </Badge>
+              </>
+            ) : (
+              <span className="text-base font-bold font-mono text-ink">–</span>
+            )}
           </div>
         </div>
       </div>
@@ -158,7 +201,7 @@ export function ProfitLossView() {
         <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Expenses & Outflows</span>
-            <span className="text-slate-300 font-bold">{formatINR(totalExpense)}</span>
+            <span className="text-slate-300 font-bold">{money(totalExpense)}</span>
           </div>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
@@ -192,7 +235,7 @@ export function ProfitLossView() {
               ) : (
                 <tr>
                   <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
-                    No expense movements recorded.
+                    {loaded ? "No expense movements recorded." : "–"}
                   </td>
                 </tr>
               )}
@@ -204,7 +247,7 @@ export function ProfitLossView() {
         <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
           <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
             <span>Income & Inflows</span>
-            <span className="text-emerald-400 font-bold">{formatINR(totalIncome)}</span>
+            <span className="text-emerald-400 font-bold">{money(totalIncome)}</span>
           </div>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
@@ -238,7 +281,7 @@ export function ProfitLossView() {
               ) : (
                 <tr>
                   <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
-                    No revenue movements recorded.
+                    {loaded ? "No revenue movements recorded." : "–"}
                   </td>
                 </tr>
               )}

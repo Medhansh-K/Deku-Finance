@@ -220,6 +220,14 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     icon: FileSpreadsheet,
   },
   {
+    id: "rep-general-ledger",
+    title: "General Ledger",
+    subtitle: "One account's posted lines with opening and running balance",
+    category: "Reports",
+    route: "/reports/general-ledger",
+    icon: FileSpreadsheet,
+  },
+  {
     id: "rep-pnl",
     title: "Profit & Loss Account",
     subtitle: "Revenue, operating expenses & net profit",

@@ -173,6 +173,7 @@ export interface GeneralLedgerRow {
   party_id?: string | null;
   party_name?: string | null;
   description?: string | null;
+  narration?: string | null;
   debit: number;
   credit: number;
   fiscal_period_id: string;
@@ -200,8 +201,8 @@ export interface AccountBalanceRow {
 
 export interface ProfitLossRow {
   organisation_id: string;
-  fiscal_period_id: string;
-  fiscal_period_name: string;
+  fiscal_period_id?: string;
+  fiscal_period_name?: string;
   account_id: string;
   account_code: string;
   account_name: string;
@@ -213,10 +214,11 @@ export interface ProfitLossRow {
 
 export interface BalanceSheetRow {
   organisation_id: string;
-  fiscal_period_id: string;
-  fiscal_period_name: string;
-  account_id: string;
-  account_code: string;
+  fiscal_period_id?: string;
+  fiscal_period_name?: string;
+  /** Null on the computed accumulated profit row, which has no ledger of its own. */
+  account_id: string | null;
+  account_code: string | null;
   account_name: string;
   account_type: AccountType;
   total_debit: number;

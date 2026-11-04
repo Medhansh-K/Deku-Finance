@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { runWorkflows } from "./workflows.mjs";
 import { runEditingChecks } from "./editing.mjs";
 import { runBankingChecks } from "./banking.mjs";
+import { runReportChecks } from "./reports.mjs";
 
 const BASE = process.env.E2E_BASE ?? "http://localhost:3000";
 const BACKEND = process.env.E2E_BACKEND ?? "http://localhost:8080";
@@ -303,6 +304,7 @@ async function fresh() {
   await runWorkflows({ me, org, fy, date, check, invite: inviteToken, login, signup, voucherPeriod: period, accounts, viewer, base: BASE, PASSWORD });
   await runEditingChecks({ me, org, date, voucherPeriod: period, accounts, check });
   await runBankingChecks({ me, org, date, voucherPeriod: period, accounts, check, invite: inviteToken, signup });
+  await runReportChecks({ me, org, date, fy, check });
 
   // S-04, S-09: what a hostile page or script can reach through the proxy.
   r = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/fiscal-periods`, {
