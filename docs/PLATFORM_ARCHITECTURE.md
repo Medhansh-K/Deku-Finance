@@ -208,7 +208,7 @@ The Rust/Axum backend exposes **26 route modules** serving business operations, 
 
 ## 5. Database Migrations & Module Dependency Inventory
 
-The application database is constructed through **45 sequential SQL migrations** (`000` through `044`). Each migration establishes schemas, tables, functions, triggers, and Row-Level Security policies supporting specific application runtime modules:
+The application database is constructed through **47 sequential SQL migrations** (`000` through `046`). Each migration establishes schemas, tables, functions, triggers, and Row-Level Security policies supporting specific application runtime modules:
 
 ```mermaid
 graph LR
@@ -261,6 +261,8 @@ graph LR
 - **`20261028000021_reports_include_reversed_entries.sql`**: Updates reporting views to handle voided vouchers and display compensating reversal audit trails.
 - **`20261031000027_allow_journal_reversal.sql`**: Creates `reverse_journal_entry()` RPC for atomic, immutable ledger reversals.
 - **`20261031000029_ledger_functions.sql`**: High-performance ledger balance RPCs and sub-ledger trial balance computations.
+- **`20261104000045_reports_exclude_unposted_lines.sql`**: Filters out unposted and draft vouchers from balance sheet, P&L, and trial balance reporting views.
+- **`20261104000046_report_functions_use_chart_columns.sql`**: Updates reporting RPCs to query canonical chart-of-accounts columns and group hierarchies accurately.
 
 #### 3. Sales Invoicing, Credit/Debit Notes & Indian GST Engine
 - **`20261018000007_sales_invoices_gst.sql`**: Creates `sales_invoices`, `sales_invoice_items`, POS evaluation rules, CGST/SGST/IGST tax split fields.
