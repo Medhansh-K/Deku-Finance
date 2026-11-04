@@ -87,8 +87,7 @@ async function completeOnboarding(browser) {
         const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
         return { disabled: el.disabled, rect: [r.x, r.y, r.width, r.height], viewport: [innerWidth, innerHeight], covering: top ? `${top.tagName}.${String(top.className).slice(0, 80)} ${top.textContent.slice(0, 60)}` : null, same: top === el || el.contains(top) };
       }).catch((e) => e.message);
-      const reasons = clicked.split(/?
-/).filter((l) => /intercept|not enabled|not stable|not visible|outside|detached/.test(l)).slice(0, 3).join(" ");
+      const reasons = clicked.split("\n").filter((l) => /intercept|not enabled|not stable|not visible|outside|detached/.test(l)).slice(0, 3).join(" ");
       check("O-W-click", "Continue can be clicked", false, `${JSON.stringify(seen)} ${reasons}`);
       await page.screenshot({ path: join(SHOTS, "wizard-stuck.png") });
       break;
