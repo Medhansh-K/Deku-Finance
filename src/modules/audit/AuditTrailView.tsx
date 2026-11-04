@@ -404,7 +404,7 @@ export function AuditTrailView() {
                   onClick={() => downloadSecureAuditExport(orgId, "json", orgName)}
                   className="w-full text-left px-3 py-1.5 hover:bg-canvas-sunken flex items-center justify-between text-ink-soft"
                 >
-                  <span>Export Verified JSON</span>
+                  <span>Export JSON</span>
                   <span className="font-mono text-[9px] text-ink-subtle">.json</span>
                 </button>
                 <button
@@ -412,7 +412,7 @@ export function AuditTrailView() {
                   onClick={() => downloadSecureAuditExport(orgId, "csv", orgName)}
                   className="w-full text-left px-3 py-1.5 hover:bg-canvas-sunken flex items-center justify-between text-ink-soft"
                 >
-                  <span>Export Verified CSV</span>
+                  <span>Export CSV</span>
                   <span className="font-mono text-[9px] text-ink-subtle">.csv</span>
                 </button>
               </div>

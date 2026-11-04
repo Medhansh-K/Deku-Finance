@@ -418,7 +418,7 @@ export function VoucherWorkspace({
       title: `Matched Open Sales Invoice #${target.invoice_number}`,
       refNumber: target.invoice_number,
       uploadedAt: new Date().toISOString(),
-      verified: true,
+      verified: false,
       linkedInvoiceNumber: target.invoice_number,
       notes: `Direct settlement for ${customerNameOf(target)} (Amount: ₹${target.total_amount?.toLocaleString("en-IN")})`,
     });
@@ -748,10 +748,11 @@ export function VoucherWorkspace({
       }
     }
 
-    const activeFp =
-      fiscalPeriods.find((fp) => fp.status === "open") || fiscalPeriods[0];
+    const activeFp = fiscalPeriods.find(
+      (fp) => fp.status === "open" && fp.start_date <= entryDate && entryDate <= fp.end_date
+    );
     if (!activeFp) {
-      setApiError("No active open fiscal period found for organisation.");
+      setApiError(`No open fiscal period covers ${entryDate}. Add or reopen one in Settings.`);
       return;
     }
 
@@ -806,7 +807,7 @@ export function VoucherWorkspace({
         );
       } else {
         setSubmissionSuccess(
-          `Draft voucher ${voucherNumber} saved successfully. (Note: Drafts are unposted and do not update COA, P&L, or Balance Sheet until statutory document proof is verified.)`
+          `Draft voucher ${voucherNumber} saved successfully. (Drafts don't reach the ledger or reports until they're posted.)`
         );
       }
 
@@ -1450,7 +1451,7 @@ export function VoucherWorkspace({
                   )}
                 </div>
                 <p className="text-[11px] text-ink-muted font-mono">
-                  Indian GAAP compliance: final COA posting and financial statements (P&amp;L, Balance Sheet) require verifiable proof.
+                  Attach the supporting document. It's stored with the voucher; nothing checks what it says.
                 </p>
               </div>
             </div>
@@ -1747,7 +1748,7 @@ export function VoucherWorkspace({
                             <option value="">— Choose Open Invoice to Settle —</option>
                             {openInvoices.map((inv) => (
                               <option key={inv.id || inv.invoice_number} value={inv.invoice_number}>
-                                {inv.invoice_number} • {customerNameOf(inv)} (Due: ₹{inv.total_amount?.toLocaleString("en-IN")})
+                                {inv.invoice_number} • {customerNameOf(inv)} (Invoice total: ₹{inv.total_amount?.toLocaleString("en-IN")})
                               </option>
                             ))}
                           </select>

@@ -373,7 +373,7 @@ export function GatewayLanding() {
                     color: "#FFFFFF",
                   }}
                   className="flex items-center justify-between px-2.5 py-2 rounded hover:border-[#00F5A0]/60 shadow-xs group transition-all"
-                  title="Launch Deku Konsultant Executive Dashboard & Sovereign AI CFO (K or E)"
+                  title="Launch Deku Konsultant Executive Dashboard & Consultant (K or E)"
                 >
                   <div className="flex items-center gap-2">
                     <span
@@ -391,7 +391,7 @@ export function GatewayLanding() {
                         Deku <u>K</u>onsultant (<u>E</u>xecutive Dashboard)
                       </span>
                       <span className="text-[10px] text-ink-subtle block font-mono">
-                        {companyShortName} Sovereign AI CFO &amp; Real-time Ledger Intelligence
+                        {companyShortName} Consultant &amp; Real-time Ledger Intelligence
                       </span>
                     </div>
                   </div>
@@ -909,7 +909,7 @@ export function GatewayLanding() {
             <Link
               href="/executive"
               className="inline-flex items-center gap-1 font-bold text-ink hover:text-brand transition-colors"
-              title="Open Executive Dashboard & AI CFO (E)"
+              title="Open Executive Dashboard (E)"
             >
               <span>Executive Dashboard (E)</span>
               <ArrowRight className="h-3.5 w-3.5" />

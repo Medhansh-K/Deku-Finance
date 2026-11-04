@@ -57,6 +57,11 @@ export function DayBookView() {
   const [voucherTypeFilter, setVoucherTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  // Reports link here with ?account_code= to show one ledger's vouchers.
+  const [accountCode, setAccountCode] = useState<string | null>(null);
+  useEffect(() => {
+    setAccountCode(new URLSearchParams(window.location.search).get("account_code"));
+  }, []);
 
   // Transaction Detail Modal
   const [selectedEntry, setSelectedEntry] = useState<VoucherItem | null>(null);
@@ -68,7 +73,7 @@ export function DayBookView() {
   const [reversalDate, setReversalDate] = useState<string>("2026-10-23");
   const [reversalReason, setReversalReason] = useState<string>("");
 
-  // Printable Indian GAAP Voucher Slip Modal State
+  // Printable Voucher Slip Modal State
   const [isPrintSlipOpen, setIsPrintSlipOpen] = useState(false);
 
   // Definition banner toggle
@@ -181,7 +186,20 @@ export function DayBookView() {
       setIsDetailOpen(false);
       window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber: vch.entry_number } }));
     } catch (err: any) {
-      alert(`Posting failed: ${err?.message || "Unknown error"}`);
+      // With approvals on, a draft goes to a checker instead; there's no other way to send one.
+      if (/approval required/i.test(err?.message ?? "")) {
+        if (confirm(`This company requires approval. Submit ${vch.entry_number} for approval?`)) {
+          try {
+            await accountingApi.submitJournal(orgId, vch.id);
+            setIsDetailOpen(false);
+            window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { voucherNumber: vch.entry_number } }));
+          } catch (submitErr: any) {
+            alert(`Couldn't submit: ${submitErr?.message || "Unknown error"}`);
+          }
+        }
+      } else {
+        alert(`Posting failed: ${err?.message || "Unknown error"}`);
+      }
     } finally {
       setIsActionPending(false);
     }
@@ -235,6 +253,7 @@ export function DayBookView() {
 
   // Filter journals
   const filteredJournals = journals.filter((entry) => {
+    if (accountCode && !entry.lines.some((l) => l.ledger_folio === accountCode)) return false;
     if (statusFilter !== "all" && entry.status !== statusFilter) return false;
     if (dateFilter && entry.entry_date !== dateFilter) return false;
     if (voucherTypeFilter !== "all" && entry.voucher_type !== voucherTypeFilter) return false;
@@ -418,7 +437,7 @@ export function DayBookView() {
               setIsPrintSlipOpen(true);
             }}
             className="p-1 rounded hover:bg-slate-100 text-brand-strong hover:text-ink cursor-pointer"
-            title="Print Indian GAAP Voucher Slip"
+            title="Print Voucher Slip"
           >
             <Printer className="h-3.5 w-3.5" />
           </button>
@@ -680,7 +699,7 @@ export function DayBookView() {
               </div>
             </div>
 
-            {/* Statutory Document Proof Status */}
+            {/* Supporting Document Status */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-slate-400 block text-[10px] font-mono uppercase">
@@ -694,7 +713,7 @@ export function DayBookView() {
                 ) : (
                   <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
                     <ShieldAlert className="h-3 w-3 text-amber-700" />
-                    Proof Missing
+                    No Document
                   </span>
                 )}
               </div>
@@ -750,7 +769,7 @@ export function DayBookView() {
                   <div className="flex items-center gap-2 text-amber-900">
                     <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
                     <span>
-                      <strong>Proof Missing:</strong> Indian GAAP statutory compliance requires verifiable document proof before this entry can update the Chart of Accounts, P&amp;L, or Balance Sheet.
+                      <strong>No document attached.</strong> You can attach the supporting document here.
                     </span>
                   </div>
                   <label className="text-xs font-bold text-brand-strong underline cursor-pointer shrink-0">
@@ -905,7 +924,7 @@ export function DayBookView() {
             <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5">
               <RotateCcw className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
               <div className="leading-relaxed">
-                <strong>Statutory Audit Safeguard:</strong> Reversing this voucher will not delete historical records. An auditable Contra Reversal entry will be posted, reversing all debits to credits and credits to debits, updating the Chart of Accounts, Day Book, and Financial Statements.
+                <strong>Audit safeguard:</strong> Reversing this voucher will not delete historical records. An auditable Contra Reversal entry will be posted, reversing all debits to credits and credits to debits, updating the Chart of Accounts, Day Book, and Financial Statements.
               </div>
             </div>
 
@@ -960,7 +979,7 @@ export function DayBookView() {
         <Modal
           isOpen={isPrintSlipOpen}
           onClose={() => setIsPrintSlipOpen(false)}
-          title={`Print Indian GAAP Voucher Slip: ${selectedEntry.entry_number}`}
+          title={`Print Voucher Slip: ${selectedEntry.entry_number}`}
           maxWidth="2xl"
         >
           <div className="space-y-4 font-sans text-xs">
@@ -1088,17 +1107,16 @@ export function DayBookView() {
                 </span>
               </div>
 
-              {/* Statutory Document Proof Footer Note */}
+              {/* Supporting Document Footer Note */}
               <div className="p-2 rounded bg-emerald-50/60 border border-emerald-200 text-[10px] font-mono text-emerald-900 flex items-center justify-between">
                 <div>
-                  <strong>Statutory Document Proof: </strong>
+                  <strong>Supporting Document: </strong>
                   <span>
                     {selectedEntry.document_proof
                       ? `${selectedEntry.document_proof.title} (Ref: ${selectedEntry.document_proof.refNumber || selectedEntry.reference})`
                       : `Source Doc: ${selectedEntry.source_document}`}
                   </span>
                 </div>
-                <span className="text-emerald-700 font-bold">✓ GAAP Verified</span>
               </div>
 
               {/* Three Indian GAAP Signature Blocks */}
@@ -1132,7 +1150,7 @@ export function DayBookView() {
             {/* Print Dialog Actions */}
             <div className="pt-2 flex items-center justify-between">
               <span className="text-[11px] text-slate-500 font-mono">
-                Indian GAAP Voucher Print Module
+                Voucher Print Module
               </span>
               <div className="flex items-center gap-2">
                 <Button

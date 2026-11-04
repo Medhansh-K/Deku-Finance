@@ -63,7 +63,7 @@ export function ReconciliationView() {
     if (!orgId) return;
     accountingApi
       .listAccounts(orgId)
-      .then((res) => setAccounts((res.data || []).filter((a) => a.is_postable && a.type === "asset")))
+      .then((res) => setAccounts((res.data || []).filter((a) => a.is_postable && a.ledger === "Cash & Liquid Capital" && a.type === "asset")))
       .catch((err) => setError(err.message || "Failed to load accounts"));
   }, [orgId]);
 

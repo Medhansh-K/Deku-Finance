@@ -227,6 +227,10 @@ export async function runWorkflows({ me, org, fy, date, check, invite, login, si
     check("M-08c", "maker can't post directly", direct.status !== 200, direct.status);
     const submitted = await accountant.s.api("POST", `${O}/journals/${id}/submit`);
     check("M-08d", "maker submits for approval", submitted.status === 200, `${submitted.status} ${submitted.text.slice(0, 200)}`);
+    const sentBack = await me.api("POST", `${O}/journals/${id}/reject`, { reason: "E2E please check" });
+    check("M-08d1", "checker sends it back", sentBack.status === 200, `${sentBack.status} ${sentBack.text.slice(0, 200)}`);
+    const resubmitted = await accountant.s.api("POST", `${O}/journals/${id}/submit`);
+    check("M-08d2", "maker resubmits it", resubmitted.status === 200, `${resubmitted.status} ${resubmitted.text.slice(0, 200)}`);
     const self = await accountant.s.api("POST", `${O}/journals/${id}/post`);
     check("M-08e", "maker can't approve their own voucher", self.status !== 200, self.status);
     check("M-08f", "nothing reaches the ledger before approval", moved(before, await balances(), "5090") === 0);

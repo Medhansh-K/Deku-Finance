@@ -139,6 +139,22 @@ async fn create_audit_event(
 
 /// GET /api/v1/organisations/:org_id/audit-events
 /// Returns chronological immutable audit records for the organisation
+/// Both feeds, because the database's own events (such as a document attached) aren't activity rows.
+fn merge_newest_first(a: Value, b: Value, limit: usize) -> Value {
+    let mut rows: Vec<Value> = [a, b]
+        .into_iter()
+        .filter_map(|v| match v {
+            Value::Array(rows) => Some(rows),
+            _ => None,
+        })
+        .flatten()
+        .collect();
+    let at = |r: &Value| r.get("created_at").and_then(Value::as_str).unwrap_or_default().to_string();
+    rows.sort_by_key(|r| std::cmp::Reverse(at(r)));
+    rows.truncate(limit);
+    Value::Array(rows)
+}
+
 async fn list_audit_events(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -162,18 +178,14 @@ async fn list_audit_events(
         query.push(("category", &cat_filter));
     }
 
-    let res = match state
-        .db
-        .query_table("user_activity_logs", &query, token)
-        .await
-    {
-        Ok(data) if data.as_array().map_or(false, |a| !a.is_empty()) => data,
-        _ => state
-            .db
-            .query_table("audit_events", &query, token)
-            .await
-            .unwrap_or_else(|_| json!([])),
+    let activity = state.db.query_table("user_activity_logs", &query, token).await?;
+    // Database events have no category, so a category filter is about activity rows only.
+    let events = if params.category.is_some() {
+        json!([])
+    } else {
+        state.db.query_table("audit_events", &query, token).await.unwrap_or_else(|_| json!([]))
     };
+    let res = merge_newest_first(activity, events, limit.parse().unwrap_or(100));
 
     Ok(Json(json!({
         "success": true,
@@ -318,5 +330,18 @@ async fn export_audit_events(
             .map_err(|e| AppError::Internal(e.to_string()))?;
 
         Ok(resp)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn merges_both_feeds_newest_first_up_to_the_limit() {
+        let a = json!([{ "created_at": "2026-11-03" }, { "created_at": "2026-11-01" }]);
+        let b = json!([{ "created_at": "2026-11-02" }]);
+        let merged = merge_newest_first(a, b, 2);
+        assert_eq!(merged, json!([{ "created_at": "2026-11-03" }, { "created_at": "2026-11-02" }]));
     }
 }

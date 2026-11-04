@@ -744,7 +744,7 @@ export function DekuConsultantView() {
             </div>
             <span className="font-black text-sm tracking-tight text-ink">Deku Konsultant</span>
             <span className="text-[9px] font-mono px-2 py-0.5 rounded uppercase font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-              Executive AI CFO
+              Ledger Consultant
             </span>
           </div>
 

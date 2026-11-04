@@ -292,6 +292,8 @@ async function fresh() {
   check("F-01h", "a web page named .pdf is refused", webPage.status === 400, webPage.status);
   const huge = await upload(me, Buffer.concat([Buffer.from("%PDF-"), Buffer.alloc(11 * 1024 * 1024)]));
   check("F-01i", "a file over 10 MB is refused", huge.status === 413, huge.status);
+  const trail = await me.api("GET", `/organisations/${org}/audit-events`);
+  check("F-01k", "the audit trail shows the attachment", (trail.json?.data ?? []).some((e) => e.action === "document_attached"), trail.text.slice(0, 200));
   const listed = await me.api("GET", `/organisations/${org}/files`);
   const fileRow = (listed.json?.data ?? []).find((f) => f.id === fileId);
   check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));

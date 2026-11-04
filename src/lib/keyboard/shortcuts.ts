@@ -62,7 +62,7 @@ export const STANDARD_SHORTCUTS: KeyboardShortcut[] = [
   {
     key: "F2",
     label: "F2: Deku Consultant",
-    description: "AI financial copilot & document OCR extraction",
+    description: "Questions answered from your ledger figures",
     category: "navigation",
     actionRoute: "/consultant",
   },

@@ -54,7 +54,7 @@ export const COMMAND_REGISTRY: CommandItem[] = [
   },
   {
     id: "deku-consultant",
-    title: "Deku Consultant (AI CFO)",
+    title: "Deku Consultant",
     subtitle: "Answers from your own ledger. Nothing leaves your servers",
     category: "Reports",
     route: "/consultant",

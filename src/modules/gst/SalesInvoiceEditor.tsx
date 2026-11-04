@@ -51,7 +51,7 @@ const UNTAXED: ReadonlyArray<InvoiceType> = ["bill_of_supply", "export_without_p
 const EXPORT_POS = "96-Other Countries";
 
 const blankLine = (): EditorLine => ({ item_name: "", hsn_sac_code: "", quantity: "1", unit_price: "", gst_rate: "18" });
-const GST_RATES = ["0", "0.25", "3", "5", "12", "18", "28"];
+const GST_RATES = ["0", "0.25", "3", "5", "12", "18", "28", "40"];
 const rs = (paise: number) => formatINR(paise / 100);
 
 const selectClass =

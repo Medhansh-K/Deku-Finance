@@ -39,7 +39,7 @@ export interface VoucherItem {
 const TYPES: [RegExp, VoucherItem["voucher_type"], string, string][] = [
   [/SLS|SAL|INV/, "sales", "F8", ""],
   [/PAY/, "payment", "F5", "Payment Voucher"],
-  [/RCP|REC/, "receipt", "F6", "Bank / Cash Receipt"],
+  [/RCT|RCP|REC/, "receipt", "F6", "Bank / Cash Receipt"],
   [/PUR/, "purchase", "F9", "Purchase Bill"],
   [/CNT/, "contra", "F4", "Contra Slip"],
 ];

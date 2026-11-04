@@ -1677,6 +1677,7 @@ export function DocumentBuilderView() {
                               <option value="12">12%</option>
                               <option value="18">18%</option>
                               <option value="28">28%</option>
+                              <option value="40">40%</option>
                             </select>
                           </div>
                         </div>

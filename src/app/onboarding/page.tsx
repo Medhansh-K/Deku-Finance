@@ -186,8 +186,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
 
         {step === "accounts" && (
           <p className="text-sm text-ink-soft">
-            Deku creates the standard chart of accounts (assets, liabilities, income, expenses and GST ledgers). You can add
-            or rename accounts later under Masters.
+            Your company starts with the standard chart of accounts (assets, liabilities, income, expenses and GST ledgers). You can review and add accounts later under Masters.
           </p>
         )}
 
@@ -204,7 +203,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
           </Button>
           {step === "accounts" ? (
             <Button size="sm" isLoading={busy} onClick={finish}>
-              Create accounts and finish
+              Finish setup
             </Button>
           ) : (
             <Button size="sm" isLoading={busy} onClick={next}>

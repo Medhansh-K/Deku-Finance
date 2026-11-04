@@ -526,7 +526,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "backup",
         title: "Backup and restore",
-        body: "The app has no backup button; backups are run on the server by whoever manages the deployment. Vouchers and their documents are all in the database, so one database backup covers both. Ask your implementer how often backups run and to prove a restore works, because this project doesn't have a tested procedure yet.",
+        body: "The app has no backup button; backups are run on the server by whoever manages the deployment. Vouchers and their documents are all in the database, so one database backup covers both. Ask your implementer how often backups run, and to show you a restore working on your own data.",
       },
       {
         id: "updates",

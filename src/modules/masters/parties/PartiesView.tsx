@@ -38,7 +38,7 @@ export function PartiesView() {
     email: "",
     phone: "",
     state: "Maharashtra",
-    city: "Mumbai",
+    city: "",
   });
 
   const [orgId, setOrgId] = useState<string>("");
@@ -120,7 +120,7 @@ export function PartiesView() {
         email: "",
         phone: "",
         state: "Maharashtra",
-        city: "Mumbai",
+        city: "",
       });
       await fetchParties();
     } catch (err: any) {
@@ -288,7 +288,7 @@ export function PartiesView() {
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         title="Create New Counterparty"
-        description="Add a verified customer or vendor to your accounting masters"
+        description="Add a customer or vendor to your accounting masters"
       >
         <form onSubmit={handleCreate} className="space-y-3 font-sans text-xs">
           <div className="grid grid-cols-2 gap-3">
