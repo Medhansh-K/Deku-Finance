@@ -71,7 +71,7 @@ export interface PayrollRun {
 
 /** What run_monthly_payroll returns. */
 export type PayrollResult =
-  | { success: true; payroll_run_id: string; period: string; headcount: number; total_net_disbursed: number; total_tds: number; total_epf: number }
+  | { success: true; entry_number?: string; submitted_for_approval?: boolean; payroll_run_id: string; period: string; headcount: number; total_net_disbursed: number; total_tds: number; total_epf: number }
   | { success: false; message: string };
 
 // Mirrors the database checks; the server still enforces each of them.
