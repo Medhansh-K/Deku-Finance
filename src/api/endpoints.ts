@@ -738,6 +738,28 @@ export interface BankReconciliation {
   reconciled_at: string;
 }
 
+/** What the ledger and saved matches say about a bank account at a date (migration 56). */
+export interface BankPosition {
+  book_balance: number;
+  matched_amount: number;
+  uncleared_amount: number;
+}
+
+export interface ReconciliationStatement extends BankPosition {
+  id: string;
+  organisation_id: string;
+  bank_account_id: string;
+  statement_date: string;
+  closing_balance: number;
+  statement_only_amount: number;
+  difference: number;
+  unexplained_difference: number;
+  accepted_difference: number | null;
+  recorded_by: string;
+  recorded_by_name: string | null;
+  recorded_at: string;
+}
+
 export const bankingApi = {
   listReconciliations: (orgId: string, bankAccountId: string) =>
     apiClient<ApiResponse<BankReconciliation[]>>(
@@ -755,6 +777,20 @@ export const bankingApi = {
     apiClient<ApiResponse<BankReconciliation[]>>(
       `/api/v1/organisations/${orgId}/banking/reconciliations/${reconciliationId}`,
       { method: "DELETE" }
+    ),
+  position: (orgId: string, bankAccountId: string, asOf: string) =>
+    apiClient<ApiResponse<BankPosition>>(
+      `/api/v1/organisations/${orgId}/banking/statements/position?bank_account_id=${encodeURIComponent(bankAccountId)}&as_of=${encodeURIComponent(asOf)}`
+    ),
+  listStatements: (orgId: string) =>
+    apiClient<ApiResponse<ReconciliationStatement[]>>(`/api/v1/organisations/${orgId}/banking/statements`),
+  completeStatement: (
+    orgId: string,
+    payload: Pick<ReconciliationStatement, "bank_account_id" | "statement_date" | "closing_balance" | "statement_only_amount" | "accepted_difference">
+  ) =>
+    apiClient<ApiResponse<ReconciliationStatement[]>>(
+      `/api/v1/organisations/${orgId}/banking/statements`,
+      { method: "POST", body: JSON.stringify(payload) }
     ),
 };
 

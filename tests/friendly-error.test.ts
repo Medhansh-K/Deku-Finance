@@ -31,6 +31,15 @@ describe("friendlyError", () => {
     );
   });
 
+  it("explains a refused reconciliation statement", () => {
+    expect(friendlyError({ error: "PostgREST insert error: uk_reconciliation_statements_date" }, 502)).toBe(
+      "This bank account already has a completed reconciliation for that date."
+    );
+    expect(friendlyError({ error: "PostgREST insert error: difference_not_accepted: 1.00 is unexplained" }, 502)).toBe(
+      "The figures changed while you were reviewing them. Check the new difference and try again."
+    );
+  });
+
   it("leaves other errors to the server's message", () => {
     expect(friendlyError({ error: "Department code already exists" }, 400)).toBeNull();
     expect(friendlyError(null, 500)).toBeNull();

@@ -23,6 +23,14 @@ export function friendlyError(body: unknown, status?: number, limits?: Entitleme
     return "That voucher number is already used. Change it and try again.";
   }
 
+  if (text.includes("uk_reconciliation_statements_date")) {
+    return "This bank account already has a completed reconciliation for that date.";
+  }
+
+  if (text.includes("difference_not_accepted")) {
+    return "The figures changed while you were reviewing them. Check the new difference and try again.";
+  }
+
   const limit = obj.error === "plan_limit" ? String(obj.limit ?? "") : text.match(/plan_limit:(\w+)/)?.[1];
   if (limit !== undefined) {
     const n = limits?.[limit as keyof Entitlements];
