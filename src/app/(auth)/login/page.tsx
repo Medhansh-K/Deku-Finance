@@ -57,10 +57,11 @@ function LoginForm() {
     setIsTutorialOpen(true);
   };
 
-  // If already logged in, redirect
-  if (user) {
-    router.push(nextPath);
-  }
+  // In an effect: Next keeps this page mounted but hidden after leaving it, and a redirect during
+  // render would keep firing from there and fight the onboarding redirect in a loop.
+  useEffect(() => {
+    if (user) router.replace(nextPath);
+  }, [user, nextPath, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

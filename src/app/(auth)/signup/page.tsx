@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/auth/next-path";
@@ -42,10 +42,11 @@ function SignupForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already logged in, redirect
-  if (user) {
-    router.push(nextPath);
-  }
+  // In an effect: Next keeps this page mounted but hidden after leaving it, and a redirect during
+  // render would keep firing from there and fight the onboarding redirect in a loop.
+  useEffect(() => {
+    if (user) router.replace(nextPath);
+  }, [user, nextPath, router]);
 
   const indianStates = [
     "Maharashtra",
