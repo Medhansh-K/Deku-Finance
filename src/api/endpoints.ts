@@ -303,25 +303,25 @@ export const accountingApi = {
 };
 
 export const reportsApi = {
-  getGeneralLedger: (orgId: string) =>
+  getGeneralLedger: (orgId: string, accountId?: string) =>
     apiClient<ApiResponse<GeneralLedgerRow[]>>(
-      `/api/v1/organisations/${orgId}/reports/general-ledger`
+      `/api/v1/organisations/${orgId}/reports/general-ledger${accountId ? `?account_id=${encodeURIComponent(accountId)}` : ""}`
     ),
   getAccountBalances: (orgId: string) =>
     apiClient<ApiResponse<AccountBalanceRow[]>>(
       `/api/v1/organisations/${orgId}/reports/account-balances`
     ),
-  getProfitAndLoss: (orgId: string) =>
+  getProfitAndLoss: (orgId: string, range?: { from: string; to: string }) =>
     apiClient<ApiResponse<ProfitLossRow[]>>(
-      `/api/v1/organisations/${orgId}/reports/profit-and-loss`
+      `/api/v1/organisations/${orgId}/reports/profit-and-loss${range ? `?${new URLSearchParams(range)}` : ""}`
     ),
-  getBalanceSheet: (orgId: string) =>
+  getBalanceSheet: (orgId: string, asOf?: string) =>
     apiClient<ApiResponse<BalanceSheetRow[]>>(
-      `/api/v1/organisations/${orgId}/reports/balance-sheet`
+      `/api/v1/organisations/${orgId}/reports/balance-sheet${asOf ? `?as_of=${encodeURIComponent(asOf)}` : ""}`
     ),
-  getTrialBalance: (orgId: string) =>
+  getTrialBalance: (orgId: string, range?: { from: string; to: string }) =>
     apiClient<ApiResponse<any[]>>(
-      `/api/v1/organisations/${orgId}/reports/trial-balance`
+      `/api/v1/organisations/${orgId}/reports/trial-balance${range ? `?${new URLSearchParams(range)}` : ""}`
     ),
   getCashFlow: (
     orgId: string,

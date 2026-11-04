@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileSpreadsheet,
@@ -15,16 +15,26 @@ import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
 import { AccountBalanceRow } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
+import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
+import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
 
 export function TrialBalanceView() {
   const router = useRouter();
-  const [rows, setRows] = useState<AccountBalanceRow[]>([]);
+  // Null until figures load, and after a failure: nothing to show must not read as zero.
+  const [rows, setRows] = useState<AccountBalanceRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [orgId, setOrgId] = useState<string>("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const latest = useRef(0);
+  const problem = rangeProblem(from, to);
 
   useEffect(() => {
+    const range = currentFyRange();
+    setFrom(range.from);
+    setTo(range.to);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -32,20 +42,21 @@ export function TrialBalanceView() {
   }, []);
 
   const fetchTrialBalance = async () => {
-    setIsLoading(true);
+    const request = ++latest.current;
+    setRows(null);
     setError(null);
-    try {
-      const res = await reportsApi.getTrialBalance(orgId);
-      setRows((res.data || []) as any);
-    } catch (err: any) {
-      try {
-        const fallback = await reportsApi.getAccountBalances(orgId);
-        setRows(fallback.data || []);
-      } catch (fErr: any) {
-        setError(fErr.message || "Failed to load authoritative Trial Balance");
-      }
-    } finally {
+    if (problem) {
       setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await reportsApi.getTrialBalance(orgId, { from, to });
+      if (request === latest.current) setRows((res.data || []) as any);
+    } catch (err: any) {
+      if (request === latest.current) setError(err.message || "Failed to load authoritative Trial Balance");
+    } finally {
+      if (request === latest.current) setIsLoading(false);
     }
   };
 
@@ -59,13 +70,13 @@ export function TrialBalanceView() {
       window.removeEventListener("deku_ledger_updated", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
-  }, [orgId]);
+  }, [orgId, from, to]);
 
   // Compute total debits and credits from backend rows
   let totalDebit = 0;
   let totalCredit = 0;
 
-  rows.forEach((r) => {
+  (rows ?? []).forEach((r) => {
     totalDebit += r.total_debit || 0;
     totalCredit += r.total_credit || 0;
   });
@@ -78,14 +89,17 @@ export function TrialBalanceView() {
   return (
     <div className="space-y-4 font-sans text-xs">
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="flex items-center gap-2">
-          <Badge variant={isEquilibrium ? "success" : "warning"}>
-            {isEquilibrium ? "Equilibrium Verified" : "Verification Pending"}
-          </Badge>
-          <span className="text-ink-muted font-mono text-[11px]">
-            ALERX Double-Entry Trial Balance
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Badge variant={isEquilibrium ? "success" : "warning"}>
+              {isEquilibrium ? "Equilibrium Verified" : "Verification Pending"}
+            </Badge>
+            <span className="text-ink-muted font-mono text-[11px]">
+              Debits and credits posted between these dates
+            </span>
+          </div>
+          <ReportDateRange from={from} to={to} onFrom={setFrom} onTo={setTo} problem={orgId ? problem : null} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -102,6 +116,7 @@ export function TrialBalanceView() {
             size="sm"
             onClick={fetchTrialBalance}
             isLoading={isLoading}
+            disabled={!!problem}
             className="gap-1.5"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -151,7 +166,7 @@ export function TrialBalanceView() {
                 <th className="py-2 px-4 w-32">Classification</th>
                 <th className="py-2 px-4 text-right w-40">Debit Total (₹)</th>
                 <th className="py-2 px-4 text-right w-40">Credit Total (₹)</th>
-                <th className="py-2 px-4 text-right w-44">Natural Balance (₹)</th>
+                <th className="py-2 px-4 text-right w-44">Balance (₹)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -161,7 +176,7 @@ export function TrialBalanceView() {
                     Computing general ledger balances...
                   </td>
                 </tr>
-              ) : rows.length > 0 ? (
+              ) : rows && rows.length > 0 ? (
                 rows.map((row) => {
                   const hasMovement = row.total_debit > 0 || row.total_credit > 0;
                   return (
@@ -199,7 +214,8 @@ export function TrialBalanceView() {
                         {row.total_credit > 0 ? formatINR(row.total_credit, { showCurrencySymbol: false }) : "—"}
                       </td>
                       <td className="py-2 px-4 text-right font-mono font-bold text-ink">
-                        {formatINR(row.natural_balance, { showDrCr: true })}
+                        {/* Debit minus credit, so the Dr or Cr beside it is true for every account type. */}
+                        {formatINR(Math.round((row.total_debit - row.total_credit) * 100) / 100, { showDrCr: true })}
                       </td>
                     </tr>
                   );
@@ -207,7 +223,7 @@ export function TrialBalanceView() {
               ) : (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-ink-muted font-mono">
-                    No account balance records available.
+                    {rows ? "No account balance records available." : "–"}
                   </td>
                 </tr>
               )}
@@ -219,13 +235,15 @@ export function TrialBalanceView() {
                   Total Trial Balance Equilibrium
                 </td>
                 <td className="py-3 px-4 text-right text-emerald-400">
-                  {formatINR(totalDebit)}
+                  {rows ? formatINR(totalDebit) : "–"}
                 </td>
                 <td className="py-3 px-4 text-right text-emerald-400">
-                  {formatINR(totalCredit)}
+                  {rows ? formatINR(totalCredit) : "–"}
                 </td>
                 <td className="py-3 px-4 text-right">
-                  {difference === 0 ? (
+                  {!rows ? (
+                    "–"
+                  ) : difference === 0 ? (
                     <span className="text-emerald-400 flex items-center justify-end gap-1">
                       <CheckCircle2 className="h-4 w-4" /> Balanced (0.00)
                     </span>

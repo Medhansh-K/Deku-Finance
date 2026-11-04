@@ -1,22 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   TrendingUp,
   TrendingDown,
   RefreshCw,
   Printer,
-  Calendar,
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
   Layers,
   ArrowRight,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
 import { formatINR } from "@/lib/formatters/currency";
+import { downloadFile } from "@/lib/download";
+import { cashFlowCsv } from "@/lib/import/export";
+import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
+import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
 
 export function CashFlowView() {
   const [data, setData] = useState<any>(null);
@@ -26,13 +30,13 @@ export function CashFlowView() {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const latest = useRef(0);
+  const problem = rangeProblem(startDate, endDate);
 
   useEffect(() => {
-    const today = new Date();
-    // shortcut: assumes an April financial year, add a date picker when companies need another start month.
-    const fyStart = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
-    setStartDate(`${fyStart}-04-01`);
-    setEndDate(today.toISOString().split("T")[0]);
+    const range = currentFyRange();
+    setStartDate(range.from);
+    setEndDate(range.to);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("deku_active_org_id");
       if (saved) setOrgId(saved);
@@ -40,23 +44,29 @@ export function CashFlowView() {
   }, []);
 
   const fetchCashFlow = async () => {
-    setIsLoading(true);
+    const request = ++latest.current;
+    setData(null);
     setError(null);
+    if (problem) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
     try {
       const res = await reportsApi.getCashFlow(orgId, {
         start_date: startDate,
         end_date: endDate,
       });
-      setData(res.data);
+      if (request === latest.current) setData(res.data);
     } catch (err: any) {
-      setError(err.message || "Failed to load Cash Flow Statement");
+      if (request === latest.current) setError(err.message || "Failed to load Cash Flow Statement");
     } finally {
-      setIsLoading(false);
+      if (request === latest.current) setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!orgId || !endDate) return;
+    if (!orgId) return;
     fetchCashFlow();
     const handleUpdate = () => fetchCashFlow();
     window.addEventListener("deku_ledger_updated", handleUpdate);
@@ -100,22 +110,29 @@ export function CashFlowView() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div data-tour="cash-flow-period" className="flex items-center gap-1.5 bg-canvas-sunken px-3 py-1.5 rounded-lg border border-line text-xs font-mono text-ink-soft">
-            <Calendar className="h-3.5 w-3.5 text-ink-subtle" />
-            <span>{startDate}</span>
-            <span className="text-ink-subtle">to</span>
-            <span>{endDate}</span>
+        <div className="flex flex-wrap items-end gap-2">
+          <div data-tour="cash-flow-period">
+            <ReportDateRange from={startDate} to={endDate} onFrom={setStartDate} onTo={setEndDate} problem={orgId ? problem : null} />
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={fetchCashFlow}
-            disabled={isLoading}
+            disabled={isLoading || !!problem}
             className="gap-1.5"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => data && downloadFile(`cash-flow-${startDate}-to-${endDate}.csv`, cashFlowCsv(data, startDate, endDate), "text/csv;charset=utf-8")}
+            disabled={!data}
+            className="gap-1.5"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
           </Button>
           <Button
             variant="outline"

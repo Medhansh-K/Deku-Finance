@@ -31,6 +31,32 @@ pub struct PeriodQuery {
     pub to: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct ReportRangeQuery {
+    pub from: Option<String>,
+    pub to: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AsOfQuery {
+    pub as_of: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GeneralLedgerQuery {
+    pub account_id: Option<String>,
+}
+
+/// Blank means not given. Anything else must be a real date: a 400 here, not a database error.
+fn report_date(value: Option<String>) -> Result<Option<String>, AppError> {
+    match value.filter(|v| !v.trim().is_empty()) {
+        Some(v) => chrono::NaiveDate::parse_from_str(&v, "%Y-%m-%d")
+            .map(|_| Some(v.clone()))
+            .map_err(|_| AppError::BadRequest("Dates must be in YYYY-MM-DD format".into())),
+        None => Ok(None),
+    }
+}
+
 /// 1 April of the Indian financial year containing today.
 fn current_fy_start() -> String {
     use chrono::Datelike;
@@ -452,14 +478,19 @@ async fn get_general_ledger(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(org_id): Path<String>,
+    Query(params): Query<GeneralLedgerQuery>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
     let org_filter = format!("eq.{}", org_id);
-    let query = [
+    let account_filter = params.account_id.map(|id| format!("eq.{}", id));
+    let mut query: Vec<(&str, &str)> = vec![
         ("select", "*"),
-        ("organisation_id", &org_filter),
+        ("organisation_id", org_filter.as_str()),
         ("order", "entry_date.desc,line_number.asc"),
     ];
+    if let Some(filter) = account_filter.as_deref() {
+        query.push(("account_id", filter));
+    }
     let res = state.db.query_table("view_general_ledger", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
@@ -486,8 +517,16 @@ async fn get_profit_and_loss(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(org_id): Path<String>,
+    Query(params): Query<ReportRangeQuery>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
+    let from = report_date(params.from)?;
+    let to = report_date(params.to)?;
+    if from.is_some() || to.is_some() {
+        let payload = json!({ "p_org_id": org_id, "p_from": from, "p_to": to });
+        let res = state.db.rpc("get_profit_and_loss_range", &payload, token).await?;
+        return Ok(Json(json!({ "success": true, "data": res })));
+    }
     let org_filter = format!("eq.{}", org_id);
     let query = [
         ("select", "*"),
@@ -503,8 +542,14 @@ async fn get_balance_sheet(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(org_id): Path<String>,
+    Query(params): Query<AsOfQuery>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
+    if let Some(as_of) = report_date(params.as_of)? {
+        let payload = json!({ "p_org_id": org_id, "p_as_of": as_of });
+        let res = state.db.rpc("get_balance_sheet_as_of", &payload, token).await?;
+        return Ok(Json(json!({ "success": true, "data": res })));
+    }
     let org_filter = format!("eq.{}", org_id);
     let query = [
         ("select", "*"),
@@ -520,8 +565,16 @@ async fn get_trial_balance(
     State(state): State<AppState>,
     headers: HeaderMap,
     Path(org_id): Path<String>,
+    Query(params): Query<ReportRangeQuery>,
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
+    let from = report_date(params.from)?;
+    let to = report_date(params.to)?;
+    if from.is_some() || to.is_some() {
+        let payload = json!({ "p_org_id": org_id, "p_from": from, "p_to": to });
+        let res = state.db.rpc("get_trial_balance_range", &payload, token).await?;
+        return Ok(Json(json!({ "success": true, "data": res })));
+    }
     let org_filter = format!("eq.{}", org_id);
     let query = [
         ("select", "*"),
