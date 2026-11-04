@@ -15,9 +15,8 @@ mkdirSync(SHOTS, { recursive: true });
 
 const results = [];
 function check(id, name, ok, detail = "") {
-  results.push({ id, name, ok });
+  results.push({ id, name, ok, detail: String(detail) });
   console.log(`${ok ? "PASS" : "FAIL"} ${id} ${name}${!ok && detail ? ` :: ${detail}` : ""}`);
-  if (!ok && process.env.GITHUB_ACTIONS) console.log(`::error::${id} ${name} ${String(detail).slice(0, 300)}`);
 }
 
 // All signed-in pages. Pages needing a token or an id aren't reachable on their own.
@@ -58,6 +57,8 @@ function watch(page) {
   return problems;
 }
 
+let wizardBlocked = false;
+
 // The real setup wizard, once: every signed-in page redirects here until it's finished.
 async function completeOnboarding(browser) {
   const { context, page } = await signIn(browser, STATE.email, { width: 1366, height: 800 });
@@ -80,7 +81,9 @@ async function completeOnboarding(browser) {
     await page.getByRole("button", { name: /^(Next|Continue|Save and continue)/ }).first().click();
     await page.waitForTimeout(700);
   }
-  check("O-W2", "the setup wizard finishes on the Gateway", new URL(page.url()).pathname === "/gateway", `${page.url()} ${(await page.locator("body").innerText()).slice(0, 300)}`);
+  const finished = new URL(page.url()).pathname === "/gateway";
+  check("O-W2", "the setup wizard finishes on the Gateway", finished, `${page.url()} ${(await page.locator("body").innerText()).slice(0, 240)}`);
+  if (!finished) wizardBlocked = true;
   check("O-W3", "the wizard makes no failed requests", problems.length === 0, problems.join(" | "));
   await context.close();
 }
@@ -286,6 +289,8 @@ try {
     () => walkTutorials(browser),
   ];
   for (const run of sections) {
+    // Every other page would just redirect back to the wizard.
+    if (wizardBlocked) break;
     try {
       await run();
     } catch (e) {
@@ -298,5 +303,10 @@ try {
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\nbrowser: ${results.length - failed.length}/${results.length} passed`);
-if (process.env.GITHUB_ACTIONS) console.log(`::notice::e2e browser: ${results.length - failed.length}/${results.length} passed`);
+if (process.env.GITHUB_ACTIONS) {
+  console.log(`::notice::e2e browser: ${results.length - failed.length}/${results.length} passed`);
+  // One annotation: GitHub shows only ten per step, and logs need a login.
+  if (failed.length) console.log(`::error::${failed.map((f) => `${f.id} ${f.detail.slice(0, 260)}`.replaceAll("
+", " ")).join("%0A").slice(0, 9000)}`);
+}
 process.exit(failed.length ? 1 : 0);
