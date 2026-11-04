@@ -302,9 +302,10 @@ async function fresh() {
   check("F-01j", "file list links the voucher and leaves out the bytes", fileRow?.journal_entry_id === entry && !("data" in (fileRow ?? {})), listed.text.slice(0, 200));
 
   await runWorkflows({ me, org, fy, date, check, invite: inviteToken, login, signup, voucherPeriod: period, accounts, viewer, base: BASE, PASSWORD });
-  await runEditingChecks({ me, org, date, voucherPeriod: period, accounts, check });
+  // Banking asserts the exact bank balance the workflows leave, so it goes first.
   await runBankingChecks({ me, org, date, voucherPeriod: period, accounts, check, invite: inviteToken, signup });
   await runReportChecks({ me, org, date, fy, check });
+  await runEditingChecks({ me, org, date, voucherPeriod: period, accounts, check });
 
   // S-04, S-09: what a hostile page or script can reach through the proxy.
   r = await fetch(`${BASE}/api/backend/api/v1/organisations/${org}/fiscal-periods`, {

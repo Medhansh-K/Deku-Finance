@@ -107,7 +107,17 @@ async fn create_reconciliation(
     let res = state
         .db
         .insert_table("bank_reconciliations", &body, token)
-        .await?;
+        .await
+        .map_err(|e| match &e {
+            // Refused by the database's own rule, so it's a bad request rather than a backend failure.
+            AppError::Database(msg) if msg.contains("Reconciliation Violation") => {
+                AppError::BadRequest("That voucher line can't be matched to this statement line.".into())
+            }
+            AppError::Database(msg) if msg.contains("row-level security") => {
+                AppError::Forbidden("You don't have permission to reconcile.".into())
+            }
+            _ => e,
+        })?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }

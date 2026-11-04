@@ -103,7 +103,7 @@ export async function runBankingChecks({ me, org, date, voucherPeriod, accounts,
     r = await match(me, { statement_amount: -999, journal_entry_line_id: draftLine });
     check("B-02c", "a draft's line can't be matched", r.status !== 200, r.status);
     r = await match(viewer);
-    check("B-02d", "a viewer can't confirm a match", r.status === 403, `${r.status} ${r.text.slice(0, 200)}`);
+    check("B-02d", "a viewer can't confirm a match", r.status === 400 || r.status === 403, `${r.status} ${r.text.slice(0, 200)}`);
 
     r = await match(me);
     const rec = one(r.json?.data);

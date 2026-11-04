@@ -69,6 +69,7 @@ jobs:
             trivy="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD/image-reports:/out aquasec/trivy:0.57.0 image --quiet"
             $trivy --format cyclonedx --output "/out/$image.sbom.json" "$image:latest"
             $trivy --severity HIGH,CRITICAL --ignore-unfixed --output "/out/$image.txt" "$image:latest"
+            echo "::notice::$image packages: $(awk -F'│' '/HIGH|CRITICAL/ {print $2}' "image-reports/$image.txt" | tr -d ' ' | sort -u | grep -v '^$' | tr '\n' ' ')"
             echo "::notice::$image: $(grep -hE '^Total:' "image-reports/$image.txt" | tr '\n' ' ')"
           done
           echo "::notice::image sizes: $(tr '\n' ';' < image-reports/sizes.txt)"
