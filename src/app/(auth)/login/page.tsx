@@ -148,7 +148,7 @@ function LoginForm() {
                     <Building className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <div className="text-white text-xs">PRO Enterprise</div>
+                    <div className="text-white text-xs">PRO (₹49,999/yr)</div>
                     <div className="text-[9px] text-slate-400 font-normal">Full GST &amp; Team</div>
                   </div>
                 </div>
@@ -165,7 +165,7 @@ function LoginForm() {
                     <User className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <div className="text-white text-xs">GO Freelancer</div>
+                    <div className="text-white text-xs">GO (₹24,999/yr)</div>
                     <div className="text-[9px] text-slate-400 font-normal">Section 22 &amp; Solo</div>
                   </div>
                 </div>

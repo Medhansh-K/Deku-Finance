@@ -311,3 +311,68 @@ graph LR
 - **`20261031000035_marketplace_settlements.sql`**: Marketplace vendor settlement tables.
 - **`20261031000039_subscriptions.sql`**: Subscription tiers and billing cycles.
 - **`20261031000043_import_jobs.sql`**: Bulk CSV/Excel/XML ETL import jobs with staged validation.
+
+---
+
+## 7. Commercial Licensing & Plan-Wise Module Comparison
+
+Deku Finance operates on an **Annual Contract-Based License** model. Deployments are single-tenant isolated, contract-backed, and include dedicated statutory tax updates with zero transaction surcharges.
+
+### Commercial Licensing Tiers (Annual)
+
+| Plan Tier | Annual Contract Fee | Target Audience & Operating Scope | User Seats | Deployment Model |
+| :--- | :---: | :--- | :---: | :--- |
+| **GO** | **₹24,999 / year** | Freelancers, solo consultancies, creators, and small traders operating under Section 22 CGST Act exemption (< ₹20L/₹40L) or single GSTIN. | 2 Seats (Admin + Accountant) | Dedicated Virtual Tenant / Shared Cloud |
+| **PRO** | **₹49,999 / year** | Scaling SMEs, B2B trading firms, and multi-user businesses requiring full statutory GST, ITC Rule 88A set-off, maker-checker governance, and bank reconciliation. | 5 Seats (7-Role RBAC) | Dedicated Virtual Cloud Tenant |
+| **Enterprise** | **₹1,19,999 / year** | Multi-entity corporations, high-volume enterprises, and agencies requiring AI CFO automation across 10 departments, direct IRP E-Invoicing (INV-01), NIC E-Way bills, and custom integrations. | Unlimited Seats | Dedicated Single-Tenant Instance / On-Prem / Local Docker |
+
+---
+
+### Plan-Wise Functional Module Comparison Matrix
+
+```
+┌──────────────────────────────────────────────┬────────────────────────┬────────────────────────┬────────────────────────┐
+│ Functional Capabilities & Modules            │ GO (₹24,999/yr)        │ PRO (₹49,999/yr)       │ Enterprise (₹1,19,999) │
+├──────────────────────────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ 1. INVOICING & CASH COLLECTIONS              │                        │                        │                        │
+│   • Invoicing Volume                         │ Up to 2,000 bills/yr   │ Unlimited bills/year   │ Unlimited (High Volume)│
+│   • Embedded Bharat UPI QR Code              │ Dynamic UPI on Bills   │ Dynamic UPI + Webhooks │ Dynamic UPI + Multi-VPA│
+│   • Custom Invoice Fields & Branding         │ Standard (PO, Terms)   │ Advanced Customizer    │ Full White-Label Schema│
+│   • Product & Service Catalogue              │ Up to 100 Items        │ Unlimited Catalogue    │ Unlimited + Godowns    │
+│   • MSME 45-Day Recovery (Sec 43B(h))        │ Manual WhatsApp Trigger│ Automated Aging Alerts │ Statutory Int. Calc    │
+│   • Marketplace Settlements (ECO Table 3.1.1)│ Manual Entry           │ Bulk CSV Parser        │ Automated Recon Engine │
+├──────────────────────────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ 2. GST & STATUTORY COMPLIANCE                │                        │                        │                        │
+│   • Section 22 Non-GST Pure Accounting       │ Full Support (₹0 Tax)  │ Full Support           │ Multi-Branch Mixed Mode│
+│   • Exemption Turnover Tracker (₹20L/₹40L)   │ Live Visual Gauge      │ Live Visual Gauge      │ Consolidated Multi-GST │
+│   • Place of Supply (POS) Math & CGST/SGST/IGST│ Basic State Split    │ Full POS Rule Engine   │ Full POS + SEZ + RCM   │
+│   • GSTIN Check Digit Validation             │ Standard Check         │ Strict Luhn/Mod-36     │ Strict Luhn/Mod-36     │
+│   • GSTR-1 & GSTR-3B Offline JSON Export     │ Summary Tax View       │ 1-Click Offline JSON   │ Direct GSP API Filing  │
+│   • Input Tax Credit (ITC) Rule 88A Set-off  │ Basic Purchase Log     │ Rule 88A + Sec 17(5)   │ GSTR-2B Auto-Recon     │
+│   • Direct IRP E-Invoicing (INV-01 & IRN)    │ Not Applicable         │ JSON Export Schema     │ Direct IRP API + QR    │
+│   • NIC E-Way Bill Generation                │ Optional Manual        │ Export Tool Schema     │ Automated NIC E-Way API│
+├──────────────────────────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ 3. ALERX DOUBLE-ENTRY LEDGER & BANKING       │                        │                        │                        │
+│   • 4-Tier Chart of Accounts                 │ Standard 25 GAAP       │ Custom Hierarchy       │ Multi-Entity Hierarchy │
+│   • Strict Parity Enforcement (ΣDr = ΣCr)    │ Database Trigger Locked│ Database Trigger Locked│ Inter-Company Balancing│
+│   • Server-Issued Sequential Voucher Numbers │ PostgreSQL Sequence    │ PostgreSQL Sequence    │ Multi-Branch Prefixes  │
+│   • Draft Voucher Review & In-Line Editing   │ Included               │ Included               │ Multi-Level Draft Flow │
+│   • Bank Statement Import & Reconciliation   │ Manual Cash/Bank Book  │ CSV Statement Matcher  │ Direct Corporate Feeds │
+│   • General Ledger Account Drill-Down & CSV  │ Standard Account View  │ Drill-Down + CSV       │ Drill-Down + API / CSV │
+├──────────────────────────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ 4. FINANCIAL INTELLIGENCE & AI CFO           │                        │                        │                        │
+│   • Real-Time Balance Sheet & Profit & Loss  │ Real-Time Realization  │ Real-Time + Date Ranges│ Consolidated Entities  │
+│   • Trial Balance & Ratio Analysis           │ Standard Trial Balance │ Core Financial Ratios  │ Advanced Solvency Dash │
+│   • Cash Flow Statement                      │ Inflow / Outflow Log   │ 3-Pillar Statement     │ Forward Runway Forecast│
+│   • Deku Consultant AI CFO                   │ Basic Ledger Prompts   │ 3 Core Departments     │ 10 Depts / 50 Workflows│
+├──────────────────────────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ 5. GOVERNANCE, SECURITY & DEPLOYMENT         │                        │                        │                        │
+│   • User Seats Included                      │ 2 Seats                │ 5 Seats                │ Unlimited Seats        │
+│   • Access Control Model                     │ 2 Standard Roles       │ 7-Role RBAC            │ Custom Role Hierarchy  │
+│   • Maker-Checker Dual Authorization         │ Direct Posting         │ High-Value Vouchers    │ Multi-Tier Thresholds  │
+│   • Confidential Payroll Masking             │ Standard               │ Cryptographic Masking  │ Masking + Auto Journal │
+│   • Tamper-Evident SHA-256 Audit Trail       │ Activity Log           │ SHA-256 Chained Trail  │ External Log Forwarding│
+│   • Support SLA & Account Management         │ Email & Help Centre    │ Priority VIP Helpline  │ 24/7 Dedicated Manager │
+└──────────────────────────────────────────────┴────────────────────────┴────────────────────────┴────────────────────────┘
+```
+
