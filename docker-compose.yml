@@ -27,13 +27,13 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-dev-only-postgres-password}@postgres:5432/deku
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
     depends_on:
       postgres:
         condition: service_healthy
 
   postgrest:
-    image: postgrest/postgrest:v12.2.3
+    image: postgrest/postgrest:latest
     platform: linux/amd64
     restart: unless-stopped
     environment:
@@ -85,7 +85,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8080
       # Turns the demo sign-in on, for the accounts migrate seeds with the same setting.
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3000:3000"
