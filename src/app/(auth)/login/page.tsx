@@ -20,6 +20,7 @@ import {
   Loader2,
   Sparkles,
   BookOpen,
+  KeyRound,
 } from "lucide-react";
 import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 
@@ -28,6 +29,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { login, loginDemo, user } = useAuth();
 
+  const [licenseKey, setLicenseKey] = useState("DEKU-PRO-2026-88A1-42F0");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -66,13 +68,43 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
+
+    if (!licenseKey.trim()) {
+      setErrorMsg("Activation License Key is strictly required to log in.");
+      return;
+    }
+
     setIsLoading(true);
-    const res = await login(email, password);
-    setIsLoading(false);
-    if (res.error) {
-      setErrorMsg(res.error);
-    } else {
-      router.push(nextPath);
+
+    try {
+      // 1. Verify Activation License Key with Ecosystem Authority
+      const licRes = await fetch("/api/ecosystem/validate-license", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          licenseKey: licenseKey.trim(),
+          email: email.trim(),
+        }),
+      });
+      const licData = await licRes.json();
+
+      if (!licData.success) {
+        setIsLoading(false);
+        setErrorMsg(licData.error || "Invalid or inactive activation license key.");
+        return;
+      }
+
+      // 2. Proceed with user authentication
+      const res = await login(email, password);
+      setIsLoading(false);
+      if (res.error) {
+        setErrorMsg(res.error);
+      } else {
+        router.push(nextPath);
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err.message || "Failed to validate activation license");
     }
   };
 
@@ -180,25 +212,51 @@ function LoginForm() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
-                {/* Standard Login Email */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-300">
-                      Work Email Address
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@company.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                    />
-                  </div>
-                </div>
+            {/* Activation License Key */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Activation License Key
+                </label>
+                <Link
+                  href="/request-setup"
+                  className="text-[11px] font-medium text-brand hover:underline"
+                >
+                  Need a license?
+                </Link>
+              </div>
+              <div className="relative">
+                <KeyRound className="h-4 w-4 text-brand absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  required
+                  value={licenseKey}
+                  onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
+                  placeholder="DEKU-PRO-2026-XXXX-XXXX"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs font-mono text-brand font-semibold placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all uppercase"
+                />
+              </div>
+            </div>
+
+            {/* Standard Login Email */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Work Email Address
+                </label>
+              </div>
+              <div className="relative">
+                <Mail className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-panel-deep border border-edge text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
+                />
+              </div>
+            </div>
 
                 {/* Standard Password */}
                 <div>
@@ -266,13 +324,18 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Link to Signup */}
-        <p className="mt-6 text-center text-xs text-slate-400">
-          New to Deku Finance?{" "}
-          <Link href="/signup" className="font-bold text-brand hover:underline">
-            Create Free Workspace ➔
-          </Link>
-        </p>
+        {/* Link to Enterprise Onboarding & Setup */}
+        <div className="mt-6 text-center space-y-1">
+          <p className="text-xs text-slate-400">
+            New Business or Enterprise?{" "}
+            <Link href="/request-setup" className="font-bold text-brand hover:underline">
+              Request Setup &amp; Activation License ➔
+            </Link>
+          </p>
+          <p className="text-[10px] text-slate-500">
+            Onboarding is handled exclusively by authorized regional distributors.
+          </p>
+        </div>
       </div>
 
       {/* Interactive Plan Tutorial & Architecture Walkthrough Modal */}

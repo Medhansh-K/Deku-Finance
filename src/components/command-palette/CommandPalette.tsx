@@ -310,22 +310,6 @@ export const COMMAND_REGISTRY: CommandItem[] = [
     icon: Layers,
   },
   {
-    id: "import",
-    title: "Import from Tally or CSV",
-    subtitle: "Bring in masters, opening balances and vouchers",
-    category: "Utilities",
-    route: "/import",
-    icon: Layers,
-  },
-  {
-    id: "export",
-    title: "Export to CSV",
-    subtitle: "Chart of accounts, parties, items, day book and trial balance",
-    category: "Utilities",
-    route: "/export",
-    icon: Layers,
-  },
-  {
     id: "gst",
     title: "GST Returns & Tax Engine",
     subtitle: "Tax calculations, supply breakdown & GSTR summary",

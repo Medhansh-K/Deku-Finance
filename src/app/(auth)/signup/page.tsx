@@ -104,6 +104,25 @@ function SignupForm() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl relative z-10">
         <div className="bg-panel/90 backdrop-blur-xl border border-edge rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          {/* Distributor Ecosystem Notice */}
+          {!inviteToken && (
+            <div className="rounded-2xl bg-teal-950/40 border border-teal-500/40 p-4 space-y-2">
+              <div className="flex items-center gap-2 text-teal-400 font-bold text-xs">
+                <ShieldCheck className="h-4 w-4" />
+                <span>Authorized Distributor Onboarding Model</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Deku Finance workspaces require an Activation License Key issued via our regional distributor network. If your company is new to Deku:
+              </p>
+              <Link
+                href="/request-setup"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500 text-slate-950 font-bold text-xs hover:bg-teal-400 transition-colors"
+              >
+                Request Setup &amp; Activation from Regional Partner <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          )}
+
           {/* Error Banner */}
           {errorMsg && (
             <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-3.5 flex items-center gap-2.5 text-xs text-rose-300">
