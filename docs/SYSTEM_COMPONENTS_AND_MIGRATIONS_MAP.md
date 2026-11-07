@@ -164,3 +164,4 @@ flowchart TD
 2. **Honest Data Rule**: Zero synthetic or hallucinated figures—missing figures render as clean dashes (`—`).
 3. **Statutory Alignment**: Strict Indian GST Act adherence (Section 22 Exemption, Rule 88A optimal set-off, GSTR-1 & GSTR-3B offline JSON, IRP INV-01 IRN hash, and Section 43B(h) MSME recovery).
 4. **Single-Tenant Privacy**: Dedicated single-customer runtime isolation preventing cross-organization data leakage.
+

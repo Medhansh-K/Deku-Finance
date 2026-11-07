@@ -498,7 +498,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "masters",
         title: "Chart of accounts and masters",
-        body: "Add Account creates a ledger; accounts you added can be deactivated or removed, while system accounts can't, and this screen has no rename option. Parties and items have their own screens under Masters. To bring in existing data, Import from Tally or CSV on the Gateway shows a review before you apply anything.",
+        body: "Add Account creates a ledger; accounts you added can be deactivated or removed, while system accounts can't, and this screen has no rename option. Parties and items have their own screens under Masters. To bring in existing data, Import from Tally or CSV in the top header bar shows a review before you apply anything.",
         route: "/masters/chart-of-accounts",
         target: "coa-add-account",
       },

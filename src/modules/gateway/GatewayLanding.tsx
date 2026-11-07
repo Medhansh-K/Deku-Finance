@@ -618,18 +618,6 @@ export function GatewayLanding() {
                     <span>Reconciliation &amp; Settlements</span>
                   </Link>
                   <Link
-                    href="/import"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>Import from Tally or CSV</span>
-                  </Link>
-                  <Link
-                    href="/export"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>Export to CSV</span>
-                  </Link>
-                  <Link
                     href="/audit"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
