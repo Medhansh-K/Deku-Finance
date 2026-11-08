@@ -1,7 +1,20 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/auth/session";
 
 export default async function proxy(request: NextRequest) {
+  const dekuInterface = process.env.DEKU_INTERFACE;
+  const { pathname } = request.nextUrl;
+
+  // Interface-specific root redirection
+  if (pathname === "/") {
+    if (dekuInterface === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (dekuInterface === "distributor") {
+      return NextResponse.redirect(new URL("/distributor", request.url));
+    }
+  }
+
   return await updateSession(request);
 }
 
