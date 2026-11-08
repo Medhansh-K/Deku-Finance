@@ -5,12 +5,21 @@ export default async function proxy(request: NextRequest) {
   const dekuInterface = process.env.DEKU_INTERFACE;
   const { pathname } = request.nextUrl;
 
-  // Interface-specific root redirection
-  if (pathname === "/") {
-    if (dekuInterface === "admin") {
+  // Interface-specific root redirection & strict boundary isolation
+  if (dekuInterface === "admin") {
+    if (pathname === "/") {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
-    if (dekuInterface === "distributor") {
+    if (pathname.startsWith("/distributor")) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+  }
+
+  if (dekuInterface === "distributor") {
+    if (pathname === "/") {
+      return NextResponse.redirect(new URL("/distributor", request.url));
+    }
+    if (pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/distributor", request.url));
     }
   }
