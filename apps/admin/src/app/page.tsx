@@ -166,7 +166,7 @@ export default function DekuAdminPortal() {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/ecosystem/admin");
+      const res = await fetch("/api/admin");
       const json = await res.json();
       if (json.success) {
         setData(json);
@@ -184,7 +184,7 @@ export default function DekuAdminPortal() {
 
   const handleApproveRequest = async (requestId: string) => {
     try {
-      const res = await fetch("/api/ecosystem/admin", {
+      const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -209,7 +209,7 @@ export default function DekuAdminPortal() {
     const reason = prompt("Enter rejection reason for distributor:");
     if (!reason) return;
     try {
-      const res = await fetch("/api/ecosystem/admin", {
+      const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -232,7 +232,7 @@ export default function DekuAdminPortal() {
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/ecosystem/admin", {
+      const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -261,7 +261,7 @@ export default function DekuAdminPortal() {
   const handleCreateDistributor = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/ecosystem/admin", {
+      const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -906,3 +906,4 @@ export default function DekuAdminPortal() {
     </div>
   );
 }
+

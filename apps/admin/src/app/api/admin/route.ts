@@ -6,7 +6,7 @@ import {
   createDistributor,
   approveLicenseRequest,
   rejectLicenseRequest,
-} from "@/lib/ecosystem/store";
+} from "@/lib/store";
 
 export async function GET(req: NextRequest) {
   try {
@@ -54,24 +54,16 @@ export async function POST(req: NextRequest) {
     if (action === "add_admin") {
       const { email, fullName, role, createdBy } = body;
       if (!email || !fullName) {
-        return NextResponse.json(
-          { success: false, error: "Email and Full Name are required" },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
       }
-      const newAdmin = addPlatformAdmin({
-        email,
-        fullName,
-        role: role || "license_manager",
-        createdBy: createdBy || "medhanshk10@gmail.com",
-      });
-      return NextResponse.json({ success: true, admin: newAdmin });
+      const admin = addPlatformAdmin({ email, fullName, role, createdBy });
+      return NextResponse.json({ success: true, admin });
     }
 
     if (action === "toggle_admin") {
       const { adminId, isActive } = body;
-      const updated = toggleAdminStatus(adminId, Boolean(isActive));
-      return NextResponse.json({ success: true, admin: updated });
+      const admin = toggleAdminStatus(adminId, Boolean(isActive));
+      return NextResponse.json({ success: true, admin });
     }
 
     if (action === "create_distributor") {
@@ -85,51 +77,45 @@ export async function POST(req: NextRequest) {
         allocatedSeatQuota,
         availableServiceCredits,
       } = body;
-
-      const dist = createDistributor({
+      if (!name || !companyName || !email) {
+        return NextResponse.json({ success: false, error: "Missing distributor fields" }, { status: 400 });
+      }
+      const distributor = createDistributor({
         name,
         companyName,
         email,
         phone,
-        assignedStates: assignedStates || [],
-        assignedPincodes: assignedPincodes || [],
-        allocatedSeatQuota: Number(allocatedSeatQuota) || 20,
-        availableServiceCredits: Number(availableServiceCredits) || 50,
+        assignedStates,
+        assignedPincodes,
+        allocatedSeatQuota,
+        availableServiceCredits,
       });
-
-      return NextResponse.json({ success: true, distributor: dist });
+      return NextResponse.json({ success: true, distributor });
     }
 
-    if (action === "approve_request") {
-      const { requestId, reviewedBy } = body;
-      const result = approveLicenseRequest(requestId, reviewedBy || "medhanshk10@gmail.com");
-      return NextResponse.json({
-        success: true,
-        message: "License generated and issued successfully",
-        result,
-      });
+    if (action === "approve_license") {
+      const { requestId, reviewerEmail } = body;
+      const res = approveLicenseRequest(requestId, reviewerEmail || "medhanshk10@gmail.com");
+      if (!res) {
+        return NextResponse.json({ success: false, error: "Request not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, license: res.license, request: res.request });
     }
 
-    if (action === "reject_request") {
-      const { requestId, reviewedBy, reason } = body;
-      const result = rejectLicenseRequest(
-        requestId,
-        reviewedBy || "medhanshk10@gmail.com",
-        reason || "Incomplete commercial document proof"
-      );
-      return NextResponse.json({
-        success: true,
-        message: "License request rejected",
-        result,
-      });
+    if (action === "reject_license") {
+      const { requestId, reviewerEmail, reason } = body;
+      const res = rejectLicenseRequest(requestId, reviewerEmail || "medhanshk10@gmail.com", reason || "Documentation criteria not met");
+      if (!res) {
+        return NextResponse.json({ success: false, error: "Request not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, request: res });
     }
 
     return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to process request" },
-      { status: 400 }
+      { success: false, error: error.message || "Failed to process admin action" },
+      { status: 500 }
     );
   }
 }
-

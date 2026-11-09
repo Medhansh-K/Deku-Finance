@@ -63,7 +63,7 @@ function sourceFiles(dir: string): string[] {
 
 describe("tutorial content matches the app", () => {
   const steps = TUTORIAL_PATHS.flatMap((p) => p.steps);
-  const source = sourceFiles("src").map((f) => readFileSync(f, "utf8")).join("\n");
+  const source = sourceFiles("apps/platform/src").map((f) => readFileSync(f, "utf8")).join("\n");
 
   it("has the nine required paths", () => {
     expect(TUTORIAL_PATHS.map((p) => p.id)).toEqual([
@@ -87,7 +87,7 @@ describe("tutorial content matches the app", () => {
   });
 
   it("only sends people to pages that exist", () => {
-    const missing = steps.filter((s) => s.route && !existsSync(join("src/app", s.route, "page.tsx"))).map((s) => s.route);
+    const missing = steps.filter((s) => s.route && !existsSync(join("apps/platform/src/app", s.route, "page.tsx"))).map((s) => s.route);
     expect(missing).toEqual([]);
   });
 

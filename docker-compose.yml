@@ -148,24 +148,25 @@ services:
       - postgrest
 
   # =========================================================================
-  # 3. THREE FRONTEND CONTAINERS (FOR THE THREE INTERFACES)
+  # 3. THREE FRONTEND CONTAINERS (FOR THE THREE DISTINCT INTERFACES)
   # =========================================================================
 
-  # Frontend 1: Deku Admin Portal (Port 3001)
+  # Frontend 1: Deku Admin Portal (Port 3001) — apps/admin
   frontend-admin:
-    build: .
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
     container_name: deku-frontend-admin
     restart: unless-stopped
     environment:
       PORT: "3000"
-      DEKU_INTERFACE: admin
       BACKEND_URL: http://backend-admin:8080
       DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3001:3000"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/admin').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -173,21 +174,22 @@ services:
       backend-admin:
         condition: service_healthy
 
-  # Frontend 2: Distributor Portal (Port 3002)
+  # Frontend 2: Distributor Portal (Port 3002) — apps/distributor
   frontend-distributor:
-    build: .
+    build:
+      context: ./apps/distributor
+      dockerfile: Dockerfile
     container_name: deku-frontend-distributor
     restart: unless-stopped
     environment:
       PORT: "3000"
-      DEKU_INTERFACE: distributor
       BACKEND_URL: http://backend-distributor:8080
       DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3002:3000"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/distributor').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -195,14 +197,15 @@ services:
       backend-distributor:
         condition: service_healthy
 
-  # Frontend 3: Deku Platform ERP Client App (Port 3000)
+  # Frontend 3: Deku Platform ERP Client App (Port 3000) — apps/platform
   frontend-platform:
-    build: .
+    build:
+      context: ./apps/platform
+      dockerfile: Dockerfile
     container_name: deku-frontend-platform
     restart: unless-stopped
     environment:
       PORT: "3000"
-      DEKU_INTERFACE: platform
       BACKEND_URL: http://backend-platform:8080
       DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}

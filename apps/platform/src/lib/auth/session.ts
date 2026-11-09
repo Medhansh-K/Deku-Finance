@@ -13,8 +13,6 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/request-setup",
   "/api/auth",
-  "/distributor",
-  "/admin",
   "/features",
   "/gst-compliance",
   "/gst-returns",

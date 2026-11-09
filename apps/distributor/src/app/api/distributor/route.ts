@@ -4,7 +4,7 @@ import {
   submitLicenseRequest,
   provisionSeatsByDistributor,
   provisionServiceByDistributor,
-} from "@/lib/ecosystem/store";
+} from "@/lib/store";
 
 export async function GET(req: NextRequest) {
   try {
@@ -72,7 +72,6 @@ export async function POST(req: NextRequest) {
         proofAmount,
       } = body;
 
-      // Condition 1 & Condition 2 validation
       if (!distributorId || !clientName || !clientEmail || !companyName) {
         return NextResponse.json(
           { success: false, error: "Client and company details are required" },

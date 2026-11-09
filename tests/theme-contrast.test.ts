@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-const css = readFileSync(path.resolve(__dirname, '../src/app/globals.css'), 'utf8');
+const css = readFileSync(path.resolve(__dirname, '../apps/platform/src/app/globals.css'), 'utf8');
 
 function tokens(block: string): Record<string, string> {
   const out: Record<string, string> = {};

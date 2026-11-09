@@ -181,7 +181,7 @@ describe('one path for the active company', () => {
     });
 
   it('nothing else writes the keys or fires the event', () => {
-    const offenders = files('src').filter((f) => {
+    const offenders = files('apps/platform/src').filter((f) => {
       if (f.replace(/\\/g, '/').endsWith('lib/organisation/active-org.ts')) return false;
       const text = readFileSync(f, 'utf8');
       return /setItem\(\s*["']deku_active_org/.test(text) || /new Event\(\s*["']deku_active_org_changed/.test(text);

@@ -1,11 +1,20 @@
 {
-  "name": "deku-finance",
-  "version": "0.1.0",
+  "name": "deku-finance-monorepo",
+  "version": "0.2.0",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm run dev --workspace=@deku/platform",
+    "dev:platform": "npm run dev --workspace=@deku/platform",
+    "dev:admin": "npm run dev --workspace=@deku/admin",
+    "dev:distributor": "npm run dev --workspace=@deku/distributor",
+    "build": "npm run build --workspaces",
+    "build:platform": "npm run build --workspace=@deku/platform",
+    "build:admin": "npm run build --workspace=@deku/admin",
+    "build:distributor": "npm run build --workspace=@deku/distributor",
+    "start": "npm run start --workspace=@deku/platform",
     "lint": "eslint",
     "test": "vitest run"
   },

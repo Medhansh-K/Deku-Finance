@@ -148,7 +148,7 @@ export default function DistributorPortal() {
   const fetchDistributorData = async (distId: string) => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/ecosystem/distributor?distributorId=${distId}`);
+      const res = await fetch(`/api/distributor?distributorId=${distId}`);
       const json = await res.json();
       if (json.success) {
         setData(json);
@@ -172,7 +172,7 @@ export default function DistributorPortal() {
     }
     try {
       setSubmitting(true);
-      const res = await fetch("/api/ecosystem/distributor", {
+      const res = await fetch("/api/distributor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -215,7 +215,7 @@ export default function DistributorPortal() {
   const handleProvisionSeats = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/ecosystem/distributor", {
+      const res = await fetch("/api/distributor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -244,7 +244,7 @@ export default function DistributorPortal() {
   const handleProvisionService = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/ecosystem/distributor", {
+      const res = await fetch("/api/distributor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -273,7 +273,7 @@ export default function DistributorPortal() {
 
   const handleUpdateLeadStatus = async (leadId: string, status: string) => {
     try {
-      await fetch("/api/ecosystem/distributor", {
+      await fetch("/api/distributor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -974,3 +974,4 @@ export default function DistributorPortal() {
     </div>
   );
 }
+
