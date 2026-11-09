@@ -24,53 +24,53 @@ export default function InteractiveModePreview() {
   });
 
   return (
-    <div className="w-full bg-panel rounded-3xl p-6 sm:p-10 border border-edge shadow-2xl text-white relative overflow-hidden font-sans">
+    <div className="w-full bg-panel rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-8 border border-edge shadow-2xl text-white relative overflow-hidden font-sans">
       {/* Background Subtle Ambient Glow */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-brand/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header and Mode Selector Buttons */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-8 border-b border-edge">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-edge">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-brand/15 px-2.5 py-0.5 text-xs font-mono font-semibold text-brand-soft border border-brand/30">
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-brand/15 px-2.5 py-0.5 text-[11px] sm:text-xs font-mono font-semibold text-brand-soft border border-brand/30">
               <Zap className="h-3 w-3 text-brand" />
               Interactive Architecture Demo
             </span>
-            <span className="text-xs text-slate-400">Toggle mode to see real-time engine shift</span>
+            <span className="text-[11px] sm:text-xs text-slate-400">Toggle mode to see real-time engine shift</span>
           </div>
-          <h3 className="text-2xl font-bold tracking-tight text-white">
+          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
             One Core Engine. Two Operating Modes.
           </h3>
-          <p className="text-slate-400 text-sm mt-1 max-w-xl">
+          <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
             Freelancer under ₹20L or high-growth B2B enterprise? Deku Finance adapts your legal document generation, tax splitting, and ledger posting seamlessly.
           </p>
         </div>
 
         {/* The 2 Mode Toggles */}
-        <div className="flex items-center bg-panel-deep p-1.5 rounded-2xl border border-edge self-start lg:self-auto">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center bg-panel-deep p-1 rounded-xl sm:rounded-2xl border border-edge self-start lg:self-auto gap-1">
           <button
             type="button"
             onClick={() => setActiveMode("pure")}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeMode === "pure"
                 ? "bg-brand text-ink shadow-md font-bold"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <UserCheck className="h-4 w-4" />
+            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>Pure Accounting (Non-GST)</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveMode("gst")}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeMode === "gst"
                 ? "bg-brand text-ink shadow-md font-bold"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Building2 className="h-4 w-4" />
+            <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>GST Registered Enterprise</span>
           </button>
         </div>
@@ -321,8 +321,8 @@ export default function InteractiveModePreview() {
             )}
 
             {/* Line Item Table */}
-            <div>
-              <table className="w-full text-xs">
+            <div className="overflow-x-auto -mx-1 sm:mx-0">
+              <table className="w-full text-xs min-w-[380px]">
                 <thead>
                   <tr className="border-b border-slate-200 text-slate-500 text-left font-medium">
                     <th className="pb-2">Item / SAC</th>

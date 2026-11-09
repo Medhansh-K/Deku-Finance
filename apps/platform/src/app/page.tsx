@@ -82,73 +82,73 @@ export default function Home() {
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-line-strong bg-gradient-to-b from-brand/10 via-canvas to-white">
+      <section className="relative overflow-hidden pt-8 pb-12 sm:pt-14 sm:pb-16 lg:pt-18 lg:pb-22 border-b border-line-strong bg-gradient-to-b from-brand/10 via-canvas to-white">
         {/* Decorative Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
+          <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6">
             {/* Pill Eyebrow */}
-            <div className="inline-flex items-center gap-2 rounded-full bg-panel px-4 py-1.5 text-xs font-mono font-bold text-white border border-edge shadow-sm animate-fade-in">
-              <Sparkles className="h-3.5 w-3.5 text-brand" />
-              <span>Built for India’s 63M+ MSMEs, Freelancers & Growing Startups</span>
+            <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 sm:px-4 sm:py-1.5 text-[11px] sm:text-xs font-mono font-bold text-white border border-edge shadow-sm animate-fade-in">
+              <Sparkles className="h-3.5 w-3.5 text-brand shrink-0" />
+              <span>Built for India’s 63M+ MSMEs, Freelancers &amp; Growing Startups</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-ink leading-[1.12]">
-              The Smart GST & Double-Entry{" "}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-ink leading-[1.14]">
+              The Smart GST &amp; Double-Entry{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-panel via-[#2F6B6B] to-brand">
                 Financial Operating System
               </span>
             </h1>
 
             {/* Sub-headline */}
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xs sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
               Operate friction-free under <strong>Section 22 CGST Exemption</strong>, or power enterprise B2B sales with auto-calculated GST, instant Bharat UPI QR codes, and an immutable double-entry ALERX ledger.
             </p>
 
             {/* CTA Buttons */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+            <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3.5">
               <Link
                 href="/gateway"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl bg-brand hover:bg-brand-soft px-7 py-3.5 text-sm font-bold text-ink shadow-lg shadow-brand/25 transition-all hover:scale-105 active:scale-95"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand hover:bg-brand-soft px-6 py-3 text-xs sm:text-sm font-bold text-ink shadow-lg shadow-brand/25 transition-all hover:scale-105 active:scale-95"
               >
-                <Layers className="h-4 w-4 text-ink" />
+                <Layers className="h-4 w-4 text-ink shrink-0" />
                 <span>Open Gateway of Deku</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
               <Link
                 href="/login"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-panel hover:bg-panel-deep border border-edge hover:border-brand px-6 py-3.5 text-sm font-semibold text-white transition-all shadow-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-panel hover:bg-panel-deep border border-edge hover:border-brand px-5 py-3 text-xs sm:text-sm font-semibold text-white transition-all shadow-md"
               >
-                <Zap className="h-4 w-4 text-brand" />
+                <Zap className="h-4 w-4 text-brand shrink-0" />
                 <span>Try Instant Demo Sandbox</span>
               </Link>
             </div>
 
             {/* Quick Trust Highlights */}
-            <div className="pt-6 flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500">
+            <div className="pt-3 sm:pt-5 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[11px] sm:text-xs font-semibold text-slate-500">
               <span className="flex items-center gap-1.5 font-mono">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 Zero Password Sharing
               </span>
               <span className="flex items-center gap-1.5 font-mono">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 Govt API Setu Ready
               </span>
               <span className="flex items-center gap-1.5 font-mono">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 Indian GAAP (ALERX)
               </span>
               <span className="flex items-center gap-1.5 font-mono">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 Official GSTR-3B Offline JSON
               </span>
             </div>
           </div>
 
           {/* Interactive Live Architecture Demo */}
-          <div id="modes" className="mt-14 scroll-mt-24">
+          <div id="modes" className="mt-8 sm:mt-12 scroll-mt-24">
             <InteractiveModePreview />
           </div>
         </div>
@@ -161,19 +161,19 @@ export default function Home() {
       <AlerxLedgerSection />
 
       {/* Comparison: Deku Finance vs Traditional Tools */}
-      <section className="py-20 bg-white border-b border-line-strong">
+      <section className="py-12 sm:py-16 bg-white border-b border-line-strong">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-14 space-y-2">
+          <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12 space-y-2">
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-ink-soft">
               The Modern Advantage
             </span>
-            <h2 className="text-3xl font-black text-ink">
+            <h2 className="text-2xl sm:text-3xl font-black text-ink">
               Why Indian Businesses Choose Deku Finance
             </h2>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-edge shadow-md">
-            <table className="w-full text-xs text-left">
+            <table className="w-full text-xs text-left min-w-[580px]">
               <thead className="bg-panel text-white font-bold uppercase tracking-wider text-[11px] border-b border-edge">
                 <tr>
                   <th className="py-4 px-5">Capabilities</th>
@@ -238,18 +238,18 @@ export default function Home() {
       <PricingPlansSection />
 
       {/* FAQ Accordion Section */}
-      <section id="faq" className="py-20 bg-canvas border-b border-line-strong scroll-mt-16">
+      <section id="faq" className="py-12 sm:py-16 bg-canvas border-b border-line-strong scroll-mt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-14 space-y-2">
+          <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12 space-y-2">
             <span className="text-xs font-mono font-bold uppercase tracking-widest text-ink-soft">
               Clear Answers
             </span>
-            <h2 className="text-3xl font-black text-ink">
+            <h2 className="text-2xl sm:text-3xl font-black text-ink">
               Frequently Asked Questions
             </h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
@@ -258,7 +258,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="w-full py-5 px-6 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-900 hover:text-brand-strong transition-colors"
+                  className="w-full py-3.5 px-4 sm:py-4 sm:px-6 text-left flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 hover:text-brand-strong transition-colors"
                 >
                   <span>{faq.q}</span>
                   {openFaq === idx ? (
@@ -268,7 +268,7 @@ export default function Home() {
                   )}
                 </button>
                 {openFaq === idx && (
-                  <div className="px-6 pb-5 pt-1 text-xs leading-relaxed text-slate-600 border-t border-slate-100">
+                  <div className="px-4 sm:px-6 pb-4 sm:pb-5 pt-1 text-xs leading-relaxed text-slate-600 border-t border-slate-100">
                     {faq.a}
                   </div>
                 )}
@@ -279,23 +279,23 @@ export default function Home() {
       </section>
 
       {/* High-Conversion Bottom Call to Action */}
-      <section className="py-20 bg-panel-deep border-t border-edge text-white relative overflow-hidden">
+      <section className="py-12 sm:py-16 bg-panel-deep border-t border-edge text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#5BB5BB20,transparent_50%)] pointer-events-none" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-4 sm:space-y-6">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-panel px-3.5 py-1 text-xs font-mono font-bold text-brand-soft border border-edge">
-            <Zap className="h-3.5 w-3.5 text-brand" />
+            <Zap className="h-3.5 w-3.5 text-brand shrink-0" />
             Zero Setup Fee • 60-Second Onboarding
           </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
             Ready to Take Full Control of Your Financial Operations?
           </h2>
-          <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
             Join thousands of modern Indian entrepreneurs and freelancers enjoying frictionless invoicing, zero penalty anxiety, and institutional-grade bookkeeping.
           </p>
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               href="/gateway"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand hover:bg-brand-soft px-8 py-4 text-sm font-bold text-ink shadow-xl shadow-brand/25 transition-transform hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand hover:bg-brand-soft px-6 py-3 text-xs sm:text-sm font-bold text-ink shadow-xl shadow-brand/25 transition-transform hover:scale-105 active:scale-95"
             >
               <Layers className="h-4 w-4" />
               <span>Launch Desktop Gateway</span>
@@ -303,7 +303,7 @@ export default function Home() {
             </Link>
             <Link
               href="/login"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-panel hover:bg-panel-deep border border-edge hover:border-brand px-7 py-4 text-sm font-semibold text-slate-200 transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-panel hover:bg-panel-deep border border-edge hover:border-brand px-6 py-3 text-xs sm:text-sm font-semibold text-slate-200 transition-colors"
             >
               <span>Sign in to Workspace</span>
             </Link>

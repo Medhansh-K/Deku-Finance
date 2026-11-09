@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -22,9 +22,12 @@ import {
   Server,
   Headphones,
   Lock,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export default function PricingPlansSection() {
+  const [showMatrix, setShowMatrix] = useState(false);
   const plans = [
     {
       id: "go",
@@ -338,41 +341,41 @@ export default function PricingPlansSection() {
   ];
 
   return (
-    <section id="pricing" className="py-24 bg-white text-slate-900 border-b border-line-strong scroll-mt-16 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    <section id="pricing" className="py-12 sm:py-16 lg:py-20 bg-white text-slate-900 border-b border-line-strong scroll-mt-16 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-4 py-1.5 text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
+        <div className="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3.5">
+          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-brand" />
             <span>Annual Contract-Based Licensing • 100% Transparent</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-ink">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-ink">
             Predictable Plans,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-panel via-brand-strong to-brand">
               Annual Contract Pricing.
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
             Deku Finance is licensed as an <strong>Annual Contract-Based License</strong>. Enjoy predictable, contract-backed software with dedicated deployment, statutory GST updates, and zero surprise transaction fees.
           </p>
 
           {/* Annual Contract Highlight Pill */}
-          <div className="pt-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>All licenses include 1-year statutory tax updates & dedicated single-tenant data isolation</span>
+          <div className="pt-1 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] sm:text-xs font-semibold text-slate-700">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+            <span>All licenses include 1-year statutory tax updates &amp; dedicated data isolation</span>
           </div>
         </div>
 
         {/* 3 Plans Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 max-w-7xl mx-auto items-stretch">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
+              className={`rounded-2xl sm:rounded-3xl p-5 sm:p-7 flex flex-col justify-between transition-all relative ${
                 plan.isPopular
-                  ? "bg-panel text-white border-2 border-brand shadow-2xl ring-4 ring-brand/10 lg:-translate-y-2"
+                  ? "bg-panel text-white border-2 border-brand shadow-2xl ring-4 ring-brand/10 md:-translate-y-1"
                   : "bg-canvas text-slate-900 border border-slate-200 shadow-sm hover:shadow-md"
               }`}
             >
@@ -495,23 +498,31 @@ export default function PricingPlansSection() {
           ))}
         </div>
 
-        {/* Detailed Plan Feature Breakup Table (3 Columns) */}
-        <div className="pt-10 space-y-6 max-w-7xl mx-auto">
-          <div className="text-center space-y-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-ink-soft">
-              Functional Capability Matrix
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-950">
-              Comprehensive Module Comparison: GO vs PRO vs Enterprise
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
-              Compare statutory compliance, ledger mechanics, AI CFO intelligence, and governance capabilities across all three annual licensing tiers.
-            </p>
+        {/* Detailed Plan Feature Breakup Table (Collapsible on Mobile/Tablet to Prevent Infinite Scrolling) */}
+        <div className="pt-4 sm:pt-8 space-y-4 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <div className="text-center sm:text-left space-y-1">
+              <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-2">
+                <span>Functional Capability Matrix (GO vs PRO vs Enterprise)</span>
+              </h3>
+              <p className="text-xs text-slate-600">
+                Compare statutory compliance, ledger mechanics, AI CFO intelligence, and governance across all tiers.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowMatrix(!showMatrix)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-panel hover:bg-panel-deep text-white text-xs font-bold transition-all shrink-0"
+            >
+              <span>{showMatrix ? "Hide Detailed Matrix" : "View Complete Matrix"}</span>
+              {showMatrix ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[760px]">
+          {showMatrix && (
+            <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white animate-in fade-in duration-200">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs min-w-[760px]">
                 <thead>
                   <tr className="bg-panel text-white text-[11px] font-bold uppercase tracking-wider border-b border-edge">
                     <th className="py-4 px-5 w-2/5">Capabilities & Module Specifications</th>
@@ -582,6 +593,7 @@ export default function PricingPlansSection() {
               </div>
             </div>
           </div>
+        )}
         </div>
       </div>
     </section>

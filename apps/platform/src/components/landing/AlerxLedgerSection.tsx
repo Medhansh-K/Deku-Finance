@@ -383,66 +383,66 @@ export default function AlerxLedgerSection() {
   };
 
   return (
-    <section id="alerx" className="py-24 bg-panel-deep border-b border-edge text-white relative overflow-hidden scroll-mt-16 font-sans">
+    <section id="alerx" className="py-12 sm:py-16 lg:py-20 bg-panel-deep border-b border-edge text-white relative overflow-hidden scroll-mt-16 font-sans">
       {/* Background Decorative Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#5BB5BB10,transparent_60%)] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8 sm:space-y-12">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-4 py-1.5 text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
+        <div className="text-center max-w-3xl mx-auto space-y-2 sm:space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
             <Layers className="h-3.5 w-3.5 text-brand" />
             <span>The ALERX 4-Tier Foundation • Standard Indian GAAP</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight">
             Effortless Chart of Accounts (COA) for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-soft via-brand to-brand-strong">
               Any Business Model
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
             Forget complex manual ledger setup. Deku Finance dynamically generates a verified 4-tier Chart of Accounts tailored to your exact industry in 1 click.
           </p>
         </div>
 
         {/* The 4-Tier Hierarchy Flow Banner */}
-        <div className="bg-panel rounded-2xl border border-edge p-4 sm:p-6 shadow-xl">
-          <div className="text-xs font-mono font-bold uppercase tracking-wider text-brand mb-3 flex items-center gap-2">
-            <Database className="h-4 w-4 text-brand" />
+        <div className="bg-panel rounded-2xl border border-edge p-3.5 sm:p-5 shadow-xl">
+          <div className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-brand mb-2.5 flex items-center gap-2">
+            <Database className="h-4 w-4 text-brand shrink-0" />
             <span>Mathematical ALERX 4-Tier Architecture Enforced at Database Level</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
-            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 1: Group</span>
-              <h4 className="font-bold text-white text-sm">ALERX Group</h4>
-              <p className="text-[11px] text-slate-400">Assets, Liabilities, Equity, Revenue, Expense.</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 text-xs">
+            <div className="bg-panel-deep p-2.5 sm:p-3.5 rounded-xl border border-edge space-y-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 1: Group</span>
+              <h4 className="font-bold text-white text-xs sm:text-sm">ALERX Group</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Assets, Liabilities, Equity, Revenue, Expense.</p>
             </div>
 
-            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 2: Major</span>
-              <h4 className="font-bold text-white text-sm">Ledger Category</h4>
-              <p className="text-[11px] text-slate-400">Liquid Capital, Receivables, Statutory Taxes.</p>
+            <div className="bg-panel-deep p-2.5 sm:p-3.5 rounded-xl border border-edge space-y-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 2: Major</span>
+              <h4 className="font-bold text-white text-xs sm:text-sm">Ledger Category</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Liquid Capital, Receivables, Statutory Taxes.</p>
             </div>
 
-            <div className="bg-panel-deep p-3.5 rounded-xl border border-edge space-y-1">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 3: Control</span>
-              <h4 className="font-bold text-white text-sm">Sub-Ledger Bucket</h4>
-              <p className="text-[11px] text-slate-400">Bank Accounts, Trade Debtors, Output GST.</p>
+            <div className="bg-panel-deep p-2.5 sm:p-3.5 rounded-xl border border-edge space-y-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-slate-500 uppercase">Tier 3: Control</span>
+              <h4 className="font-bold text-white text-xs sm:text-sm">Sub-Ledger Bucket</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Bank Accounts, Trade Debtors, Output GST.</p>
             </div>
 
-            <div className="bg-panel-deep p-3.5 rounded-xl border border-brand/40 bg-brand/5 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-brand uppercase">Tier 4: Leaf Account</span>
-              <h4 className="font-bold text-brand-soft text-sm">Transacting Label</h4>
-              <p className="text-[11px] text-slate-400">HDFC Bank, Primary Customer, Server Hosting.</p>
+            <div className="bg-panel-deep p-2.5 sm:p-3.5 rounded-xl border border-brand/40 bg-brand/5 space-y-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-brand uppercase">Tier 4: Leaf Account</span>
+              <h4 className="font-bold text-brand-soft text-xs sm:text-sm">Transacting Label</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">HDFC Bank, Primary Customer, Server Hosting.</p>
             </div>
 
-            <div className="bg-panel-deep p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 space-y-1">
-              <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">State & Magnitude</span>
-              <h4 className="font-bold text-emerald-300 text-sm">Units & INR Value</h4>
-              <p className="text-[11px] text-slate-400">Count of vouchers (units) & Net INR balance.</p>
+            <div className="col-span-2 sm:col-span-1 bg-panel-deep p-2.5 sm:p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 space-y-1">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold text-emerald-400 uppercase">State & Magnitude</span>
+              <h4 className="font-bold text-emerald-300 text-xs sm:text-sm">Units & INR Value</h4>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">Count of vouchers (units) & Net INR balance.</p>
             </div>
           </div>
         </div>
