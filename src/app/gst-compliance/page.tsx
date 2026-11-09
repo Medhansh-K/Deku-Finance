@@ -271,9 +271,14 @@ export default function GstCompliancePage() {
               <div className="h-8 w-8 rounded-lg bg-brand/20 text-brand flex items-center justify-center font-bold">
                 <FileCode className="h-4 w-4" />
               </div>
-              <h4 className="font-bold text-white text-sm">2. Instant Live e-Invoicing (IRN)</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-white text-sm">2. Live e-Invoicing (IRN) Flow</h4>
+                <span className="text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30">
+                  Target Architecture
+                </span>
+              </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                When you post an F8 Sales Voucher, Deku transmits the compliant JSON to your GSP, retrieves the 64-character Invoice Reference Number (IRN), and prints the government signed QR code.
+                Once your GSP provider credentials are configured, posting an F8 Sales Voucher will transmit the compliant JSON to your GSP, retrieve the 64-character Invoice Reference Number (IRN), and print the government-signed QR code.
               </p>
             </div>
 
@@ -288,12 +293,14 @@ export default function GstCompliancePage() {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-panel-deep border border-edge flex items-center justify-between text-xs text-slate-400">
+          <div className="p-4 rounded-xl bg-panel-deep border border-edge flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-400">
             <span className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-emerald-400" />
-              <span>GSP API tokens are encrypted in PostgreSQL using AES-256 GCM authenticated encryption.</span>
+              <Lock className="h-4 w-4 text-emerald-400 shrink-0" />
+              <span>GSP API tokens will be stored encrypted in PostgreSQL using AES-256 GCM authenticated encryption.</span>
             </span>
-            <span className="font-mono text-[11px] text-brand-soft">Status: API Scaffold Ready</span>
+            <span className="font-mono text-[11px] text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800 shrink-0">
+              Current Status: Offline JSON Active • Live GSP Seam in Development
+            </span>
           </div>
         </section>
 
