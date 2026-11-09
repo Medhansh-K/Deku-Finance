@@ -56,6 +56,34 @@ export default function Home() {
       q: "What is the ALERX 4-Tier Accounting Model?",
       a: "ALERX stands for Assets (A), Liabilities (L), Equity (E), Revenue (R), and Expenses (X). Our database enforces a 4-tier hierarchy: Account Group ➔ Ledger ➔ Sub-Ledger ➔ Label. Financial transactions can only post directly to Labels (leaf accounts), guaranteeing mathematical debit=credit parity and auditable financial statements.",
     },
+    {
+      q: "How does Deku Finance isolate customer data and maintain privacy?",
+      a: "Every organization runs with strict data isolation. We employ row-level security (RLS) and tenant isolation in PostgreSQL, AES-256 GCM encryption for statutory and banking credentials, and strict role-based access control (RBAC). No other tenant or distributor can ever inspect your books, ledgers, or customer details.",
+    },
+    {
+      q: "What is GSP (GST Suvidha Provider) integration, and do I connect my own GSP account?",
+      a: "Yes. In live enterprise deployments, Deku Finance connects via an authorized GSP API Bridge. You simply plug in your registered GSP credentials (e.g., Cygnet, Masters India, IRIS, Clear, or NIC e-Way API) under Settings to execute instant e-Way Bill generation and live e-Invoicing (IRN) directly from your Deku vouchers without external portal hopping.",
+    },
+    {
+      q: "How does the Maker-Checker authorization workflow protect businesses from unauthorized payouts?",
+      a: "Maker-Checker enforces separation of duties. Subordinate accountants or billing clerks can draft vouchers, but cannot post them to the General Ledger or disburse funds. An authorized Approver (Owner, CFO, or Administrator) reviews the transaction, inspects supporting PDF vouchers, and officially approves or rejects it before any journal commitment occurs.",
+    },
+    {
+      q: "Can I create Quotations, Estimates, and Proforma Invoices before issuing a final Tax Invoice?",
+      a: "Yes. The built-in Document Builder lets you design professional Quotations, Proforma Invoices, Delivery Challans, and Estimates. Once approved by your client, you can convert them into a finalized GST Tax Invoice in one click without re-typing any customer details or line items.",
+    },
+    {
+      q: "How does automated Bank Reconciliation work with imported statements?",
+      a: "You can import standard bank statement files (.CSV or .OFX) directly into your bank asset ledger. Deku’s reconciliation engine compares transaction dates, reference numbers, and debit/credit amounts with your posted vouchers, highlights automatic matches, and allows 1-click batch confirmation with zero variance.",
+    },
+    {
+      q: "Can I export my entire accounting data if I ever decide to leave Deku Finance?",
+      a: "Absolutely. Deku adheres to strict open data standards with zero vendor lock-in. You can download comprehensive ledger balances, chronological Day Book registers, party contacts, and trial balance reports in standard Excel, CSV, or JSON formats at any time.",
+    },
+    {
+      q: "Can I explore and learn the platform without signing up or providing company details?",
+      a: "Yes! You can visit our public Learn Centre at /learn. It offers interactive, hands-on tutorials across 9 learning paths (76 lessons) and complete technical documentation in an isolated sandbox with safe sample data—zero login, zero credit card, and zero registration required.",
+    },
   ];
 
   return (

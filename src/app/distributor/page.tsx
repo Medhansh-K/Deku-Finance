@@ -791,20 +791,6 @@ export default function DistributorPortal() {
         </div>
       </main>
 
-      {/* Bottom Keyboard Strip: Matching platform style */}
-      <footer className="bg-panel border-t border-edge px-4 py-1.5 text-[10px] font-mono text-slate-300 flex flex-wrap items-center justify-between shrink-0 gap-2">
-        <div className="flex items-center gap-3">
-          <span><kbd className="text-brand font-bold">F1</kbd>: New Client</span>
-          <span><kbd className="text-brand font-bold">F2</kbd>: Inbound Leads</span>
-          <span><kbd className="text-brand font-bold">F3</kbd>: Client Accounts</span>
-          <span><kbd className="text-brand font-bold">F4</kbd>: Seat Allocator</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-slate-400">Distributor Portal • Franchise Territory Operations</span>
-        </div>
-      </footer>
-
       {/* Modal: Allocate Extra Seats (Sub-Type B) */}
       {showSeatModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">

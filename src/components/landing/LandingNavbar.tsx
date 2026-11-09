@@ -31,29 +31,32 @@ export default function LandingNavbar() {
         </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-slate-600">
-          <a
-            href="#modes"
+        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
+          <Link
+            href="/features"
             className="hover:text-ink transition-colors flex items-center gap-1.5"
           >
-            Dual Modes
-            <span className="h-1.5 w-1.5 rounded-full bg-brand inline-block animate-pulse" />
-          </a>
-          <a href="#features" className="hover:text-ink transition-colors">
             Features
-          </a>
-          <a href="#alerx" className="hover:text-ink transition-colors">
-            ALERX Ledger
-          </a>
-          <a href="#gstn" className="hover:text-ink transition-colors">
-            GST Returns
-          </a>
-          <a href="#pricing" className="hover:text-ink transition-colors">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand inline-block animate-pulse" />
+          </Link>
+          <Link href="/gst-compliance" className="hover:text-ink transition-colors">
+            GST Compliance
+          </Link>
+          <Link href="/#pricing" className="hover:text-ink transition-colors">
             Plans & Pricing
-          </a>
-          <a href="#faq" className="hover:text-ink transition-colors">
+          </Link>
+          <Link href="/#faq" className="hover:text-ink transition-colors">
             FAQ
-          </a>
+          </Link>
+          <Link
+            href="/learn"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand/15 text-brand-strong font-bold hover:bg-brand/25 transition-all"
+          >
+            <span>Learn</span>
+            <span className="text-[9px] font-mono uppercase bg-brand text-ink px-1.5 py-0.2 rounded font-extrabold tracking-wide">
+              Hub
+            </span>
+          </Link>
         </nav>
 
         {/* Action Buttons - Exactly ONE button for Gateway */}

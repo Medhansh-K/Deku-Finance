@@ -6,7 +6,21 @@ const ACCESS_MAX_AGE = 3600;
 const REFRESH_MAX_AGE = 30 * 24 * 3600;
 
 // Pages anyone may open; every other page needs a signed-in user.
-const PUBLIC_PATHS = ["/login", "/signup", "/join", "/reset-password", "/request-setup", "/api/auth", "/distributor", "/admin"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/join",
+  "/reset-password",
+  "/request-setup",
+  "/api/auth",
+  "/distributor",
+  "/admin",
+  "/features",
+  "/gst-compliance",
+  "/gst-returns",
+  "/learn",
+  "/api/learn",
+];
 
 export { safeNextPath } from "./next-path";
 

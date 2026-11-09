@@ -32,6 +32,16 @@ export default function LandingFooter() {
             </h5>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
+                <Link href="/features" className="hover:text-brand transition-colors font-medium text-white">
+                  All Platform Features (New)
+                </Link>
+              </li>
+              <li>
+                <Link href="/learn" className="hover:text-brand transition-colors font-medium text-brand-soft">
+                  Learn Centre &amp; Tutorials
+                </Link>
+              </li>
+              <li>
                 <Link href="/gateway" className="hover:text-brand transition-colors">
                   Gateway of Deku (Desktop)
                 </Link>
@@ -66,8 +76,13 @@ export default function LandingFooter() {
             </h5>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
+                <Link href="/gst-compliance" className="hover:text-brand transition-colors font-medium text-white">
+                  GST Compliance &amp; GSP Bridge
+                </Link>
+              </li>
+              <li>
                 <Link href="/gst" className="hover:text-brand transition-colors">
-                  GST Tax Engine & Splits
+                  GST Invoicing Desk
                 </Link>
               </li>
               <li>
