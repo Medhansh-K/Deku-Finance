@@ -315,51 +315,46 @@ export default function DekuAdminPortal() {
           <div className="hidden md:flex items-center gap-1 bg-panel-deep/60 p-0.5 rounded-lg border border-edge text-[11px] font-mono">
             <button
               onClick={() => setActiveTab("dual_gate")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "dual_gate"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "dual_gate"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Verification ({data?.metrics.pendingVerifications ?? 0})
             </button>
             <button
               onClick={() => setActiveTab("distributors")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "distributors"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "distributors"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Distributors ({data?.distributors.length ?? 0})
             </button>
             <button
               onClick={() => setActiveTab("admins")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "admins"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "admins"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Sub-Admins ({data?.admins.length ?? 0})
             </button>
             <button
               onClick={() => setActiveTab("licenses")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "licenses"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "licenses"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Licenses
             </button>
             <button
               onClick={() => setActiveTab("leads")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "leads"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "leads"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Leads ({data?.metrics.inboundLeadsCount ?? 0})
             </button>
@@ -530,13 +525,12 @@ export default function DekuAdminPortal() {
                           </div>
                         </div>
                         <span
-                          className={`text-[9px] font-mono px-2 py-0.5 rounded font-bold uppercase ${
-                            req.status === "pending_verification"
+                          className={`text-[9px] font-mono px-2 py-0.5 rounded font-bold uppercase ${req.status === "pending_verification"
                               ? "bg-amber-100 text-amber-800 border border-amber-300"
                               : req.status === "approved_issued"
-                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                              : "bg-rose-100 text-rose-800 border border-rose-300"
-                          }`}
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                : "bg-rose-100 text-rose-800 border border-rose-300"
+                            }`}
                         >
                           {req.status.replace("_", " ")}
                         </span>
@@ -641,11 +635,10 @@ export default function DekuAdminPortal() {
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-brand-strong text-[11px]">{lic.licenseKey}</span>
                       <span
-                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${
-                          lic.managedBy === "company_admin"
+                        className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${lic.managedBy === "company_admin"
                             ? "bg-panel text-brand-soft border border-edge"
                             : "bg-sky-50 text-sky-800 border border-sky-300"
-                        }`}
+                          }`}
                       >
                         {lic.managedBy === "company_admin" ? "Admin Issued" : "Distributor"}
                       </span>

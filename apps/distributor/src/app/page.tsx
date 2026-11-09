@@ -319,41 +319,37 @@ export default function DistributorPortal() {
           <div className="hidden md:flex items-center gap-1 bg-panel-deep/60 p-0.5 rounded-lg border border-edge text-[11px] font-mono">
             <button
               onClick={() => setActiveTab("new_request")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "new_request"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "new_request"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               New Client Request
             </button>
             <button
               onClick={() => setActiveTab("leads")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "leads"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "leads"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Inbound Leads ({data?.leads.length ?? 0})
             </button>
             <button
               onClick={() => setActiveTab("clients")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "clients"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "clients"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Active Clients ({data?.clientLicenses.length ?? 0})
             </button>
             <button
               onClick={() => setActiveTab("add_ons")}
-              className={`px-2.5 py-1 rounded transition-colors ${
-                activeTab === "add_ons"
+              className={`px-2.5 py-1 rounded transition-colors ${activeTab === "add_ons"
                   ? "bg-brand text-panel-deep font-bold"
                   : "text-slate-300 hover:text-white hover:bg-panel-raised"
-              }`}
+                }`}
             >
               Add-On Allocator
             </button>
@@ -589,33 +585,30 @@ export default function DistributorPortal() {
                       <button
                         type="button"
                         onClick={() => setPlanTier("go")}
-                        className={`p-2 rounded-lg border text-center transition-all ${
-                          planTier === "go"
+                        className={`p-2 rounded-lg border text-center transition-all ${planTier === "go"
                             ? "border-brand bg-panel text-brand-soft font-bold shadow-xs"
                             : "border-line bg-canvas text-ink-soft hover:bg-canvas-sunken"
-                        }`}
+                          }`}
                       >
                         Deku GO (2 Seats)
                       </button>
                       <button
                         type="button"
                         onClick={() => setPlanTier("pro")}
-                        className={`p-2 rounded-lg border text-center transition-all ${
-                          planTier === "pro"
+                        className={`p-2 rounded-lg border text-center transition-all ${planTier === "pro"
                             ? "border-brand bg-panel text-brand-soft font-bold shadow-xs"
                             : "border-line bg-canvas text-ink-soft hover:bg-canvas-sunken"
-                        }`}
+                          }`}
                       >
                         Deku PRO (5 Seats)
                       </button>
                       <button
                         type="button"
                         onClick={() => setPlanTier("enterprise")}
-                        className={`p-2 rounded-lg border text-center transition-all ${
-                          planTier === "enterprise"
+                        className={`p-2 rounded-lg border text-center transition-all ${planTier === "enterprise"
                             ? "border-brand bg-panel text-brand-soft font-bold shadow-xs"
                             : "border-line bg-canvas text-ink-soft hover:bg-canvas-sunken"
-                        }`}
+                          }`}
                       >
                         Enterprise (20+ Seats)
                       </button>
