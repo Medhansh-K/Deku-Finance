@@ -16,19 +16,9 @@ export default function LandingNavbar() {
           <div className="h-10 w-10 rounded-xl bg-panel-deep flex items-center justify-center shadow-md shadow-brand/20 group-hover:bg-panel transition-colors border border-edge">
             <DekuLogo size={26} />
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-ink">
-                Deku<span className="text-brand">Finance</span>
-              </span>
-              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-800 border border-emerald-300">
-                IN GAAP
-              </span>
-            </div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-ink-soft">
-              ALERX • Desktop Gateway OS
-            </span>
-          </div>
+          <span className="font-extrabold text-xl tracking-tight text-ink">
+            Deku<span className="text-brand">Finance</span>
+          </span>
         </Link>
 
         {/* Navigation Links */}
