@@ -10,9 +10,7 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import {
   Receipt,
   ShieldCheck,
-  TrendingUp,
   FileCheck2,
-  Building,
   Zap,
   ArrowRight,
   CheckCircle2,
@@ -22,10 +20,6 @@ import {
   QrCode,
   Layers,
   FileSpreadsheet,
-  Users,
-  Clock,
-  Briefcase,
-  Laptop,
 } from "lucide-react";
 
 export default function Home() {

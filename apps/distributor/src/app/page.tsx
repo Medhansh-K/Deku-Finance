@@ -4,28 +4,15 @@ import React, { useState, useEffect } from "react";
 import {
   Building2,
   Users,
-  KeyRound,
   FileText,
   Upload,
   Plus,
-  CheckCircle2,
   AlertCircle,
-  ExternalLink,
-  ChevronRight,
-  Layers,
   Award,
-  Clock,
-  Sparkles,
-  ReceiptText,
   Activity,
-  ArrowRightLeft,
-  Check,
   MapPin,
-  Phone,
-  Mail,
   RefreshCw,
 } from "lucide-react";
-import Link from "next/link";
 
 interface DistributorData {
   distributor: {
@@ -90,7 +77,7 @@ interface DistributorData {
 }
 
 export default function DistributorPortal() {
-  const [selectedDistributorId, setSelectedDistributorId] = useState("dist-mh-01");
+  const [selectedDistributorId] = useState("dist-mh-01");
   const [data, setData] = useState<DistributorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"new_request" | "leads" | "clients" | "add_ons">("new_request");
@@ -161,7 +148,21 @@ export default function DistributorPortal() {
   };
 
   useEffect(() => {
-    fetchDistributorData(selectedDistributorId);
+    let active = true;
+    fetch(`/api/distributor?distributorId=${selectedDistributorId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (active && json.success) {
+          setData(json);
+        }
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [selectedDistributorId]);
 
   const handleSubmitLicenseRequest = async (e: React.FormEvent) => {
@@ -205,8 +206,8 @@ export default function DistributorPortal() {
       } else {
         alert(json.error);
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     } finally {
       setSubmitting(false);
     }
@@ -236,8 +237,8 @@ export default function DistributorPortal() {
       } else {
         alert(json.error);
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -266,8 +267,8 @@ export default function DistributorPortal() {
       } else {
         alert(json.error);
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -634,7 +635,7 @@ export default function DistributorPortal() {
                       <label className="block text-ink-soft mb-1 font-medium">Document Type *</label>
                       <select
                         value={proofType}
-                        onChange={(e) => setProofType(e.target.value as any)}
+                        onChange={(e) => setProofType(e.target.value as "invoice" | "mou" | "quote")}
                         className="w-full bg-surface border border-line-strong rounded-lg p-2 text-ink font-mono focus:border-brand outline-none"
                       >
                         <option value="invoice">Tax Invoice</option>

@@ -4,36 +4,27 @@ import React, { useState } from "react";
 import Link from "next/link";
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import LandingFooter from "@/components/landing/LandingFooter";
-import { TUTORIAL_PATHS, type TutorialPath } from "@/lib/tutorials/paths";
+import { TUTORIAL_PATHS } from "@/lib/tutorials/paths";
 import {
   Compass,
   BookOpen,
-  Zap,
   ArrowRight,
-  CheckCircle2,
   Receipt,
   Scale,
   ShieldCheck,
-  Building2,
-  FileSpreadsheet,
-  Users,
   Code,
   Sparkles,
   ChevronRight,
   Landmark,
-  FileText,
-  Lock,
   Layers,
-  HelpCircle,
-  ExternalLink,
-  Info,
-  Clock,
   Play,
   Check,
 } from "lucide-react";
 
+type AudienceFilter = "all" | "everyone" | "admin" | "implementer";
+
 export default function LearnPage() {
-  const [selectedAudience, setSelectedAudience] = useState<"all" | "everyone" | "admin" | "implementer">("all");
+  const [selectedAudience, setSelectedAudience] = useState<AudienceFilter>("all");
   const [activeExperience, setActiveExperience] = useState<"tutorials" | "docs">("tutorials");
 
   const filteredPaths = TUTORIAL_PATHS.filter((p) => {
@@ -125,14 +116,14 @@ export default function LearnPage() {
 
               <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-medium">
                 {[
-                  { id: "all", label: "All Audiences" },
-                  { id: "everyone", label: "For Everyone" },
-                  { id: "admin", label: "Admins & CFOs" },
-                  { id: "implementer", label: "Developers" },
+                  { id: "all" as const, label: "All Audiences" },
+                  { id: "everyone" as const, label: "For Everyone" },
+                  { id: "admin" as const, label: "Admins & CFOs" },
+                  { id: "implementer" as const, label: "Developers" },
                 ].map((f) => (
                   <button
                     key={f.id}
-                    onClick={() => setSelectedAudience(f.id as any)}
+                    onClick={() => setSelectedAudience(f.id)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       selectedAudience === f.id
                         ? "bg-white text-ink shadow-xs font-bold"
@@ -291,7 +282,7 @@ export default function LearnPage() {
                   ],
                   icon: Code,
                 },
-              ].map((doc, idx) => {
+              ].map((doc) => {
                 const Icon = doc.icon;
                 return (
                   <div key={doc.title} className="p-6 rounded-2xl border border-line-strong bg-surface space-y-4">

@@ -11,30 +11,20 @@ import {
   ArrowRight,
   CheckCircle2,
   Receipt,
-  QrCode,
-  FileCheck2,
-  Building2,
   Scale,
   FileSpreadsheet,
   Users,
   Clock,
   Sparkles,
   ChevronRight,
-  Search,
   Lock,
-  ArrowRightLeft,
-  FileText,
-  BadgePercent,
-  Check,
   Landmark,
-  FileCode,
-  Calendar,
-  Eye,
-  Sliders,
 } from "lucide-react";
 
+type FeatureTab = "dual_mode" | "alerx" | "vouchers" | "banking" | "reports" | "governance";
+
 export default function FeaturesPage() {
-  const [activeTab, setActiveTab] = useState<"dual_mode" | "alerx" | "vouchers" | "banking" | "reports" | "governance">("dual_mode");
+  const [activeTab, setActiveTab] = useState<FeatureTab>("dual_mode");
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-brand/30 selection:text-ink">
@@ -85,19 +75,19 @@ export default function FeaturesPage() {
       <section className="sticky top-18 z-40 bg-white/95 backdrop-blur-md border-b border-line-strong py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar">
           {[
-            { id: "dual_mode", label: "Dual Modes", icon: Sparkles },
-            { id: "alerx", label: "ALERX Ledger", icon: Scale },
-            { id: "vouchers", label: "Voucher Suite (F4-F9)", icon: Receipt },
-            { id: "banking", label: "Bank Reconciliation", icon: Landmark },
-            { id: "reports", label: "Financial Reports", icon: FileSpreadsheet },
-            { id: "governance", label: "Governance & RBAC", icon: ShieldCheck },
+            { id: "dual_mode" as const, label: "Dual Modes", icon: Sparkles },
+            { id: "alerx" as const, label: "ALERX Ledger", icon: Scale },
+            { id: "vouchers" as const, label: "Voucher Suite (F4-F9)", icon: Receipt },
+            { id: "banking" as const, label: "Bank Reconciliation", icon: Landmark },
+            { id: "reports" as const, label: "Financial Reports", icon: FileSpreadsheet },
+            { id: "governance" as const, label: "Governance & RBAC", icon: ShieldCheck },
           ].map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   isSelected
                     ? "bg-panel text-white shadow-sm border border-edge"

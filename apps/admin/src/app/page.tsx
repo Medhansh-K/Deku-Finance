@@ -5,29 +5,13 @@ import {
   ShieldCheck,
   Building2,
   Users,
-  KeyRound,
-  FileText,
   CheckCircle2,
-  XCircle,
   Plus,
   RefreshCw,
-  Search,
-  ExternalLink,
-  ChevronRight,
-  TrendingUp,
-  Receipt,
-  Layers,
-  Award,
-  Sparkles,
   ReceiptText,
-  ArrowRightLeft,
-  Calendar,
   Check,
-  AlertCircle,
-  MapPin,
   Activity,
 } from "lucide-react";
-import Link from "next/link";
 
 interface AdminData {
   metrics: {
@@ -179,7 +163,21 @@ export default function DekuAdminPortal() {
   };
 
   useEffect(() => {
-    fetchAdminData();
+    let active = true;
+    fetch("/api/admin")
+      .then((res) => res.json())
+      .then((json) => {
+        if (active && json.success) {
+          setData(json);
+        }
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleApproveRequest = async (requestId: string) => {
@@ -200,8 +198,8 @@ export default function DekuAdminPortal() {
       } else {
         alert(json.error || "Approval failed");
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -224,8 +222,8 @@ export default function DekuAdminPortal() {
         setActionMessage("Request marked as rejected.");
         fetchAdminData();
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -253,8 +251,8 @@ export default function DekuAdminPortal() {
       } else {
         alert(json.error);
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -284,8 +282,8 @@ export default function DekuAdminPortal() {
       } else {
         alert(json.error);
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert((err as Error).message);
     }
   };
 
@@ -711,7 +709,7 @@ export default function DekuAdminPortal() {
                 <label className="block text-ink-soft mb-1 font-medium">Privilege Role</label>
                 <select
                   value={newAdminRole}
-                  onChange={(e) => setNewAdminRole(e.target.value as any)}
+                  onChange={(e) => setNewAdminRole(e.target.value as "license_manager" | "super_admin" | "support_admin")}
                   className="w-full bg-canvas border border-line-strong rounded-lg p-2 text-ink font-mono focus:border-brand outline-none"
                 >
                   <option value="license_manager">License Manager (Can verify proof &amp; mint keys)</option>
