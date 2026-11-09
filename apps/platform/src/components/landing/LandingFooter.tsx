@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Layers, PhoneCall, ShieldCheck, ExternalLink } from "lucide-react";
+import { PhoneCall, ShieldCheck, ExternalLink } from "lucide-react";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 
 export default function LandingFooter() {
   return (
@@ -9,8 +10,8 @@ export default function LandingFooter() {
           {/* Brand Info (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-brand text-ink flex items-center justify-center font-black">
-                <Layers className="h-5 w-5 text-ink" />
+              <div className="h-9 w-9 rounded-xl bg-panel flex items-center justify-center border border-edge">
+                <DekuLogo size={24} />
               </div>
               <span className="font-extrabold text-xl tracking-tight text-white">
                 Deku<span className="text-brand">Finance</span>

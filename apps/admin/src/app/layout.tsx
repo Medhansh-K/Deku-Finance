@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Deku Admin Console — Internal Platform Administration",
   description: "Deku Finance internal superadmin authority console and partner license verification desk.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

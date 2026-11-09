@@ -12,6 +12,7 @@ import {
   Check,
   Activity,
 } from "lucide-react";
+import { DekuLogo } from "@/components/DekuLogo";
 
 interface AdminData {
   metrics: {
@@ -292,8 +293,8 @@ export default function DekuAdminPortal() {
       {/* Top Header Bar: Dark Chrome with Deku Brand Icon */}
       <header className="bg-panel border-b border-edge px-4 py-2 flex items-center justify-between text-white shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-brand text-panel-deep flex items-center justify-center font-black shadow-xs">
-            <ReceiptText className="h-4 w-4 text-panel-deep" />
+          <div className="h-7 w-7 rounded-lg bg-panel-deep border border-edge flex items-center justify-center shadow-xs">
+            <DekuLogo size={18} />
           </div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm tracking-tight text-white">Deku Admin</span>

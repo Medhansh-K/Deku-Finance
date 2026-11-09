@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { ArrowRight, Layers } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 
 export default function LandingNavbar() {
   const { user } = useAuth();
@@ -12,8 +13,8 @@ export default function LandingNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-xl bg-brand text-ink flex items-center justify-center font-black shadow-md shadow-brand/20 group-hover:bg-brand-soft transition-colors">
-            <Layers className="h-5 w-5 text-ink" />
+          <div className="h-10 w-10 rounded-xl bg-panel-deep flex items-center justify-center shadow-md shadow-brand/20 group-hover:bg-panel transition-colors border border-edge">
+            <DekuLogo size={26} />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">

@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 
 interface NavItem {
   label: string;
@@ -132,7 +133,9 @@ export function AppSidebar({ companyName, onOpenCommandPalette, onOpenHelp, onNa
     <aside className="flex h-full w-64 shrink-0 flex-col bg-panel-deep text-slate-300">
       <div className="flex h-14 items-center gap-2 px-4">
         <Link href="/gateway" onClick={onNavigate} className="flex items-center gap-2 rounded-md focus-visible:ring-2 focus-visible:ring-brand">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand text-sm font-black text-panel-deep">D</span>
+          <span className="grid h-7 w-7 place-items-center rounded-lg bg-panel border border-edge">
+            <DekuLogo size={20} />
+          </span>
           <span className="text-[15px] font-semibold tracking-tight text-white">
             Deku <span className="font-normal text-slate-400">Finance</span>
           </span>
