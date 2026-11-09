@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  ReceiptText,
   ChevronsUpDown,
   Search,
   Keyboard,
@@ -21,6 +20,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 import { useAuth } from "@/context/AuthContext";
 import { useKeyboardNav } from "@/context/KeyboardNavContext";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
@@ -232,8 +232,8 @@ export function AppShell({ children }: AppShellProps) {
               className="flex items-center gap-2.5 rounded-lg py-1 px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand hover:opacity-90 transition-opacity shrink-0"
               title="Return to Gateway (Esc)"
             >
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand text-panel-deep font-black shadow-xs">
-                <ReceiptText className="h-5 w-5 text-panel-deep" />
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-panel-deep border border-edge shadow-xs">
+                <DekuLogo size={20} />
               </div>
               <span className="hidden sm:inline text-sm font-bold tracking-tight text-white">
                 Deku <span className="font-normal text-slate-400">Finance</span>

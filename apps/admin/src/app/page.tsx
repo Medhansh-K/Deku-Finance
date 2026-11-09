@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Plus,
   RefreshCw,
-  ReceiptText,
   Check,
   Activity,
 } from "lucide-react";

@@ -30,6 +30,16 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/invoices/:path*", destination: "/gst", permanent: true },
       { source: "/invoices", destination: "/gst", permanent: true },
       { source: "/marketplace", destination: "/reconciliation?tab=marketplace", permanent: true },
+      {
+        source: "/admin",
+        destination: process.env.ADMIN_URL || "http://localhost:3001/",
+        permanent: false,
+      },
+      {
+        source: "/distributor",
+        destination: process.env.DISTRIBUTOR_URL || "http://localhost:3002/",
+        permanent: false,
+      },
     ];
   },
 };

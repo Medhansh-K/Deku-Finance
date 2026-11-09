@@ -4,22 +4,18 @@ import React, { useState } from "react";
 import Link from "next/link";
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import InteractiveModePreview from "@/components/landing/InteractiveModePreview";
+import LandingBentoGrid from "@/components/landing/LandingBentoGrid";
 import AlerxLedgerSection from "@/components/landing/AlerxLedgerSection";
 import PricingPlansSection from "@/components/landing/PricingPlansSection";
 import LandingFooter from "@/components/landing/LandingFooter";
 import {
-  Receipt,
-  ShieldCheck,
-  FileCheck2,
   Zap,
   ArrowRight,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Sparkles,
-  QrCode,
   Layers,
-  FileSpreadsheet,
 } from "lucide-react";
 
 export default function Home() {
@@ -158,126 +154,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6 Core Feature Modules Section */}
-      <section id="features" className="py-20 bg-canvas border-b border-line-strong scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-ink-soft">
-              Complete Financial Engine
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-ink">
-              Everything Your Business Needs from Day 1 to Scale
-            </h2>
-            <p className="text-sm text-slate-600">
-              Built ground-up with high-performance Rust backend services and PostgreSQL multi-tenant isolation.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-brand/15 text-ink flex items-center justify-center font-bold">
-                <Receipt className="h-5 w-5 text-brand-strong" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                Power-Mode Sales Invoicing
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Keyboard-first line item entry (<kbd className="px-1.5 py-0.5 bg-slate-100 font-mono text-[11px] text-ink-soft rounded border border-slate-300">Enter</kbd> to jump fields, <kbd className="px-1.5 py-0.5 bg-slate-100 font-mono text-[11px] text-ink-soft rounded border border-slate-300">Ctrl+Enter</kbd> to save). Auto-detects place of supply (POS) to calculate CGST+SGST or IGST.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1">
-                <span>Direct PDF & Print Engine</span>
-                <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-emerald-500/15 text-emerald-800 flex items-center justify-center">
-                <QrCode className="h-5 w-5 text-emerald-700" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                MSME Collect & WhatsApp Follow-Ups
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Stay compliant with the 45-day MSME Samadhaan rule. Send WhatsApp reminders with UPI QR links so buyers can pay straight away.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                <span>Zero Delayed Receivables</span>
-                <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-panel text-brand-soft flex items-center justify-center">
-                <FileSpreadsheet className="h-5 w-5 text-brand" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                Purchase & Input Tax Credit (ITC)
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Upload vendor bills via drag-and-drop. Auto-differentiate between Eligible ITC and Ineligible Blocked ITC under Section 17(5) to prevent audit penalties.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1">
-                <span>GSTR-3B ITC Summary</span>
-                <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-
-            {/* Card 4 */}
-            <div className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-brand/15 text-brand-strong flex items-center justify-center">
-                <Layers className="h-5 w-5 text-brand-strong" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                ALERX Double-Entry Ledger
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Assets, Liabilities, Equity, Revenue, Expense. Structured into 4 tiers: Group ➔ Ledger ➔ Sub-Ledger ➔ Label. Posting is strictly guarded to transacting leaf Labels.
-              </p>
-              <a href="#alerx" className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1 hover:underline">
-                <span>Explore ALERX COA Engine</span>
-                <ArrowRight className="h-3 w-3" />
-              </a>
-            </div>
-
-            {/* Card 5 */}
-            <div id="gstn" className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-brand/15 text-brand-strong flex items-center justify-center">
-                <FileCheck2 className="h-5 w-5 text-brand-strong" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                One-Click Offline JSON Exporter
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Compile Table 3.1 (Outward Supplies) and Table 4 (Eligible ITC) directly into Government GSTN offline format. Upload directly to gst.gov.in in under 60 seconds.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1">
-                <span>Interactive Portal Guide</span>
-                <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-
-            {/* Card 6 */}
-            <div className="bg-white p-7 rounded-2xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-md transition-all space-y-4">
-              <div className="h-11 w-11 rounded-xl bg-panel text-brand-soft flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5 text-brand" />
-              </div>
-              <h3 className="text-lg font-bold text-ink">
-                Dual-Locker Government KYC Hub
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                3-way identity verification: Personal DigiLocker ⇄ Sole Proprietorship (PAN + Udyam) ⇄ Corporate EntityLocker. Instant legal trust level validation.
-              </p>
-              <div className="pt-2 text-xs font-semibold text-brand-strong hover:text-brand flex items-center gap-1">
-                <span>MeriPehchaan Protocol</span>
-                <ArrowRight className="h-3 w-3" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Bento Grid Feature Matrix */}
+      <LandingBentoGrid />
 
       {/* Dedicated ALERX 4-Tier Interactive Ledger & Chart of Accounts Section */}
       <AlerxLedgerSection />

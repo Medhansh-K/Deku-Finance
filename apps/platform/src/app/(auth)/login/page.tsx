@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/auth/next-path";
 import { useAuth } from "@/context/AuthContext";
 import {
-  ReceiptText,
   Mail,
   Lock,
   ArrowRight,
@@ -22,6 +21,7 @@ import {
   BookOpen,
   KeyRound,
 } from "lucide-react";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 
 function LoginForm() {
@@ -130,8 +130,8 @@ function LoginForm() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center space-y-3">
         {/* Brand Logo */}
         <Link href="/" className="inline-flex items-center gap-3 group">
-          <div className="h-12 w-12 rounded-2xl bg-brand text-panel-deep flex items-center justify-center font-black shadow-lg shadow-brand/25 group-hover:scale-105 transition-transform">
-            <ReceiptText className="h-6 w-6 text-panel-deep" />
+          <div className="h-12 w-12 rounded-2xl bg-panel-deep border border-edge flex items-center justify-center shadow-lg shadow-brand/25 group-hover:scale-105 transition-transform">
+            <DekuLogo size={32} />
           </div>
         </Link>
         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
