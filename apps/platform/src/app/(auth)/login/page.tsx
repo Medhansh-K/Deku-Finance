@@ -27,7 +27,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { login, loginDemo, user } = useAuth();
 
-  const [licenseKey, setLicenseKey] = useState("DEKU-PRO-2026-88A1-42F0");
+  const [licenseKey, setLicenseKey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
