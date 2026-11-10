@@ -8,7 +8,7 @@ import { orgFromRow } from "@/lib/organisation/profile";
 import type { Entitlements, Subscription } from "@/lib/subscription/entitlements";
 import { UserProfile, Organisation, OperatingMode } from "@/types";
 
-interface AuthContextType {
+export interface AuthContextType {
   user: UserProfile | null;
   organisation: Organisation | null;
   organisations: Organisation[];
@@ -71,7 +71,7 @@ async function authRequest(
 const slugify = (name: string) =>
   `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${crypto.randomUUID().slice(0, 6)}`;
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);

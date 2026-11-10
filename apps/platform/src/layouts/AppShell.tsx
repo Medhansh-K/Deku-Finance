@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { DekuLogo } from "@/components/ui/DekuLogo";
 import { useAuth } from "@/context/AuthContext";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
+import { DemoControlBar } from "@/components/learn/DemoControlBar";
 import { useKeyboardNav } from "@/context/KeyboardNavContext";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
@@ -70,9 +72,18 @@ const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking"
 
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
-  const pathname = usePathname() || "";
+  const demo = useOptionalLearnDemo();
+  const rawPathname = usePathname() || "";
+  const pathname = demo?.activeRoute ?? rawPathname;
   const { user, logout } = useAuth();
   const { keyboardNavEnabled, toggleKeyboardNav } = useKeyboardNav();
+  const navigateTo = useCallback(
+    (dest: string) => {
+      if (demo) demo.navigateTo(dest);
+      else router.push(dest);
+    },
+    [demo, router]
+  );
 
   // Set by what the user types, because forms start out prefilled and a field's value proves nothing.
   const dirtyRef = useRef(false);
@@ -192,7 +203,7 @@ export function AppShell({ children }: AppShellProps) {
 
         if (pathname !== "/gateway") {
           e.preventDefault();
-          router.push("/gateway");
+          navigateTo("/gateway");
         }
         return;
       }
@@ -224,13 +235,13 @@ export function AppShell({ children }: AppShellProps) {
         }
 
         e.preventDefault();
-        router.push(destination);
+        navigateTo(destination);
       }
     };
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [router, pathname, isCommandPaletteOpen, isHelpOpen, keyboardNavEnabled]);
+  }, [navigateTo, pathname, isCommandPaletteOpen, isHelpOpen, keyboardNavEnabled]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -504,23 +515,27 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         )}
 
-        {/* Interactive Demo Mode Guide Banner */}
-        {user?.is_demo && (
-          <div className="bg-gradient-to-r from-brand/15 via-sky-500/10 to-brand/15 border-b border-brand/30 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between text-ink shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-brand-strong animate-pulse" />
-              <span className="text-ink-soft font-medium">
-                Exploring Demo Sandbox: <strong className="text-ink font-bold">{activeCompany.name || "Demo Company"}</strong>
-              </span>
+        {/* Interactive Demo Mode Control Bar / Legacy Guide Banner */}
+        {demo ? (
+          <DemoControlBar />
+        ) : (
+          user?.is_demo && (
+            <div className="bg-gradient-to-r from-brand/15 via-sky-500/10 to-brand/15 border-b border-brand/30 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between text-ink shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-brand-strong animate-pulse" />
+                <span className="text-ink-soft font-medium">
+                  Exploring Demo Sandbox: <strong className="text-ink font-bold">{activeCompany.name || "Demo Company"}</strong>
+                </span>
+              </div>
+              <Link
+                href="/request-setup"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-strong hover:text-ink transition-colors underline underline-offset-2"
+              >
+                <span>Activate Full License</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             </div>
-            <Link
-              href="/request-setup"
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-strong hover:text-ink transition-colors underline underline-offset-2"
-            >
-              <span>Activate Full License</span>
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
+          )
         )}
 
         {/* Central Content Area (Full screen width, no permanent sidebar) */}

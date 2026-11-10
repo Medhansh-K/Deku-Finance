@@ -1,4 +1,5 @@
 import { ApiError, NetworkError } from "./errors";
+export { ApiError, NetworkError };
 import { friendlyError } from "@/lib/errors/friendly";
 import { clearActiveOrg } from "@/lib/organisation/active-org";
 
@@ -9,10 +10,22 @@ export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
 }
 
+export type DemoApiInterceptor = (path: string, options?: RequestOptions) => Promise<unknown>;
+let demoInterceptor: DemoApiInterceptor | null = null;
+
+/** Registered only inside the public Learn Demo workspace so reused screens never hit /api/backend without auth. */
+export function setDemoApiInterceptor(handler: DemoApiInterceptor | null) {
+  demoInterceptor = handler;
+}
+
 export async function apiClient<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<T> {
+  if (demoInterceptor && !path.startsWith("http")) {
+    return (await demoInterceptor(path, options)) as T;
+  }
+
   const { timeoutMs = 15000, headers: customHeaders, ...rest } = options;
 
   const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;

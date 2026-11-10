@@ -25,9 +25,11 @@ import {
 } from "@/lib/kpi/kpi-service";
 import { setActiveOrg } from "@/lib/organisation/active-org";
 import { GATEWAY_ALPHABET_KEY_MAP, isTargetInteractive } from "@/lib/keyboard/shortcuts";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 
 export function GatewayLanding() {
   const router = useRouter();
+  const demo = useOptionalLearnDemo();
 
   const [orgList, setOrgList] = useState<OrgSummary[]>([]);
   const [orgsLoaded, setOrgsLoaded] = useState(false);
@@ -137,13 +139,14 @@ export function GatewayLanding() {
       const route = GATEWAY_ALPHABET_KEY_MAP[lookupKey];
       if (route) {
         e.preventDefault();
-        router.push(route);
+        if (demo) demo.navigateTo(route);
+        else router.push(route);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
+  }, [demo, router]);
 
 
 

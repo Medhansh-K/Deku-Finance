@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 import {
   Search,
   BookOpen,
@@ -385,6 +386,7 @@ export interface CommandPaletteProps {
 
 export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const router = useRouter();
+  const demo = useOptionalLearnDemo();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -409,7 +411,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   const handleSelect = (route: string) => {
     onClose();
-    router.push(route);
+    if (demo) demo.navigateTo(route);
+    else router.push(route);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

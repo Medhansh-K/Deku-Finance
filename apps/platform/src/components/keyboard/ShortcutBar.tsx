@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useKeyboardNav } from "@/context/KeyboardNavContext";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 
 export interface ShortcutItem {
   key: string;
@@ -19,7 +20,9 @@ export interface ShortcutBarProps {
 }
 
 export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
-  const pathname = usePathname() || "";
+  const demo = useOptionalLearnDemo();
+  const rawPathname = usePathname() || "";
+  const pathname = demo?.activeRoute ?? rawPathname;
   const { keyboardNavEnabled } = useKeyboardNav();
 
   // Unified F1-F11 shortcuts across the platform: F4-F9 are always Vouchers

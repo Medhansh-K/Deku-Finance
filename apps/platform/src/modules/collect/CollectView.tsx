@@ -57,7 +57,8 @@ function statusText(r: CollectRow) {
 }
 
 export function CollectView() {
-  const { organisation } = useAuth();
+  const { organisation, user } = useAuth();
+  const isDemo = user?.is_demo === true;
   const { month, setMonth, fy } = useReturnPeriod();
   const [orgId, setOrgId] = useState("");
   const [books, setBooks] = useState<Books | null>(null);
@@ -265,6 +266,7 @@ export function CollectView() {
                     companyName={books.companyName}
                     upiId={upiId}
                     paymentLink={linkForInvoice(books.paymentLinks, r.invoice.id)}
+                    isDemo={isDemo}
                   />
                 ))}
               </tbody>
@@ -291,11 +293,13 @@ function Row({
   companyName,
   upiId,
   paymentLink,
+  isDemo,
 }: {
   r: CollectRow;
   companyName: string | null;
   upiId: string | null;
   paymentLink: PaymentLink | null;
+  isDemo: boolean;
 }) {
   const msme = msmeFlag(r);
   const owed = (r.openPaise ?? 0) > 0;
@@ -338,7 +342,16 @@ function Row({
       </td>
       <td className="px-3 py-2 text-right">
         {owed &&
-          (phone.ok ? (
+          (isDemo ? (
+            <span
+              title="External WhatsApp dispatch is blocked in public demo sessions"
+              className="inline-block rounded-md"
+            >
+              <Button variant="secondary" size="sm" disabled>
+                <MessageCircle className="h-4 w-4" aria-hidden /> Simulated in Demo
+              </Button>
+            </span>
+          ) : phone.ok ? (
             <a
               href={whatsappUrl(
                 phone.waNumber,
