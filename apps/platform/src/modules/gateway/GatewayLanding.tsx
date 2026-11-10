@@ -24,6 +24,7 @@ import {
   KpiKey,
 } from "@/lib/kpi/kpi-service";
 import { setActiveOrg } from "@/lib/organisation/active-org";
+import { GATEWAY_ALPHABET_KEY_MAP, isTargetInteractive } from "@/lib/keyboard/shortcuts";
 
 export function GatewayLanding() {
   const router = useRouter();
@@ -125,74 +126,18 @@ export function GatewayLanding() {
   // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.tagName === "SELECT" ||
-        e.ctrlKey ||
-        e.altKey ||
-        e.metaKey
-      ) {
+      if (isTargetInteractive(e.target) || e.ctrlKey || e.altKey || e.metaKey) {
         return;
       }
 
-      const key = e.key.toUpperCase();
-      switch (key) {
-        case "E":
-          router.push("/executive");
-          break;
-        case "A":
-          router.push("/masters/chart-of-accounts");
-          break;
-        case "P":
-          router.push("/masters/parties");
-          break;
-        case "I":
-          router.push("/masters/products-services");
-          break;
-        case "V":
-          router.push("/vouchers");
-          break;
-        case "D":
-          router.push("/day-book");
-          break;
-        case "B":
-          if (e.shiftKey) {
-            router.push("/builder");
-          } else {
-            router.push("/reports/balance-sheet");
-          }
-          break;
-        case "O":
-          router.push("/reports/profit-loss");
-          break;
-        case "L":
-          router.push("/audit");
-          break;
-        case "T":
-          router.push("/reports/trial-balance");
-          break;
-        case "C":
-          router.push("/reports/cash-flow");
-          break;
-        case "F":
-          router.push("/reports/fpa");
-          break;
-        case "K":
-          router.push("/consultant");
-          break;
-        case "G":
-          router.push("/gst");
-          break;
-        case "M":
-          router.push("/departments-members");
-          break;
-        case "S":
-          router.push("/settings");
-          break;
-        default:
-          break;
+      const raw = e.key.toUpperCase();
+      const lookupKey = e.shiftKey && raw === "B" ? "Shift+B" : !e.shiftKey ? raw : null;
+      if (!lookupKey) return;
+
+      const route = GATEWAY_ALPHABET_KEY_MAP[lookupKey];
+      if (route) {
+        e.preventDefault();
+        router.push(route);
       }
     };
 
@@ -476,6 +421,28 @@ export function GatewayLanding() {
                     </kbd>
                   </Link>
                   <Link
+                    href="/purchases"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>
+                      P<u>u</u>rchases &amp; ITC
+                    </span>
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
+                      U
+                    </kbd>
+                  </Link>
+                  <Link
+                    href="/collect"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>
+                      Collections &amp; <u>W</u>hatsApp
+                    </span>
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
+                      W
+                    </kbd>
+                  </Link>
+                  <Link
                     href="/day-book"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
@@ -544,7 +511,12 @@ export function GatewayLanding() {
                     href="/reports/general-ledger"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
-                    <span>General Ledger</span>
+                    <span>
+                      Ge<u>n</u>eral Ledger
+                    </span>
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
+                      N
+                    </kbd>
                   </Link>
                   <Link
                     href="/reports/cash-flow"
@@ -612,10 +584,26 @@ export function GatewayLanding() {
                     </kbd>
                   </Link>
                   <Link
+                    href="/approvals"
+                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
+                  >
+                    <span>
+                      Approvals <u>Q</u>ueue (Maker-Checker)
+                    </span>
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
+                      Q
+                    </kbd>
+                  </Link>
+                  <Link
                     href="/reconciliation"
                     className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
                   >
-                    <span>Reconciliation &amp; Settlements</span>
+                    <span>
+                      <u>R</u>econciliation &amp; Settlements
+                    </span>
+                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
+                      R
+                    </kbd>
                   </Link>
                   <Link
                     href="/audit"

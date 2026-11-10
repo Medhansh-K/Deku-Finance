@@ -264,8 +264,8 @@ async function navigationAndKeyboard(browser) {
 
   await page.goto(`${BASE}/gateway`, { waitUntil: "networkidle" });
   await page.keyboard.press("F8");
-  await page.waitForURL(/\/day-book/, { timeout: 10000 }).catch(() => {});
-  check("K-04", "function keys navigate otherwise", new URL(page.url()).pathname === "/day-book", page.url());
+  await page.waitForURL(/\/vouchers\/sales/, { timeout: 10000 }).catch(() => {});
+  check("K-04", "function keys navigate otherwise", new URL(page.url()).pathname === "/vouchers/sales", page.url());
   await page.keyboard.press("Control+k");
   check("K-05", "Ctrl+K opens the command palette", await page.getByRole("dialog").first().isVisible().catch(() => false) || (await page.getByPlaceholder(/search|jump|type/i).count()) > 0);
 

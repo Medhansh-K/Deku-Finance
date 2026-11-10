@@ -22,37 +22,23 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
   const pathname = usePathname() || "";
   const { keyboardNavEnabled } = useKeyboardNav();
 
-  const isVouchers = pathname.startsWith("/vouchers");
-
-  // Context-aware shortcuts: Local voucher modes inside /vouchers, global F1-F11 everywhere else
-  const shortcuts: ShortcutItem[] = isVouchers
-    ? [
-        { key: "F4", label: "Contra", route: "/vouchers/contra", active: pathname === "/vouchers/contra" },
-        { key: "F5", label: "Payment", route: "/vouchers/payment", active: pathname === "/vouchers/payment" || pathname === "/vouchers" },
-        { key: "F6", label: "Receipt", route: "/vouchers/receipt", active: pathname === "/vouchers/receipt" },
-        { key: "F7", label: "Journal", route: "/vouchers/journal", active: pathname === "/vouchers/journal" },
-        { key: "F8", label: "Sales", route: "/vouchers/sales", active: pathname === "/vouchers/sales" },
-        { key: "F9", label: "Purchase", route: "/vouchers/purchase", active: pathname === "/vouchers/purchase" },
-        { key: "Ctrl+K", label: "Go To", onClick: onOpenGoTo },
-        { key: "Help", label: "Cheatsheet", onClick: onOpenHelp },
-        { key: "Esc", label: "Gateway", route: "/gateway" },
-      ]
-    : [
-        { key: "F1", label: "Executive", route: "/executive", active: pathname === "/executive" },
-        { key: "F2", label: "Consultant", route: "/consultant", active: pathname === "/consultant" },
-        { key: "F3", label: "Vouchers", route: "/vouchers", active: pathname.startsWith("/vouchers") },
-        { key: "F4", label: "GST / Sales", route: "/gst", active: pathname === "/gst" },
-        { key: "F5", label: "Purchases", route: "/purchases", active: pathname === "/purchases" },
-        { key: "F6", label: "Collect", route: "/collect", active: pathname === "/collect" },
-        { key: "F7", label: "Builder", route: "/builder", active: pathname === "/builder" },
-        { key: "F8", label: "Day Book", route: "/day-book", active: pathname === "/day-book" },
-        { key: "F9", label: "Approvals", route: "/approvals", active: pathname === "/approvals" },
-        { key: "F10", label: "Bank Rec", route: "/banking/reconciliation", active: pathname === "/banking/reconciliation" },
-        { key: "F11", label: "GST File", route: "/gst/file", active: pathname === "/gst/file" },
-        { key: "Ctrl+K", label: "Go To", onClick: onOpenGoTo },
-        { key: "Help", label: "Cheatsheet", onClick: onOpenHelp },
-        { key: "Esc", label: "Gateway", route: "/gateway", active: pathname === "/gateway" },
-      ];
+  // Unified F1-F11 shortcuts across the platform: F4-F9 are always Vouchers
+  const shortcuts: ShortcutItem[] = [
+    { key: "F1", label: "Executive", route: "/executive", active: pathname === "/executive" },
+    { key: "F2", label: "Konsultant", route: "/consultant", active: pathname === "/consultant" },
+    { key: "F3", label: "Vouchers", route: "/vouchers", active: pathname === "/vouchers" },
+    { key: "F4", label: "Contra", route: "/vouchers/contra", active: pathname === "/vouchers/contra" },
+    { key: "F5", label: "Payment", route: "/vouchers/payment", active: pathname === "/vouchers/payment" },
+    { key: "F6", label: "Receipt", route: "/vouchers/receipt", active: pathname === "/vouchers/receipt" },
+    { key: "F7", label: "Journal", route: "/vouchers/journal", active: pathname === "/vouchers/journal" },
+    { key: "F8", label: "Sales", route: "/vouchers/sales", active: pathname === "/vouchers/sales" },
+    { key: "F9", label: "Purchase", route: "/vouchers/purchase", active: pathname === "/vouchers/purchase" },
+    { key: "F10", label: "Bank Rec", route: "/banking/reconciliation", active: pathname === "/banking/reconciliation" },
+    { key: "F11", label: "GST File", route: "/gst/file", active: pathname === "/gst/file" },
+    { key: "Ctrl+K", label: "Go To", onClick: onOpenGoTo },
+    { key: "Help", label: "Cheatsheet", onClick: onOpenHelp },
+    { key: "Esc", label: "Gateway", route: "/gateway", active: pathname === "/gateway" },
+  ];
 
   return (
     <footer

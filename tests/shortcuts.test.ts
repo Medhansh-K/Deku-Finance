@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   STANDARD_SHORTCUTS,
   GLOBAL_FUNCTION_KEY_MAP,
+  GATEWAY_ALPHABET_KEY_MAP,
   isTargetInteractive, isPlainKey,
 } from '@/lib/keyboard/shortcuts';
 
@@ -13,35 +14,41 @@ describe('Global Function Key Map (F1–F11 Navigation)', () => {
     ]);
   });
 
-  it('correctly maps function keys to active application routes', () => {
+  it('correctly maps F4-F9 to vouchers and F1-F3/F10-F11 to active routes', () => {
     expect(GLOBAL_FUNCTION_KEY_MAP['F1']).toBe('/executive');
     expect(GLOBAL_FUNCTION_KEY_MAP['F2']).toBe('/consultant');
     expect(GLOBAL_FUNCTION_KEY_MAP['F3']).toBe('/vouchers');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F4']).toBe('/gst');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F5']).toBe('/purchases');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F6']).toBe('/collect');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F7']).toBe('/builder');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F8']).toBe('/day-book');
-    expect(GLOBAL_FUNCTION_KEY_MAP['F9']).toBe('/approvals');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F4']).toBe('/vouchers/contra');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F5']).toBe('/vouchers/payment');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F6']).toBe('/vouchers/receipt');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F7']).toBe('/vouchers/journal');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F8']).toBe('/vouchers/sales');
+    expect(GLOBAL_FUNCTION_KEY_MAP['F9']).toBe('/vouchers/purchase');
     expect(GLOBAL_FUNCTION_KEY_MAP['F10']).toBe('/banking/reconciliation');
     expect(GLOBAL_FUNCTION_KEY_MAP['F11']).toBe('/gst/file');
+  });
+
+  it('assigns alphabet shortcuts to unassigned modules without collisions', () => {
+    expect(GATEWAY_ALPHABET_KEY_MAP['G']).toBe('/gst');
+    expect(GATEWAY_ALPHABET_KEY_MAP['U']).toBe('/purchases');
+    expect(GATEWAY_ALPHABET_KEY_MAP['W']).toBe('/collect');
+    expect(GATEWAY_ALPHABET_KEY_MAP['Shift+B']).toBe('/builder');
+    expect(GATEWAY_ALPHABET_KEY_MAP['D']).toBe('/day-book');
+    expect(GATEWAY_ALPHABET_KEY_MAP['Q']).toBe('/approvals');
+    expect(GATEWAY_ALPHABET_KEY_MAP['R']).toBe('/reconciliation');
+    expect(GATEWAY_ALPHABET_KEY_MAP['N']).toBe('/reports/general-ledger');
+    expect(GATEWAY_ALPHABET_KEY_MAP['H']).toBe('/help');
   });
 });
 
 describe('Standard Keyboard Shortcuts Registry', () => {
-  it('registers navigation entries for all F1–F11 routes and Escape', () => {
+  it('registers navigation entries for F1–F3, F10–F11 and Escape', () => {
     const navShortcuts = STANDARD_SHORTCUTS.filter(s => s.category === 'navigation');
     const navKeys = navShortcuts.map(s => s.key);
 
     expect(navKeys).toContain('F1');
     expect(navKeys).toContain('F2');
     expect(navKeys).toContain('F3');
-    expect(navKeys).toContain('F4');
-    expect(navKeys).toContain('F5');
-    expect(navKeys).toContain('F6');
-    expect(navKeys).toContain('F7');
-    expect(navKeys).toContain('F8');
-    expect(navKeys).toContain('F9');
     expect(navKeys).toContain('F10');
     expect(navKeys).toContain('F11');
     expect(navKeys).toContain('Escape');

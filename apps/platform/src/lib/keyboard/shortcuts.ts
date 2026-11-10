@@ -1,6 +1,6 @@
 /**
  * Deku Finance — Keyboard Shortcut Registry & Keybindings
- * Final Navigation Refactor: Function-Key (F1-F11 + ESC) Specification
+ * Unified Function-Key (F1-F11 + ESC) & Gateway Alphabet Specification
  */
 
 export interface KeyboardShortcut {
@@ -12,7 +12,7 @@ export interface KeyboardShortcut {
   shiftKey?: boolean;
   label: string;
   description: string;
-  category: "navigation" | "voucher" | "action";
+  category: "navigation" | "voucher" | "gateway" | "action";
   actionRoute?: string;
 }
 
@@ -20,14 +20,40 @@ export const GLOBAL_FUNCTION_KEY_MAP: Record<string, string> = {
   F1: "/executive",
   F2: "/consultant",
   F3: "/vouchers",
-  F4: "/gst",
-  F5: "/purchases",
-  F6: "/collect",
-  F7: "/builder",
-  F8: "/day-book",
-  F9: "/approvals",
+  F4: "/vouchers/contra",
+  F5: "/vouchers/payment",
+  F6: "/vouchers/receipt",
+  F7: "/vouchers/journal",
+  F8: "/vouchers/sales",
+  F9: "/vouchers/purchase",
   F10: "/banking/reconciliation",
   F11: "/gst/file",
+};
+
+export const GATEWAY_ALPHABET_KEY_MAP: Record<string, string> = {
+  A: "/masters/chart-of-accounts",
+  B: "/reports/balance-sheet",
+  "Shift+B": "/builder",
+  C: "/reports/cash-flow",
+  D: "/day-book",
+  E: "/executive",
+  F: "/reports/fpa",
+  G: "/gst",
+  H: "/help",
+  I: "/masters/products-services",
+  K: "/consultant",
+  L: "/audit",
+  M: "/departments-members",
+  N: "/reports/general-ledger",
+  O: "/reports/profit-loss",
+  P: "/masters/parties",
+  Q: "/approvals",
+  R: "/reconciliation",
+  S: "/settings",
+  T: "/reports/trial-balance",
+  U: "/purchases",
+  V: "/vouchers",
+  W: "/collect",
 };
 
 /** A function key with no modifier; Ctrl+F5, Shift+F5 and Alt+F4 belong to the browser and the OS. */
@@ -52,6 +78,7 @@ export function isTargetInteractive(target: EventTarget | null): boolean {
 }
 
 export const STANDARD_SHORTCUTS: KeyboardShortcut[] = [
+  // Global Function Keys (F1–F11)
   {
     key: "F1",
     label: "F1: Executive Dashboard",
@@ -61,59 +88,59 @@ export const STANDARD_SHORTCUTS: KeyboardShortcut[] = [
   },
   {
     key: "F2",
-    label: "F2: Deku Consultant",
+    label: "F2: Deku Konsultant",
     description: "Questions answered from your ledger figures",
     category: "navigation",
     actionRoute: "/consultant",
   },
   {
     key: "F3",
-    label: "F3: Vouchers",
-    description: "Universal double-entry accounting vouchers desk",
+    label: "F3: Vouchers Desk",
+    description: "Universal double-entry accounting vouchers workspace",
     category: "navigation",
     actionRoute: "/vouchers",
   },
   {
     key: "F4",
-    label: "F4: Sales & Invoicing",
-    description: "Tax invoices, bills of supply, and sales notes",
-    category: "navigation",
-    actionRoute: "/gst",
+    label: "F4: Contra Voucher",
+    description: "Bank to Cash / internal account transfers",
+    category: "voucher",
+    actionRoute: "/vouchers/contra",
   },
   {
     key: "F5",
-    label: "F5: Purchases & ITC",
-    description: "Vendor bills and GSTR-2B inward reconciliation",
-    category: "navigation",
-    actionRoute: "/purchases",
+    label: "F5: Payment Voucher",
+    description: "Vendor settlements and expense payouts",
+    category: "voucher",
+    actionRoute: "/vouchers/payment",
   },
   {
     key: "F6",
-    label: "F6: Collections",
-    description: "Receivables aging, UPI QR, and Razorpay links",
-    category: "navigation",
-    actionRoute: "/collect",
+    label: "F6: Receipt Voucher",
+    description: "Customer payments and incoming receipts",
+    category: "voucher",
+    actionRoute: "/vouchers/receipt",
   },
   {
     key: "F7",
-    label: "F7: Document Builder",
-    description: "Quotations, proformas, challans (Rule 55), and POs",
-    category: "navigation",
-    actionRoute: "/builder",
+    label: "F7: Journal Voucher",
+    description: "Double-entry adjusting journals and provisions",
+    category: "voucher",
+    actionRoute: "/vouchers/journal",
   },
   {
     key: "F8",
-    label: "F8: Day Book",
-    description: "Chronological immutable ledger transaction feed",
-    category: "navigation",
-    actionRoute: "/day-book",
+    label: "F8: Sales Voucher",
+    description: "Sales & invoicing entry",
+    category: "voucher",
+    actionRoute: "/vouchers/sales",
   },
   {
     key: "F9",
-    label: "F9: Approvals",
-    description: "Maker-checker draft voucher review and ledger sign-off",
-    category: "navigation",
-    actionRoute: "/approvals",
+    label: "F9: Purchase Voucher",
+    description: "Vendor purchase bill entry",
+    category: "voucher",
+    actionRoute: "/vouchers/purchase",
   },
   {
     key: "F10",
@@ -143,41 +170,70 @@ export const STANDARD_SHORTCUTS: KeyboardShortcut[] = [
     description: "Global command palette to search or jump to any module",
     category: "action",
   },
-  // Voucher editor local shortcuts
+
+  // Gateway Alphabet Keys (for unassigned pages & quick access)
   {
-    key: "F4",
-    label: "Voucher F4: Contra",
-    description: "Inside Voucher Desk: Bank to Cash / Contra transfer",
-    category: "voucher",
+    key: "G",
+    label: "G: GST & Sales Invoicing",
+    description: "Tax invoices, bills of supply, and sales notes",
+    category: "gateway",
+    actionRoute: "/gst",
   },
   {
-    key: "F5",
-    label: "Voucher F5: Payment",
-    description: "Inside Voucher Desk: Vendor / Expense payment",
-    category: "voucher",
+    key: "U",
+    label: "U: Purchases & ITC",
+    description: "Vendor bills and inward ITC reconciliation",
+    category: "gateway",
+    actionRoute: "/purchases",
   },
   {
-    key: "F6",
-    label: "Voucher F6: Receipt",
-    description: "Inside Voucher Desk: Customer receipt / incoming funds",
-    category: "voucher",
+    key: "W",
+    label: "W: Collections & WhatsApp",
+    description: "Receivables aging, UPI QR, and WhatsApp payment links",
+    category: "gateway",
+    actionRoute: "/collect",
   },
   {
-    key: "F7",
-    label: "Voucher F7: Journal",
-    description: "Inside Voucher Desk: Double-entry adjusting journal",
-    category: "voucher",
+    key: "Shift+B",
+    shiftKey: true,
+    label: "Shift+B: Document Builder",
+    description: "Quotations, proformas, challans, and coupons",
+    category: "gateway",
+    actionRoute: "/builder",
   },
   {
-    key: "F8",
-    label: "Voucher F8: Sales",
-    description: "Inside Voucher Desk: Sales transaction entry",
-    category: "voucher",
+    key: "D",
+    label: "D: Day Book",
+    description: "Chronological immutable ledger transaction feed",
+    category: "gateway",
+    actionRoute: "/day-book",
   },
   {
-    key: "F9",
-    label: "Voucher F9: Purchase",
-    description: "Inside Voucher Desk: Purchase voucher entry",
-    category: "voucher",
+    key: "Q",
+    label: "Q: Approvals Queue",
+    description: "Maker-checker draft voucher review and ledger sign-off",
+    category: "gateway",
+    actionRoute: "/approvals",
+  },
+  {
+    key: "R",
+    label: "R: Reconciliation & Settlements",
+    description: "Bank statement matching and marketplace payouts",
+    category: "gateway",
+    actionRoute: "/reconciliation",
+  },
+  {
+    key: "N",
+    label: "N: General Ledger",
+    description: "Full account-level ledger statement",
+    category: "gateway",
+    actionRoute: "/reports/general-ledger",
+  },
+  {
+    key: "H",
+    label: "H: Help & Shortcuts",
+    description: "Documentation and walkthroughs",
+    category: "gateway",
+    actionRoute: "/help",
   },
 ];
