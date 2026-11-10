@@ -506,16 +506,16 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Interactive Demo Mode Guide Banner */}
         {user?.is_demo && (
-          <div className="bg-gradient-to-r from-brand/20 via-sky-500/10 to-brand/20 border-b border-brand/30 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between text-slate-200 shrink-0">
+          <div className="bg-gradient-to-r from-brand/15 via-sky-500/10 to-brand/15 border-b border-brand/30 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between text-ink shrink-0">
             <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-brand animate-pulse" />
-              <span className="text-slate-300">
-                Exploring Interactive Demo: <strong className="text-white font-bold">{activeCompany.name || "Demo Company"}</strong>
+              <span className="flex h-2 w-2 rounded-full bg-brand-strong animate-pulse" />
+              <span className="text-ink-soft font-medium">
+                Exploring Demo Sandbox: <strong className="text-ink font-bold">{activeCompany.name || "Demo Company"}</strong>
               </span>
             </div>
             <Link
               href="/request-setup"
-              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand hover:text-white transition-colors underline underline-offset-2"
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-strong hover:text-ink transition-colors underline underline-offset-2"
             >
               <span>Activate Full License</span>
               <ArrowRight className="h-3 w-3" />
