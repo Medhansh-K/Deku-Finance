@@ -32,10 +32,10 @@ export default function RootLayout({
       className="h-full antialiased font-sans"
     >
       <head>
-        {/* Applies the stored or system theme before first paint, so dark mode never flashes light. */}
+        {/* Ensure the original light canvas + dark chrome Deku palette is active on initial paint. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('deku_theme');if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})()`,
+            __html: `(function(){try{document.documentElement.classList.remove('dark');localStorage.removeItem('deku_theme')}catch(e){}})()`,
           }}
         />
       </head>
