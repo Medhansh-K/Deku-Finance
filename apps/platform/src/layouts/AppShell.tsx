@@ -36,7 +36,6 @@ import { useKeyboardNav } from "@/context/KeyboardNavContext";
 import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
 import { TutorialCoach } from "@/components/tutorial/TutorialCoach";
-import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 import { NotificationBell } from "@/modules/notifications/NotificationBell";
 import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
 import { GLOBAL_FUNCTION_KEY_MAP, isPlainKey, isTargetInteractive } from "@/lib/keyboard/shortcuts";
@@ -72,7 +71,7 @@ const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking"
 export function AppShell({ children }: AppShellProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
-  const { user, logout, loginDemo } = useAuth();
+  const { user, logout } = useAuth();
   const { keyboardNavEnabled, toggleKeyboardNav } = useKeyboardNav();
 
   // Set by what the user types, because forms start out prefilled and a field's value proves nothing.
@@ -103,7 +102,6 @@ export function AppShell({ children }: AppShellProps) {
 
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -515,13 +513,13 @@ export function AppShell({ children }: AppShellProps) {
                 Exploring Interactive Demo: <strong className="text-white font-bold">{activeCompany.name || "Demo Company"}</strong>
               </span>
             </div>
-            <button
-              onClick={() => setIsTutorialOpen(true)}
+            <Link
+              href="/request-setup"
               className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand hover:text-white transition-colors underline underline-offset-2"
             >
-              <span>Compare GO Freelancer vs PRO Enterprise &amp; Tour</span>
+              <span>Activate Full License</span>
               <ArrowRight className="h-3 w-3" />
-            </button>
+            </Link>
           </div>
         )}
 
@@ -546,15 +544,6 @@ export function AppShell({ children }: AppShellProps) {
         <KeyboardHelpModal
           isOpen={isHelpOpen}
           onClose={() => setIsHelpOpen(false)}
-        />
-        <InteractivePlanTutorialModal
-          isOpen={isTutorialOpen}
-          onClose={() => setIsTutorialOpen(false)}
-          onLaunchDemo={async (type) => {
-            setIsTutorialOpen(false);
-            await loginDemo(type);
-            window.location.reload();
-          }}
         />
       </div>
     </QueryClientProvider>

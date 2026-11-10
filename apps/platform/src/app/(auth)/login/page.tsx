@@ -18,11 +18,9 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
-  BookOpen,
   KeyRound,
 } from "lucide-react";
 import { DekuLogo } from "@/components/ui/DekuLogo";
-import { InteractivePlanTutorialModal } from "@/components/tutorial/InteractivePlanTutorialModal";
 
 function LoginForm() {
   const router = useRouter();
@@ -50,14 +48,6 @@ function LoginForm() {
       .then((d) => setDemoEnabled(d.enabled === true))
       .catch(() => setDemoEnabled(false));
   }, []);
-
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
-  const [tutorialPlan, setTutorialPlan] = useState<"freelancer" | "enterprise">("enterprise");
-
-  const openTutorial = (plan: "freelancer" | "enterprise") => {
-    setTutorialPlan(plan);
-    setIsTutorialOpen(true);
-  };
 
   // In an effect: Next keeps this page mounted but hidden after leaving it, and a redirect during
   // render would keep firing from there and fight the onboarding redirect in a loop.
@@ -152,28 +142,24 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Quick Sandbox & Interactive Tutorial Options */}
+          {/* Quick Sandbox Demo Options */}
           {demoEnabled && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
               <span className="flex items-center gap-1.5 text-brand">
                 <Sparkles className="h-3.5 w-3.5 fill-brand" />
-                Interactive Plan Tour
+                Instant Demo Sandboxes
               </span>
-              <button
-                type="button"
-                onClick={() => openTutorial("enterprise")}
-                className="text-[10px] text-brand hover:underline flex items-center gap-1 font-semibold"
-              >
-                <BookOpen className="h-3 w-3" />
-                Compare &amp; Learn
-              </button>
+              <span className="text-[10px] text-slate-400">
+                Safe Mock Data • Zero Setup
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => openTutorial("enterprise")}
-                className="py-2.5 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-all flex items-center justify-between group hover:border-brand/50 shadow-sm"
+                onClick={() => handleDemoLogin("owner")}
+                disabled={Boolean(demoLoading)}
+                className="py-2.5 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-all flex items-center justify-between group hover:border-brand/50 shadow-sm disabled:opacity-50"
               >
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 rounded-lg bg-brand/10 border border-brand/30 flex items-center justify-center text-brand shrink-0 group-hover:scale-105 transition-transform">
@@ -184,13 +170,18 @@ function LoginForm() {
                     <div className="text-[9px] text-slate-400 font-normal">Full GST &amp; Team</div>
                   </div>
                 </div>
-                <ArrowRight className="h-3 w-3 text-slate-500 group-hover:text-brand transition-colors" />
+                {demoLoading === "owner" ? (
+                  <Loader2 className="h-3 w-3 animate-spin text-brand" />
+                ) : (
+                  <ArrowRight className="h-3 w-3 text-slate-500 group-hover:text-brand transition-colors" />
+                )}
               </button>
 
               <button
                 type="button"
-                onClick={() => openTutorial("freelancer")}
-                className="py-2.5 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-all flex items-center justify-between group hover:border-emerald-500/50 shadow-sm"
+                onClick={() => handleDemoLogin("freelancer")}
+                disabled={Boolean(demoLoading)}
+                className="py-2.5 px-3 rounded-xl bg-panel-raised hover:bg-edge border border-edge text-xs font-bold text-white text-left transition-all flex items-center justify-between group hover:border-emerald-500/50 shadow-sm disabled:opacity-50"
               >
                 <div className="flex items-center gap-2">
                   <div className="h-7 w-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-105 transition-transform">
@@ -201,12 +192,13 @@ function LoginForm() {
                     <div className="text-[9px] text-slate-400 font-normal">Section 22 &amp; Solo</div>
                   </div>
                 </div>
-                <ArrowRight className="h-3 w-3 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+                {demoLoading === "freelancer" ? (
+                  <Loader2 className="h-3 w-3 animate-spin text-emerald-400" />
+                ) : (
+                  <ArrowRight className="h-3 w-3 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+                )}
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 text-center">
-              Click either plan to open the interactive comparison, invoice simulator &amp; tutorial.
-            </p>
           </div>
           )}
 
@@ -337,18 +329,6 @@ function LoginForm() {
           </p>
         </div>
       </div>
-
-      {/* Interactive Plan Tutorial & Architecture Walkthrough Modal */}
-      <InteractivePlanTutorialModal
-        isOpen={isTutorialOpen}
-        onClose={() => setIsTutorialOpen(false)}
-        initialPlan={tutorialPlan}
-        onLaunchDemo={async (type) => {
-          setIsTutorialOpen(false);
-          await handleDemoLogin(type);
-        }}
-        isLoadingDemo={demoLoading}
-      />
     </div>
   );
 }
