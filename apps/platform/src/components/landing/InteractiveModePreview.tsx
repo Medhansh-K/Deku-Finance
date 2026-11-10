@@ -35,15 +35,15 @@ export default function InteractiveModePreview() {
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center gap-1.5 rounded-md bg-brand/15 px-2.5 py-0.5 text-[11px] sm:text-xs font-mono font-semibold text-brand-soft border border-brand/30">
               <Zap className="h-3 w-3 text-brand" />
-              Interactive Architecture Demo
+              Interactive Workspace Preview
             </span>
-            <span className="text-[11px] sm:text-xs text-slate-400">Toggle mode to see real-time engine shift</span>
+            <span className="text-[11px] sm:text-xs text-slate-400">Switch stage to preview how Deku adapts</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            One Core Engine. Two Operating Modes.
+            Start Lean. Scale Effortlessly.
           </h3>
           <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
-            Freelancer under ₹20L or high-growth B2B enterprise? Deku Finance adapts your legal document generation, tax splitting, and ledger posting seamlessly.
+            Solo studio keeping things fast, or high-growth B2B company? Deku Finance adapts your invoicing, payment links, and reporting seamlessly as you grow.
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default function InteractiveModePreview() {
             }`}
           >
             <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>Pure Accounting (Non-GST)</span>
+            <span>Lean Business (Non-GST)</span>
           </button>
           <button
             type="button"
@@ -71,7 +71,7 @@ export default function InteractiveModePreview() {
             }`}
           >
             <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>GST Registered Enterprise</span>
+            <span>Scale &amp; Enterprise (GST)</span>
           </button>
         </div>
       </div>
@@ -85,37 +85,37 @@ export default function InteractiveModePreview() {
               <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
-                    Legal Protection
+                    Early-Stage Simplicity
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
                     <CheckCircle2 className="h-3 w-3" />
-                    100% Tax-Exempt & Legal
+                    Zero Tax Clutter
                   </span>
                 </div>
                 <h4 className="text-base font-bold text-white">
-                  Section 22 of the CGST Act Exemption
+                  Fast Commercial Billing Without Overhead
                 </h4>
                 <p className="text-xs leading-relaxed text-slate-400">
-                  Ideal for Freelancers, Creators & Startups under ₹20L (Services) or ₹40L (Goods). Invoices are legally generated as <strong>Bills of Supply & Commercial Invoices</strong> without charging tax or requiring GST portal filings.
+                  Built for freelancers, studios &amp; early startups below ₹20L/₹40L. Send clean <strong>Bills of Supply &amp; Commercial Invoices</strong> in seconds with zero monthly filing distractions.
                 </p>
               </div>
 
               {/* Turnover Tracker Box */}
               <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Turnover Exemption Tracker</span>
-                  <span className="text-brand-soft font-mono font-bold">16% of ₹40L Utilized</span>
+                  <span className="text-slate-400 font-medium">Revenue Milestone Tracker</span>
+                  <span className="text-brand-soft font-mono font-bold">16% of ₹40L Milestone</span>
                 </div>
                 <div className="w-full bg-panel h-2.5 rounded-full overflow-hidden border border-edge">
                   <div className="bg-brand h-full rounded-full w-[16%] transition-all duration-500" />
                 </div>
                 <div className="flex justify-between text-[11px] font-mono text-slate-400">
                   <span>Current FY: ₹6,40,000</span>
-                  <span>Threshold Limit: ₹40,00,000</span>
+                  <span>Next Stage: ₹40,00,000</span>
                 </div>
                 <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
                   <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>No GSTIN or monthly GSTR returns required.</span>
+                  <span>Focus 100% on revenue; upgrade when ready.</span>
                 </div>
               </div>
             </div>
@@ -124,37 +124,37 @@ export default function InteractiveModePreview() {
               <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
-                    Compliance Status
+                    Growth Operations
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
                     <CheckCircle2 className="h-3 w-3" />
-                    Active GSTN Entity
+                    Full Scale Ready
                   </span>
                 </div>
                 <h4 className="text-base font-bold text-white">
-                  Multi-State GST Compliance Suite
+                  Automated Multi-Channel &amp; B2B Operations
                 </h4>
                 <p className="text-xs leading-relaxed text-slate-400">
-                  Tailored for B2B vendors, D2C brands, and marketplace sellers on Amazon, Flipkart, Blinkit & Meesho. Full automated CGST/SGST/IGST splitting and Section 14 ECO compliance.
+                  Built for scaling SMEs, B2B vendors, and marketplace brands on Amazon, Flipkart &amp; Blinkit. Auto-handles tax splits, marketplace payouts, and team permissions without slowing down sales.
                 </p>
               </div>
 
-              {/* GST Returns Readiness Box */}
+              {/* Returns Readiness Box */}
               <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
-                <span className="text-xs text-slate-400 font-medium">Auto Return Preparation</span>
+                <span className="text-xs text-slate-400 font-medium">Background Automation</span>
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="bg-panel-deep rounded-xl p-3 border border-edge">
-                    <span className="text-[10px] text-slate-400 block uppercase font-mono">GSTR-1 Outward</span>
-                    <span className="text-sm font-bold text-emerald-400">Offline JSON Ready</span>
+                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Monthly Sales Summary</span>
+                    <span className="text-sm font-bold text-emerald-400">1-Click Export Ready</span>
                   </div>
                   <div className="bg-panel-deep rounded-xl p-3 border border-edge">
-                    <span className="text-[10px] text-slate-400 block uppercase font-mono">GSTR-3B Tax Match</span>
-                    <span className="text-sm font-bold text-brand-soft">ITC Offset Computed</span>
+                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Credit &amp; Tax Match</span>
+                    <span className="text-sm font-bold text-brand-soft">Auto-Computed</span>
                   </div>
                 </div>
                 <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
                   <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
-                  <span>Validated directly against GSTN Portal specifications.</span>
+                  <span>Close your monthly books in minutes instead of days.</span>
                 </div>
               </div>
             </div>

@@ -32,7 +32,7 @@ export default function PricingPlansSection() {
     {
       id: "go",
       name: "GO",
-      tagline: "For freelancers, solo studios, and early-stage companies operating under Section 22 CGST exemption (< ₹20L/₹40L) or single GSTIN.",
+      tagline: "For freelancers, solo studios, and early-stage businesses seeking clean billing, instant UPI collections, and effortless real-time books.",
       badge: "🌱 Essential Starter",
       badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
       price: 24999,
@@ -58,7 +58,7 @@ export default function PricingPlansSection() {
     {
       id: "pro",
       name: "PRO",
-      tagline: "For scaling SMEs, high-volume traders, and multi-user businesses requiring full statutory GST, ITC, and bank reconciliation.",
+      tagline: "For growing SMEs and active B2B teams needing unlimited billing, automated bank reconciliation, GST exports, and multi-user permissions.",
       badge: "⚡ Most Popular for Growth",
       badgeColor: "bg-brand/15 text-brand-soft border-brand/30",
       price: 49999,
@@ -347,24 +347,24 @@ export default function PricingPlansSection() {
         <div className="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3.5">
           <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-brand" />
-            <span>Annual Contract-Based Licensing • 100% Transparent</span>
+            <span>Simple Annual Licensing • Built to Scale With You</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-ink">
             Predictable Plans,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-panel via-brand-strong to-brand">
-              Annual Contract Pricing.
+              Built for Every Growth Stage.
             </span>
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Deku Finance is licensed as an <strong>Annual Contract-Based License</strong>. Enjoy predictable, contract-backed software with dedicated deployment, statutory GST updates, and zero surprise transaction fees.
+            Predictable annual licensing with dedicated setup, ongoing tax &amp; product updates, and zero surprise per-invoice or transaction fees.
           </p>
 
           {/* Annual Contract Highlight Pill */}
           <div className="pt-1 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] sm:text-xs font-semibold text-slate-700">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>All licenses include 1-year statutory tax updates &amp; dedicated data isolation</span>
+            <span>Every plan includes full product updates &amp; private company data isolation</span>
           </div>
         </div>
 
@@ -506,7 +506,7 @@ export default function PricingPlansSection() {
                 <span>Functional Capability Matrix (GO vs PRO vs Enterprise)</span>
               </h3>
               <p className="text-xs text-slate-600">
-                Compare statutory compliance, ledger mechanics, AI CFO intelligence, and governance across all tiers.
+                Compare billing speed, financial reporting, AI CFO intelligence, and team governance across all tiers.
               </p>
             </div>
             <button

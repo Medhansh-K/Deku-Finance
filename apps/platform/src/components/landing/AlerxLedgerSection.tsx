@@ -392,18 +392,18 @@ export default function AlerxLedgerSection() {
         <div className="text-center max-w-3xl mx-auto space-y-2 sm:space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-brand-soft border border-edge shadow-sm">
             <Layers className="h-3.5 w-3.5 text-brand" />
-            <span>The ALERX 4-Tier Foundation • Standard Indian GAAP</span>
+            <span>Pre-Built Industry Templates • Ready on Day One</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight">
-            Effortless Chart of Accounts (COA) for{" "}
+            Clean Financial Structure for{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-soft via-brand to-brand-strong">
               Any Business Model
             </span>
           </h2>
 
           <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            Forget complex manual ledger setup. Deku Finance dynamically generates a verified 4-tier Chart of Accounts tailored to your exact industry in 1 click.
+            Skip weeks of complex ledger setup. Pick your business type and Deku automatically organizes your revenue streams, bank accounts, receivables, and operating costs in 1 click.
           </p>
         </div>
 
@@ -411,7 +411,7 @@ export default function AlerxLedgerSection() {
         <div className="bg-panel rounded-2xl border border-edge p-3.5 sm:p-5 shadow-xl">
           <div className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-brand mb-2.5 flex items-center gap-2">
             <Database className="h-4 w-4 text-brand shrink-0" />
-            <span>Mathematical ALERX 4-Tier Architecture Enforced at Database Level</span>
+            <span>Clear 4-Tier ALERX Structure Built for Effortless Reporting</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 text-xs">

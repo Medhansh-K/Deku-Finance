@@ -47,13 +47,13 @@ export default function LandingBentoGrid() {
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-2 sm:space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1 text-[11px] sm:text-xs font-mono font-bold text-white border border-edge shadow-sm">
             <Sparkles className="h-3.5 w-3.5 text-brand" />
-            <span>High-Precision Financial Operating System</span>
+            <span>Unified Financial Control</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-ink">
-            Engineered for Frictionless Indian Business
+            Built to Simplify Operations &amp; Accelerate Growth
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
-            Explore Deku Finance’s modular bento architecture — from Section 22 CGST exemption safeguards to lightning-fast keyboard-first ledger postings.
+            From instant customer collections and keyboard-fast daily billing to live financial statements and safe team delegation—everything works seamlessly in one place.
           </p>
         </div>
 
@@ -61,24 +61,24 @@ export default function LandingBentoGrid() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
 
           {/* ========================================================================= */}
-          {/* BENTO 1: DUAL-MODE STATUTORY ENGINE (Span 7) */}
+          {/* BENTO 1: DUAL-MODE GROWTH ENGINE (Span 7) */}
           {/* ========================================================================= */}
           <div className="md:col-span-2 lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-xl transition-all duration-300 p-5 sm:p-7 flex flex-col justify-between group overflow-hidden relative">
             <div className="space-y-3 sm:space-y-4 relative z-10">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider bg-brand/10 text-brand-strong border border-brand/20">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  Statutory Architecture
+                  Flexible Growth Architecture
                 </span>
-                <span className="text-[11px] font-mono text-slate-500">Dual-Mode Kernel</span>
+                <span className="text-[11px] font-mono text-slate-500">Adapts as You Scale</span>
               </div>
 
               <div>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-ink">
-                  Dual-Mode Engine: Pure Accounting ⇄ GST Registered
+                  Start Lean. Upgrade to Full Scale in One Click.
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
-                  Operate 100% tax-free under <strong>Section 22 CGST Act</strong> without fake GST numbers, or seamlessly toggle to GST Registered mode with automated CGST, SGST, IGST tax breakdown.
+                  Begin with simple commercial billing and zero bloat while you grow. When your revenue expands, switch on automated tax splits and enterprise workflows without migrating tools.
                 </p>
               </div>
 
@@ -95,7 +95,7 @@ export default function LandingBentoGrid() {
                     }`}
                   >
                     <Check className={`h-3.5 w-3.5 ${activeMode === "non_gst" ? "text-emerald-600" : "opacity-0"}`} />
-                    <span>Pure Accounting (Sec 22)</span>
+                    <span>Lean Business Mode</span>
                   </button>
                   <button
                     type="button"
@@ -107,25 +107,25 @@ export default function LandingBentoGrid() {
                     }`}
                   >
                     <Check className={`h-3.5 w-3.5 ${activeMode === "gst" ? "text-brand" : "opacity-0"}`} />
-                    <span>GST Registered (Enterprise)</span>
+                    <span>Scale &amp; Enterprise Mode</span>
                   </button>
                 </div>
 
                 {/* Live Mode Preview Box */}
                 <div className="rounded-2xl p-4 bg-slate-50 border border-slate-200 text-xs space-y-3 font-mono">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-500">Document Issued:</span>
+                    <span className="text-slate-500">Active Billing Format:</span>
                     <strong className="text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {activeMode === "non_gst" ? "Bill of Supply (Under Sec 22 CGST Act)" : "Tax Invoice (GST Rule 46)"}
+                      {activeMode === "non_gst" ? "Clean Commercial Bill of Supply" : "Full Tax Invoice + Auto Split"}
                     </strong>
                   </div>
 
                   {/* Turnover Exemption Meter */}
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between items-center text-[11px]">
-                      <span className="text-slate-600">Turnover Exemption Meter:</span>
+                      <span className="text-slate-600">Revenue Milestone Progress:</span>
                       <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                        {activeMode === "non_gst" ? "₹18,40,000 / ₹20,00,000 (92%)" : "Exemption Lifted (GSTIN Active)"}
+                        {activeMode === "non_gst" ? "₹18,40,000 / ₹20,00,000 (92%)" : "Full Scale Active"}
                       </span>
                     </div>
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -137,7 +137,7 @@ export default function LandingBentoGrid() {
                     </div>
                     {activeMode === "non_gst" && (
                       <p className="text-[10px] text-amber-600 font-sans">
-                        ⚠️ 92% of statutory ceiling reached. One-click upgrade ready when crossing ₹20L/₹40L threshold.
+                        Approaching ₹20L milestone. One-click scale upgrade ready whenever you expand.
                       </p>
                     )}
                   </div>
@@ -147,10 +147,10 @@ export default function LandingBentoGrid() {
 
             <div className="pt-6 flex items-center justify-between text-xs font-semibold text-brand-strong">
               <Link href="/features" className="inline-flex items-center gap-1.5 hover:text-brand transition-colors">
-                <span>View Dual-Mode Architecture Spec</span>
+                <span>Explore Platform Capabilities</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <span className="text-slate-400 font-mono text-[11px]">Zero GSTIN Lock-In</span>
+              <span className="text-slate-400 font-mono text-[11px]">Zero Switching Friction</span>
             </div>
           </div>
 
@@ -164,17 +164,17 @@ export default function LandingBentoGrid() {
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider bg-brand/20 text-brand-soft border border-brand/30">
                   <Scale className="h-3.5 w-3.5" />
-                  Indian GAAP
+                  Always Balanced
                 </span>
-                <span className="text-[11px] font-mono text-slate-400">ALERX Core</span>
+                <span className="text-[11px] font-mono text-slate-400">ALERX Structure</span>
               </div>
 
               <div>
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-white">
-                  ALERX 4-Tier Mathematical Balance
+                  Self-Balancing Financial Structure
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
-                  Assets, Liabilities, Equity, Revenue, Expense. Strict hierarchical posting guard ensures transactions commit only to transacting leaf Labels.
+                  Organize every rupee across Assets, Liabilities, Equity, Revenue, and Expenses. Real-time reports stay accurate automatically with zero manual spreadsheet fixes.
                 </p>
               </div>
 
@@ -327,67 +327,66 @@ export default function LandingBentoGrid() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BENTO 5: OFFICIAL GSTR-3B & GSTR-1 OFFLINE JSON (Span 6) */}
+          {/* BENTO 5: AUTOMATED MONTH-END & RETURN EXPORTS (Span 6) */}
           {/* ========================================================================= */}
           <div className="md:col-span-1 lg:col-span-6 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-xl transition-all duration-300 p-5 sm:p-7 flex flex-col justify-between group">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider bg-sky-50 text-sky-800 border border-sky-200">
                   <FileCheck2 className="h-3.5 w-3.5" />
-                  GSTN Schema Validated
+                  1-Click Month-End Close
                 </span>
-                <span className="text-[11px] font-mono text-slate-400">1-Click JSON</span>
+                <span className="text-[11px] font-mono text-slate-400">Ready in 60s</span>
               </div>
 
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-ink">
-                  Direct GSTR-1 &amp; GSTR-3B Offline JSON
+                  Automated Return &amp; Tax Exports
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-                  Compiles Table 3.1 (Outward Supplies) and Table 4 (Eligible ITC) directly into the official GST Portal JSON format. Upload directly to gst.gov.in in under 60 seconds.
+                  Skip tedious manual spreadsheet mapping at month-end. Deku automatically organizes your sales and eligible credits into upload-ready portal files in under 60 seconds.
                 </p>
               </div>
 
               {/* Mock Code Block */}
               <div className="rounded-2xl p-3 sm:p-4 bg-slate-900 text-emerald-400 font-mono text-[11px] sm:text-xs overflow-x-auto border border-slate-800 space-y-1">
-                <div className="text-slate-500 text-[10px]">// GSTN Official Offline Return Schema</div>
+                <div className="text-slate-500 text-[10px]">// Ready-to-Upload Monthly Summary</div>
                 <div>{"{"}</div>
-                <div className="pl-4"><span className="text-slate-400">"gstin":</span> <span className="text-amber-300">"27AABCU9603R1ZM"</span>,</div>
-                <div className="pl-4"><span className="text-slate-400">"fp":</span> <span className="text-amber-300">"112026"</span>,</div>
-                <div className="pl-4"><span className="text-slate-400">"sec_3_1_taxable":</span> <span className="text-sky-300">1284500.00</span>,</div>
-                <div className="pl-4"><span className="text-slate-400">"table_4_itc_eligible":</span> <span className="text-sky-300">231210.00</span></div>
+                <div className="pl-4"><span className="text-slate-400">"period":</span> <span className="text-amber-300">"Nov 2026"</span>,</div>
+                <div className="pl-4"><span className="text-slate-400">"taxable_sales":</span> <span className="text-sky-300">1284500.00</span>,</div>
+                <div className="pl-4"><span className="text-slate-400">"eligible_credits":</span> <span className="text-sky-300">231210.00</span></div>
                 <div>{"}"}</div>
               </div>
             </div>
 
             <div className="pt-4 sm:pt-6 flex items-center justify-between text-xs font-semibold text-brand-strong">
               <Link href="/gst-compliance" className="inline-flex items-center gap-1.5 hover:text-brand transition-colors">
-                <span>View Full GST Compliance Flow</span>
+                <span>See Automated Exports</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <span className="text-slate-400 font-mono text-[11px]">Zero Portal Manual Entry</span>
+              <span className="text-slate-400 font-mono text-[11px]">Zero Manual Mapping</span>
             </div>
           </div>
 
           {/* ========================================================================= */}
-          {/* BENTO 6: MSME SAMADHAAN 45-DAY & WHATSAPP CHASER (Span 6) */}
+          {/* BENTO 6: SMART RECEIVABLES & WHATSAPP COLLECT (Span 6) */}
           {/* ========================================================================= */}
           <div className="md:col-span-1 lg:col-span-6 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 hover:border-brand/60 shadow-xs hover:shadow-xl transition-all duration-300 p-5 sm:p-7 flex flex-col justify-between group">
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
                   <Clock className="h-3.5 w-3.5 text-emerald-700" />
-                  Sec 43B(h) Audit Shield
+                  Faster Cash Flow
                 </span>
-                <span className="text-[11px] font-mono text-slate-400">MSME Samadhaan</span>
+                <span className="text-[11px] font-mono text-slate-400">Smart Collections</span>
               </div>
 
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-ink">
-                  MSME 45-Day Aging &amp; WhatsApp Collect
+                  Receivables Aging &amp; WhatsApp Payment Links
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-                  Protect deductions under Section 43B(h). Automatically track 15/45-day overdue receivables and send WhatsApp reminders with direct UPI payment links.
+                  Never lose track of pending payments. Spot aging customer invoices early and send polite WhatsApp reminders with direct scan-to-pay UPI links.
                 </p>
               </div>
 
@@ -396,19 +395,19 @@ export default function LandingBentoGrid() {
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-bold text-emerald-900 flex items-center gap-1.5">
                     <Send className="h-3.5 w-3.5 text-emerald-700" />
-                    Automated WhatsApp Payment Link
+                    1-Click WhatsApp Payment Link
                   </span>
-                  <span className="text-emerald-700 font-mono text-[10px]">Day 32 of 45 (Due Soon)</span>
+                  <span className="text-emerald-700 font-mono text-[10px]">Due Soon</span>
                 </div>
                 <div className="bg-white p-2.5 sm:p-3 rounded-xl border border-emerald-200 text-slate-700 text-[11px] leading-relaxed shadow-xs">
-                  "Dear Apex Corp, Invoice <strong>#DK-2026-084</strong> for <strong>₹48,000</strong> is due in 13 days under MSME Samadhaan guidelines. Tap below to settle instantly via UPI."
+                  &ldquo;Hi Apex Corp, Invoice <strong>#DK-2026-084</strong> for <strong>₹48,000</strong> is ready for settlement. Tap below to pay instantly via UPI.&rdquo;
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-lg bg-emerald-600 text-white font-bold text-[10px] flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
-                    1-Click WhatsApp Delivery
+                    Instant WhatsApp Send
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">Real-time Read Receipts</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Faster Settlement</span>
                 </div>
               </div>
             </div>
@@ -418,27 +417,27 @@ export default function LandingBentoGrid() {
                 <span>Explore Collections Workspace</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <span className="text-slate-400 font-mono text-[11px]">Zero Delayed Debt</span>
+              <span className="text-slate-400 font-mono text-[11px]">Healthier Cash Flow</span>
             </div>
           </div>
 
           {/* ========================================================================= */}
-          {/* BENTO 7: MAKER-CHECKER & DUAL LOCKER SECURITY (Span 12 / Footer Strip) */}
+          {/* BENTO 7: TEAM DELEGATION & APPROVAL CONTROL (Span 12 / Footer Strip) */}
           {/* ========================================================================= */}
           <div className="md:col-span-2 lg:col-span-12 bg-gradient-to-r from-panel via-panel-deep to-panel rounded-2xl sm:rounded-3xl border border-edge p-5 sm:p-7 text-white flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 relative overflow-hidden">
             <div className="space-y-2 max-w-2xl relative z-10 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full bg-brand/20 px-2.5 py-0.5 text-[10px] font-mono font-bold text-brand-soft border border-brand/30">
                   <Lock className="h-3 w-3 text-brand" />
-                  Dual-Gate Governance
+                  Safe Team Delegation
                 </span>
-                <span className="text-[11px] text-slate-400 font-mono">DigiLocker &amp; EntityLocker KYC</span>
+                <span className="text-[11px] text-slate-400 font-mono">Maker-Checker &amp; Role Controls</span>
               </div>
               <h4 className="text-base sm:text-lg lg:text-xl font-bold text-white">
-                Enterprise Maker-Checker Authorization &amp; Statutory Identity
+                Delegate Daily Billing While Keeping Full Owner Control
               </h4>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Subordinate clerks draft vouchers; only authorized business owners or CFOs commit entries to the general ledger. Verify legal identities via Aadhaar DigiLocker, PAN and Udyam registrations.
+                Let your team draft bills, expenses, and vendor entries freely—while owners or managers review and approve payouts before anything posts to the books.
               </p>
             </div>
 
