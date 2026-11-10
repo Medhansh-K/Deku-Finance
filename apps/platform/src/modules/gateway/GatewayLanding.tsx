@@ -158,7 +158,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 1 (Left): Company Status & Instant Shift Switcher */}
         {/* ========================================================================= */}
-        <div className="w-full xl:w-[290px] shrink-0 bg-surface border border-line-strong rounded-xl p-3.5 shadow-xs flex flex-col justify-between">
+        <div data-tour="gateway-company" className="w-full xl:w-[290px] shrink-0 bg-surface border border-line-strong rounded-xl p-3.5 shadow-xs flex flex-col justify-between">
           <div className="space-y-2.5">
             {/* Header with Company Selector Dropdown */}
             <div className="border-b border-line pb-2">
@@ -650,7 +650,7 @@ export function GatewayLanding() {
         {/* ========================================================================= */}
         {/* Column 3 (Right): Quick KPI Table (Dynamically Synced with Company)       */}
         {/* ========================================================================= */}
-        <div className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
+        <div data-tour="gateway-kpis" className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
           <div>
             {/* KPI Title Header */}
             <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">

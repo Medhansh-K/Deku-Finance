@@ -53,6 +53,7 @@ export function DemoControlBar() {
     <>
       <div
         data-testid="learn-demo-control-bar"
+        data-tour="demo-control-bar"
         className="no-print shrink-0 border-b border-brand/30 bg-gradient-to-r from-brand/10 via-sky-500/5 to-amber-500/10 px-3 sm:px-4 py-2 text-xs text-ink"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -127,11 +128,20 @@ export function DemoControlBar() {
 
             <button
               type="button"
+              onClick={() => launchTutorial("product-walkthrough", "/gateway")}
+              className="inline-flex items-center gap-1 rounded-lg bg-panel text-white hover:bg-panel-deep border border-edge px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer"
+            >
+              <Compass className="h-3.5 w-3.5 text-brand" />
+              <span>Guided Tour</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setWorkflowDrawerOpen(true)}
-              className="inline-flex items-center gap-1 rounded-lg border border-brand/40 bg-brand/15 hover:bg-brand/25 px-2.5 py-1 text-[11px] font-bold text-ink transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand/40 bg-brand/15 hover:bg-brand/25 px-2.5 py-1 text-[11px] font-bold text-ink transition-colors cursor-pointer"
             >
               <Compass className="h-3.5 w-3.5 text-brand-strong" />
-              <span>Workflows &amp; Tours</span>
+              <span>8 Workflows</span>
             </button>
 
             <Link

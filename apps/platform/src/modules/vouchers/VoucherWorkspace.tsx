@@ -38,6 +38,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { accountingApi, businessDocumentsApi, invoicesApi, organisationsApi, partiesApi , filesApi, MAX_DOCUMENT_BYTES } from "@/api/endpoints";
 import { Account, CreateJournalRequest, FiscalPeriod, Party, SalesInvoice } from "@/types/accounting";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 import { formatINR, parseAmount } from "@/lib/formatters/currency";
 import { toISODateString } from "@/lib/formatters/date";
 import {
@@ -202,6 +203,7 @@ export function VoucherWorkspace({
   defaultNarration: propDefaultNarration,
 }: VoucherWorkspaceProps) {
   const router = useRouter();
+  const demo = useOptionalLearnDemo();
 
   // Active Voucher Mode
   const [activeMode, setActiveMode] = useState<VoucherMode>(propMode || initialMode);
@@ -1205,6 +1207,70 @@ export function VoucherWorkspace({
               </h2>
             </div>
             <div className="flex items-center gap-2 text-ink-muted font-mono text-[11px]">
+              {demo && (
+                <button
+                  type="button"
+                  data-tour="voucher-autofill"
+                  onClick={() => {
+                    const byCode = (code: string) =>
+                      accounts.find((a) => a.is_postable && a.code === code)?.id ||
+                      accounts.find((a) => a.is_postable)?.id ||
+                      "";
+                    const bankId = byCode("1020");
+                    const cashId = byCode("1010");
+                    const arId = byCode("1030");
+                    const apId = byCode("2010");
+                    const revId = byCode("4010");
+                    const cogsId = byCode("5010");
+                    const opexId = byCode("5020");
+                    const custId = parties.find((p) => p.type === "customer")?.id || "";
+                    const vendId = parties.find((p) => p.type === "vendor")?.id || "";
+
+                    let drAcc = opexId;
+                    let crAcc = bankId;
+                    let drParty = "self";
+                    let crParty = "self";
+                    let amt = "25000";
+
+                    if (activeMode === "contra") {
+                      drAcc = cashId || bankId;
+                      crAcc = bankId;
+                      amt = "15000";
+                    } else if (activeMode === "payment") {
+                      drAcc = apId || opexId;
+                      crAcc = bankId;
+                      drParty = vendId || "self";
+                      amt = "45000";
+                    } else if (activeMode === "receipt") {
+                      drAcc = bankId;
+                      crAcc = arId;
+                      crParty = custId || "self";
+                      amt = "60000";
+                    } else if (activeMode === "sales") {
+                      drAcc = arId;
+                      crAcc = revId;
+                      drParty = custId || "self";
+                      amt = "50000";
+                    } else if (activeMode === "purchase") {
+                      drAcc = cogsId || opexId;
+                      crAcc = apId;
+                      crParty = vendId || "self";
+                      amt = "35000";
+                    }
+
+                    setReference(`DEMO-${activeMode.toUpperCase()}-101`);
+                    setNarration(`Sample ${activeMode} entry in ${demo.dataset.org.name} (review & submit/post)`);
+                    setLines([
+                      { id: `demo-1-${Date.now()}`, line_number: 1, dr_cr: "Dr", account_id: drAcc, party_id: drParty, description: `Debit allocation (${activeMode})`, amount: amt },
+                      { id: `demo-2-${Date.now()}`, line_number: 2, dr_cr: "Cr", account_id: crAcc, party_id: crParty, description: `Credit allocation (${activeMode})`, amount: amt },
+                    ]);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-brand/40 bg-brand/15 hover:bg-brand/25 px-2.5 py-1 text-[11px] font-sans font-bold text-ink transition-colors cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
+                  <span>Autofill Sample</span>
+                </button>
+              )}
               <span>Double-Entry Strict</span>
               <span>•</span>
               <span className="text-brand font-bold">ALERX Postable Only</span>

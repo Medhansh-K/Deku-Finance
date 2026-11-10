@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, Sparkles, Trash2, AlertTriangle } from "lucide-react";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { catalogueApi, invoicesApi } from "@/api/endpoints";
@@ -71,6 +72,7 @@ interface Props {
 
 export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Props) {
   const { organisation } = useAuth();
+  const demo = useOptionalLearnDemo();
 
   const [customerId, setCustomerId] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -307,11 +309,42 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             <h3 className="text-sm font-semibold text-ink">New {typeLabel.toLowerCase()}</h3>
             <p className="text-xs text-ink-muted">Saved as a draft. Issuing it posts the journal to your ledger.</p>
           </div>
-          <p className="text-[11px] text-ink-muted" aria-label="Keyboard shortcuts">
-            <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> next field ·{" "}
-            <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Ctrl</kbd>+
-            <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> save draft
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {demo && (
+              <button
+                type="button"
+                data-tour="invoice-autofill"
+                onClick={() => {
+                  const cust = customers[0];
+                  const item = catalogue[0];
+                  const targetPos = cust?.gstin?.slice(0, 2) || companyState || "27";
+                  setCustomerId(cust?.id || "");
+                  setInvoiceNumber(`DEMO-${String(Date.now()).slice(-4)}`);
+                  setPosCode(targetPos);
+                  setLines([
+                    {
+                      item_id: item?.id || "",
+                      unit_code: item?.unit_code || "NOS",
+                      item_name: item?.name || "Demo Consultation / Supply Item",
+                      hsn_sac_code: item?.hsn_sac_code || "998313",
+                      quantity: "5",
+                      unit_price: String(item?.default_unit_price || 15000),
+                      gst_rate: String(item?.default_gst_rate ?? 18),
+                    },
+                  ]);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg bg-brand/20 hover:bg-brand/30 border border-brand/40 px-2.5 py-1 text-[11px] font-bold text-ink cursor-pointer"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
+                <span>Autofill Sample Invoice</span>
+              </button>
+            )}
+            <p className="text-[11px] text-ink-muted" aria-label="Keyboard shortcuts">
+              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> next field ·{" "}
+              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Ctrl</kbd>+
+              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> save draft
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

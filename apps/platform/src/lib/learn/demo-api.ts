@@ -326,7 +326,7 @@ export async function dispatchDemoApi(
         })),
       };
       ctx.updateDataset((prev) => ({ ...prev, journals: [je, ...prev.journals] }));
-      return { success: true, entry: je, lines: je.journal_entry_lines };
+      return { success: true, entry: [je], lines: je.journal_entry_lines };
     }
   }
 
@@ -360,6 +360,9 @@ export async function dispatchDemoApi(
       });
       return { ...prev, journals: next };
     });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { journalId: jeId, act } }));
+    }
     return { success: true, message: `Voucher ${act} completed in demo tab.`, entry: updatedEntry };
   }
 
@@ -462,20 +465,62 @@ export async function dispatchDemoApi(
 
   if (sub === "/reports/kpis") {
     const all = buildAccountBalanceRows(dataset);
-    const findBal = (code: string) => all.find((r) => r.account_code === code)?.natural_balance ?? 0;
+    const postedJournals = dataset.journals.filter((j) => j.status === "posted");
+    const lastEntryDate = postedJournals.length
+      ? postedJournals.reduce((max, j) => (j.entry_date > max ? j.entry_date : max), postedJournals[0].entry_date)
+      : null;
+
+    const balOf = (code: string) => all.find((r) => r.account_code === code)?.natural_balance ?? 0;
+    const accInfo = (code: string) => {
+      const a = dataset.accounts.find((x) => x.code === code);
+      return a ? { id: a.id, code: a.code, name: a.name } : null;
+    };
+
     const revenue = all.filter((r) => r.account_type === "income").reduce((s, r) => s + r.natural_balance, 0);
-    const expenses = all.filter((r) => r.account_type === "expense").reduce((s, r) => s + r.natural_balance, 0);
+    const expenseRows = all.filter((r) => r.account_type === "expense");
+    const expenses = expenseRows.reduce((s, r) => s + r.natural_balance, 0);
+    const billed = dataset.invoices
+      .filter((i) => i.status !== "cancelled")
+      .reduce((s, i) => s + Number(i.taxable_amount || 0), 0);
+
+    const debtorsAgeing = buildPartyAgeing(dataset, "receivable");
+    const creditorsAgeing = buildPartyAgeing(dataset, "payable");
+
+    const assets = all.filter((r) => r.account_type === "asset").reduce((s, r) => s + r.natural_balance, 0);
+    const liabilities = all.filter((r) => r.account_type === "liability").reduce((s, r) => s + r.natural_balance, 0);
+    const baseEquity = all.filter((r) => r.account_type === "equity").reduce((s, r) => s + r.natural_balance, 0);
+    const equityWithProfit = baseEquity + (revenue - expenses);
+
+    const gstOutput = balOf("2020") + balOf("2021") + balOf("2022");
+    const gstInput = balOf("1050") + balOf("1051") + balOf("1052");
+
     return {
       success: true,
       data: {
-        revenue,
+        has_entries: postedJournals.length > 0,
+        last_entry_date: lastEntryDate,
+        turnover: revenue,
+        profit: revenue - expenses,
+        billed,
+        liquid: balOf("1010") + balOf("1020"),
+        liquid_accounts: ["Petty Cash (1010)", "HDFC Bank (1020)"],
+        debtors_account: accInfo("1030"),
+        debtors: Math.max(0, balOf("1030")),
+        debtors_count: debtorsAgeing.length,
+        debtors_over_45_count: debtorsAgeing.filter((r) => (r.oldest_age_days ?? 0) > 45).length,
+        dso_days: 34,
+        creditors_account: accInfo("2010"),
+        creditors: Math.max(0, balOf("2010")),
+        creditors_count: creditorsAgeing.length,
+        dpo_days: 28,
         expenses,
-        net_profit: revenue - expenses,
-        cash_balance: findBal("1010") + findBal("1020"),
-        receivables: Math.max(0, findBal("1030")),
-        payables: Math.max(0, findBal("2010")),
-        invoice_count: dataset.invoices.length,
-        voucher_count: dataset.journals.filter((j) => j.status === "posted").length,
+        expense_heads: expenseRows.filter((r) => r.natural_balance !== 0).map((r) => r.account_name),
+        gst_output: gstOutput,
+        gst_input: gstInput,
+        assets,
+        liabilities,
+        equity: equityWithProfit,
+        balanced: Math.abs(assets - (liabilities + equityWithProfit)) < 0.01,
       },
     };
   }
@@ -577,14 +622,49 @@ export async function dispatchDemoApi(
     const [, invId, action] = invAction;
     assertRoleAllowed(ctx, "issue_invoice", action === "issue" ? "Issue Invoice" : "Cancel Invoice");
     let targetInv = dataset.invoices.find((i) => i.id === invId);
-    ctx.updateDataset((prev) => ({
-      ...prev,
-      invoices: prev.invoices.map((i) => {
+    ctx.updateDataset((prev) => {
+      let nextJournals = prev.journals;
+      const nextInvoices = prev.invoices.map((i) => {
         if (i.id !== invId) return i;
-        targetInv = { ...i, status: action === "issue" ? "issued" : "cancelled" };
+        let jeId = i.journal_entry_id ?? null;
+        if (action === "issue" && !jeId) {
+          const findAcc = (code: string) => prev.accounts.find((a) => a.code === code)?.id || "";
+          const arId = findAcc("1030");
+          const revId = findAcc("4010");
+          const cgstId = findAcc("2020");
+          const sgstId = findAcc("2021");
+          const igstId = findAcc("2022");
+          jeId = `${orgId}-je-inv-${Date.now()}`;
+          const lines = [
+            { line_number: 1, account_id: arId, party_id: i.customer_id, debit: Number(i.total_amount || 0), credit: 0, description: `Receivable ${i.invoice_number}` },
+            { line_number: 2, account_id: revId, debit: 0, credit: Number(i.taxable_amount || 0), description: `Sales ${i.invoice_number}` },
+          ];
+          if (Number(i.cgst_amount || 0) > 0) lines.push({ line_number: lines.length + 1, account_id: cgstId, debit: 0, credit: Number(i.cgst_amount), description: "Output CGST" });
+          if (Number(i.sgst_amount || 0) > 0) lines.push({ line_number: lines.length + 1, account_id: sgstId, debit: 0, credit: Number(i.sgst_amount), description: "Output SGST" });
+          if (Number(i.igst_amount || 0) > 0) lines.push({ line_number: lines.length + 1, account_id: igstId, debit: 0, credit: Number(i.igst_amount), description: "Output IGST" });
+          nextJournals = [
+            {
+              id: jeId,
+              organisation_id: orgId,
+              fiscal_period_id: prev.fiscalPeriods[0]?.id || "",
+              entry_number: `SI-${prev.journals.length + 101}`,
+              entry_date: i.invoice_date,
+              status: "posted",
+              narration: `Issued GST Invoice ${i.invoice_number}`,
+              posted_at: new Date().toISOString(),
+              journal_entry_lines: lines,
+            },
+            ...nextJournals,
+          ];
+        }
+        targetInv = { ...i, status: action === "issue" ? "issued" : "cancelled", journal_entry_id: jeId };
         return targetInv;
-      }),
-    }));
+      });
+      return { ...prev, invoices: nextInvoices, journals: nextJournals };
+    });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("deku_ledger_updated", { detail: { invoiceId: invId, action } }));
+    }
     return { success: true, message: `Invoice ${action}d in demo workspace.`, invoice: targetInv };
   }
 
@@ -605,6 +685,22 @@ export async function dispatchDemoApi(
       ctx.updateDataset((prev) => ({ ...prev, purchases: [bill, ...prev.purchases] }));
       return { success: true, data: [bill] };
     }
+  }
+
+  const purchasePatch = sub.match(/^\/purchases\/([^/]+)$/);
+  if (purchasePatch && method === "PATCH") {
+    const [, billId] = purchasePatch;
+    const body = parseBody(options);
+    let updated: DemoDataset["purchases"][number] | undefined;
+    ctx.updateDataset((prev) => ({
+      ...prev,
+      purchases: prev.purchases.map((b) => {
+        if (b.id !== billId) return b;
+        updated = { ...b, ...body };
+        return updated;
+      }),
+    }));
+    return { success: true, data: updated ? [updated] : [] };
   }
 
   if (sub === "/business-documents") {

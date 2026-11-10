@@ -46,6 +46,7 @@ import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
 import { RecentlyAddedVouchers } from "@/modules/executive/RecentlyAddedVouchers";
 import { loadProgress, saveProgress, startPath } from "@/lib/tutorials/progress";
+import { PRODUCT_WALKTHROUGH_PATH } from "@/lib/tutorials/workflows";
 import type { DemoCompanySlug } from "@/lib/learn/companies";
 import type { DemoPlanId } from "@/lib/learn/demo-plans";
 import type { OrgRole } from "@/modules/departments-members/team";
@@ -262,10 +263,15 @@ function DemoScreenDispatcher() {
 function TourAutoStarter({ initialTour }: { initialTour?: string | null }) {
   const { navigateTo } = useLearnDemo();
   useEffect(() => {
-    if (!initialTour) return;
     const progress = loadProgress("public-learn-demo");
-    saveProgress("public-learn-demo", startPath(progress, initialTour));
-    // Route alignment happens cleanly inside TutorialCoach, or navigate if needed
+    if (initialTour) {
+      saveProgress("public-learn-demo", startPath(progress, initialTour));
+      return;
+    }
+    // Automatically guide first-time demo visitors from Gateway -> Action -> Business Value
+    if (!progress.active && !progress.welcomed) {
+      saveProgress("public-learn-demo", startPath(progress, PRODUCT_WALKTHROUGH_PATH.id));
+    }
     void navigateTo;
   }, [initialTour, navigateTo]);
   return null;

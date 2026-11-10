@@ -2,6 +2,8 @@ import type { TutorialPath, TutorialStep } from "./paths";
 
 export interface WorkflowStep extends TutorialStep {
   accountingImpact?: string;
+  actionPrompt?: string;
+  businessValuePoints?: string[];
 }
 
 export interface WorkflowTutorialPath extends Omit<TutorialPath, "steps"> {
@@ -32,6 +34,7 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
         route: "/masters/parties",
         target: "parties-new",
         accountingImpact: "Links counterparty sub-ledger to Control Account 2010 (Accounts Payable).",
+        actionPrompt: "Click '+ New Party' or inspect an existing vendor card, then click Next.",
       },
       {
         id: "p2p-bill",
@@ -40,6 +43,7 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
         route: "/purchases",
         target: "purchases-tabs",
         accountingImpact: "Dr Inventory/Expense + Dr Input GST (1050–1052) | Cr Accounts Payable (2010).",
+        actionPrompt: "Click 'Autofill Sample Bill', review auto-calculated GST, then click Save bill and post voucher.",
       },
       {
         id: "p2p-itc-rule",
@@ -48,14 +52,16 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
         route: "/purchases",
         target: "purchases-itc",
         accountingImpact: "Separates claimable tax credit from cost-capitalised taxes.",
+        actionPrompt: "Toggle ITC Eligibility between Eligible and Blocked u/s 17(5) to preview tax treatment.",
       },
       {
         id: "p2p-pay",
         title: "Issue Payment Voucher (F5)",
         body: "Record supplier payout by debiting Accounts Payable (2010) with counterparty selected and crediting HDFC Bank (1020).",
         route: "/vouchers/payment",
-        target: "voucher-actions",
+        target: "voucher-autofill",
         accountingImpact: "Dr Accounts Payable (2010) | Cr Bank (1020).",
+        actionPrompt: "Click 'Autofill Sample' above, review the balanced Dr/Cr lines, then click Submit/Post below.",
       },
       {
         id: "p2p-creditors",
@@ -103,18 +109,20 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
       {
         id: "o2c-invoice",
         title: "Create & issue GST Sales Invoice",
-        body: "Review Place of Supply (CGST+SGST vs IGST) and Issue & Post Double Entry to lock the invoice and recognise revenue.",
+        body: "Open '+ Create GST Invoice', use 'Autofill Sample Invoice', Save Draft, then Issue & Post Double Entry to update Turnover and Debtors.",
         route: "/gst",
         target: "gst-tabs",
         accountingImpact: "Dr Accounts Receivable (1030) | Cr Revenue (4010) + Cr Output GST (2020–2022).",
+        actionPrompt: "Open '+ Create GST Invoice', click 'Autofill Sample Invoice', save draft, and issue it.",
       },
       {
         id: "o2c-receipt",
         title: "Record Receipt Voucher (F6)",
         body: "Settle open invoices via Receipt Voucher by debiting Bank (1020) and crediting Accounts Receivable (1030) for the customer.",
         route: "/vouchers/receipt",
-        target: "voucher-document",
+        target: "voucher-autofill",
         accountingImpact: "Dr Bank (1020) | Cr Accounts Receivable (1030).",
+        actionPrompt: "Click 'Autofill Sample' to populate a customer receipt, then click Submit/Post below.",
       },
       {
         id: "o2c-collect",
@@ -145,10 +153,11 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
     steps: [
       {
         id: "fc-voucher",
-        title: "Inspect Voucher Desk (F4–F9)",
+        title: "Inspect & fill Voucher Desk (F4–F9)",
         body: "Enter Contra, Payment, Receipt, Journal, Sales, or Purchase vouchers. Notice Debits must equal Credits before submission.",
         route: "/vouchers",
-        target: "voucher-types",
+        target: "voucher-autofill",
+        actionPrompt: "Click 'Autofill Sample', switch F4–F9 tabs or edit amounts, then Submit/Post your voucher.",
       },
       {
         id: "fc-approvals",
@@ -157,6 +166,7 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
         route: "/approvals",
         target: "approvals-queue",
         accountingImpact: "Unposted drafts have zero Trial Balance impact until independent approval.",
+        actionPrompt: "Try clicking Approve as Accountant (blocked!), then switch Role to Owner/CFO in the top bar and approve.",
       },
       {
         id: "fc-daybook",
@@ -395,4 +405,89 @@ export const WORKFLOW_TUTORIAL_PATHS: WorkflowTutorialPath[] = [
 ];
 
 export const WORKFLOW_ID_MAP = new Map(WORKFLOW_TUTORIAL_PATHS.map((w) => [w.id, w]));
+
+/** Complete start-to-value guided product walkthrough launched automatically inside Public Demo Workspace. */
+export const PRODUCT_WALKTHROUGH_PATH: WorkflowTutorialPath = {
+  id: "product-walkthrough",
+  badge: "Start Here",
+  title: "Deku Guided Walkthrough: Components to Business Value",
+  summary: "Step-by-step interactive tour showing every workspace area, hands-on entry creation, and measurable business value.",
+  audience: "everyone",
+  prerequisites: "None — runs directly inside Public Demo.",
+  outcome: "Understand what every panel does, post a real entry yourself, and see live financial & GST value.",
+  recommendedCompanies: ["aster-trading", "northstar-consulting", "urbannest-retail", "meridian-retail"],
+  recommendedPlan: "pro",
+  roleGuidance: "Follow the glowing pointer cards or surf freely anywhere in Deku.",
+  steps: [
+    {
+      id: "pw-control-bar",
+      title: "1. Demo Control Bar — Switch Companies, Roles & Plans",
+      body: "Use this top bar anytime to switch between 4 realistic industries, test all 7 RBAC roles (Owner to Viewer), compare GO / PRO / Enterprise limits, or Reset sample books safely.",
+      route: "/gateway",
+      target: "demo-control-bar",
+      actionPrompt: "Notice your active Company, Role & Plan selectors here. Click Next when ready.",
+    },
+    {
+      id: "pw-company-card",
+      title: "2. Active Company, GSTIN & Period Pulse",
+      body: "Displays the active entity's GSTIN, Financial Year, last posted voucher date, and strict ALERX 4-Tier Double-Entry mode — keeping multi-entity operations cleanly separated.",
+      route: "/gateway",
+      target: "gateway-company",
+      actionPrompt: "Check the Company Period & GSTIN panel, then click Next.",
+    },
+    {
+      id: "pw-gateway-menu",
+      title: "3. Gateway of Deku — Single-Keystroke Control Centre",
+      body: "Every module is organised by Masters, Transactions (F4–F9), Financial Reports, and Statutory GST. Press any highlighted alphabet letter (A, P, V, B, G) or click directly.",
+      route: "/gateway",
+      target: "gateway-menu",
+      actionPrompt: "Notice the keyboard letters on the right of each module link.",
+    },
+    {
+      id: "pw-kpis",
+      title: "4. Quick Business KPIs — Real-Time Ledger Health",
+      body: "Zero Excel wait times: Turnover, Net Profit, Liquid Funds, Trade Debtors (with MSME >45-day flags), Trade Creditors, Expenses & Net GST Payable update automatically from posted journals.",
+      route: "/gateway",
+      target: "gateway-kpis",
+      actionPrompt: "Click any KPI metric to inspect underlying reports, or click Next to create a real transaction!",
+    },
+    {
+      id: "pw-shortcut-bar",
+      title: "5. Tally-Speed Keyboard Strip (F1–F11, Ctrl+K, Esc)",
+      body: "Accountants never need to leave the keyboard: F4–F9 jump straight to Vouchers, F10 opens Bank Recon, F11 opens GST Filing, Ctrl+K jumps anywhere, and Esc returns here.",
+      route: "/gateway",
+      target: "shortcut-bar",
+      actionPrompt: "Next step takes you straight into Accounting Vouchers to post an entry yourself.",
+    },
+    {
+      id: "pw-do-voucher",
+      title: "6. Your Action: Autofill & Post a Payment Voucher",
+      body: "Let's try real work! Click 'Autofill Sample' to pre-fill balanced Debit (Payables 2010) and Credit (HDFC Bank 1020) lines, inspect them, then click Submit/Post at the bottom.",
+      route: "/vouchers/payment",
+      target: "voucher-autofill",
+      accountingImpact: "Dr Accounts Payable (2010) ₹45,000 | Cr HDFC Bank (1020) ₹45,000",
+      actionPrompt: "Click the glowing 'Autofill Sample' button, then click Submit/Post below!",
+    },
+    {
+      id: "pw-do-gst",
+      title: "7. Your Action: GST Engine & Automated Tax Math",
+      body: "Here every Sales Invoice validates party GSTIN check digits, splits CGST+SGST (intra-state) vs IGST (inter-state), and posts balanced double-entry journals upon Issue.",
+      route: "/gst",
+      target: "gst-tabs",
+      actionPrompt: "Click '+ Create GST Invoice' -> 'Autofill Sample Invoice' to test live tax computation, or click Next for the final value summary.",
+    },
+    {
+      id: "pw-business-value",
+      title: "8. Value for Your Business — Audit-Ready Every Second",
+      body: "Your vouchers, invoices, and purchases flow automatically into this live Trial Balance (Debits == Credits), Profit & Loss, Balance Sheet, and GSTR-1/3B offline JSON — with zero reconciliation lag.",
+      route: "/reports/trial-balance",
+      target: "trial-balance-table",
+      businessValuePoints: [
+        "Save 15+ hours/month: GST invoicing, purchase ITC, FIFO stock & bank recon post balanced double-entry ledgers automatically.",
+        "Zero GST & MSME Penalties: Built-in Rule 88A set-off, Sec 17(5) ITC blocking, mod-36 GSTIN validation & 45-day Sec 43B(h) alerts.",
+        "Total Governance at Scale: 7 RBAC roles, Maker-Checker dual approvals, salary masking & immutable Audit Trails.",
+      ],
+    },
+  ],
+};
 

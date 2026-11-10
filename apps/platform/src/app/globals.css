@@ -340,4 +340,7 @@ table {
   outline: 3px solid var(--color-brand);
   outline-offset: 3px;
   border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(5, 184, 165, 0.22);
+  position: relative;
+  z-index: 35;
 }

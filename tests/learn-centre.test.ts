@@ -7,7 +7,7 @@ import { DEMO_ROLES, canDemoRolePerform, getDemoRoleConfig } from "@/lib/learn/d
 import { DEMO_PLANS, buildDemoSubscription } from "@/lib/learn/demo-plans";
 import { createInitialDemoDataset } from "@/lib/learn/sample-data";
 import { dispatchDemoApi } from "@/lib/learn/demo-api";
-import { WORKFLOW_TUTORIAL_PATHS } from "@/lib/tutorials/workflows";
+import { PRODUCT_WALKTHROUGH_PATH, WORKFLOW_TUTORIAL_PATHS } from "@/lib/tutorials/workflows";
 import {
   DOC_ARTICLES,
   DOC_CATEGORIES,
@@ -113,6 +113,23 @@ describe("Learn Centre 4 demo companies & frontend sample ledger parity", () => 
       )) as { data: { errors: string[]; json: unknown } };
       expect(gstr1Res.data.errors).toEqual([]);
       expect(gstr1Res.data.json).not.toBeNull();
+
+      const kpiRes = (await dispatchDemoApi(
+        {
+          getDataset: () => ds,
+          updateDataset: (fn) => {
+            ds = fn(ds);
+          },
+          getRole: () => "owner",
+          getPlan: () => c.recommendedPlan,
+          notifyAction: () => {},
+        },
+        `/api/v1/organisations/${ds.org.id}/reports/kpis`
+      )) as { data: { has_entries: boolean; turnover: number; liquid: number; balanced: boolean } };
+      expect(kpiRes.data.has_entries).toBe(true);
+      expect(kpiRes.data.turnover).toBeGreaterThan(0);
+      expect(kpiRes.data.liquid).toBeGreaterThan(0);
+      expect(kpiRes.data.balanced).toBe(true);
     }
   });
 });
@@ -172,7 +189,7 @@ describe("Learn Centre 8 guided workflows & 8 doc categories", () => {
     ]);
 
     const source = walkFiles("apps/platform/src").map((f) => readFileSync(f, "utf8")).join("\n");
-    for (const wf of WORKFLOW_TUTORIAL_PATHS) {
+    for (const wf of [PRODUCT_WALKTHROUGH_PATH, ...WORKFLOW_TUTORIAL_PATHS]) {
       expect(wf.steps.length).toBeGreaterThan(2);
       for (const step of wf.steps) {
         if (step.route) {

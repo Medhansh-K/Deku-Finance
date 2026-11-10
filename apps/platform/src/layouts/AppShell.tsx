@@ -287,7 +287,7 @@ export function AppShell({ children }: AppShellProps) {
               </span>
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-[11px] sm:text-xs font-semibold text-white leading-tight">
-                  {activeCompany.name || "Select Company"}
+                  {demo ? demo.dataset.org.name : (activeCompany.name || "Select Company")}
                 </span>
                 <span className="hidden sm:block text-[10px] text-slate-400 leading-tight">
                   {financialYear ? `FY ${financialYear}` : "Active Workspace"}

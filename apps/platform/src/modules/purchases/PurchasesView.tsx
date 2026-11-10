@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Trash2, UploadCloud } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Sparkles, Trash2, UploadCloud } from "lucide-react";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -249,6 +250,7 @@ function AddBill({
   existing: Set<string>;
   onSaved: () => Promise<void>;
 }) {
+  const demo = useOptionalLearnDemo();
   const ownState = (companyGstin ?? "").slice(0, 2);
   const [f, setF] = useState<FormState>(() => emptyForm(ownState));
   const [errors, setErrors] = useState<string[]>([]);
@@ -369,6 +371,40 @@ function AddBill({
       }}
     >
       {notice && <Notice tone="ok">{notice}</Notice>}
+      {demo && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-brand/30 bg-brand/5 px-3 py-2 text-xs">
+          <span className="text-ink-soft">
+            Need quick sample values? Autofill a realistic supplier bill, then click <strong>Save</strong> yourself.
+          </span>
+          <button
+            type="button"
+            data-tour="purchase-autofill"
+            onClick={() => {
+              const sup = suppliers[0];
+              const expAcc = expenseAccounts.find((a) => a.code === "5010" || a.code === "5020") ?? expenseAccounts[0];
+              const apAcc = payableAccounts.find((a) => a.code === "2010") ?? payableAccounts[0];
+              update({
+                partyId: sup?.id || "",
+                supplierName: sup?.legal_name || "Sample Supplier Pvt Ltd",
+                gstin: (sup?.gstin || companyGstin || "").toUpperCase(),
+                billNumber: `DEMO-PB-${String(existing.size + 101)}`,
+                billDate: toISODateString(),
+                pos: ownState || "27",
+                taxable: "50000",
+                rate: "18",
+                eligibility: "eligible",
+                createVoucher: true,
+                expenseAccountId: expAcc?.id || "",
+                payableAccountId: apAcc?.id || "",
+              });
+            }}
+            className="inline-flex items-center gap-1 rounded-lg bg-brand/20 hover:bg-brand/30 border border-brand/40 px-2.5 py-1 font-bold text-ink cursor-pointer"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
+            <span>Autofill Sample Bill</span>
+          </button>
+        </div>
+      )}
       {errors.length > 0 && (
         <Notice tone="error">
           <ul className="list-disc pl-4 space-y-0.5">

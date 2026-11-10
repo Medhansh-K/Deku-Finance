@@ -46,6 +46,7 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
   return (
     <footer
       id="keyboard-shortcut-bar"
+      data-tour="shortcut-bar"
       className="flex h-8 bg-panel-deep border-t border-edge text-slate-300 items-center justify-between px-3 select-none text-[11px] font-sans shrink-0 z-30 no-print overflow-hidden shadow-inner"
     >
       <div className="flex items-center gap-1 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
