@@ -260,11 +260,11 @@ export function AppShell({ children }: AppShellProps) {
               {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
 
-            {/* Logo / Gateway Home Link */}
+            {/* Logo / Home Link (Landing page in Demo, Gateway in authenticated app) */}
             <Link
-              href="/gateway"
+              href={demo ? "/" : "/gateway"}
               className="flex items-center gap-2 rounded-lg py-1 px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand hover:opacity-90 transition-opacity shrink-0"
-              title="Return to Gateway (Esc)"
+              title={demo ? "Go to Deku Finance Landing Page" : "Return to Gateway (Esc)"}
             >
               <div className="grid h-8 w-8 place-items-center">
                 <DekuLogo size={28} />

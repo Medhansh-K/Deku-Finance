@@ -432,6 +432,7 @@ export function LearnDemoProvider({
       const rawHref = anchor.getAttribute("href") || "";
       if (
         !rawHref.startsWith("/") ||
+        rawHref === "/" ||
         rawHref.startsWith("/learn") ||
         rawHref.startsWith("/request-setup") ||
         rawHref.startsWith("/login") ||
