@@ -104,7 +104,7 @@ export function NotificationBell() {
         data-tour="notification-bell" ref={buttonRef}
         type="button"
         onClick={() => (open ? close() : setOpen(true))}
-        className="relative rounded-md p-1.5 text-ink-subtle hover:bg-panel hover:text-brand-soft focus-visible:ring-2 focus-visible:ring-brand"
+        className="relative rounded-ctl p-2 text-ink-muted hover:bg-canvas-sunken hover:text-ink focus-visible:ring-2 focus-visible:ring-brand"
         aria-label={bellAriaLabel(unread.length)}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -115,7 +115,7 @@ export function NotificationBell() {
         {badge && (
           <span
             aria-hidden="true"
-            className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-none text-panel-deep"
+            className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-xs font-semibold leading-none text-panel-deep"
           >
             {badge}
           </span>
@@ -129,17 +129,17 @@ export function NotificationBell() {
           role="dialog"
           aria-labelledby={headingId}
           tabIndex={-1}
-          className="fixed bottom-16 left-3 z-50 flex max-h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-line bg-surface text-ink shadow-pop outline-none"
+          className="fixed top-16 right-4 z-50 flex max-h-[min(28rem,70vh)] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-panel border border-line bg-surface text-ink shadow-pop outline-none"
         >
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
-            <h2 id={headingId} className="text-sm font-semibold">
+            <h2 id={headingId} className="text-[13.5px] font-semibold">
               Notifications
             </h2>
             {unread.length > 0 && (
               <button
                 type="button"
                 onClick={() => read(unread)}
-                className="rounded text-xs font-medium text-brand-strong hover:underline focus-visible:ring-2 focus-visible:ring-brand"
+                className="rounded-chip text-xs font-medium text-brand-strong hover:underline focus-visible:ring-2 focus-visible:ring-brand"
               >
                 Mark all read
               </button>
@@ -147,13 +147,13 @@ export function NotificationBell() {
           </div>
 
           {error && (
-            <p role="alert" className="border-b border-line px-4 py-2 text-xs text-ink-muted">
+            <p role="alert" className="border-b border-line px-4 py-2 text-[12.5px] text-ink-muted">
               {error}
             </p>
           )}
 
           {items.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-ink-muted">You&apos;re all caught up.</p>
+            <p className="px-4 py-6 text-center text-[13.5px] text-ink-muted">You&apos;re all caught up.</p>
           ) : (
             <ul className="overflow-y-auto">
               {items.map((n) => (
@@ -170,21 +170,21 @@ export function NotificationBell() {
                           if (!n.read_at) read([n.id]);
                           setOpen(false);
                         }}
-                        className={`block text-sm hover:underline ${n.read_at ? "text-ink-soft" : "font-medium text-ink"}`}
+                        className={`block text-[13.5px] hover:underline ${n.read_at ? "text-ink-soft" : "font-medium text-ink"}`}
                       >
                         {n.title}
                       </Link>
                     ) : (
-                      <p className={`text-sm ${n.read_at ? "text-ink-soft" : "font-medium text-ink"}`}>{n.title}</p>
+                      <p className={`text-[13.5px] ${n.read_at ? "text-ink-soft" : "font-medium text-ink"}`}>{n.title}</p>
                     )}
-                    {n.body && <p className="mt-0.5 text-xs text-ink-muted">{n.body}</p>}
-                    <div className="mt-1 flex items-center gap-3 text-[11px] text-ink-subtle">
+                    {n.body && <p className="mt-0.5 text-[12.5px] text-ink-muted">{n.body}</p>}
+                    <div className="mt-1 flex items-center gap-3 text-[12.5px] text-ink-subtle">
                       <time dateTime={n.created_at}>{formatWhen(n.created_at)}</time>
                       {!n.read_at && (
                         <button
                           type="button"
                           onClick={() => read([n.id])}
-                          className="rounded font-medium text-brand-strong hover:underline focus-visible:ring-2 focus-visible:ring-brand"
+                          className="rounded-ctl font-medium text-brand-strong hover:underline focus-visible:ring-2 focus-visible:ring-brand"
                           aria-label={`Mark "${n.title}" as read`}
                         >
                           Mark read

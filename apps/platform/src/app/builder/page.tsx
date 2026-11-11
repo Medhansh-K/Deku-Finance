@@ -12,8 +12,8 @@ export default function DocumentBuilderPage() {
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Suspense
           fallback={
-            <div className="flex-1 flex items-center justify-center p-8 text-xs font-mono text-slate-500">
-              Initializing Business Document Builder...
+            <div className="flex-1 flex items-center justify-center p-8 text-[13px] text-ink-muted">
+              Opening the document builder...
             </div>
           }
         >

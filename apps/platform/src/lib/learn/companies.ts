@@ -83,7 +83,7 @@ export const DEMO_COMPANIES: DemoCompanyTemplate[] = [
       "Confidential Payroll Run",
       "AR Ageing & Collections",
       "FP&A & Cash Flow",
-      "Deku Konsultant",
+      "Deku Consultant",
     ],
     workflowIds: ["order-to-collection", "team-governance", "financial-close", "financial-intelligence"],
     defaultLandingRoute: "/gateway",

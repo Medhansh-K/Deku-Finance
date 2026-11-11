@@ -49,7 +49,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Dim backdrop */}
       <div
-        className="fixed inset-0 bg-panel-deep/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-panel-deep/40 backdrop-blur-[2px] transition-opacity"
         onClick={onClose}
       />
 
@@ -60,7 +60,7 @@ export function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         tabIndex={-1}
-        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-xl border border-line bg-surface shadow-pop overflow-hidden`}
+        className={`relative z-10 w-full ${widthClasses[maxWidth]} rounded-panel border border-line bg-surface shadow-pop overflow-hidden`}
       >
         <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>

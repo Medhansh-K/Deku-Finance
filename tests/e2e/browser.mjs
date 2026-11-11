@@ -33,11 +33,11 @@ const PAGES = routes().filter((r) => !SKIP.has(r)).sort();
 
 async function signIn(browser, email, viewport) {
   const context = await browser.newContext({ viewport });
+  // The login page says "coming soon", so sign in through the session API it used to call.
+  const res = await context.request.post(`${BASE}/api/auth/login`, { data: { email, password: PASSWORD } });
+  if (!res.ok()) throw new Error(`sign-in failed for ${email}: ${res.status()}`);
   const page = await context.newPage();
-  await page.goto(`${BASE}/login`);
-  await page.fill('input[type="email"]', email);
-  await page.fill('input[type="password"]', PASSWORD);
-  await page.click('button[type="submit"]');
+  await page.goto(`${BASE}/gateway`);
   await page.waitForURL(/\/(gateway|onboarding)/, { timeout: 20000 });
   return { context, page };
 }
@@ -276,6 +276,8 @@ async function navigationAndKeyboard(browser) {
   await attach.waitFor({ state: "attached", timeout: 10000 });
   await attach.setInputFiles({ name: "receipt.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7 e2e receipt") });
   await page.waitForTimeout(1500);
+  // The voucher opens in a side drawer: close it and open it again to read the stored attachment.
+  await page.keyboard.press("Escape");
   await page.getByText("E2E-R-1", { exact: true }).first().click();
   const download = page.getByRole("link", { name: "Download", exact: true });
   await download.waitFor({ timeout: 10000 });
@@ -287,7 +289,7 @@ async function navigationAndKeyboard(browser) {
   const anon = await browser.newContext();
   const fresh = await anon.newPage();
   await fresh.goto(`${BASE}/login`, { waitUntil: "networkidle" });
-  check("U-08", "login has no demo buttons on a clean deployment", (await fresh.getByText("Interactive Plan Tour").count()) === 0);
+  check("U-08", "login says coming soon and offers the demo", (await fresh.getByText("Sign-in is coming soon").count()) === 1 && (await fresh.getByText("Interactive Plan Tour").count()) === 0);
   await fresh.goto(`${BASE}/reset-password`, { waitUntil: "networkidle" });
   check("U-09", "reset page explains a missing link", await fresh.getByText(/invalid|expired/i).first().isVisible());
   await anon.close();

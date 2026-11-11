@@ -41,7 +41,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-surface text-ink selection:bg-amber-400/30 selection:text-amber-900"
+        className="min-h-full flex flex-col bg-canvas text-ink"
       >
         <ThemeProvider>
           <AuthProvider>

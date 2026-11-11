@@ -42,11 +42,11 @@ function MethodStatus({ row }: { row?: KycVerification }) {
   const expired = isExpired(row);
   return (
     <span className="flex flex-wrap items-center gap-2">
-      <Badge variant={expired ? "default" : STATUS_BADGE[row.status]}>{expired ? "expired" : row.status}</Badge>
-      {row.provider === "sandbox" && <Badge variant="warning">SANDBOX</Badge>}
-      {row.verified_name && <span className="text-xs text-ink-soft">{row.verified_name}</span>}
-      {row.verified_at && <span className="text-xs text-ink-muted">{new Date(row.verified_at).toLocaleDateString("en-IN")}</span>}
-      {row.failure_reason && <span className="text-xs text-rose-700">{row.failure_reason}</span>}
+      <Badge variant={expired ? "default" : STATUS_BADGE[row.status]} className="capitalize">{expired ? "expired" : row.status}</Badge>
+      {row.provider === "sandbox" && <Badge variant="warning">Sandbox</Badge>}
+      {row.verified_name && <span className="text-[12.5px] text-ink-soft">{row.verified_name}</span>}
+      {row.verified_at && <span className="text-[12.5px] text-ink-muted">{new Date(row.verified_at).toLocaleDateString("en-IN")}</span>}
+      {row.failure_reason && <span className="text-[12.5px] text-bad">{row.failure_reason}</span>}
     </span>
   );
 }
@@ -134,28 +134,28 @@ export function KycHubView() {
   const off = !status?.configured;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5 text-sm">
+    <div className="mx-auto max-w-4xl space-y-5 text-[13.5px]">
       {status?.sandbox && <SandboxBanner what="KYC" />}
 
-      <section aria-labelledby="trust-title" className="rounded-xl border border-line bg-surface p-5 shadow-card space-y-2">
+      <section aria-labelledby="trust-title" className="rounded-panel border border-line bg-surface p-5 space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <h2 id="trust-title" className="text-base font-semibold text-ink">Trust level</h2>
+          <h2 id="trust-title" className="text-[15px] font-semibold tracking-tight text-ink">Trust level</h2>
           <Badge variant={level > 0 ? "success" : "default"}>
             Level {level}: {TRUST_LABELS[level].label}
           </Badge>
         </div>
         <p className="text-ink-muted">{TRUST_LABELS[level].detail} Sandbox checks never count.</p>
-        <p className="text-xs text-ink-muted">{KYC_SHARED_TEXT}</p>
+        <p className="text-[12.5px] text-ink-muted">{KYC_SHARED_TEXT}</p>
         {status && off && (
-          <p className="rounded border border-line bg-canvas p-3 text-ink-soft">
+          <p className="rounded-ctl bg-canvas px-4 py-3 text-ink-soft">
             No KYC provider is configured on this server (KYC_PROVIDER is unset). Checks below are disabled until one is.
           </p>
         )}
       </section>
 
-      <section aria-labelledby="biz-title" className="rounded-xl border border-line bg-surface p-5 shadow-card space-y-4">
-        <h2 id="biz-title" className="text-base font-semibold text-ink">Business</h2>
-        <p className="text-xs text-ink-muted">Owners, CFOs and admins can run these.</p>
+      <section aria-labelledby="biz-title" className="rounded-panel border border-line bg-surface p-5 space-y-4">
+        <h2 id="biz-title" className="text-[15px] font-semibold tracking-tight text-ink">Business</h2>
+        <p className="text-[12.5px] text-ink-muted">Owners, CFOs and admins can run these.</p>
         <ul className="divide-y divide-line">
           <li className="flex flex-wrap items-end justify-between gap-3 py-3">
             <div className="space-y-1">
@@ -206,8 +206,8 @@ export function KycHubView() {
         </ul>
       </section>
 
-      <section aria-labelledby="me-title" className="rounded-xl border border-line bg-surface p-5 shadow-card space-y-4">
-        <h2 id="me-title" className="text-base font-semibold text-ink">You{user?.full_name ? ` (${user.full_name})` : ""}</h2>
+      <section aria-labelledby="me-title" className="rounded-panel border border-line bg-surface p-5 space-y-4">
+        <h2 id="me-title" className="text-[15px] font-semibold tracking-tight text-ink">You{user?.full_name ? ` (${user.full_name})` : ""}</h2>
         <ul className="divide-y divide-line">
           <li className="flex flex-wrap items-end justify-between gap-3 py-3">
             <div className="space-y-1">
@@ -239,7 +239,7 @@ export function KycHubView() {
       </section>
 
       {message && (
-        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-emerald-700" : "text-rose-700"}>
+        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-ok" : "text-bad"}>
           {message.text}
         </p>
       )}

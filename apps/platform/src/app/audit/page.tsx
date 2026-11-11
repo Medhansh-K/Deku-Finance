@@ -10,12 +10,12 @@ export default function AuditPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="User Activity Logs & Audit Trail"
+        title="Activity log and audit trail"
         subtitle="Real-time chronological log of every user action, transaction lifecycle, and immutable compliance records"
-        badge={<Badge variant="teal">Shortcut: L</Badge>}
+        badge={<Badge variant="teal">Shortcut L</Badge>}
         breadcrumbs={[
           { label: "Utilities" },
-          { label: "Activity Logs (L)", href: "/audit" },
+          { label: "Activity log", href: "/audit" },
         ]}
       >
         <AuditTrailView />

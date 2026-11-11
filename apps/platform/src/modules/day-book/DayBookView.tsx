@@ -1,53 +1,75 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { DataTable, ColumnDef } from "@/components/data-table/DataTable";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   RefreshCw,
   Search,
   Filter,
-  CheckCircle2,
   RotateCcw,
   AlertCircle,
-  FileText,
-  Clock,
-  ArrowRight,
-  BookOpen,
   Info,
-  Building2,
-  Plus,
-  Eye,
-  Printer,
-  ShieldCheck,
   Paperclip,
-  ShieldAlert,
-  FileCheck,
-  Check,
-  Pencil,
+  Printer,
   X,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { accountingApi, filesApi, MAX_DOCUMENT_BYTES, organisationsApi, partiesApi, OrgSummary } from "@/api/endpoints";
-import { Account, JournalEntry, JournalStatus } from "@/types/accounting";
+import {
+  accountingApi,
+  filesApi,
+  invoicesApi,
+  MAX_DOCUMENT_BYTES,
+  organisationsApi,
+  partiesApi,
+  OrgSummary,
+} from "@/api/endpoints";
+import { Account, JournalEntry, SalesInvoice } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { loadOrgTaxProfile, OrgTaxProfile } from "@/lib/org-regime";
-import { VOUCHER_TYPE_STYLES } from "@/modules/executive/RecentlyAddedVouchers";
 import { journalToVoucher, VoucherItem } from "@/lib/reports/vouchers";
 import { numberToIndianWords } from "@/lib/builder/number-to-words";
 import { setActiveOrg } from "@/lib/organisation/active-org";
+import type { OrgMember } from "@/modules/departments-members/team";
 import { EditDraftModal } from "./EditDraftModal";
+import { VoucherDrawer, formatDay, money, particulars, statusChip } from "./VoucherDrawer";
+
+const PAGE_SIZE = 20;
+
+type SortCol = { header: string; key?: (j: VoucherItem) => string | number; right?: boolean; width?: string };
+const COLUMNS: SortCol[] = [
+  { header: "Date", key: (j) => j.entry_date, width: "96px" },
+  { header: "Voucher", key: (j) => j.entry_number, width: "160px" },
+  { header: "Particulars", key: (j) => particulars(j)[0] },
+  { header: "L.F.", key: (j) => j.ledger_folio, width: "72px" },
+  { header: "Status", key: (j) => j.status, width: "150px" },
+  { header: "Amount", key: (j) => j.amount, right: true, width: "130px" },
+];
+
+const STATUSES = [
+  ["all", "All"],
+  ["posted", "Posted"],
+  ["draft", "Draft"],
+  ["reversed", "Reversed"],
+] as const;
+
+const PILL =
+  "h-9 rounded-ctl border border-line bg-surface text-[13.5px] text-ink-soft hover:border-line-strong focus-within:border-brand focus-within:ring-1 focus-within:ring-brand";
 
 export function DayBookView() {
-  const [mounted, setMounted] = useState(false);
   const [journals, setJournals] = useState<VoucherItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Raw entries keep the approval columns the Day Book row doesn't carry.
+  const [rawById, setRawById] = useState<Map<string, JournalEntry>>(new Map());
+  const [members, setMembers] = useState<OrgMember[] | null>(null);
+  const [invoiceByJournal, setInvoiceByJournal] = useState<Map<string, SalesInvoice>>(new Map());
+  const [partyNames, setPartyNames] = useState<Map<string, string>>(new Map());
 
   // Active Organisation State (initialized with deterministic server default)
   const [orgId, setOrgId] = useState<string>("");
@@ -60,13 +82,21 @@ export function DayBookView() {
   const [voucherTypeFilter, setVoucherTypeFilter] = useState<string>("all");
   const [dateFilter, setDateFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  // Reports link here with ?account_code= to show one ledger's vouchers.
+  // Reports link here with ?account_code= to show one ledger's vouchers; ?voucher=<id> opens one.
   const [accountCode, setAccountCode] = useState<string | null>(null);
+  const [linkedVoucherId, setLinkedVoucherId] = useState<string | null>(null);
   useEffect(() => {
-    setAccountCode(new URLSearchParams(window.location.search).get("account_code"));
+    const params = new URLSearchParams(window.location.search);
+    setAccountCode(params.get("account_code"));
+    setLinkedVoucherId(params.get("voucher"));
   }, []);
 
-  // Transaction Detail Modal
+  // Register table
+  const [sort, setSort] = useState<{ col: number; dir: "asc" | "desc" } | null>(null);
+  const [page, setPage] = useState(0);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
+  // Voucher side drawer
   const [selectedEntry, setSelectedEntry] = useState<VoucherItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionPending, setIsActionPending] = useState(false);
@@ -81,12 +111,11 @@ export function DayBookView() {
   // Printable Voucher Slip Modal State
   const [isPrintSlipOpen, setIsPrintSlipOpen] = useState(false);
 
-  // Definition banner toggle
+  // Definition line toggle
   const [showDefinition, setShowDefinition] = useState(true);
 
   // Load active organisation from storage & list after mount
   useEffect(() => {
-    setMounted(true);
     if (typeof window !== "undefined") {
       const savedId = localStorage.getItem("deku_active_org_id") || "";
       const savedName = localStorage.getItem("deku_active_org_name") || "";
@@ -131,17 +160,23 @@ export function DayBookView() {
     setIsLoading(true);
     setError(null);
     try {
-      const [res, accounts, parties, files] = await Promise.all([
+      const [res, accounts, parties, files, team, invoices] = await Promise.all([
         accountingApi.listJournals(orgId),
         accountingApi.listAccounts(orgId),
         partiesApi.list(orgId),
-        // The day book is still useful if its attachments can't be listed.
+        // The day book is still useful if its attachments, team or invoices can't be listed.
         filesApi.list(orgId).catch(() => ({ data: [] })),
+        organisationsApi.listMembers(orgId).catch(() => null),
+        invoicesApi.list(orgId).catch(() => ({ data: [] as SalesInvoice[] })),
       ]);
       const fileByJournal = new Map((files.data ?? []).filter((f) => f.journal_entry_id).map((f) => [f.journal_entry_id, f]));
       setAccounts(accounts.data ?? []);
+      setMembers(team?.data ?? null);
+      setInvoiceByJournal(new Map((invoices.data ?? []).filter((i) => i.journal_entry_id).map((i) => [i.journal_entry_id!, i])));
+      setRawById(new Map((res.data ?? []).map((j) => [j.id, j])));
       const accountMap = new Map((accounts.data ?? []).map((a) => [a.id, a]));
       const partyMap = new Map((parties.data ?? []).map((p) => [p.id, p]));
+      setPartyNames(new Map((parties.data ?? []).map((p) => [p.id, p.display_name || p.legal_name])));
       const apiVouchers = (res.data ?? []).map((j) => {
         const voucher = journalToVoucher(j, accountMap, partyMap, taxProfile?.regime);
         const file = fileByJournal.get(j.id);
@@ -164,6 +199,8 @@ export function DayBookView() {
           : voucher;
       });
       setJournals(apiVouchers);
+      // Keep an open drawer showing the refreshed voucher.
+      setSelectedEntry((prev) => (prev ? apiVouchers.find((v) => v.id === prev.id) ?? prev : prev));
     } catch (err: any) {
       setError(err?.message || "Could not load the day book");
       setJournals([]);
@@ -176,6 +213,38 @@ export function DayBookView() {
     if (!orgId) return;
     fetchJournals();
   }, [orgId, taxProfile?.regime]);
+
+  // ?voucher=<id> opens that voucher's drawer once it has loaded.
+  useEffect(() => {
+    const found = linkedVoucherId && journals.find((j) => j.id === linkedVoucherId);
+    if (!found) return;
+    setSelectedEntry(found);
+    setIsDetailOpen(true);
+    setLinkedVoucherId(null);
+  }, [linkedVoucherId, journals]);
+
+  // Esc closes the drawer first. Capture phase runs before AppShell's Esc→Gateway, so stopping it
+  // here keeps the page; open modals handle their own Esc.
+  useEffect(() => {
+    if (!isDetailOpen || isPrintSlipOpen || isReversalModalOpen || isEditOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      e.preventDefault();
+      setIsDetailOpen(false);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [isDetailOpen, isPrintSlipOpen, isReversalModalOpen, isEditOpen]);
+
+  const toggleEntry = (entry: VoucherItem) => {
+    if (isDetailOpen && selectedEntry?.id === entry.id) {
+      setIsDetailOpen(false);
+      return;
+    }
+    setSelectedEntry(entry);
+    setIsDetailOpen(true);
+  };
 
   // Handle Post Draft Journal to ledger
   // Posting and reversal run on the server, which enforces balance, period, approval and immutability rules.
@@ -231,7 +300,6 @@ export function DayBookView() {
     setIsReversalModalOpen(true);
   };
 
-
   const handleConfirmReversal = async () => {
     if (!selectedEntry) return;
     setIsActionPending(true);
@@ -252,10 +320,9 @@ export function DayBookView() {
     }
   };
 
-  // Filter journals
-  const filteredJournals = journals.filter((entry) => {
+  // Every filter except status, so the status tabs can show counts.
+  const baseFiltered = journals.filter((entry) => {
     if (accountCode && !entry.lines.some((l) => l.ledger_folio === accountCode)) return false;
-    if (statusFilter !== "all" && entry.status !== statusFilter) return false;
     if (dateFilter && entry.entry_date !== dateFilter) return false;
     if (voucherTypeFilter !== "all" && entry.voucher_type !== voucherTypeFilter) return false;
     if (searchQuery.trim()) {
@@ -272,671 +339,355 @@ export function DayBookView() {
     }
     return true;
   });
+  const counts = {
+    all: baseFiltered.length,
+    posted: baseFiltered.filter((e) => e.status === "posted").length,
+    draft: baseFiltered.filter((e) => e.status === "draft").length,
+    reversed: baseFiltered.filter((e) => e.status === "reversed").length,
+  };
+  const filteredJournals = statusFilter === "all" ? baseFiltered : baseFiltered.filter((e) => e.status === statusFilter);
+  const postedTotal = filteredJournals.filter((e) => e.status === "posted").reduce((s, e) => s + e.amount, 0);
 
-  const columns: ColumnDef<VoucherItem>[] = [
-    {
-      header: "Date & Time",
-      sortKey: (j) => j.entry_date,
-      cell: (j) => (
-        <div>
-          <span className="font-mono text-slate-800 font-semibold block">
-            {formatDateTally(j.entry_date)}
-          </span>
-          <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
-            <Clock className="h-2.5 w-2.5" />
-            {j.entry_time || "12:00 PM"}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: "Voucher / Invoice No.",
-      sortKey: (j) => j.entry_number,
-      cell: (j) => (
-        <div>
-          <span className="font-mono font-bold text-ink block">
-            {j.entry_number}
-          </span>
-          <span className="text-[10px] font-mono text-slate-400">
-            {j.reference}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: "Type & Source Document",
-      cell: (j) => {
-        const typeMeta = VOUCHER_TYPE_STYLES[j.voucher_type] || VOUCHER_TYPE_STYLES.journal;
-        return (
-          <div>
-            <span
-              className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border ${typeMeta.badge}`}
-            >
-              <span className={`h-1.5 w-1.5 rounded-full ${typeMeta.dot}`} />
-              <span>{typeMeta.label}</span>
-              <span className="text-[9px] opacity-75">({typeMeta.key})</span>
-            </span>
-            <span className="text-[10px] text-slate-500 block mt-0.5 truncate max-w-[170px]" title={j.source_document}>
-              📄 {j.source_document}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      header: "Particulars / Party",
-      sortKey: (j) => j.party_name,
-      cell: (j) => (
-        <div className="max-w-xs">
-          <span className="text-slate-900 block truncate font-semibold">
-            {j.party_name}
-          </span>
-          <span className="text-[11px] text-slate-500 truncate block">
-            {j.narration}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: "L.F.",
-      sortKey: (j) => j.ledger_folio,
-      cell: (j) => (
-        <span
-          className="inline-block px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-100 text-slate-800 border border-slate-300"
-          title={`General Ledger Folio: ${j.ledger_folio}`}
-        >
-          {j.ledger_folio}
-        </span>
-      ),
-    },
-    {
-      header: "Status & Proof",
-      sortKey: (j) => j.status,
-      cell: (j) => {
-        const s = j.status;
-        const hasProof = !!j.document_proof;
-        if (s === "posted") {
-          return (
-            <div>
-              <Badge variant="success">Posted to Ledger</Badge>
-              {hasProof ? (
-                <span className="text-[9px] font-mono text-emerald-800 flex items-center gap-0.5 mt-0.5 font-bold">
-                  <ShieldCheck className="h-2.5 w-2.5 text-emerald-600" />
-                  Document Attached
-                </span>
-              ) : (
-                <span className="text-[9px] font-mono text-slate-400 block mt-0.5">
-                  General Posting
-                </span>
-              )}
-            </div>
-          );
-        }
-        if (s === "reversed") {
-          return (
-            <div>
-              <Badge variant="danger">Reversed</Badge>
-              <span className="text-[9px] font-mono text-rose-600 block mt-0.5 font-semibold">
-                Contra Entry
-              </span>
-            </div>
-          );
-        }
-        return (
-          <div>
-            <Badge variant="warning">Draft (Unposted)</Badge>
-            {hasProof ? (
-              <span className="text-[9px] font-mono text-emerald-700 flex items-center gap-0.5 mt-0.5">
-                <Check className="h-2.5 w-2.5" /> Proof Ready
-              </span>
-            ) : (
-              <span className="text-[9px] font-mono text-amber-700 flex items-center gap-0.5 mt-0.5 font-bold">
-                <ShieldAlert className="h-2.5 w-2.5 text-amber-600" /> Proof Pending
-              </span>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      header: "Debit / Credit Amount",
-      sortKey: (j) => j.amount,
-      cell: (j) => (
-        <div className="text-right">
-          <span className="font-mono font-bold text-slate-900 block">
-            {formatINR(j.amount)}
-          </span>
-          <span
-            className={`text-[10px] font-mono font-bold ${
-              j.dr_cr === "Dr" ? "text-emerald-700" : "text-amber-700"
-            }`}
-          >
-            {j.dr_cr}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: "Actions",
-      cell: (j) => (
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedEntry(j);
-              setIsDetailOpen(true);
-            }}
-            className="p-1 rounded hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer"
-            title="View Details"
-          >
-            <Eye className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedEntry(j);
-              setIsPrintSlipOpen(true);
-            }}
-            className="p-1 rounded hover:bg-slate-100 text-brand-strong hover:text-ink cursor-pointer"
-            title="Print Voucher Slip"
-          >
-            <Printer className="h-3.5 w-3.5" />
-          </button>
-          {j.status === "posted" && (
-            <button
-              type="button"
-              onClick={() => handleOpenReverseModal(j)}
-              className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-600 cursor-pointer"
-              title="Reverse Voucher"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      ),
-    },
-  ];
+  const sorted = useMemo(() => {
+    const key = sort && COLUMNS[sort.col].key;
+    if (!sort || !key) return filteredJournals;
+    return [...filteredJournals].sort((a, b) => {
+      const [x, y] = [key(a), key(b)];
+      const c = x === y ? 0 : x < y ? -1 : 1;
+      return sort.dir === "asc" ? c : -c;
+    });
+  }, [filteredJournals, sort]);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageRows = sorted.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+  // asc → desc → original order, as the shared data table does.
+  const handleSort = (col: number) => {
+    setSort((s) => (s?.col !== col ? { col, dir: "asc" } : s.dir === "asc" ? { col, dir: "desc" } : null));
+    setPage(0);
+  };
+
+  const handleTableKey = (e: React.KeyboardEvent) => {
+    if (pageRows.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedIndex((p) => (p === null || p >= pageRows.length - 1 ? 0 : p + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedIndex((p) => (p === null || p <= 0 ? pageRows.length - 1 : p - 1));
+    } else if (e.key === "Enter" && focusedIndex !== null && pageRows[focusedIndex]) {
+      e.preventDefault();
+      toggleEntry(pageRows[focusedIndex]);
+    }
+  };
+
+  const drawerOpen = isDetailOpen && !!selectedEntry;
 
   return (
-    <div className="space-y-4 font-sans text-xs">
-      {/* Top Bar with Organisation Context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-brand/20 border border-brand/50 flex items-center justify-center text-brand">
-            <BookOpen className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2" suppressHydrationWarning>
-              <span className="font-bold text-sm text-ink">Day Book Register</span>
-              {!taxProfile ? null : taxProfile.regime === "sec22" ? (
-                <span
-                  suppressHydrationWarning
-                  className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300"
-                >
-                  Sec 22 Exempt (Pure)
-                </span>
-              ) : (
-                <span
-                  suppressHydrationWarning
-                  className="text-[10px] font-mono font-bold text-emerald-950 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300"
-                >
-                  GST Registered • {taxProfile.gstin}
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 font-mono">
-              Chronological book of prime entry across all source documents
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <div className="space-y-4 font-sans text-[13.5px] text-ink">
+      {/* Context line: what a day book is, the company's tax regime, company switcher */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        {showDefinition && (
+          <p className="flex min-w-0 flex-1 items-start gap-2 text-[13px] text-ink-muted">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-ink-subtle" />
+            <span>
+              The day book records every transaction in date order from its source document (invoice, receipt or
+              voucher) before totals are posted to the ledger.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowDefinition(false)}
+              className="grid h-5 w-5 shrink-0 place-items-center rounded-chip text-ink-subtle hover:bg-canvas-sunken hover:text-ink cursor-pointer"
+              title="Dismiss definition"
+              aria-label="Dismiss definition"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </p>
+        )}
+        <div className="ml-auto flex items-center gap-2" suppressHydrationWarning>
+          {!taxProfile ? null : taxProfile.regime === "sec22" ? (
+            <span suppressHydrationWarning className="inline-flex h-[22px] items-center rounded-chip bg-canvas-sunken px-2 text-xs font-medium text-ink-soft">
+              Section 22 exempt
+            </span>
+          ) : (
+            <span suppressHydrationWarning className="inline-flex h-[22px] items-center gap-1.5 rounded-chip bg-canvas-sunken px-2 text-xs font-medium text-ink-soft">
+              GST registered <span className="font-mono">{taxProfile.gstin}</span>
+            </span>
+          )}
           {orgList.length > 0 && (
             <select
               value={orgId}
               onChange={(e) => handleSwitchOrg(e.target.value)}
-              className="bg-white text-slate-800 font-semibold text-xs py-1.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:border-brand cursor-pointer"
+              aria-label="Company"
+              className={`${PILL} px-3 font-medium text-ink cursor-pointer focus:outline-none`}
             >
               {orgList.map((org) => (
                 <option key={org.id} value={org.id}>
-                  🏢 {org.name}
+                  {org.name}
                 </option>
               ))}
             </select>
           )}
-
-          <Button variant="outline" size="sm" onClick={fetchJournals} isLoading={isLoading}>
+          <Button variant="secondary" size="sm" onClick={fetchJournals} isLoading={isLoading} className="h-9">
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
         </div>
       </div>
 
-      {/* Authoritative Accounting Definition Banner */}
-      {showDefinition && (
-        <div className="bg-[#F0FDF4] border border-emerald-200 rounded-xl p-3.5 flex items-start justify-between gap-3 text-xs shadow-xs">
-          <div className="flex items-start gap-2.5">
-            <span className="p-1 rounded bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
-              <Info className="h-4 w-4" />
-            </span>
-            <div className="text-slate-800 leading-relaxed">
-              <span className="font-black text-emerald-950 font-mono uppercase text-[11px] mr-1.5">
-                Authoritative Day Book Principle:
-              </span>
-              <span>
-                A day book is recorded chronologically as financial transactions happen throughout the day, using source documents like invoices, receipts, and vouchers. Each entry captures core details—such as the date, particulars/party name, voucher or invoice number, ledger folio reference, and the transaction amount—before totals are posted to the ledger.
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowDefinition(false)}
-            className="text-slate-400 hover:text-slate-600 text-xs font-mono font-bold shrink-0 ml-2 cursor-pointer"
-            title="Dismiss definition"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* Filters Strip */}
-      <div data-tour="day-book-filters" className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status Tabs */}
-          <div className="flex items-center gap-1">
-            {(["all", "posted", "draft", "reversed"] as const).map((st) => (
+      {/* Filter bar */}
+      <div data-tour="day-book-filters" className="flex flex-wrap items-center gap-2.5">
+        <div role="tablist" aria-label="Status" className="flex gap-0.5 rounded-[10px] bg-canvas-sunken p-[3px]">
+          {STATUSES.map(([st, label]) => {
+            const on = statusFilter === st;
+            return (
               <button
                 key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 font-semibold rounded text-xs capitalize transition-colors cursor-pointer ${
-                  statusFilter === st
-                    ? "bg-panel text-white font-bold"
-                    : "text-slate-600 hover:bg-slate-100"
+                type="button"
+                role="tab"
+                aria-selected={on}
+                onClick={() => {
+                  setStatusFilter(st);
+                  setPage(0);
+                }}
+                className={`rounded-[7px] px-3 py-1.5 text-[13.5px] cursor-pointer transition-colors ${
+                  on ? "bg-surface font-[550] text-ink shadow-[0_1px_2px_rgb(14_27_25/0.08)]" : "text-ink-soft hover:text-ink"
                 }`}
               >
-                {st}
+                {label}
+                <span className={`ml-1.5 tabular-nums ${on ? "text-brand-strong" : "text-ink-subtle"}`}>{counts[st]}</span>
               </button>
-            ))}
-          </div>
-
-          <div className="h-4 w-px bg-slate-300 mx-1" />
-
-          {/* Type Filter */}
-          <select
-            value={voucherTypeFilter}
-            onChange={(e) => setVoucherTypeFilter(e.target.value)}
-            className="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800 font-medium cursor-pointer"
-          >
-            <option value="all">All Voucher Types</option>
-            <option value="sales">Sales Invoice / BOS (F8)</option>
-            <option value="payment">Payment Voucher (F5)</option>
-            <option value="receipt">Customer Receipt (F6)</option>
-            <option value="purchase">Purchase Bill (F9)</option>
-            <option value="contra">Contra (Bank/Cash) (F4)</option>
-            <option value="journal">Journal Voucher (F7)</option>
-          </select>
-
-          {/* Date Picker Filter */}
-          <div data-tour="day-book-date" className="flex items-center gap-1.5">
-            <span className="text-slate-500 font-mono text-[11px]">Filter Date:</span>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800"
-            />
-            {dateFilter && (
-              <button
-                onClick={() => setDateFilter("")}
-                className="text-[11px] text-brand hover:underline cursor-pointer"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Search */}
-        <div data-tour="day-book-search" className="relative min-w-[220px]">
-          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <label className={`${PILL} relative flex items-center gap-2 pl-3 pr-2`}>
+          <Filter className="h-4 w-4 text-ink-muted" />
+          <span className="sr-only">Voucher type</span>
+          <select
+            value={voucherTypeFilter}
+            onChange={(e) => {
+              setVoucherTypeFilter(e.target.value);
+              setPage(0);
+            }}
+            className="h-full bg-transparent pr-1 text-ink focus:outline-none cursor-pointer"
+          >
+            <option value="all">All voucher types</option>
+            <option value="sales">Sales invoice / bill of supply (F8)</option>
+            <option value="payment">Payment voucher (F5)</option>
+            <option value="receipt">Customer receipt (F6)</option>
+            <option value="purchase">Purchase bill (F9)</option>
+            <option value="contra">Contra, bank and cash (F4)</option>
+            <option value="journal">Journal voucher (F7)</option>
+          </select>
+        </label>
+
+        <div data-tour="day-book-date" className={`${PILL} flex items-center gap-2 pl-3 pr-2`}>
+          <Calendar className="h-4 w-4 text-ink-muted" />
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => {
+              setDateFilter(e.target.value);
+              setPage(0);
+            }}
+            aria-label="Filter by date"
+            className="h-full bg-transparent text-ink focus:outline-none"
+          />
+          {dateFilter && (
+            <button
+              type="button"
+              onClick={() => setDateFilter("")}
+              className="rounded-chip px-1.5 text-[13px] font-medium text-brand-strong hover:bg-brand-wash cursor-pointer"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div data-tour="day-book-search" className={`${PILL} flex min-w-[220px] flex-1 items-center gap-2 px-3`}>
+          <Search className="h-4 w-4 shrink-0 text-ink-subtle" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search party, LF folio, or voucher..."
-            className="w-full bg-white border border-slate-300 rounded-md py-1 pl-8 pr-3 text-xs placeholder:text-slate-400 focus:outline-none focus:border-brand"
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(0);
+            }}
+            placeholder="Search party, L.F. or voucher number"
+            aria-label="Search the day book"
+            className="h-full w-full bg-transparent text-ink placeholder:text-ink-subtle focus:outline-none"
           />
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+        <div className="flex items-center justify-between rounded-ctl bg-bad-wash px-3.5 py-2.5 text-[13px] text-bad">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
-          <button onClick={fetchJournals} className="underline font-bold ml-2">
+          <button onClick={fetchJournals} className="ml-2 font-medium underline cursor-pointer">
             Retry
           </button>
         </div>
       )}
 
-      {/* Day Book Table */}
-      <DataTable
-        columns={columns}
-        data={filteredJournals}
-        searchPlaceholder="Search Day Book entries..."
-        isLoading={isLoading}
-        emptyMessage="No Day Book records found for the selected criteria."
-        onRowClick={(entry) => {
-          setSelectedEntry(entry);
-          setIsDetailOpen(true);
-        }}
-        pageSize={20}
-      />
-
-      {/* Transaction Folio Detail Modal */}
-      {selectedEntry && (
-        <Modal
-          isOpen={isDetailOpen}
-          onClose={() => setIsDetailOpen(false)}
-          title={`Day Book Entry: ${selectedEntry.entry_number}`}
-          description={`Date: ${formatDateTally(selectedEntry.entry_date)} • L.F. ${selectedEntry.ledger_folio} • Status: ${selectedEntry.status.toUpperCase()}`}
-          maxWidth="xl"
-        >
-          <div className="space-y-4 font-sans text-xs">
-            {/* Header Meta */}
-            <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  Voucher / Invoice No.
-                </span>
-                <span className="font-mono font-bold text-sm text-ink">
-                  {selectedEntry.entry_number}
-                </span>
-                <span className="text-[10px] font-mono text-slate-400 block">
-                  Ref: {selectedEntry.reference}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  Source Document &amp; LF
-                </span>
-                <span className="font-semibold text-slate-900 block truncate">
-                  {selectedEntry.source_document}
-                </span>
-                <span className="font-mono font-bold text-xs text-brand-strong">
-                  Ledger Folio: {selectedEntry.ledger_folio}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  Lifecycle State
-                </span>
-                <Badge
-                  variant={
-                    selectedEntry.status === "posted"
-                      ? "success"
-                      : selectedEntry.status === "reversed"
-                      ? "danger"
-                      : "warning"
-                  }
-                >
-                  {selectedEntry.status === "posted" ? "Posted to Ledger" : selectedEntry.status}
-                </Badge>
-              </div>
-            </div>
-
-            {selectedEntry.status === "draft" && selectedEntry.submitted_at && (
-              <div className="p-2.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-900">
-                This voucher is awaiting approval, so it can&apos;t be edited. The approver can send it back.
-              </div>
-            )}
-            {selectedEntry.status === "draft" && !selectedEntry.submitted_at && selectedEntry.rejection_reason && (
-              <div className="p-2.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800">
-                <strong>Sent back:</strong> {selectedEntry.rejection_reason}
-              </div>
-            )}
-
-            {/* Narration */}
-            <div>
-              <span className="text-slate-400 block text-[10px] font-mono uppercase mb-1">
-                Particulars / Party / Narration
-              </span>
-              <div className="bg-white p-2.5 rounded border border-slate-200 text-slate-800 space-y-1">
-                <span className="font-bold text-slate-900 block">
-                  {selectedEntry.party_name}
-                </span>
-                <p className="text-slate-600 text-[11px]">
-                  {selectedEntry.narration}
-                </p>
-              </div>
-            </div>
-
-            {/* Supporting Document Status */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  Supporting Document
-                </span>
-                {selectedEntry.document_proof ? (
-                  <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-emerald-700" />
-                    Document Attached
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
-                    <ShieldAlert className="h-3 w-3 text-amber-700" />
-                    No Document
-                  </span>
-                )}
-              </div>
-
-              {selectedEntry.document_proof ? (
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg flex items-start justify-between gap-3 text-xs">
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
-                      <FileCheck className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <span className="font-mono font-bold text-emerald-950 text-xs block">
-                        {selectedEntry.document_proof.title}
+      <div className={`grid items-start gap-[18px] ${drawerOpen ? "lg:grid-cols-[minmax(0,1fr)_420px]" : ""}`}>
+        {/* Day Book register */}
+        <div className="overflow-hidden rounded-panel border border-line bg-surface">
+          <div className="overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-brand" tabIndex={0} onKeyDown={handleTableKey} aria-label="Day Book register">
+            <table className="w-full min-w-[720px] border-collapse text-left text-[13.5px] tabular-nums">
+              <thead>
+                <tr className="bg-[#fafbfa] dark:bg-canvas-sunken">
+                  {COLUMNS.map((col, idx) => {
+                    const dir = sort?.col === idx ? sort.dir : null;
+                    return (
+                      <th
+                        key={col.header}
+                        style={{ width: col.width }}
+                        aria-sort={dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none"}
+                        className={`border-b border-line px-3.5 py-[11px] text-[12.5px] font-medium text-ink-muted ${col.right ? "text-right" : ""}`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleSort(idx)}
+                          className={`inline-flex items-center gap-1 hover:text-ink cursor-pointer ${dir ? "text-ink" : ""}`}
+                        >
+                          {col.header}
+                          {dir === "asc" && <ArrowUp className="h-3 w-3 text-brand-strong" />}
+                          {dir === "desc" && <ArrowDown className="h-3 w-3 text-brand-strong" />}
+                        </button>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading && journals.length === 0 ? (
+                  <tr>
+                    <td colSpan={COLUMNS.length} className="py-12 text-center text-ink-muted">
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-brand" /> Loading the day book
                       </span>
-                      <div className="flex items-center gap-3 text-[11px] text-emerald-800 mt-0.5 flex-wrap font-mono">
-                        <span>
-                          Category: <strong>{selectedEntry.document_proof.categoryLabel}</strong>
-                        </span>
-                        {selectedEntry.document_proof.refNumber && (
-                          <span>
-                            Ref / Ack #: <strong>{selectedEntry.document_proof.refNumber}</strong>
-                          </span>
-                        )}
-                        {selectedEntry.document_proof.fileSize && (
-                          <span>
-                            File: <strong>{selectedEntry.document_proof.fileName} ({selectedEntry.document_proof.fileSize})</strong>
-                          </span>
-                        )}
-                        {selectedEntry.document_proof.fileId && (
-                          <a
-                            href={filesApi.downloadUrl(orgId, selectedEntry.document_proof.fileId)}
-                            className="font-bold text-brand-strong underline hover:no-underline"
-                          >
-                            Download
-                          </a>
-                        )}
-                        {selectedEntry.document_proof.approvedBy && (
-                          <span className="text-emerald-900 bg-emerald-200 px-1.5 py-0.2 rounded font-bold">
-                            ✓ {selectedEntry.document_proof.approvedBy}
-                          </span>
-                        )}
-                      </div>
-                      {selectedEntry.document_proof.notes && (
-                        <p className="text-[10px] text-emerald-700 mt-1 italic">
-                          {selectedEntry.document_proof.notes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2 text-amber-900">
-                    <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
-                    <span>
-                      <strong>No document attached.</strong> You can attach the supporting document here.
-                    </span>
-                  </div>
-                  <label className="text-xs font-bold text-brand-strong underline cursor-pointer shrink-0">
-                    Attach document
-                    <input
-                      type="file"
-                      accept=".pdf,.png,.jpg,.jpeg,.webp"
-                      className="sr-only"
-                      disabled={isActionPending}
-                      onChange={(e) => handleAttachDocument(selectedEntry, e.target.files?.[0])}
-                    />
-                  </label>
-                  {selectedEntry.status === "draft" && (
-                    <Button
-                      variant="tally"
-                      size="sm"
-                      onClick={() => handlePostDraft(selectedEntry)}
-                      disabled={isActionPending}
-                      className="text-xs shrink-0 font-bold"
-                    >
-                      Post to Ledger
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Double-Entry Line Allocations */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-slate-400 block text-[10px] font-mono uppercase">
-                  ALERX General Ledger Postings ({selectedEntry.lines.length} lines)
-                </span>
-                <span className="font-mono font-bold text-emerald-700">
-                  Total: {formatINR(selectedEntry.amount)}
-                </span>
-              </div>
-
-              <div className="overflow-x-auto rounded border border-slate-300">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-slate-100 border-b border-slate-200 font-mono text-[11px] text-slate-700">
-                      <th className="py-1.5 px-3">Dr / Cr</th>
-                      <th className="py-1.5 px-3">General Ledger Account Head</th>
-                      <th className="py-1.5 px-3">L.F.</th>
-                      <th className="py-1.5 px-3 text-right">Debit (₹)</th>
-                      <th className="py-1.5 px-3 text-right">Credit (₹)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {selectedEntry.lines.map((line, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50">
-                        <td className="py-1.5 px-3 font-mono font-bold">
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${
-                              line.dr_cr === "Dr"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
-                            {line.dr_cr}
+                    </td>
+                  </tr>
+                ) : pageRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={COLUMNS.length} className="py-10 text-center text-ink-muted">
+                      No vouchers match these filters.
+                    </td>
+                  </tr>
+                ) : (
+                  pageRows.map((j, index) => {
+                    const selected = drawerOpen && selectedEntry?.id === j.id;
+                    const [title, sub] = particulars(j);
+                    return (
+                      <tr
+                        key={j.id}
+                        onClick={() => {
+                          setFocusedIndex(index);
+                          toggleEntry(j);
+                        }}
+                        aria-selected={selected}
+                        className={`cursor-pointer border-b border-line last:border-b-0 ${
+                          selected ? "bg-brand-wash" : "hover:bg-canvas"
+                        } ${focusedIndex === index ? "outline outline-1 -outline-offset-1 outline-brand/40" : ""}`}
+                      >
+                        <td className={`px-3.5 py-2.5 whitespace-nowrap ${selected ? "shadow-[inset_3px_0_0_var(--color-brand)]" : ""}`}>
+                          {formatDay(j.entry_date)}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono whitespace-nowrap">{j.entry_number}</td>
+                        <td className="max-w-0 px-3.5 py-2.5">
+                          <span className="block truncate font-[550]">{title}</span>
+                          {sub && sub !== title && <span className="block truncate text-[12.5px] text-ink-muted">{sub}</span>}
+                        </td>
+                        <td className="px-3.5 py-2.5 font-mono text-ink-muted">{j.ledger_folio}</td>
+                        <td className="px-3.5 py-2.5">
+                          <span className="inline-flex items-center gap-1.5">
+                            {statusChip(j)}
+                            {j.document_proof && (
+                              <span title="Document attached" aria-label="Document attached">
+                                <Paperclip className="h-3.5 w-3.5 text-ink-muted" />
+                              </span>
+                            )}
                           </span>
                         </td>
-                        <td className="py-1.5 px-3">
-                          <span className="font-medium text-slate-800 block">
-                            {line.account_name}
-                          </span>
-                          {line.description && (
-                            <span className="text-[10px] text-slate-400 block">
-                              {line.description}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-1.5 px-3 font-mono text-slate-600 font-bold">
-                          {line.ledger_folio || selectedEntry.ledger_folio}
-                        </td>
-                        <td className="py-1.5 px-3 text-right font-mono font-bold text-slate-900">
-                          {line.debit > 0 ? formatINR(line.debit) : "—"}
-                        </td>
-                        <td className="py-1.5 px-3 text-right font-mono font-bold text-slate-900">
-                          {line.credit > 0 ? formatINR(line.credit) : "—"}
-                        </td>
+                        <td className="px-3.5 py-2.5 text-right whitespace-nowrap">{money(j.amount)}</td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[11px] text-slate-500 font-mono">
-                Source Document: {selectedEntry.source_document}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsPrintSlipOpen(true)}
-                  className="gap-1.5 text-xs text-brand-strong border-brand-strong/40"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print Voucher Slip
-                </Button>
-
-                {selectedEntry.status === "posted" && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpenReverseModal(selectedEntry)}
-                    className="gap-1.5 text-xs text-rose-700 border-rose-300 hover:bg-rose-50"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" /> Reverse Voucher
-                  </Button>
+                    );
+                  })
                 )}
-
-                {selectedEntry.status === "draft" && !selectedEntry.submitted_at && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setIsDetailOpen(false);
-                      setIsEditOpen(true);
-                    }}
-                    className="gap-1.5 text-xs"
-                  >
-                    <Pencil className="h-3.5 w-3.5" /> Edit
-                  </Button>
-                )}
-
-                {selectedEntry.status === "draft" && (
-                  <Button
-                    variant="tally"
-                    size="sm"
-                    onClick={() => handlePostDraft(selectedEntry)}
-                    isLoading={isActionPending}
-                  >
-                    Post to General Ledger
-                  </Button>
-                )}
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsDetailOpen(false)}
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
+              </tbody>
+            </table>
           </div>
-        </Modal>
-      )}
+          <div className="flex flex-wrap items-center gap-3 border-t border-line px-3.5 py-3 text-[13px] text-ink-muted">
+            <span>
+              {filteredJournals.length} {filteredJournals.length === 1 ? "voucher" : "vouchers"}
+              {statusFilter === "all" && filteredJournals.length > 0 && (
+                <>
+                  {" · "}
+                  {[
+                    `${counts.posted} posted`,
+                    `${counts.draft} draft`,
+                    counts.reversed ? `${counts.reversed} reversed` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </>
+              )}
+            </span>
+            {totalPages > 1 && (
+              <span className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPage(Math.max(0, currentPage - 1))}
+                  disabled={currentPage === 0}
+                  className="rounded-chip px-2 py-0.5 hover:bg-canvas-sunken hover:text-ink disabled:opacity-40 cursor-pointer"
+                >
+                  Previous
+                </button>
+                <span className="tabular-nums">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
+                  disabled={currentPage >= totalPages - 1}
+                  className="rounded-chip px-2 py-0.5 hover:bg-canvas-sunken hover:text-ink disabled:opacity-40 cursor-pointer"
+                >
+                  Next
+                </button>
+              </span>
+            )}
+            <span className="ml-auto">
+              Total of posted vouchers{" "}
+              <b className="ledger-total ml-1.5 font-semibold text-ink tabular-nums">{money(postedTotal)}</b>
+            </span>
+          </div>
+        </div>
+
+        {drawerOpen && selectedEntry && (
+          <VoucherDrawer
+            entry={selectedEntry}
+            journal={rawById.get(selectedEntry.id)}
+            invoice={invoiceByJournal.get(selectedEntry.id)}
+            members={members}
+            partyNames={partyNames}
+            orgId={orgId}
+            isActionPending={isActionPending}
+            onClose={() => setIsDetailOpen(false)}
+            onPrint={() => setIsPrintSlipOpen(true)}
+            onReverse={() => handleOpenReverseModal(selectedEntry)}
+            onEdit={() => {
+              setIsDetailOpen(false);
+              setIsEditOpen(true);
+            }}
+            onPost={() => handlePostDraft(selectedEntry)}
+            onAttach={(file) => handleAttachDocument(selectedEntry, file)}
+          />
+        )}
+      </div>
 
       {selectedEntry && isEditOpen && (
         <EditDraftModal
@@ -956,264 +707,185 @@ export function DayBookView() {
         <Modal
           isOpen={isReversalModalOpen}
           onClose={() => setIsReversalModalOpen(false)}
-          title={`Reverse Voucher: ${selectedEntry.entry_number}`}
-          description={`Double-entry contra reversal for ${selectedEntry.party_name} (₹${selectedEntry.amount.toLocaleString("en-IN")})`}
+          title={`Reverse voucher ${selectedEntry.entry_number}`}
+          description={`Contra reversal for ${particulars(selectedEntry)[0]} (${money(selectedEntry.amount)})`}
           maxWidth="md"
         >
-          <div className="space-y-4 font-sans text-xs">
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5">
-              <RotateCcw className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <strong>Audit safeguard:</strong> Reversing this voucher will not delete historical records. An auditable Contra Reversal entry will be posted, reversing all debits to credits and credits to debits, updating the Chart of Accounts, Day Book, and Financial Statements.
-              </div>
-            </div>
+          <div className="space-y-4 text-[13.5px]">
+            <p className="flex items-start gap-2.5 rounded-ctl bg-bad-wash px-3 py-2.5 text-[13px] text-bad">
+              <RotateCcw className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Reversing does not delete this voucher. A reversal entry is posted that swaps every debit and credit,
+                and the chart of accounts, day book and statements update.
+              </span>
+            </p>
 
-            <div className="space-y-2">
-              <Input
-                label="Reversal Posting Date (YYYY-MM-DD)"
-                type="date"
-                value={reversalDate}
-                onChange={(e) => setReversalDate(e.target.value)}
+            <Input
+              label="Reversal date"
+              type="date"
+              value={reversalDate}
+              onChange={(e) => setReversalDate(e.target.value)}
+              required
+            />
+
+            <div>
+              <label htmlFor="day-book-reversal-reason" className="mb-1 block text-[13px] text-ink-muted">
+                Reason for reversal (kept for audit)
+              </label>
+              <textarea
+                id="day-book-reversal-reason"
+                rows={2}
+                value={reversalReason}
+                onChange={(e) => setReversalReason(e.target.value)}
+                placeholder="e.g. Wrong account head, invoice cancelled, duplicate transaction"
+                className="w-full rounded-ctl border border-line-strong bg-surface p-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 required
               />
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                  Reason for Reversal (Mandatory Audit Memo)
-                </label>
-                <textarea
-                  rows={2}
-                  value={reversalReason}
-                  onChange={(e) => setReversalReason(e.target.value)}
-                  placeholder="e.g. Erroneous account head / invoice cancelled / duplicate transaction"
-                  className="w-full rounded border border-slate-300 p-2 text-xs text-slate-900 focus:border-rose-500 focus:outline-none"
-                  required
-                />
-              </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsReversalModalOpen(false)}
-              >
+            <div className="flex items-center justify-end gap-2 border-t border-line pt-3">
+              <Button variant="secondary" size="sm" onClick={() => setIsReversalModalOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={handleConfirmReversal}
-                isLoading={isActionPending}
-                className="gap-1.5 font-bold"
-              >
-                <RotateCcw className="h-3.5 w-3.5" /> Confirm &amp; Post Reversal
+              <Button variant="danger" size="sm" onClick={handleConfirmReversal} isLoading={isActionPending}>
+                <RotateCcw className="h-3.5 w-3.5" /> Confirm and post reversal
               </Button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* Formal Indian GAAP Printable Voucher Slip Modal */}
+      {/* Printable Voucher Slip Modal */}
       {selectedEntry && (
         <Modal
           isOpen={isPrintSlipOpen}
           onClose={() => setIsPrintSlipOpen(false)}
-          title={`Print Voucher Slip: ${selectedEntry.entry_number}`}
+          title={`Print voucher ${selectedEntry.entry_number}`}
           maxWidth="2xl"
         >
-          <div className="space-y-4 font-sans text-xs">
-            {/* The Printable Slip Frame */}
+          <div className="space-y-4 text-[13px]">
             <div
               id="printable-voucher-slip"
-              className="bg-white p-6 rounded-lg border-2 border-slate-800 text-slate-900 shadow-sm space-y-4 print:p-0 print:border-none"
+              className="space-y-4 rounded-ctl border border-ink bg-surface p-6 text-ink print:border-none print:p-0"
             >
-              {/* Header */}
-              <div className="border-b-2 border-slate-800 pb-3 flex items-start justify-between">
+              <div className="flex items-start justify-between border-b border-ink pb-3">
                 <div>
-                  <h1 className="text-base font-black uppercase tracking-wider text-slate-900 font-serif">
-                    {orgName}
-                  </h1>
-                  <p className="text-[11px] text-slate-600 font-mono">
-                    Financial Operating System • Corporate Day Book Ledger
-                  </p>
-                  <div className="text-[10px] font-mono text-slate-500 mt-0.5">
+                  <h1 className="text-base font-semibold tracking-tight">{orgName}</h1>
+                  <p className="text-[12.5px] text-ink-muted">Day Book voucher</p>
+                  <p className="text-[12.5px] text-ink-muted">
                     {!taxProfile ? null : taxProfile.regime === "sec22" ? (
-                      <span>No GSTIN on the company record</span>
+                      "No GSTIN on the company record"
                     ) : (
-                      <span>GSTIN: <strong>{taxProfile.gstin}</strong></span>
+                      <>
+                        GSTIN <span className="font-mono text-ink">{taxProfile.gstin}</span>
+                      </>
                     )}
-                  </div>
+                  </p>
                 </div>
-
                 <div className="text-right">
-                  <span className="font-mono font-black text-xs px-2.5 py-1 rounded bg-slate-900 text-white uppercase tracking-wider inline-block">
-                    {selectedEntry.voucher_type.toUpperCase()} VOUCHER ({selectedEntry.f_key})
+                  <span className="inline-block rounded-chip bg-ink px-2.5 py-1 text-xs font-medium text-surface">
+                    {selectedEntry.source_document} ({selectedEntry.f_key})
                   </span>
-                  <div className="text-[10px] font-mono text-slate-500 mt-1">
-                    Status: <strong className="uppercase">{selectedEntry.status}</strong>
+                  <p className="mt-1 text-[12.5px] capitalize text-ink-muted">{selectedEntry.status}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 rounded-ctl border border-line-strong p-3 sm:grid-cols-4">
+                {[
+                  ["Voucher no.", <span className="font-mono">{selectedEntry.entry_number}</span>],
+                  ["Date", formatDateTally(selectedEntry.entry_date)],
+                  ["Ledger folio", <span className="font-mono">{selectedEntry.ledger_folio}</span>],
+                  ["Reference", selectedEntry.reference],
+                ].map(([label, value]) => (
+                  <div key={label as string}>
+                    <span className="block text-xs text-ink-muted">{label}</span>
+                    <span className="font-medium">{value}</span>
                   </div>
-                </div>
+                ))}
               </div>
 
-              {/* Voucher Meta Grid */}
-              <div className="grid grid-cols-4 gap-2 p-2.5 bg-slate-50 rounded border border-slate-300 font-mono text-[11px]">
-                <div>
-                  <span className="text-slate-500 block text-[9px] uppercase">Voucher No.</span>
-                  <strong className="text-slate-900">{selectedEntry.entry_number}</strong>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[9px] uppercase">Date</span>
-                  <strong className="text-slate-900">{formatDateTally(selectedEntry.entry_date)}</strong>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[9px] uppercase">Ledger Folio</span>
-                  <strong className="text-brand-strong">{selectedEntry.ledger_folio}</strong>
-                </div>
-                <div>
-                  <span className="text-slate-500 block text-[9px] uppercase">Reference</span>
-                  <strong className="text-slate-900">{selectedEntry.reference}</strong>
-                </div>
+              <div className="rounded-ctl border border-line-strong p-3">
+                <span className="block text-xs text-ink-muted">Particulars</span>
+                <span className="mt-0.5 block text-sm font-semibold">{selectedEntry.party_name}</span>
+                <p className="mt-0.5 text-ink-soft">Narration: {selectedEntry.narration}</p>
               </div>
 
-              {/* Counterparty / Particulars */}
-              <div className="border border-slate-300 rounded p-2.5">
-                <span className="text-slate-500 block text-[9px] font-mono uppercase">
-                  Account Particulars / Counterparty
-                </span>
-                <span className="font-bold text-sm text-slate-900 block mt-0.5">
-                  {selectedEntry.party_name}
-                </span>
-                <p className="text-slate-600 text-[11px] mt-0.5 font-sans">
-                  Narration: {selectedEntry.narration}
-                </p>
-              </div>
-
-              {/* Double-Entry Allocation Table */}
-              <table className="w-full text-left border-collapse border border-slate-800 text-xs font-mono">
+              <table className="w-full border-collapse border border-ink text-left text-[13px] tabular-nums">
                 <thead>
-                  <tr className="bg-slate-100 border-b border-slate-800 text-[10px] text-slate-900 uppercase">
-                    <th className="py-1.5 px-2.5 w-12 text-center border-r border-slate-300">Dr/Cr</th>
-                    <th className="py-1.5 px-2.5 border-r border-slate-300">General Ledger Account Head</th>
-                    <th className="py-1.5 px-2.5 w-16 text-center border-r border-slate-300">L.F.</th>
-                    <th className="py-1.5 px-2.5 w-28 text-right border-r border-slate-300">Debit (₹)</th>
-                    <th className="py-1.5 px-2.5 w-28 text-right">Credit (₹)</th>
+                  <tr className="border-b border-ink bg-canvas-sunken text-xs">
+                    <th className="w-12 border-r border-line-strong px-2.5 py-1.5 text-center font-medium">Dr/Cr</th>
+                    <th className="border-r border-line-strong px-2.5 py-1.5 font-medium">Account</th>
+                    <th className="w-16 border-r border-line-strong px-2.5 py-1.5 text-center font-medium">L.F.</th>
+                    <th className="w-28 border-r border-line-strong px-2.5 py-1.5 text-right font-medium">Debit</th>
+                    <th className="w-28 px-2.5 py-1.5 text-right font-medium">Credit</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-300">
+                <tbody className="divide-y divide-line-strong">
                   {selectedEntry.lines.map((line, idx) => (
                     <tr key={idx}>
-                      <td className="py-1.5 px-2.5 text-center font-bold border-r border-slate-300">
-                        {line.dr_cr}
+                      <td className="border-r border-line-strong px-2.5 py-1.5 text-center font-medium">{line.dr_cr}</td>
+                      <td className="border-r border-line-strong px-2.5 py-1.5">
+                        <span className="font-medium">{line.account_name}</span>
+                        {line.description && <span className="block text-xs text-ink-muted">{line.description}</span>}
                       </td>
-                      <td className="py-1.5 px-2.5 border-r border-slate-300">
-                        <span className="font-bold text-slate-900">{line.account_name}</span>
-                        {line.description && (
-                          <span className="block text-[10px] text-slate-500 font-sans">{line.description}</span>
-                        )}
-                      </td>
-                      <td className="py-1.5 px-2.5 text-center text-slate-600 border-r border-slate-300">
+                      <td className="border-r border-line-strong px-2.5 py-1.5 text-center font-mono text-ink-soft">
                         {line.ledger_folio || selectedEntry.ledger_folio}
                       </td>
-                      <td className="py-1.5 px-2.5 text-right font-bold text-slate-900 border-r border-slate-300">
-                        {line.debit > 0 ? formatINR(line.debit) : "—"}
+                      <td className="border-r border-line-strong px-2.5 py-1.5 text-right">
+                        {line.debit > 0 ? formatINR(line.debit) : "–"}
                       </td>
-                      <td className="py-1.5 px-2.5 text-right font-bold text-slate-900">
-                        {line.credit > 0 ? formatINR(line.credit) : "—"}
-                      </td>
+                      <td className="px-2.5 py-1.5 text-right">{line.credit > 0 ? formatINR(line.credit) : "–"}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-slate-100 border-t-2 border-slate-800 font-bold text-xs">
-                    <td colSpan={3} className="py-2 px-2.5 text-right border-r border-slate-300 uppercase">
-                      Total Balanced Amount
+                  <tr className="border-t-2 border-ink font-semibold">
+                    <td colSpan={3} className="border-r border-line-strong px-2.5 py-2 text-right">
+                      Total
                     </td>
-                    <td className="py-2 px-2.5 text-right border-r border-slate-300">
-                      {formatINR(selectedEntry.amount)}
-                    </td>
-                    <td className="py-2 px-2.5 text-right">
-                      {formatINR(selectedEntry.amount)}
-                    </td>
+                    <td className="border-r border-line-strong px-2.5 py-2 text-right">{formatINR(selectedEntry.amount)}</td>
+                    <td className="px-2.5 py-2 text-right">{formatINR(selectedEntry.amount)}</td>
                   </tr>
                 </tfoot>
               </table>
 
-              {/* Amount in Indian Words */}
-              <div className="p-2 bg-slate-50 rounded border border-slate-300 font-mono text-[11px]">
-                <span className="text-slate-500 uppercase text-[9px] block">Amount in Words:</span>
-                <span className="font-bold text-slate-900 block mt-0.5">
-                  {numberToIndianWords(selectedEntry.amount)}
-                </span>
+              <div className="rounded-ctl border border-line-strong p-2.5">
+                <span className="block text-xs text-ink-muted">Amount in words</span>
+                <span className="mt-0.5 block font-medium">{numberToIndianWords(selectedEntry.amount)}</span>
               </div>
 
-              {/* Supporting Document Footer Note */}
-              <div className="p-2 rounded bg-emerald-50/60 border border-emerald-200 text-[10px] font-mono text-emerald-900 flex items-center justify-between">
-                <div>
-                  <strong>Supporting Document: </strong>
-                  <span>
-                    {selectedEntry.document_proof
-                      ? `${selectedEntry.document_proof.title} (Ref: ${selectedEntry.document_proof.refNumber || selectedEntry.reference})`
-                      : `Source Doc: ${selectedEntry.source_document}`}
-                  </span>
-                </div>
-              </div>
+              <p className="text-[12.5px] text-ink-soft">
+                <span className="font-medium">Supporting document: </span>
+                {selectedEntry.document_proof
+                  ? `${selectedEntry.document_proof.title} (Ref: ${selectedEntry.document_proof.refNumber || selectedEntry.reference})`
+                  : `Source document: ${selectedEntry.source_document}`}
+              </p>
 
-              {/* Three Indian GAAP Signature Blocks */}
-              <div className="pt-6 grid grid-cols-3 gap-4 border-t-2 border-slate-800 text-center font-mono text-[10px]">
-                <div className="space-y-6">
-                  <div className="h-8" />
-                  <div className="border-t border-slate-400 pt-1">
-                    <span className="font-bold block text-slate-900 uppercase">Prepared By</span>
-                    <span className="text-slate-500 text-[9px]">Accountant / Finance Exec</span>
+              <div className="grid grid-cols-3 gap-4 border-t border-ink pt-10 text-center text-[12.5px]">
+                {[
+                  ["Prepared by", "Accountant / finance executive"],
+                  ["Verified and authorised by", "CFO / financial controller"],
+                  ["Receiver's signature", "Payee / beneficiary / seal"],
+                ].map(([role, who]) => (
+                  <div key={role} className="border-t border-line-strong pt-1">
+                    <span className="block font-medium">{role}</span>
+                    <span className="text-ink-muted">{who}</span>
                   </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="h-8" />
-                  <div className="border-t border-slate-400 pt-1">
-                    <span className="font-bold block text-slate-900 uppercase">Verified / Authorized By</span>
-                    <span className="text-slate-500 text-[9px]">CFO / Financial Controller</span>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="h-8" />
-                  <div className="border-t border-slate-400 pt-1">
-                    <span className="font-bold block text-slate-900 uppercase">Receiver's Signature</span>
-                    <span className="text-slate-500 text-[9px]">Payee / Beneficiary / Seal</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Print Dialog Actions */}
-            <div className="pt-2 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500 font-mono">
-                Voucher Print Module
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="tally"
-                  size="sm"
-                  onClick={() => window.print()}
-                  className="gap-1.5 font-bold"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print Voucher Slip
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsPrintSlipOpen(false)}
-                >
-                  Close
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2">
+              <Button variant="tally" size="sm" onClick={() => window.print()}>
+                <Printer className="h-3.5 w-3.5" /> Print voucher
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setIsPrintSlipOpen(false)}>
+                Close
+              </Button>
             </div>
           </div>
         </Modal>
       )}
-
     </div>
   );
 }

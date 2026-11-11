@@ -11,9 +11,9 @@ import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { NOTE_REASONS, noteLines } from "@/lib/invoices/notes";
 
 const selectClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 const cellClass =
-  "w-24 h-8 rounded border border-line-strong bg-surface px-2 text-right font-mono text-xs text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
+  "w-24 h-8 rounded-[7px] border border-line-strong bg-surface px-2 text-right tabular-nums text-[13px] text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
 
 interface Props {
   orgId: string;
@@ -83,12 +83,12 @@ export function SalesNoteEditor({ orgId, invoice, noteType, onCreated, onCancel 
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-4" aria-label={`New ${title.toLowerCase()}`}>
-      <div className="rounded-lg border border-line bg-surface p-5 shadow-card space-y-4">
-        <div className="border-b border-line pb-3">
-          <h3 className="text-sm font-semibold text-ink">
+      <div className="rounded-panel border border-line bg-surface p-5 space-y-4">
+        <div className="border-b border-line pb-4">
+          <h3 className="text-[15px] font-semibold tracking-tight text-ink">
             {title} against {invoice.invoice_number}
           </h3>
-          <p className="text-xs text-ink-muted">
+          <p className="mt-0.5 text-[13px] text-ink-muted">
             {invoice.parties?.legal_name ?? "Customer"} · invoice dated {formatDateTally(invoice.invoice_date)} · place of
             supply {invoice.place_of_supply}. Saved as a draft; issuing it posts the journal.
           </p>
@@ -98,7 +98,7 @@ export function SalesNoteEditor({ orgId, invoice, noteType, onCreated, onCancel 
           <Input id="note-date" label="Note date" type="date" min={invoice.invoice_date} value={noteDate}
             onChange={(e) => setNoteDate(e.target.value)} />
           <div className="space-y-1">
-            <label htmlFor="note-reason" className="block text-xs font-medium text-ink-soft">Reason</label>
+            <label htmlFor="note-reason" className="block text-[13px] font-medium text-ink-soft">Reason</label>
             <select id="note-reason" value={reasonCode} onChange={(e) => setReasonCode(e.target.value)} className={selectClass} required>
               <option value="">Select a reason</option>
               {NOTE_REASONS.map((r) => (
@@ -113,10 +113,10 @@ export function SalesNoteEditor({ orgId, invoice, noteType, onCreated, onCancel 
         </div>
       </div>
 
-      <div className="rounded-lg border border-line bg-surface shadow-card overflow-x-auto">
-        <table className="w-full border-collapse text-left text-xs">
+      <div className="rounded-panel border border-line bg-surface overflow-x-auto">
+        <table className="w-full border-collapse text-left text-[13.5px]">
           <caption className="sr-only">Note lines</caption>
-          <thead className="border-b border-line bg-canvas text-ink-muted">
+          <thead className="border-b border-line bg-[#fafbfa] text-[12.5px] text-ink-muted">
             <tr>
               <th scope="col" className="px-3 py-2 font-medium">Item</th>
               <th scope="col" className="px-3 py-2 text-right font-medium">Invoiced qty</th>
@@ -131,30 +131,30 @@ export function SalesNoteEditor({ orgId, invoice, noteType, onCreated, onCancel 
               return (
                 <tr key={i}>
                   <td className="px-3 py-1.5 text-ink">{l.item_name}</td>
-                  <td className="px-3 py-1.5 text-right font-mono text-ink-soft">{l.quantity}</td>
+                  <td className="px-3 py-1.5 text-right text-ink-soft">{l.quantity}</td>
                   <td className="px-3 py-1.5 text-right">
                     <input aria-label={`Line ${i + 1} note quantity`} type="number" min="0" step="any" value={quantities[i]}
                       onChange={(e) => setQuantities((prev) => prev.map((q, j) => (j === i ? e.target.value : q)))}
                       className={cellClass} />
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono text-ink-soft">{n ? formatINR(n.taxable_amount) : "–"}</td>
-                  <td className="px-3 py-1.5 text-right font-mono font-semibold text-ink">{n ? formatINR(n.total_amount) : "–"}</td>
+                  <td className="px-3 py-1.5 text-right text-ink-soft">{n ? formatINR(n.taxable_amount) : "–"}</td>
+                  <td className="px-3 py-1.5 text-right font-medium text-ink">{n ? formatINR(n.total_amount) : "–"}</td>
                 </tr>
               );
             })}
           </tbody>
           <tfoot className="border-t border-line">
             <tr>
-              <td colSpan={3} className="px-3 py-2 text-right font-medium text-ink-soft">Note total</td>
-              <td className="px-3 py-2 text-right font-mono text-ink-soft">{formatINR(taxablePaise / 100)}</td>
-              <td className="px-3 py-2 text-right font-mono font-semibold text-ink">{formatINR(totalPaise / 100)}</td>
+              <td colSpan={3} className="px-3 py-2.5 text-right font-medium text-ink-soft">Note total</td>
+              <td className="px-3 py-2.5 text-right text-ink-soft">{formatINR(taxablePaise / 100)}</td>
+              <td className="px-3 py-2.5 text-right font-semibold text-ink"><span className="ledger-total">{formatINR(totalPaise / 100)}</span></td>
             </tr>
           </tfoot>
         </table>
       </div>
 
       {errors.length > 0 && (
-        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+        <div role="alert" className="rounded-ctl border border-bad/25 bg-bad-wash p-3 text-[13px] text-bad">
           <p className="mb-1 flex items-center gap-1.5 font-semibold">
             <AlertTriangle className="h-3.5 w-3.5" /> Fix these before saving
           </p>

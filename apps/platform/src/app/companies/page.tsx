@@ -10,9 +10,9 @@ export default function CompaniesPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Select Company / Multi-Tenancy"
+        title="Companies"
         subtitle="Manage business entities, financial year periods and active enterprise workspace"
-        badge={<Badge variant="teal">F3: Company</Badge>}
+        badge={<Badge variant="teal">Workspace</Badge>}
         breadcrumbs={[
           { label: "Utilities" },
           { label: "Companies", href: "/companies" },

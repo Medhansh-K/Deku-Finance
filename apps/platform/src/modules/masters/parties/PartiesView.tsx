@@ -140,21 +140,21 @@ export function PartiesView() {
       header: "Type",
       sortKey: (p) => p.type,
       cell: (p) => (
-        <Badge variant={p.type === "customer" ? "teal" : "warning"}>
+        <Badge variant={p.type === "customer" ? "teal" : "default"} className="capitalize">
           {p.type}
         </Badge>
       ),
     },
     {
-      header: "Legal & Trade Name",
+      header: "Legal and trade name",
       sortKey: (p) => p.legal_name,
       cell: (p) => (
         <div>
-          <span className="font-bold text-ink block">
+          <span className="font-medium text-ink block">
             {p.legal_name}
           </span>
           {p.display_name && p.display_name !== p.legal_name && (
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-[12.5px] text-ink-muted">
               {p.display_name}
             </span>
           )}
@@ -165,7 +165,7 @@ export function PartiesView() {
       header: "GSTIN",
       sortKey: (p) => p.gstin || "",
       cell: (p) => (
-        <span className="font-mono text-ink-soft">
+        <span className={p.gstin ? "font-mono text-[13px] text-ink-soft" : "text-ink-muted"}>
           {p.gstin || "Unregistered"}
         </span>
       ),
@@ -173,11 +173,11 @@ export function PartiesView() {
     {
       header: "PAN",
       cell: (p) => (
-        <span className="font-mono text-ink-soft">{p.pan || "—"}</span>
+        <span className="font-mono text-[13px] text-ink-soft">{p.pan || "–"}</span>
       ),
     },
     {
-      header: "Location / State",
+      header: "Location",
       cell: (p) => {
         const addr = p.billing_address;
         return (
@@ -191,8 +191,8 @@ export function PartiesView() {
     {
       header: "Contact",
       cell: (p) => (
-        <div className="text-[11px] text-ink-muted">
-          <div>{p.email || "—"}</div>
+        <div className="text-[12.5px] text-ink-muted">
+          <div>{p.email || "–"}</div>
           <div>{p.phone || ""}</div>
         </div>
       ),
@@ -202,42 +202,44 @@ export function PartiesView() {
   return (
     <div className="space-y-4">
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px]">
           {(["all", "customer", "vendor"] as const).map((tab) => (
             <button
               key={tab}
               suppressHydrationWarning
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded capitalize transition-colors ${
+              className={`inline-flex h-[30px] items-center px-3 rounded-[7px] text-[13.5px] capitalize transition-colors ${
                 activeTab === tab
-                  ? "bg-panel text-white font-bold"
-                  : "text-ink-soft hover:bg-canvas-sunken"
+                  ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
-              {tab === "all" ? "All Parties" : `${tab}s`}
+              {tab === "all" ? "All parties" : `${tab}s`}
             </button>
           ))}
+          </div>
 
           {activeTab === "customer" && (
             <Link
               href="/reports/debtors"
-              className="ml-2 text-xs font-mono font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded border border-amber-300 transition-colors flex items-center gap-1 shadow-2xs"
+              className="inline-flex h-8 items-center gap-1.5 rounded-ctl px-3 text-[13px] font-medium text-brand-strong hover:bg-brand-wash transition-colors"
               title="Track Days Sales Outstanding (DSO) & unpaid invoices owed by customers"
             >
-              <Clock className="h-3 w-3 text-amber-700" />
-              <span>Customer DSO Aging Tracker →</span>
+              <Clock className="h-3.5 w-3.5" />
+              <span>Customer DSO ageing</span>
             </Link>
           )}
 
           {activeTab === "vendor" && (
             <Link
               href="/reports/creditors"
-              className="ml-2 text-xs font-mono font-bold text-ink bg-canvas-sunken hover:bg-line px-2.5 py-1 rounded border border-line-strong transition-colors flex items-center gap-1 shadow-2xs"
+              className="inline-flex h-8 items-center gap-1.5 rounded-ctl px-3 text-[13px] font-medium text-brand-strong hover:bg-brand-wash transition-colors"
               title="Track Days Payable Outstanding (DPO) & vendor bills we owe"
             >
-              <Clock className="h-3 w-3 text-ink-soft" />
-              <span>Vendor DPO Bills Tracker →</span>
+              <Clock className="h-3.5 w-3.5" />
+              <span>Vendor DPO bills</span>
             </Link>
           )}
         </div>
@@ -257,18 +259,18 @@ export function PartiesView() {
             data-tour="parties-new" onClick={() => setIsCreateOpen(true)}
             className="gap-1.5"
           >
-            <Plus className="h-3.5 w-3.5" /> New Party
+            <Plus className="h-3.5 w-3.5" /> New party
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+        <div className="p-3 rounded-ctl bg-bad-wash border border-bad/25 text-[13px] text-bad flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
-          <button suppressHydrationWarning onClick={fetchParties} className="underline font-bold ml-2">
+          <button suppressHydrationWarning onClick={fetchParties} className="underline font-semibold ml-2">
             Retry
           </button>
         </div>
@@ -287,14 +289,14 @@ export function PartiesView() {
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Create New Counterparty"
+        title="Create new counterparty"
         description="Add a customer or vendor to your accounting masters"
       >
-        <form onSubmit={handleCreate} className="space-y-3 font-sans text-xs">
+        <form onSubmit={handleCreate} className="space-y-3 font-sans text-[13.5px]">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
-                Party Type
+              <label className="block text-[13px] font-medium text-ink-soft mb-1.5">
+                Party type
               </label>
               <select
                 suppressHydrationWarning
@@ -302,14 +304,14 @@ export function PartiesView() {
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value as PartyType })
                 }
-                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
+                className="w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
               >
                 <option value="customer">Customer (Debtor)</option>
                 <option value="vendor">Vendor / Supplier (Creditor)</option>
               </select>
             </div>
             <Input
-              label="Legal Name"
+              label="Legal name"
               value={formData.legal_name}
               onChange={(e) =>
                 setFormData({ ...formData, legal_name: e.target.value })
@@ -321,7 +323,7 @@ export function PartiesView() {
 
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Display / Trade Name"
+              label="Display / trade name"
               value={formData.display_name}
               onChange={(e) =>
                 setFormData({ ...formData, display_name: e.target.value })
@@ -329,7 +331,7 @@ export function PartiesView() {
               placeholder="e.g. Acme Global"
             />
             <Input
-              label="GSTIN (15 Digits)"
+              label="GSTIN (15 digits)"
               value={formData.gstin}
               onChange={(e) =>
                 setFormData({ ...formData, gstin: e.target.value.toUpperCase() })
@@ -350,7 +352,7 @@ export function PartiesView() {
               maxLength={10}
             />
             <Input
-              label="State / Place of Supply"
+              label="State / place of supply"
               value={formData.state}
               onChange={(e) =>
                 setFormData({ ...formData, state: e.target.value })
@@ -394,7 +396,7 @@ export function PartiesView() {
               size="sm"
               isLoading={isSubmitting}
             >
-              Save Counterparty
+              Save counterparty
             </Button>
           </div>
         </form>

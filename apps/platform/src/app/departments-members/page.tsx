@@ -10,18 +10,18 @@ export default function DepartmentsMembersPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Departments & Firm Members"
+        title="Departments and members"
         subtitle="Organisational structure, departmental leads, inter/intra tasks, budgets, license owner governance, and employee compensation tracking"
-        badge={<Badge variant="teal">M: Departments &amp; Members</Badge>}
+        badge={<Badge variant="teal">Shortcut M</Badge>}
         breadcrumbs={[
-          { label: "Utilities & Statutory" },
+          { label: "Utilities" },
           { label: "Departments & Members", href: "/departments-members" },
         ]}
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
-              Loading departments &amp; members workspace...
+            <div className="p-6 text-[13.5px] text-ink-muted">
+              Loading departments and members…
             </div>
           }
         >

@@ -66,11 +66,11 @@ export function PaymentsCard({ orgId }: { orgId: string }) {
   const conn = status?.connection;
 
   return (
-    <section data-tour="settings-payments" aria-labelledby="payments-card-title" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+    <section data-tour="settings-payments" aria-labelledby="payments-card-title" className="bg-surface border border-line rounded-panel p-5 space-y-3">
       <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
         <div className="flex items-center gap-2">
           <CreditCard className="h-4 w-4 text-ink-soft" aria-hidden />
-          <h3 id="payments-card-title" className="text-sm font-bold uppercase text-ink font-mono">Payments (Razorpay)</h3>
+          <h3 id="payments-card-title" className="text-[15px] font-semibold tracking-tight text-ink">Payments (Razorpay)</h3>
         </div>
         {status && (
           <Badge variant={connected ? "success" : "default"}>
@@ -81,8 +81,8 @@ export function PaymentsCard({ orgId }: { orgId: string }) {
 
       {status && !status.configured && <p className="text-ink-muted">{status.reason}</p>}
 
-      <div className="rounded border border-line bg-canvas p-3 text-ink-soft">
-        <p className="font-semibold text-ink">What is shared with Razorpay</p>
+      <div className="rounded-ctl bg-canvas px-4 py-3 text-ink-soft">
+        <p className="font-[550] text-ink">What is shared with Razorpay</p>
         <p className="mt-1">When you create a payment link for an invoice, Deku sends your own Razorpay account:</p>
         <ul className="mt-1 list-disc pl-5">
           {SHARED_WITH_RAZORPAY.map((f) => (
@@ -137,12 +137,12 @@ export function PaymentsCard({ orgId }: { orgId: string }) {
           >
             Connect Razorpay
           </Button>
-          <p className="text-[11px] text-ink-muted">Only the owner or an admin can connect or disconnect.</p>
+          <p className="text-[12.5px] text-ink-muted">Only the owner or an admin can connect or disconnect.</p>
         </div>
       )}
 
       {message && (
-        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-emerald-700" : "text-rose-700"}>
+        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-ok" : "text-bad"}>
           {message.text}
         </p>
       )}

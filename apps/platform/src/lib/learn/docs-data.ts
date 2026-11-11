@@ -87,7 +87,7 @@ export const DOC_CATEGORIES: DocCategory[] = [
     slug: "financial-intelligence",
     order: "06",
     title: "Financial Intelligence",
-    summary: "Financial statements, FP&A dashboards, Operating/Investing/Financing Cash Flow, DSO/DPO working capital metrics, and on-premise Deku Konsultant.",
+    summary: "Financial statements, FP&A dashboards, Operating/Investing/Financing Cash Flow, DSO/DPO working capital metrics, and on-premise Deku Consultant.",
   },
   {
     slug: "plans-and-utilisation",
@@ -139,7 +139,7 @@ export const DOC_ARTICLES: DocArticle[] = [
         id: "real-vs-simulated",
         heading: "2. What Runs Natively vs. Vendor-Configured Integrations",
         paragraphs: [
-          "Accounting, inventory FIFO valuation, bank CSV reconciliation, offline GSTR-1/3B JSON exports, department budgets, payroll posting, and on-premise Deku Konsultant analytics run natively on the core stack.",
+          "Accounting, inventory FIFO valuation, bank CSV reconciliation, offline GSTR-1/3B JSON exports, department budgets, payroll posting, and on-premise Deku Consultant analytics run natively on the core stack.",
         ],
         callout: {
           tone: "info",
@@ -171,7 +171,7 @@ export const DOC_ARTICLES: DocArticle[] = [
           "When F-Keys mode is active in the top bar (and cursor focus is outside form inputs), function keys jump instantly across core workspaces:",
         ],
         bullets: [
-          "F1: Executive Dashboard · F2: Deku Konsultant · F3: Vouchers Hub",
+          "F1: Executive Dashboard · F2: Deku Consultant · F3: Vouchers Hub",
           "F4: Contra · F5: Payment · F6: Receipt · F7: Journal · F8: Sales · F9: Purchase",
           "F10: Bank Reconciliation · F11: File GST Return · Esc: Return to Gateway of Deku · Ctrl+K / Alt+G: Command Palette",
         ],
@@ -417,7 +417,7 @@ export const DOC_ARTICLES: DocArticle[] = [
           "CFO: Final financial sign-off, voucher approvals, invitations, payroll runs, budgets, FP&A, and cash flow.",
           "Admin: Operations configuration, member invitations, department setup, payroll execution, and document management.",
           "Accountant: Party/Item masters, invoices, purchase bills, draft vouchers, GST returns, inventory, and bank reconciliation.",
-          "Analyst: Read-only financial reporting, cash flow, FP&A ratios, DSO/DPO, and Deku Konsultant analytics.",
+          "Analyst: Read-only financial reporting, cash flow, FP&A ratios, DSO/DPO, and Deku Consultant analytics.",
           "Auditor: Independent read-only review of audit logs, user activity trails, vouchers, and supporting files.",
           "Viewer: Passive stakeholder read-only visibility across permitted KPIs and financial statements.",
         ],
@@ -436,14 +436,14 @@ export const DOC_ARTICLES: DocArticle[] = [
   {
     slug: "reports-fpa-and-deku-konsultant",
     category: "financial-intelligence",
-    title: "Financial Reports, FP&A Metrics & On-Premise Deku Konsultant",
-    summary: "How Trial Balance, P&L, Balance Sheet, Cash Flow, AR/AP ageing, and Deku Konsultant compute figures directly from posted ledger lines.",
+    title: "Financial Reports, FP&A Metrics & On-Premise Deku Consultant",
+    summary: "How Trial Balance, P&L, Balance Sheet, Cash Flow, AR/AP ageing, and Deku Consultant compute figures directly from posted ledger lines.",
     tags: ["reports", "fpa", "konsultant", "cash-flow"],
     version: "2.0",
     lastUpdated: "2026-11-10",
     readMinutes: 5,
     demoLink: {
-      label: "Open Deku Konsultant & FP&A in Northstar Consulting",
+      label: "Open Deku Consultant & FP&A in Northstar Consulting",
       companySlug: "northstar-consulting",
       targetRoute: "/consultant",
     },
@@ -452,7 +452,7 @@ export const DOC_ARTICLES: DocArticle[] = [
         id: "sql-grounding",
         heading: "1. Zero-Hallucination Deterministic Analytics",
         paragraphs: [
-          "Deku Konsultant does not send private financial books to external third-party LLM APIs. Instead, the Rust backend calls database reporting RPCs (`get_fpa_corporate_metrics`, `get_cash_flow_statement`, `get_ar_ap_aging_analysis`, `budget_variance`) and formats deterministic answers grounded strictly in posted ledger figures (showing `–` when a metric has no data).",
+          "Deku Consultant does not send private financial books to external third-party LLM APIs. Instead, the Rust backend calls database reporting RPCs (`get_fpa_corporate_metrics`, `get_cash_flow_statement`, `get_ar_ap_aging_analysis`, `budget_variance`) and formats deterministic answers grounded strictly in posted ledger figures (showing `–` when a metric has no data).",
         ],
       },
     ],

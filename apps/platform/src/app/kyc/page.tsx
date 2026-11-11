@@ -10,7 +10,7 @@ export default function KycPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="KYC & identity"
+        title="KYC and identity"
         subtitle="Verify the company and its people through a KYC provider, and see the resulting trust level"
         badge={<Badge variant="teal">KYC</Badge>}
         breadcrumbs={[{ label: "Utilities" }, { label: "KYC", href: "/kyc" }]}

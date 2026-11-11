@@ -1,18 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
-  Printer,
-  Wallet,
-  ArrowUpRight,
-  ArrowDownRight,
-  Layers,
-  ArrowRight,
-  Download,
-} from "lucide-react";
+import { RefreshCw, Printer, Wallet, ArrowUpRight, ArrowDownRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
@@ -21,6 +10,7 @@ import { downloadFile } from "@/lib/download";
 import { cashFlowCsv } from "@/lib/import/export";
 import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
 import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 
 export function CashFlowView() {
   const [data, setData] = useState<any>(null);
@@ -92,20 +82,36 @@ export function CashFlowView() {
     closing_cash: data?.closing_cash_equivalents as number | undefined,
   };
 
-  return (
-    <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Top Action & Control Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-brand/10 border border-brand/20 rounded-lg text-brand-strong">
-            <Wallet className="h-5 w-5" />
+  const sign = (v: number | undefined, pos = "text-ok", neg = "text-bad") => (v == null ? "" : v >= 0 ? pos : neg);
+  const activity = (title: string, net: number | undefined, netClass: string, lines: [string, React.ReactNode, string][]) => (
+    <div className="px-5 py-4">
+      <div className="flex items-center justify-between text-[14px] font-semibold mb-2">
+        <span>{title}</span>
+        <span className={`tabular-nums ${netClass}`}>{money(net)}</span>
+      </div>
+      <div className="divide-y divide-line pl-4 border-l-2 border-line">
+        {lines.map(([label, value, cls]) => (
+          <div key={label} className="flex justify-between items-center gap-4 py-1.5">
+            <span className="text-ink-soft">{label}</span>
+            <span className={`tabular-nums font-medium ${cls}`}>{value}</span>
           </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`${ui.page} max-w-7xl mx-auto`}>
+      {/* Top Action & Control Bar */}
+      <div className={ui.toolbar}>
+        <div className="flex items-start gap-3">
+          <span className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center shrink-0">
+            <Wallet className="h-4 w-4" />
+          </span>
           <div>
-            <h3 className="text-sm font-bold text-ink">
-              Universal Cash Flow Rollup (Direct Method)
-            </h3>
-            <p className="text-xs text-ink-muted">
-              Operating, Investing, and Financing activities computed dynamically from posted ledger journals
+            <h3 className={ui.panelTitle}>Cash flow statement (direct method)</h3>
+            <p className={ui.panelSub}>
+              Operating, investing and financing activities from posted ledger journals
             </p>
           </div>
         </div>
@@ -114,215 +120,105 @@ export function CashFlowView() {
           <div data-tour="cash-flow-period">
             <ReportDateRange from={startDate} to={endDate} onFrom={setStartDate} onTo={setEndDate} problem={orgId ? problem : null} />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchCashFlow}
-            disabled={isLoading || !!problem}
-            className="gap-1.5"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+          <Button variant="secondary" onClick={fetchCashFlow} disabled={isLoading || !!problem}>
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() => data && downloadFile(`cash-flow-${startDate}-to-${endDate}.csv`, cashFlowCsv(data, startDate, endDate), "text/csv;charset=utf-8")}
             disabled={!data}
-            className="gap-1.5"
           >
-            <Download className="h-3.5 w-3.5" />
+            <Download className="h-4 w-4" />
             Export CSV
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-1.5"
-          >
-            <Printer className="h-3.5 w-3.5" />
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
             Print
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingDown className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-          <button onClick={fetchCashFlow} className="font-bold underline hover:no-underline">
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ReportError title="Cash flow statement unavailable" message={error} onRetry={fetchCashFlow} />}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Card 1: Opening */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Opening Cash &amp; Bank</span>
-              <span className="text-[11px] font-mono text-ink-subtle bg-canvas-sunken px-1.5 py-0.5 rounded">Opening</span>
-            </div>
-            <div className="text-2xl font-black font-mono text-ink tracking-tight">
-              {money(summary.opening_cash)}
-            </div>
-          </div>
-          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
-            Cash &amp; bank balance at period start
-          </div>
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>Opening cash and bank</div>
+          <div className={ui.kpiValue}>{money(summary.opening_cash)}</div>
+          <div className={ui.kpiNote}>Balance at period start</div>
         </div>
 
-        {/* Card 2: Operating */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Operating Cash Flow</span>
-              {operating.net_operating_cash == null ? null : operating.net_operating_cash >= 0 ? (
-                <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
-                  <ArrowUpRight className="h-3 w-3" /> Positive
-                </span>
-              ) : (
-                <span className="text-[11px] font-mono text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
-                  <ArrowDownRight className="h-3 w-3" /> Negative
-                </span>
-              )}
-            </div>
-            <div className={`text-2xl font-black font-mono tracking-tight ${(operating.net_operating_cash ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-              {money(operating.net_operating_cash)}
-            </div>
-          </div>
-          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
-            Core business operations yield
-          </div>
-        </div>
-
-        {/* Card 3: Net Change */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-mono uppercase tracking-wider text-ink-muted">Net Cash Change</span>
-              <span className="text-[11px] font-mono text-brand-strong bg-brand/10 border border-brand/20 px-1.5 py-0.5 rounded font-bold">
-                Δ Movement
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Operating cash flow
+            {operating.net_operating_cash == null ? null : operating.net_operating_cash >= 0 ? (
+              <span className={`${ui.chip} ml-auto bg-ok-wash text-ok`}>
+                <ArrowUpRight className="h-3 w-3" /> Positive
               </span>
-            </div>
-            <div className={`text-2xl font-black font-mono tracking-tight ${(summary.net_cash_flow ?? 0) >= 0 ? "text-brand-strong" : "text-amber-700"}`}>
-              {money(summary.net_cash_flow)}
-            </div>
+            ) : (
+              <span className={`${ui.chip} ml-auto bg-bad-wash text-bad`}>
+                <ArrowDownRight className="h-3 w-3" /> Negative
+              </span>
+            )}
           </div>
-          <div className="text-[11px] text-ink-muted mt-2 pt-2 border-t border-line/60">
-            Operating + Investing + Financing
-          </div>
+          <div className={`${ui.kpiValue} ${sign(operating.net_operating_cash)}`}>{money(operating.net_operating_cash)}</div>
+          <div className={ui.kpiNote}>Core business operations</div>
         </div>
 
-        {/* Card 4: Closing */}
-        <div className="bg-gradient-to-br from-emerald-500/10 via-surface to-brand/5 border border-brand/40 rounded-xl p-4 shadow-2xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-mono uppercase tracking-wider text-emerald-800 font-bold">Closing Cash &amp; Bank</span>
-              <Badge variant="teal" size="sm">Closing</Badge>
-            </div>
-            <div className="text-2xl font-black font-mono text-emerald-800 tracking-tight">
-              {money(summary.closing_cash)}
-            </div>
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>Net cash change</div>
+          <div className={`${ui.kpiValue} ${sign(summary.net_cash_flow, "text-ink", "text-warn")}`}>{money(summary.net_cash_flow)}</div>
+          <div className={ui.kpiNote}>Operating + investing + financing</div>
+        </div>
+
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Closing cash and bank <Badge variant="teal" className="ml-auto">Closing</Badge>
           </div>
-          <div className="text-[11px] text-emerald-800/80 font-medium mt-2 pt-2 border-t border-emerald-500/20">
-            From posted ledger entries
-          </div>
+          <div className={ui.kpiValue}>{money(summary.closing_cash)}</div>
+          <div className={ui.kpiNote}>From posted ledger entries</div>
         </div>
       </div>
 
       {/* Main Statement Breakdown Table */}
-      <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-2xs">
-        <div className="px-5 py-3.5 bg-canvas-sunken border-b border-line flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-brand-strong" />
-            <h4 className="font-bold text-ink text-sm">
-              Statement of Cash Flows (Direct Method)
-            </h4>
-          </div>
+      <div className={ui.panel}>
+        <div className={`${ui.panelHead} border-b border-line`}>
+          <h4 className={ui.panelTitle}>Statement of cash flows (direct method)</h4>
         </div>
 
-        <div className="divide-y divide-line text-xs font-sans">
+        <div className="divide-y divide-line">
           {/* 1. Operating Activities */}
-          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
-            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
-                <span>A. Cash Flows from Operating Activities</span>
-              </span>
-              <span className={`font-mono text-base ${(operating.net_operating_cash ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-                {money(operating.net_operating_cash)}
-              </span>
-            </div>
-            <div className="space-y-2 pl-4 border-l-2 border-emerald-500/30">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-ink-soft">Cash receipts from customers &amp; debtors (Receivables collected)</span>
-                <span className="text-emerald-700 font-bold font-mono">{operating.inflows == null ? "–" : `+${money(operating.inflows)}`}</span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-t border-line/40">
-                <span className="text-ink-soft">Cash paid to suppliers, vendors, and operating expenditures</span>
-                <span className="text-rose-700 font-bold font-mono">{operating.outflows == null ? "–" : `-${money(operating.outflows)}`}</span>
-              </div>
-            </div>
-          </div>
+          {activity("A. Cash flows from operating activities", operating.net_operating_cash, sign(operating.net_operating_cash), [
+            ["Cash receipts from customers and debtors (receivables collected)", operating.inflows == null ? "–" : `+${money(operating.inflows)}`, "text-ok"],
+            ["Cash paid to suppliers, vendors and operating expenditure", operating.outflows == null ? "–" : `-${money(operating.outflows)}`, "text-bad"],
+          ])}
 
           {/* 2. Investing Activities */}
-          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
-            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0"></span>
-                <span>B. Cash Flows from Investing Activities</span>
-              </span>
-              <span className="font-mono text-base text-ink">
-                {money(investing.net_investing_cash)}
-              </span>
-            </div>
-            <div className="space-y-2 pl-4 border-l-2 border-teal-500/30">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-ink-soft">Capital expenditures, office equipment, and fixed asset additions</span>
-                <span className="text-ink font-semibold font-mono">{money(investing.net_investing_cash)}</span>
-              </div>
-            </div>
-          </div>
+          {activity("B. Cash flows from investing activities", investing.net_investing_cash, "", [
+            ["Capital expenditure, office equipment and fixed asset additions", money(investing.net_investing_cash), ""],
+          ])}
 
           {/* 3. Financing Activities */}
-          <div className="p-4 sm:p-5 hover:bg-canvas-sunken/40 transition-colors">
-            <div className="flex items-center justify-between font-bold text-ink text-sm mb-3">
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shrink-0"></span>
-                <span>C. Cash Flows from Financing Activities</span>
-              </span>
-              <span className="font-mono text-base text-ink">
-                {money(financing.net_financing_cash)}
-              </span>
-            </div>
-            <div className="space-y-2 pl-4 border-l-2 border-cyan-500/30">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-ink-soft">Capital contributions, partner drawings, debt financing, and bank borrowings</span>
-                <span className="text-ink font-semibold font-mono">{money(financing.net_financing_cash)}</span>
-              </div>
-            </div>
-          </div>
+          {activity("C. Cash flows from financing activities", financing.net_financing_cash, "", [
+            ["Capital contributions, partner drawings, debt financing and bank borrowings", money(financing.net_financing_cash), ""],
+          ])}
 
           {/* Reconciliation Footers */}
-          <div className="p-5 bg-canvas-sunken/70 border-t-2 border-line space-y-3">
-            <div className="flex justify-between items-center font-bold text-xs text-ink">
-              <span>Net Increase / (Decrease) in Cash &amp; Cash Equivalents (A + B + C)</span>
-              <span className={`font-mono text-sm ${(summary.net_cash_flow ?? 0) >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
-                {money(summary.net_cash_flow)}
+          <div className="px-5 py-4 space-y-2.5">
+            <div className="flex justify-between items-center gap-4 font-semibold">
+              <span>Net increase / (decrease) in cash and cash equivalents (A + B + C)</span>
+              <span className={`tabular-nums ${sign(summary.net_cash_flow)}`}>{money(summary.net_cash_flow)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-4 text-ink-muted">
+              <span>Cash and cash equivalents at beginning of period</span>
+              <span className="tabular-nums text-ink-soft">{money(summary.opening_cash)}</span>
+            </div>
+            <div className="flex justify-between items-center gap-4 pt-3 border-t border-line-strong font-semibold text-[14px]">
+              <span>Cash and cash equivalents at end of period</span>
+              <span className="tabular-nums">
+                {summary.closing_cash == null ? "–" : <span className="ledger-total">{money(summary.closing_cash)}</span>}
               </span>
-            </div>
-            <div className="flex justify-between items-center text-xs text-ink-muted">
-              <span>Cash &amp; Cash Equivalents at Beginning of Period</span>
-              <span className="font-mono text-ink-soft font-semibold">{money(summary.opening_cash)}</span>
-            </div>
-            <div className="pt-3 border-t border-line flex justify-between items-center font-black text-sm text-emerald-800 bg-brand/10 p-3 rounded-lg border border-brand/20">
-              <span>Cash &amp; Cash Equivalents at End of Period</span>
-              <span className="font-mono text-base text-emerald-900">{money(summary.closing_cash)}</span>
             </div>
           </div>
         </div>

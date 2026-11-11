@@ -12,7 +12,7 @@ export default function GeneralLedgerPage() {
       <WorkspaceLayout
         title="General Ledger"
         subtitle="Every posted line of one account, with its running balance"
-        badge={<Badge variant="teal">Authoritative Statement</Badge>}
+        badge={<Badge variant="teal">Authoritative statement</Badge>}
         breadcrumbs={[
           { label: "Reports" },
           { label: "General Ledger", href: "/reports/general-ledger" },

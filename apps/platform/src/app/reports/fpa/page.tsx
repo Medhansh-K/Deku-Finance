@@ -10,12 +10,12 @@ export default function FpaReportsPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="FP&A Intelligence & Strategic Analytics"
-        subtitle="Gross & net margins, solvency ratios, working capital gap, treasury runway, and departmental budget variances"
-        badge={<Badge variant="teal">FP&A Executive Suite</Badge>}
+        title="FP&A intelligence"
+        subtitle="Gross and net margins, solvency ratios, working capital, cash runway and department budget variances"
+        badge={<Badge variant="teal">Executive view</Badge>}
         breadcrumbs={[
           { label: "Reports" },
-          { label: "FP&A Intelligence", href: "/reports/fpa" },
+          { label: "FP&A intelligence", href: "/reports/fpa" },
         ]}
       >
         <FpaExecutiveView />

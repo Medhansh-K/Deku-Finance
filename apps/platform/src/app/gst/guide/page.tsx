@@ -110,16 +110,16 @@ export default function GstGuidePage() {
         breadcrumbs={[{ label: "GST", href: "/gst" }, { label: "Portal guide", href: "/gst/guide" }]}
       >
         <div className="mx-auto max-w-3xl space-y-4">
-          <p role="note" className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <p role="note" className="flex items-start gap-2 rounded-ctl border border-warn/30 bg-warn-wash p-3 text-[13.5px] text-warn">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             Rules, due dates and portal menus change, and due dates are often extended by notification. Verify on gst.gov.in
             before you file.
           </p>
-          <div className="divide-y divide-line rounded-xl border border-line bg-surface shadow-card">
+          <div className="divide-y divide-line rounded-panel border border-line bg-surface">
             {SECTIONS.map((s) => (
-              <details key={s.title} className="group p-4">
-                <summary className="cursor-pointer text-sm font-semibold text-ink">{s.title}</summary>
-                <div className="mt-3 space-y-2 text-sm text-ink-soft">{s.body}</div>
+              <details key={s.title} className="group px-5 py-4">
+                <summary className="cursor-pointer text-[14px] font-semibold text-ink">{s.title}</summary>
+                <div className="mt-3 space-y-2 text-[13.5px] text-ink-soft">{s.body}</div>
               </details>
             ))}
           </div>

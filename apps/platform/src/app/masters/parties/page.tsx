@@ -10,15 +10,15 @@ export default function PartiesPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Parties & Counterparties"
-        subtitle="Manage Debtors (Customers) and Creditors (Vendors) with GSTIN and Billing Addresses"
-        badge={<Badge variant="teal">Customer & Vendor Master</Badge>}
+        title="Parties & counterparties"
+        subtitle="Debtors (customers) and creditors (vendors) with GSTIN and billing addresses"
+        badge={<Badge variant="teal">Customer & vendor master</Badge>}
         breadcrumbs={[
           { label: "Masters" },
           { label: "Parties", href: "/masters/parties" },
         ]}
       >
-        <React.Suspense fallback={<div className="p-4 text-xs text-ink-muted font-mono">Loading counterparty directory...</div>}>
+        <React.Suspense fallback={<div className="p-4 text-[13.5px] text-ink-muted">Loading counterparty directory…</div>}>
           <PartiesView />
         </React.Suspense>
       </WorkspaceLayout>

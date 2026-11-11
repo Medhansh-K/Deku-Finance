@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function OperatingExpensesPage() {
   return (
     <AppShell>
-      <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="px-5 pt-6 pb-8 sm:px-8 sm:pt-7 max-w-[1400px] mx-auto">
         <OperatingExpensesView />
       </div>
     </AppShell>

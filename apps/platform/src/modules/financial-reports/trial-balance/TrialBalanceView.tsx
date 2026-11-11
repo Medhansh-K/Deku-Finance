@@ -2,14 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  FileSpreadsheet,
-  RefreshCw,
-  Printer,
-  CheckCircle2,
-  AlertTriangle,
-  Download,
-} from "lucide-react";
+import { RefreshCw, Printer, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
@@ -17,6 +10,7 @@ import { AccountBalanceRow } from "@/types/accounting";
 import { formatINR } from "@/lib/formatters/currency";
 import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
 import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 
 export function TrialBalanceView() {
   const router = useRouter();
@@ -85,87 +79,54 @@ export function TrialBalanceView() {
   const isEquilibrium = totalDebit > 0 && totalDebit === totalCredit;
 
   return (
-    <div className="space-y-4 font-sans text-xs">
+    <div className={ui.page}>
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="space-y-2">
+      <div className={ui.toolbar}>
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Badge variant={isEquilibrium ? "success" : "warning"}>
-              {isEquilibrium ? "Equilibrium Verified" : "Verification Pending"}
+              {isEquilibrium ? "Equilibrium verified" : "Verification pending"}
             </Badge>
-            <span className="text-ink-muted font-mono text-[11px]">
-              Debits and credits posted between these dates
-            </span>
+            <span className={ui.note}>Debits and credits posted between these dates</span>
           </div>
-          <p className="text-[11px] text-ink-muted basis-full">Leave From blank for balances to date, or set it to see one period&apos;s movements.</p>
+          <p className={`${ui.note} basis-full`}>Leave From blank for balances to date, or set it to see one period&apos;s movements.</p>
           <ReportDateRange from={from} to={to} onFrom={setFrom} onTo={setTo} problem={orgId ? problem : null} />
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-1.5"
-          >
-            <Printer className="h-3.5 w-3.5" /> Print Statement
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" /> Print statement
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchTrialBalance}
-            isLoading={isLoading}
-            disabled={!!problem}
-            className="gap-1.5"
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <Button variant="secondary" onClick={fetchTrialBalance} isLoading={isLoading} disabled={!!problem}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">Authoritative Data Unavailable</p>
-              <p>{error}</p>
-            </div>
-          </div>
-          <button onClick={fetchTrialBalance} className="font-bold underline">
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ReportError title="Trial Balance unavailable" message={error} onRetry={fetchTrialBalance} />}
 
       {/* Trial Balance Statement Sheet */}
-      <div data-tour="trial-balance-table" className="bg-surface border border-edge rounded-lg shadow-sm overflow-hidden">
+      <div data-tour="trial-balance-table" className={ui.panel}>
         {/* Statement Header */}
-        <div className="bg-panel text-white p-4 border-b border-edge flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className={`${ui.panelHead} flex-col sm:flex-row sm:items-center`}>
           <div>
-            <h2 className="text-sm font-bold tracking-wide uppercase font-mono">
-              Trial Balance Statement
-            </h2>
-            <p className="text-[11px] text-brand-soft">
-              As computed by PostgreSQL ALERX Natural Balance Engine
-            </p>
+            <h2 className={ui.panelTitle}>Trial Balance</h2>
+            <p className={ui.panelSub}>Natural balances computed from posted journal entries</p>
           </div>
-          <div className="text-right font-mono text-[11px] text-slate-300">
-            <div>All amounts in INR (₹)</div>
-          </div>
+          <span className={ui.panelSub}>All amounts in INR (₹)</span>
         </div>
 
         {/* Balance Grid */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
-                <th className="py-2 px-4 w-24">Code</th>
-                <th className="py-2 px-4">Particulars / Account Title</th>
-                <th className="py-2 px-4 w-32">Classification</th>
-                <th className="py-2 px-4 text-right w-40">Debit Total (₹)</th>
-                <th className="py-2 px-4 text-right w-40">Credit Total (₹)</th>
-                <th className="py-2 px-4 text-right w-44">Balance (₹)</th>
+              <tr>
+                <th className={`${ui.th} w-24`}>Code</th>
+                <th className={ui.th}>Particulars</th>
+                <th className={`${ui.th} w-32`}>Classification</th>
+                <th className={`${ui.th} text-right w-40`}>Debit total (₹)</th>
+                <th className={`${ui.th} text-right w-40`}>Credit total (₹)</th>
+                <th className={`${ui.th} text-right w-44`}>Balance (₹)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -184,35 +145,33 @@ export function TrialBalanceView() {
                       onClick={() =>
                         router.push(`/day-book?account_code=${row.account_code}`)
                       }
-                      className={`cursor-pointer transition-colors ${
-                        hasMovement
-                          ? "hover:bg-brand/10 font-medium text-ink"
-                          : "text-ink-subtle hover:bg-canvas"
+                      className={`cursor-pointer transition-colors hover:bg-brand-wash ${
+                        hasMovement ? "text-ink" : "text-ink-subtle"
                       }`}
                     >
-                      <td className="py-2 px-4 font-mono font-bold">
+                      <td className={`${ui.td} font-mono text-[12.5px]`}>
                         {row.account_code}
                       </td>
-                      <td className="py-2 px-4">
+                      <td className={ui.td}>
                         <span className="block">{row.account_name}</span>
                         {row.sub_ledger && (
-                          <span className="text-[10px] text-ink-subtle font-mono">
+                          <span className="text-[12.5px] text-ink-muted">
                             {row.sub_ledger}
                           </span>
                         )}
                       </td>
-                      <td className="py-2 px-4">
-                        <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-canvas-sunken border border-line">
+                      <td className={ui.td}>
+                        <span className={`${ui.chip} bg-canvas-sunken text-ink-soft capitalize`}>
                           {row.account_type}
                         </span>
                       </td>
-                      <td className="py-2 px-4 text-right font-mono">
+                      <td className={`${ui.td} text-right tabular-nums`}>
                         {row.total_debit > 0 ? formatINR(row.total_debit, { showCurrencySymbol: false }) : "—"}
                       </td>
-                      <td className="py-2 px-4 text-right font-mono">
+                      <td className={`${ui.td} text-right tabular-nums`}>
                         {row.total_credit > 0 ? formatINR(row.total_credit, { showCurrencySymbol: false }) : "—"}
                       </td>
-                      <td className="py-2 px-4 text-right font-mono font-bold text-ink">
+                      <td className={`${ui.td} text-right tabular-nums font-medium`}>
                         {/* Debit minus credit, so the Dr or Cr beside it is true for every account type. */}
                         {formatINR(Math.round((row.total_debit - row.total_credit) * 100) / 100, { showDrCr: true })}
                       </td>
@@ -221,7 +180,7 @@ export function TrialBalanceView() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-ink-muted font-mono">
+                  <td colSpan={6} className="py-8 text-center text-ink-muted">
                     {rows ? "No account balance records available." : "–"}
                   </td>
                 </tr>
@@ -229,25 +188,25 @@ export function TrialBalanceView() {
             </tbody>
             <tfoot>
               {/* Grand Totals */}
-              <tr className="bg-panel text-white border-t-2 border-edge font-mono font-bold text-xs">
-                <td colSpan={3} className="py-3 px-4 uppercase tracking-wider">
-                  Total Trial Balance Equilibrium
+              <tr>
+                <td colSpan={3} className={ui.total}>
+                  Total
                 </td>
-                <td className="py-3 px-4 text-right text-emerald-400">
-                  {rows ? formatINR(totalDebit) : "–"}
+                <td className={`${ui.total} text-right tabular-nums`}>
+                  {rows ? <span className="ledger-total">{formatINR(totalDebit)}</span> : "–"}
                 </td>
-                <td className="py-3 px-4 text-right text-emerald-400">
-                  {rows ? formatINR(totalCredit) : "–"}
+                <td className={`${ui.total} text-right tabular-nums`}>
+                  {rows ? <span className="ledger-total">{formatINR(totalCredit)}</span> : "–"}
                 </td>
-                <td className="py-3 px-4 text-right">
+                <td className={`${ui.total} text-right`}>
                   {!rows ? (
                     "–"
                   ) : difference === 0 ? (
-                    <span className="text-emerald-400 flex items-center justify-end gap-1">
+                    <span className="text-ok flex items-center justify-end gap-1">
                       <CheckCircle2 className="h-4 w-4" /> Balanced (0.00)
                     </span>
                   ) : (
-                    <span className="text-rose-400">Diff: {formatINR(difference)}</span>
+                    <span className="text-bad">Difference: {formatINR(difference)}</span>
                   )}
                 </td>
               </tr>

@@ -9,9 +9,9 @@ export default function HelpPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Help & Tutorials"
+        title="Help and tutorials"
         subtitle="Guided walkthroughs of setup, accounting, sales, purchases, banking, reports and administration"
-        breadcrumbs={[{ label: "Help & Tutorials", href: "/help" }]}
+        breadcrumbs={[{ label: "Help and tutorials", href: "/help" }]}
       >
         <Suspense fallback={null}>
           <HelpCentreView />

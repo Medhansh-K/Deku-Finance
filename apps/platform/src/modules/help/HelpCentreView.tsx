@@ -61,9 +61,9 @@ export function HelpCentreView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 text-xs">
+    <div className="max-w-4xl mx-auto space-y-4 text-[13.5px]">
       <div>
-        <label htmlFor="tutorial-search" className="block font-semibold text-ink-soft mb-1">
+        <label htmlFor="tutorial-search" className="block text-[13px] text-ink-muted mb-1.5">
           Search tutorials
         </label>
         <input
@@ -72,7 +72,7 @@ export function HelpCentreView() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="For example: trial balance, invite, credit note"
-          className="w-full px-3 py-2 rounded-lg border border-line bg-canvas text-ink"
+          className="w-full h-9 px-3 rounded-ctl border border-line-strong bg-surface text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none"
         />
       </div>
 
@@ -88,22 +88,22 @@ export function HelpCentreView() {
         const started = seen.length > 0 || (progress.positions[path.id] ?? 0) > 0;
         const isActive = progress.active === path.id;
         return (
-          <section key={path.id} className="bg-surface border border-line rounded-xl p-4 space-y-2">
+          <section key={path.id} className="bg-surface border border-line rounded-panel p-5 space-y-2.5">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-ink">{path.title}</h2>
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink">{path.title}</h2>
                 <p className="text-ink-soft mt-0.5">{path.summary}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {path.audience !== "everyone" && <Badge variant="default">{path.audience === "admin" ? "Administrators" : "Implementers"}</Badge>}
                 {complete && <Badge variant="success">Completed</Badge>}
-                <span className="font-mono text-ink-muted">
+                <span className="tabular-nums text-[13px] text-ink-muted">
                   {seen.length}/{path.steps.length}
                 </span>
               </div>
             </div>
             <p className="text-ink-muted">
-              <strong>You&apos;ll be able to:</strong> {path.outcome} <strong>Before you start:</strong> {path.prerequisites}
+              <strong className="font-medium text-ink-soft">You&apos;ll be able to:</strong> {path.outcome} <strong className="font-medium text-ink-soft">Before you start:</strong> {path.prerequisites}
             </p>
             <div className="flex flex-wrap gap-2">
               {isActive ? (
@@ -120,12 +120,12 @@ export function HelpCentreView() {
               )}
             </div>
             <details>
-              <summary className="cursor-pointer font-semibold text-ink-soft">Steps</summary>
+              <summary className="cursor-pointer font-medium text-ink-soft">Steps</summary>
               <ol className="mt-2 space-y-1">
                 {path.steps.map((s) => (
                   <li key={s.id} className="flex items-start gap-1.5 text-ink-soft">
                     {seen.includes(s.id) ? (
-                      <CheckCircle2 aria-label="Viewed" className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-600" />
+                      <CheckCircle2 aria-label="Viewed" className="h-3.5 w-3.5 mt-0.5 shrink-0 text-ok" />
                     ) : (
                       <Circle aria-label="Not viewed" className="h-3.5 w-3.5 mt-0.5 shrink-0 text-ink-subtle" />
                     )}

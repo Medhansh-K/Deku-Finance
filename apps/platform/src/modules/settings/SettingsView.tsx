@@ -96,7 +96,7 @@ export function SettingsView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 font-sans text-xs">
+    <div className="max-w-4xl mx-auto space-y-6 font-sans text-[13.5px]">
       <CompanyProfileCard />
       <ChangePasswordCard />
       <KeyboardPreferencesCard />
@@ -106,14 +106,14 @@ export function SettingsView() {
       {orgId && <KycCard orgId={orgId} />}
 
       {/* Fiscal Periods Management */}
-      <div data-tour="settings-fiscal-periods" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-4">
+      <div data-tour="settings-fiscal-periods" className="bg-surface border border-line rounded-panel p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
-            <h3 className="text-sm font-bold uppercase text-ink font-mono">
-              Fiscal Accounting Periods
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+              Fiscal periods
             </h3>
-            <p className="text-[11px] text-ink-muted">
-              Only open fiscal periods permit journal posting and financial allocations
+            <p className="text-[13px] text-ink-muted mt-0.5">
+              Only open periods accept journal postings and allocations
             </p>
           </div>
           <Button
@@ -122,39 +122,39 @@ export function SettingsView() {
             onClick={() => setIsFpModalOpen(true)}
             className="gap-1.5"
           >
-            <Plus className="h-3.5 w-3.5" /> New Fiscal Period
+            <Plus className="h-3.5 w-3.5" /> New fiscal period
           </Button>
         </div>
 
         {error && (
-          <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+          <div className="px-4 py-3 rounded-ctl bg-bad-wash text-[13px] text-bad flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
         )}
 
-        <div className="rounded border border-line overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="rounded-ctl border border-line overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-panel text-white font-mono text-[11px]">
-                <th className="py-2 px-3">Period Title</th>
-                <th className="py-2 px-3">Start Date</th>
-                <th className="py-2 px-3">End Date</th>
-                <th className="py-2 px-3 text-right">Status</th>
+              <tr>
+                <th className="deku-table-th">Period</th>
+                <th className="deku-table-th">Start date</th>
+                <th className="deku-table-th">End date</th>
+                <th className="deku-table-th !text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody>
               {fiscalPeriods.map((fp) => (
                 <tr key={fp.id} className="hover:bg-canvas">
-                  <td className="py-2 px-3 font-bold text-ink">{fp.name}</td>
-                  <td className="py-2 px-3 font-mono text-ink-soft">
+                  <td className="deku-table-td font-[550]">{fp.name}</td>
+                  <td className="deku-table-td !text-ink-soft">
                     {formatDateTally(fp.start_date)}
                   </td>
-                  <td className="py-2 px-3 font-mono text-ink-soft">
+                  <td className="deku-table-td !text-ink-soft">
                     {formatDateTally(fp.end_date)}
                   </td>
-                  <td className="py-2 px-3 text-right">
-                    <Badge variant={fp.status === "open" ? "success" : "default"}>
+                  <td className="deku-table-td text-right">
+                    <Badge variant={fp.status === "open" ? "success" : "default"} className="capitalize">
                       {fp.status}
                     </Badge>
                   </td>
@@ -166,24 +166,24 @@ export function SettingsView() {
       </div>
 
       {/* Accounting Standards & Engine Info */}
-      <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
-        <h3 className="text-sm font-bold uppercase text-ink font-mono border-b border-line pb-2">
-          Accounting Standard & Enforcement
+      <div className="bg-surface border border-line rounded-panel p-5 space-y-3">
+        <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+          Accounting standard and enforcement
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-3 bg-canvas rounded border border-line">
-            <span className="font-bold text-ink block mb-1">
-              ALERX 4-Tier Hierarchy
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="px-4 py-3 bg-canvas rounded-ctl">
+            <span className="font-[550] text-ink block mb-1">
+              ALERX four-tier hierarchy
             </span>
-            <p className="text-ink-soft text-[11px]">
+            <p className="text-ink-muted text-[13px]">
               Vouchers are strictly restricted to postable leaf accounts. Group summaries roll up naturally without manual balance cache corruptions.
             </p>
           </div>
-          <div className="p-3 bg-canvas rounded border border-line">
-            <span className="font-bold text-ink block mb-1">
-              Immutable Reversal Integrity
+          <div className="px-4 py-3 bg-canvas rounded-ctl">
+            <span className="font-[550] text-ink block mb-1">
+              Reversals, not edits
             </span>
-            <p className="text-ink-soft text-[11px]">
+            <p className="text-ink-muted text-[13px]">
               Posted vouchers cannot be silently modified or dropped. Controlled reversals create symmetric counter-entries for full statutory compliance.
             </p>
           </div>
@@ -194,26 +194,26 @@ export function SettingsView() {
       <Modal
         isOpen={isFpModalOpen}
         onClose={() => setIsFpModalOpen(false)}
-        title="Open New Fiscal Accounting Period"
-        description="Establish non-overlapping financial year dates"
+        title="Open a fiscal period"
+        description="Dates must not overlap an existing period"
       >
-        <form onSubmit={handleCreateFp} className="space-y-3 font-sans text-xs">
+        <form onSubmit={handleCreateFp} className="space-y-3 font-sans text-[13.5px]">
           <Input
-            label="Fiscal Period Title"
+            label="Period name"
             value={fpName}
             onChange={(e) => setFpName(e.target.value)}
             required
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Start Date (YYYY-MM-DD)"
+              label="Start date"
               type="date"
               value={fpStart}
               onChange={(e) => setFpStart(e.target.value)}
               required
             />
             <Input
-              label="End Date (YYYY-MM-DD)"
+              label="End date"
               type="date"
               value={fpEnd}
               onChange={(e) => setFpEnd(e.target.value)}
@@ -221,7 +221,7 @@ export function SettingsView() {
             />
           </div>
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-line">
+          <div className="pt-4 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"
@@ -236,7 +236,7 @@ export function SettingsView() {
               size="sm"
               isLoading={isSubmitting}
             >
-              Establish Period
+              Open period
             </Button>
           </div>
         </form>

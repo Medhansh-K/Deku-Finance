@@ -10,7 +10,7 @@ export default function PurchaseVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Purchase Voucher"
+        title="Purchase voucher"
         subtitle="Record inward purchases, inventory delivery, and supplier payable credits"
         badge={<Badge variant="teal">F9: Purchase</Badge>}
         breadcrumbs={[
@@ -21,7 +21,7 @@ export default function PurchaseVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading purchase voucher desk...
             </div>
           }

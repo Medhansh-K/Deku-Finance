@@ -22,10 +22,10 @@ import { reportsApi } from "@/api/endpoints";
 import { ageBuckets, bucketOf, daysBetween, KpiSnapshot, PartyBalance, toPartyBalances, toRupees } from "@/lib/reports/ledger";
 
 const BUCKETS = [
-  { id: "d0_30", label: "0–30 Days" },
-  { id: "d31_60", label: "31–60 Days" },
-  { id: "d61_90", label: "61–90 Days" },
-  { id: "d90_plus", label: "Over 90 Days" },
+  { id: "d0_30", label: "0–30 days" },
+  { id: "d31_60", label: "31–60 days" },
+  { id: "d61_90", label: "61–90 days" },
+  { id: "d90_plus", label: "over 90 days" },
 ] as const;
 
 interface Books {
@@ -106,119 +106,111 @@ export function DebtorsDsoView() {
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       {/* Top Action & Control Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-panel border border-line bg-surface px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-brand/10 border border-brand/20 rounded-lg text-brand-strong">
-            <Users className="h-5 w-5" />
+          <div className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center shrink-0">
+            <Users className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-ink">
-              Accounts Receivable Aging Analysis &amp; Invoices
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+              Accounts receivable ageing and invoices
             </h3>
-            <p className="text-xs text-ink-muted">
-              Customer exposure, overdue aging brackets, outstanding invoices, and collection velocity
+            <p className="text-[13px] text-ink-muted">
+              Customer exposure, overdue ageing brackets, outstanding invoices and collection speed
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={loadData} isLoading={isLoading} className="text-xs font-semibold">
-            <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Refresh
+          <Button variant="secondary" onClick={loadData} isLoading={isLoading}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
           <Link
             href="/vouchers/receipt"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-brand hover:bg-brand-soft text-panel-deep shadow-2xs transition-colors"
+            className="inline-flex items-center gap-2 h-9 px-3.5 rounded-ctl bg-ink text-white text-[13.5px] font-medium hover:bg-panel-raised transition-colors"
           >
-            <Receipt className="h-3.5 w-3.5" />
-            <span>Record Receipt</span>
+            <Receipt className="h-4 w-4" />
+            <span>Record receipt</span>
           </Link>
         </div>
       </div>
 
       {/* DSO KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-ink-muted mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
-              Days Sales Outstanding
-            </span>
-            <span className="h-6 w-6 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+        <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
+          <div className="flex items-center justify-between text-[13px] text-ink-muted">
+            <span>Days sales outstanding</span>
+            <span className="h-6 w-6 rounded-md bg-canvas-sunken text-ink-soft grid place-items-center">
               <Clock className="h-3.5 w-3.5" />
             </span>
           </div>
-          <div className="text-2xl font-black font-mono text-ink">
-            {dso === null ? "–" : `${dso} Days`}
+          <div className="mt-1.5 mb-1 text-[26px] font-semibold leading-tight tracking-[-0.035em] tabular-nums text-ink">
+            {dso === null ? "–" : `${dso} days`}
           </div>
-          <span className="text-[11px] text-ink-muted font-mono mt-1 block">
+          <span className="text-[12.5px] text-ink-muted block">
             {dso === null ? "No credit sales posted" : "Receivables ÷ credit sales, last 365 days"}
           </span>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-ink-muted mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
-              Total Receivables (AR)
-            </span>
-            <span className="h-6 w-6 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+        <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
+          <div className="flex items-center justify-between text-[13px] text-ink-muted">
+            <span>Total receivables (AR)</span>
+            <span className="h-6 w-6 rounded-md bg-canvas-sunken text-ink-soft grid place-items-center">
               <DollarSign className="h-3.5 w-3.5" />
             </span>
           </div>
-          <div className="text-2xl font-black font-mono text-amber-700">
+          <div className="mt-1.5 mb-1 text-[26px] font-semibold leading-tight tracking-[-0.035em] tabular-nums text-ink">
             {hasLedger ? formatINR(toRupees(totalReceivablesPaise)) : "–"}
           </div>
-          <span className="text-[11px] text-ink-muted font-mono mt-1 block">
+          <span className="text-[12.5px] text-ink-muted block">
             {owing.length} {owing.length === 1 ? "customer owes" : "customers owe"}
           </span>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-ink-muted mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
-              Past Invoice Due Date
-            </span>
-            <span className="h-6 w-6 rounded-md bg-rose-50 text-rose-700 flex items-center justify-center font-bold">
+        <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
+          <div className="flex items-center justify-between text-[13px] text-ink-muted">
+            <span>Past invoice due date</span>
+            <span className="h-6 w-6 rounded-md bg-canvas-sunken text-ink-soft grid place-items-center">
               <AlertTriangle className="h-3.5 w-3.5" />
             </span>
           </div>
-          <div className={`text-2xl font-black font-mono ${overduePaise > 0 ? "text-rose-700" : "text-ink"}`}>
+          <div className={`mt-1.5 mb-1 text-[26px] font-semibold leading-tight tracking-[-0.035em] tabular-nums ${overduePaise > 0 ? "text-bad" : "text-ink"}`}>
             {hasLedger ? formatINR(toRupees(overduePaise)) : "–"}
           </div>
-          <span className="text-[11px] text-ink-muted font-mono mt-1 block">
+          <span className="text-[12.5px] text-ink-muted block">
             Only items posted from issued invoices have a due date
           </span>
         </div>
 
-        <div className="bg-surface p-4 rounded-xl border border-line shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-ink-muted mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px]">
-              Older Than 60 Days
-            </span>
-            <span className="h-6 w-6 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+        <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
+          <div className="flex items-center justify-between text-[13px] text-ink-muted">
+            <span>Older than 60 days</span>
+            <span className="h-6 w-6 rounded-md bg-canvas-sunken text-ink-soft grid place-items-center">
               <ShieldCheck className="h-3.5 w-3.5" />
             </span>
           </div>
-          <div className="text-2xl font-black font-mono text-ink">
+          <div className="mt-1.5 mb-1 text-[26px] font-semibold leading-tight tracking-[-0.035em] tabular-nums text-ink">
             {hasLedger ? formatINR(toRupees(buckets.d61_90 + buckets.d90_plus)) : "–"}
           </div>
-          <span className="text-[11px] text-ink-muted font-mono mt-1 block">
+          <span className="text-[12.5px] text-ink-muted block">
             Unpaid since the invoice date
           </span>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 bg-surface p-2 rounded-xl border border-line text-xs font-semibold overflow-x-auto shadow-2xs">
+      <div className="flex items-center gap-0.5 p-[3px] rounded-[10px] bg-canvas-sunken text-[13.5px] overflow-x-auto w-fit max-w-full">
         {[
-          { id: "all", label: `All Debtors (${debtors.length})` },
+          { id: "all", label: `All debtors (${debtors.length})` },
           ...BUCKETS.map((b) => ({ id: b.id, label: `Oldest invoice ${b.label}` })),
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveBucket(tab.id)}
-            className={`px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
+            className={`px-3 py-1.5 rounded-[7px] transition-colors whitespace-nowrap cursor-pointer ${
               activeBucket === tab.id
-                ? "bg-brand text-panel-deep font-bold shadow-2xs"
-                : "text-ink-soft hover:bg-canvas-sunken"
+                ? "bg-surface text-ink font-medium shadow-[0_1px_2px_rgb(14_27_25/0.08)]"
+                : "text-ink-soft hover:text-ink"
             }`}
           >
             {tab.label}
@@ -226,7 +218,7 @@ export function DebtorsDsoView() {
         ))}
       </div>
 
-      <p className="text-[11px] text-ink-muted font-mono px-1">
+      <p className="text-[12.5px] text-ink-muted px-1">
         Balances from posted entries on {receivablesAccount ? `${receivablesAccount.code} ${receivablesAccount.name}` : "the trade debtors ledger"}.
         Receipts are matched to each customer&apos;s oldest invoice first.
       </p>
@@ -234,7 +226,7 @@ export function DebtorsDsoView() {
       {/* Debtors List with Expandable Invoices Breakdown */}
       <div className="space-y-3">
         {filteredDebtors.length === 0 && (
-          <div className="bg-surface rounded-xl border border-line p-8 text-center text-xs text-ink-muted shadow-2xs">
+          <div className="rounded-panel border border-line bg-surface p-8 text-center text-[13.5px] text-ink-muted">
             {isLoading ? "Loading…" : emptyMessage}
           </div>
         )}
@@ -245,28 +237,28 @@ export function DebtorsDsoView() {
           return (
             <div
               key={key}
-              className="bg-surface rounded-xl border border-line shadow-2xs overflow-hidden transition-all"
+              className="rounded-panel border border-line bg-surface overflow-hidden"
             >
               {/* Customer Row Header */}
               <div
                 onClick={() => setExpandedId(isExpanded ? null : key)}
-                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-canvas-sunken/40 transition-colors select-none"
+                className="px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-brand-wash/60 transition-colors select-none"
               >
                 <div className="flex items-start gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-brand/10 text-brand-strong flex items-center justify-center shrink-0 font-bold border border-brand/20">
+                  <div className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center shrink-0">
                     <Users className="h-4 w-4" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-ink">{name}</span>
+                      <span className="text-[14px] font-semibold text-ink">{name}</span>
                       {deb.advancePaise > 0 && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-canvas-sunken text-ink-soft border border-line">
+                        <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-brand-wash text-brand-strong">
                           Advance {formatINR(toRupees(deb.advancePaise))}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-ink-muted font-mono mt-0.5">
-                      <span>GSTIN: {deb.gstin || "–"}</span>
+                    <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink-muted mt-0.5">
+                      <span>GSTIN <span className="font-mono">{deb.gstin || "–"}</span></span>
                       {deb.billingAddress?.city && (
                         <>
                           <span>•</span>
@@ -274,7 +266,7 @@ export function DebtorsDsoView() {
                         </>
                       )}
                       <span>•</span>
-                      <span className="font-semibold text-ink-soft">
+                      <span className="font-medium text-ink-soft">
                         {deb.openItems.length} open {deb.openItems.length === 1 ? "invoice" : "invoices"}
                       </span>
                     </div>
@@ -283,24 +275,24 @@ export function DebtorsDsoView() {
 
                 <div className="flex items-center justify-between sm:justify-end gap-5 border-t sm:border-t-0 pt-2 sm:pt-0 border-line">
                   <div className="text-left sm:text-right">
-                    <div className="text-[10px] font-mono text-ink-muted uppercase font-semibold">
-                      Oldest Unpaid
+                    <div className="text-[12.5px] text-ink-muted">
+                      Oldest unpaid
                     </div>
-                    <div className="text-sm font-black font-mono text-ink">
-                      {deb.oldestAgeDays === null ? "–" : `${deb.oldestAgeDays} Days`}
+                    <div className="text-[14px] font-semibold tabular-nums text-ink">
+                      {deb.oldestAgeDays === null ? "–" : `${deb.oldestAgeDays} days`}
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-[10px] font-mono text-ink-muted uppercase font-semibold">
-                      Total Balance Owed
+                    <div className="text-[12.5px] text-ink-muted">
+                      Balance owed
                     </div>
-                    <div className="text-base font-black font-mono text-amber-700">
+                    <div className="text-[15px] font-semibold tabular-nums text-ink">
                       {formatINR(toRupees(deb.balancePaise))}
                     </div>
                   </div>
 
-                  <div className="h-7 w-7 rounded-md flex items-center justify-center bg-canvas-sunken text-ink-soft border border-line/60">
+                  <div className="h-7 w-7 rounded-ctl grid place-items-center text-ink-muted">
                     <ChevronDown
                       className={`h-4 w-4 transition-transform duration-200 ${
                         isExpanded ? "rotate-180 text-brand-strong" : ""
@@ -312,71 +304,71 @@ export function DebtorsDsoView() {
 
               {/* Expanded Invoices Section */}
               {isExpanded && (
-                <div className="border-t border-line bg-canvas-sunken/40 p-4 space-y-3">
+                <div className="border-t border-line bg-canvas-sunken/40 px-5 py-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-ink-soft flex items-center gap-1.5">
+                    <span className="text-[13px] font-semibold text-ink-soft flex items-center gap-1.5">
                       <FileText className="h-3.5 w-3.5 text-brand-strong" />
-                      <span>Outstanding Invoices Owed by {name}</span>
+                      <span>Outstanding invoices owed by {name}</span>
                     </span>
                     <Link
                       href="/gst"
-                      className="text-xs text-brand-strong hover:underline font-bold flex items-center gap-1"
+                      className="text-[13px] text-brand-strong hover:underline font-medium flex items-center gap-1"
                     >
-                      <span>View All Invoices</span>
+                      <span>View all invoices</span>
                       <ExternalLink className="h-3 w-3" />
                     </Link>
                   </div>
 
-                  <div className="overflow-x-auto border border-line rounded-lg bg-surface shadow-2xs">
-                    <table className="w-full text-left text-xs font-mono">
-                      <thead className="bg-canvas-sunken border-b border-line text-ink-muted text-[11px] font-semibold">
+                  <div className="overflow-x-auto border border-line rounded-ctl bg-surface">
+                    <table className="w-full text-left text-[13.5px]">
+                      <thead className="bg-canvas-sunken/50 border-b border-line text-ink-muted text-[12.5px] font-medium">
                         <tr>
-                          <th className="p-3">Invoice / Voucher #</th>
-                          <th className="p-3">Issued Date</th>
-                          <th className="p-3">Due Date</th>
-                          <th className="p-3 text-right">Invoice Total</th>
-                          <th className="p-3 text-right">Amount Owed</th>
-                          <th className="p-3">From How Long (Aging)</th>
-                          <th className="p-3 text-center">Status</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap">Invoice / voucher no.</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap">Issued</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap">Due date</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right">Invoice total</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-right">Amount owed</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap">Ageing</th>
+                          <th className="px-3.5 py-2.5 whitespace-nowrap text-center">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-line/60">
+                      <tbody className="divide-y divide-line">
                         {deb.openItems.map((item) => {
                           const overdueDays = item.dueDate ? daysBetween(item.dueDate, asOf) : null;
                           return (
-                            <tr key={item.entryId} className="hover:bg-canvas-sunken/50 transition-colors">
-                              <td className="p-3 font-bold text-ink">
+                            <tr key={item.entryId} className="hover:bg-brand-wash/60 transition-colors">
+                              <td className="px-3.5 py-2.5 font-mono text-[12.5px] text-ink">
                                 <span className="flex items-center gap-1.5">
                                   <FileText className="h-3.5 w-3.5 text-ink-subtle" />
                                   <span>{item.invoiceNumber ?? item.reference ?? item.entryNumber}</span>
                                 </span>
                               </td>
-                              <td className="p-3 text-ink-soft">{formatDateTally(item.date)}</td>
-                              <td className="p-3 text-ink-soft">{item.dueDate ? formatDateTally(item.dueDate) : "–"}</td>
-                              <td className="p-3 text-right text-ink font-semibold">{formatINR(toRupees(item.amountPaise))}</td>
-                              <td className="p-3 text-right font-bold text-amber-700">
+                              <td className="px-3.5 py-2.5 text-ink-soft">{formatDateTally(item.date)}</td>
+                              <td className="px-3.5 py-2.5 text-ink-soft">{item.dueDate ? formatDateTally(item.dueDate) : "–"}</td>
+                              <td className="px-3.5 py-2.5 text-right text-ink font-semibold">{formatINR(toRupees(item.amountPaise))}</td>
+                              <td className="px-3.5 py-2.5 text-right font-semibold text-ink">
                                 {formatINR(toRupees(item.openPaise))}
                               </td>
-                              <td className="p-3">
-                                <span className="font-semibold text-ink block">
+                              <td className="px-3.5 py-2.5">
+                                <span className="text-ink block">
                                   {item.ageDays} days ago
                                 </span>
                                 {overdueDays !== null && overdueDays > 0 && (
-                                  <span className="text-[11px] text-rose-700 font-semibold block">
+                                  <span className="text-[12.5px] text-bad block">
                                     Overdue by {overdueDays} days
                                   </span>
                                 )}
                               </td>
-                              <td className="p-3 text-center">
+                              <td className="px-3.5 py-2.5 text-center">
                                 {overdueDays === null ? (
-                                  <span className="text-[11px] text-ink-muted">No due date</span>
+                                  <span className="text-[12.5px] text-ink-muted">No due date</span>
                                 ) : overdueDays > 0 ? (
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
-                                    OVERDUE
+                                  <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-bad-wash text-bad">
+                                    Overdue
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                                    CURRENT
+                                  <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-ok-wash text-ok">
+                                    Current
                                   </span>
                                 )}
                               </td>

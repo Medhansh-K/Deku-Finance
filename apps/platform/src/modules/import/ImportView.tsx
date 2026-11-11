@@ -12,9 +12,9 @@ import { ALERX_GROUPS, GroupTarget, IMPORT_ORDER, ImportBatch, ImportKind, KIND_
 
 const STEPS = ["Upload", "Detect", "Map", "Validate", "Review", "Apply"] as const;
 const fieldClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
-const labelClass = "block text-xs font-medium text-ink-soft";
-const card = "rounded-xl border border-line bg-surface p-4 shadow-card space-y-4";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink focus:border-brand focus:outline-none";
+const labelClass = "block text-[13px] text-ink-muted";
+const card = "rounded-panel border border-line bg-surface p-5 space-y-4";
 
 const BATCH_KEY: Record<ImportKind, keyof Pick<ImportBatch, "accounts" | "parties" | "items" | "openings" | "vouchers">> = {
   chart_of_accounts: "accounts",
@@ -119,7 +119,7 @@ export function ImportView() {
           ? 3
           : 4;
 
-  if (!orgId) return <p className="text-sm text-ink-muted">Select a company to import data.</p>;
+  if (!orgId) return <p className="text-[13.5px] text-ink-muted">Select a company to import data.</p>;
 
   const handleFile = async (f: File | undefined) => {
     if (!f) return;
@@ -173,7 +173,7 @@ export function ImportView() {
 
   return (
     <div className="space-y-6">
-      <ol className="flex flex-wrap gap-2 text-xs" aria-label="Import steps">
+      <ol className="flex flex-wrap gap-2" aria-label="Import steps">
         {STEPS.map((s, i) => (
           <li key={s} aria-current={i === step ? "step" : undefined}>
             <Badge variant={i === step ? "teal" : i < step ? "success" : "outline"} size="md">
@@ -183,20 +183,20 @@ export function ImportView() {
         ))}
       </ol>
       {loadError && (
-        <p role="alert" className="rounded-lg border border-line bg-canvas p-3 text-sm text-ink">
+        <p role="alert" className="rounded-ctl bg-bad-wash px-4 py-3 text-[13px] text-bad">
           {loadError}
         </p>
       )}
 
       <section className={card}>
-        <h2 className="text-sm font-semibold text-ink">Upload</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Upload</h2>
         <div className="flex flex-wrap items-center gap-4">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-line-strong px-3 py-2 text-sm text-ink hover:bg-canvas">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-ctl border border-dashed border-line-strong px-3 py-2 text-[13.5px] text-ink hover:bg-canvas">
             <UploadCloud className="h-4 w-4 text-ink-muted" />
             {file?.name || "Choose a Tally XML export or a CSV file"}
             <input type="file" accept=".xml,.csv,text/xml,text/csv" className="sr-only" onChange={(e) => handleFile(e.target.files?.[0])} />
           </label>
-          <p className="max-w-xl text-xs text-ink-muted">
+          <p className="max-w-xl text-[12.5px] text-ink-muted">
             The file is read in your browser and never uploaded. Only the rows you apply are sent to Deku. In Tally, use
             Export (Alt+E) with format XML for masters and for vouchers (Day Book).
           </p>
@@ -205,9 +205,9 @@ export function ImportView() {
 
       {file && batch && (
         <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Detect</h2>
+          <h2 className="text-[15px] font-semibold tracking-tight text-ink">Detect</h2>
           {tally ? (
-            <p className="text-sm text-ink-soft">
+            <p className="text-[13.5px] text-ink-soft">
               Tally XML: {tally.groups.length} groups, {tally.ledgers.length} ledgers, {tally.stockItems.length} stock items,{" "}
               {tally.vouchers.length} vouchers.
             </p>
@@ -230,7 +230,7 @@ export function ImportView() {
 
       {file && (!file.tally || groupRows.length > 0) && (
         <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Map</h2>
+          <h2 className="text-[15px] font-semibold tracking-tight text-ink">Map</h2>
           {!file.tally && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {CSV_FIELDS[csvKind].map((f) => (
@@ -258,12 +258,12 @@ export function ImportView() {
           )}
           {groupRows.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-ink-muted">
+              <p className="text-[12.5px] text-ink-muted">
                 These groups are not standard Tally groups. Choose where their ledgers belong in Deku; nothing is guessed.
               </p>
               {groupRows.map((g) => (
                 <div key={g} className="flex flex-wrap items-center gap-3">
-                  <label htmlFor={`imp-group-${g}`} className="w-56 text-sm text-ink">
+                  <label htmlFor={`imp-group-${g}`} className="w-56 text-[13.5px] text-ink">
                     {g}
                   </label>
                   <select
@@ -288,32 +288,32 @@ export function ImportView() {
 
       {file && batch && validation && !unmapped.length && !missingColumns.length && (
         <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Validate</h2>
+          <h2 className="text-[15px] font-semibold tracking-tight text-ink">Validate</h2>
           {validation.errors.length === 0 ? (
-            <p className="text-sm text-ink-soft">
+            <p className="text-[13.5px] text-ink-soft">
               <Badge variant="success">No problems found</Badge> GSTINs, duplicates, balances and account references were checked.
             </p>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-ink">
+              <p className="text-[13.5px] text-ink">
                 <Badge variant="danger">{validation.errors.length} to fix</Badge> Fix these in the file (or leave the section out) and choose it
                 again. Row is the line in a CSV, or the position within its section in a Tally file.
               </p>
-              <div className="max-h-80 overflow-auto">
-                <table className="w-full text-sm">
+              <div className="max-h-80 overflow-auto rounded-ctl border border-line">
+                <table className="w-full text-[13.5px]">
                   <thead>
-                    <tr className="border-b border-line text-left text-xs text-ink-muted">
-                      <th className="py-1.5 pr-3 font-medium">Section</th>
-                      <th className="py-1.5 pr-3 font-medium">Row</th>
-                      <th className="py-1.5 font-medium">Problem</th>
+                    <tr className="border-b border-line bg-[#fafbfa] text-left text-[12.5px] text-ink-muted">
+                      <th className="py-2 px-3 font-medium">Section</th>
+                      <th className="py-2 px-3 font-medium">Row</th>
+                      <th className="py-2 px-3 font-medium">Problem</th>
                     </tr>
                   </thead>
                   <tbody>
                     {validation.errors.slice(0, 500).map((e, i) => (
                       <tr key={i} className="border-b border-line">
-                        <td className="py-1.5 pr-3 text-ink-soft">{e.kind ? KIND_LABELS[e.kind] : "File"}</td>
-                        <td className="py-1.5 pr-3 font-mono text-ink">{e.row || "–"}</td>
-                        <td className="py-1.5 text-ink">{e.message}</td>
+                        <td className="py-2 px-3 text-ink-soft">{e.kind ? KIND_LABELS[e.kind] : "File"}</td>
+                        <td className="py-2 px-3 font-mono text-ink">{e.row || "–"}</td>
+                        <td className="py-2 px-3 text-ink">{e.message}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -326,8 +326,8 @@ export function ImportView() {
 
       {file && batch && validation && !unmapped.length && !missingColumns.length && (
         <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Review</h2>
-          <ul className="space-y-1 text-sm">
+          <h2 className="text-[15px] font-semibold tracking-tight text-ink">Review</h2>
+          <ul className="space-y-1 text-[13.5px]">
             {IMPORT_ORDER.filter((k) => (tally ? batch[BATCH_KEY[k]].length > 0 : k === csvKind)).map((k) => (
               <li key={k} className="flex items-center gap-2 text-ink">
                 {tally && (
@@ -350,13 +350,13 @@ export function ImportView() {
             ))}
           </ul>
           {kinds.includes("opening_balances") && validation.openingDiffPaise !== 0 && (
-            <label className="flex items-start gap-2 text-sm text-ink">
+            <label className="flex items-start gap-2 text-[13.5px] text-ink">
               <input type="checkbox" className="mt-1" checked={confirmDiff} onChange={(e) => setConfirmDiff(e.target.checked)} />
               Opening debits and credits differ by {formatINR(Math.abs(validation.openingDiffPaise) / 100)}. Post the difference to an
               &quot;Opening Balance Difference&quot; equity account.
             </label>
           )}
-          <p className="text-xs text-ink-muted">
+          <p className="text-[12.5px] text-ink-muted">
             Each section is applied as one all-or-nothing job, in the order shown; if one fails, the later ones are not applied. Opening
             balances become one journal dated the first day of the current fiscal period. Vouchers are posted, or submitted for approval when
             maker-checker is on; an accountant&apos;s vouchers stay drafts for the owner, CFO or admin to post.
@@ -369,8 +369,8 @@ export function ImportView() {
 
       {results && (
         <section className={card}>
-          <h2 className="text-sm font-semibold text-ink">Apply</h2>
-          <ul className="space-y-1 text-sm">
+          <h2 className="text-[15px] font-semibold tracking-tight text-ink">Apply</h2>
+          <ul className="space-y-1 text-[13.5px]">
             {results.map((r) => (
               <li key={r.kind} className="text-ink">
                 {KIND_LABELS[r.kind]}:{" "}
@@ -389,30 +389,30 @@ export function ImportView() {
       )}
 
       <section className={card}>
-        <h2 className="text-sm font-semibold text-ink">Recent imports</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Recent imports</h2>
         {jobs.length === 0 ? (
-          <p className="text-sm text-ink-muted">No imports yet.</p>
+          <p className="text-[13.5px] text-ink-muted">No imports yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-ctl border border-line">
+            <table className="w-full text-[13.5px]">
               <thead>
-                <tr className="border-b border-line text-left text-xs text-ink-muted">
-                  <th className="py-1.5 pr-3 font-medium">When</th>
-                  <th className="py-1.5 pr-3 font-medium">What</th>
-                  <th className="py-1.5 pr-3 font-medium">File</th>
-                  <th className="py-1.5 pr-3 text-right font-medium">Rows</th>
-                  <th className="py-1.5 font-medium">Status</th>
+                <tr className="border-b border-line bg-[#fafbfa] text-left text-[12.5px] text-ink-muted">
+                  <th className="py-2 px-3 font-medium">When</th>
+                  <th className="py-2 px-3 font-medium">What</th>
+                  <th className="py-2 px-3 font-medium">File</th>
+                  <th className="py-2 px-3 text-right font-medium">Rows</th>
+                  <th className="py-2 px-3 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {jobs.map((j) => (
                   <tr key={j.id} className="border-b border-line">
-                    <td className="py-1.5 pr-3 text-ink-soft">{new Date(j.created_at).toLocaleString("en-IN")}</td>
-                    <td className="py-1.5 pr-3 text-ink">{KIND_LABELS[j.kind]}</td>
-                    <td className="py-1.5 pr-3 text-ink-soft">{j.filename ?? "–"}</td>
-                    <td className="py-1.5 pr-3 text-right font-mono text-ink">{j.row_count}</td>
-                    <td className="py-1.5">
-                      <Badge variant={j.status === "applied" ? "success" : j.status === "failed" ? "danger" : "default"}>{j.status}</Badge>
+                    <td className="py-2 px-3 text-ink-soft">{new Date(j.created_at).toLocaleString("en-IN")}</td>
+                    <td className="py-2 px-3 text-ink">{KIND_LABELS[j.kind]}</td>
+                    <td className="py-2 px-3 text-ink-soft">{j.filename ?? "–"}</td>
+                    <td className="py-2 px-3 text-right tabular-nums text-ink">{j.row_count}</td>
+                    <td className="py-2 px-3">
+                      <Badge variant={j.status === "applied" ? "success" : j.status === "failed" ? "danger" : "default"} className="capitalize">{j.status}</Badge>
                     </td>
                   </tr>
                 ))}

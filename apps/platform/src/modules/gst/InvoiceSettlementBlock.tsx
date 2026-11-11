@@ -53,11 +53,11 @@ export function InvoiceSettlementBlock({ settlement, payee, amountPaise, invoice
   return (
     <section
       aria-label="Payment details"
-      className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-line bg-surface p-4"
+      className="flex flex-wrap items-start justify-between gap-4 rounded-panel border border-line bg-surface p-4"
     >
       <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-ink">Payment details</h4>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+        <h4 className="text-[13px] font-semibold text-ink">Payment details</h4>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
           {rows.map(([label, value]) => (
             <React.Fragment key={label}>
               <dt className="text-ink-muted">{label}</dt>
@@ -70,7 +70,7 @@ export function InvoiceSettlementBlock({ settlement, payee, amountPaise, invoice
         <figure className="flex flex-col items-center gap-1">
           {/* eslint-disable-next-line @next/next/no-img-element -- data URL, nothing for next/image to optimise */}
           <img src={qr} alt={`UPI QR code to pay ${formatINR(amountPaise / 100)} to ${settlement.upiId}`} className="h-32 w-32" />
-          <figcaption className="text-[11px] text-ink-muted">
+          <figcaption className="text-[12.5px] text-ink-muted">
             Scan with any UPI app to pay <span className="font-mono">{formatINR(amountPaise / 100)}</span>
           </figcaption>
         </figure>

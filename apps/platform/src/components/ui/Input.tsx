@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-ink-soft"
+            className="block text-[13px] font-medium text-ink-soft"
           >
             {label}
           </label>
@@ -44,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             suppressHydrationWarning
-            className={`w-full h-9 rounded-md border border-line-strong bg-surface text-sm text-ink placeholder-ink-subtle shadow-[0_1px_1px_rgb(11_18_32/0.04)] transition-[border-color,box-shadow] focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20 disabled:bg-canvas disabled:text-ink-subtle ${
+            className={`w-full h-9 rounded-ctl border border-line-strong bg-surface text-[13.5px] text-ink placeholder-ink-subtle transition-[border-color,box-shadow] focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20 disabled:bg-canvas disabled:text-ink-subtle ${
               prefixSymbol ? "pl-7" : "px-3"
             } ${suffixSymbol ? "pr-8" : "px-3"} ${
               isNumeric ? "text-right font-mono" : ""

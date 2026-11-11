@@ -10,7 +10,7 @@ export default function ContraVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Contra Voucher"
+        title="Contra voucher"
         subtitle="Record internal liquid capital transfers: Bank to Cash, Cash to Bank, or Inter-Bank allocations"
         badge={<Badge variant="teal">F4: Contra</Badge>}
         breadcrumbs={[
@@ -21,7 +21,7 @@ export default function ContraVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading contra voucher desk...
             </div>
           }

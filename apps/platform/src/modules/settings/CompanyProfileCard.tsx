@@ -11,7 +11,7 @@ import type { Organisation } from "@/types";
 import { ProfileForm, formFromOrg, profileErrors, settingsFromForm } from "@/lib/organisation/profile";
 
 const selectClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
 /** The company profile stored on the organisation record. Owners and admins can save it. */
 export function CompanyProfileCard() {
@@ -45,15 +45,15 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
   };
 
   return (
-    <form data-tour="settings-company-profile" onSubmit={save} className="space-y-4 rounded-lg border border-line-strong bg-surface p-5 shadow-xs">
+    <form data-tour="settings-company-profile" onSubmit={save} className="space-y-4 rounded-panel border border-line bg-surface p-5">
       <div className="flex items-center gap-2 border-b border-line pb-3">
         <Landmark className="h-4 w-4 text-ink-muted" />
-        <h3 className="font-mono text-sm font-bold uppercase text-ink">Company Profile</h3>
+        <h3 className="text-[15px] font-semibold tracking-tight text-ink">Company profile</h3>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
-          <label htmlFor="cp-mode" className="block text-sm font-medium text-ink-soft">Operating mode</label>
+          <label htmlFor="cp-mode" className="block text-[13px] text-ink-muted">Operating mode</label>
           <select data-tour="settings-operating-mode" id="cp-mode" value={form.mode} className={selectClass}
             onChange={(e) => set("mode", e.target.value as ProfileForm["mode"])}>
             <option value="gst">GST registered</option>
@@ -61,20 +61,20 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
           </select>
         </div>
         <div className="space-y-1">
-          <label htmlFor="cp-state" className="block text-sm font-medium text-ink-soft">State of registration</label>
+          <label htmlFor="cp-state" className="block text-[13px] text-ink-muted">State of registration</label>
           <select id="cp-state" value={form.stateCode} className={selectClass} onChange={(e) => set("stateCode", e.target.value)}>
             <option value="">Choose a state</option>
             {GST_STATES.map(([code, name]) => (
               <option key={code} value={code}>{code} – {name}</option>
             ))}
           </select>
-          {errors.stateCode && <p className="text-xs text-rose-700">{errors.stateCode}</p>}
+          {errors.stateCode && <p className="text-[12.5px] text-bad">{errors.stateCode}</p>}
         </div>
 
         {form.mode === "gst" && (
           <>
             <Input id="cp-gstin" label="GSTIN" value={form.gstin} error={errors.gstin} maxLength={15}
-              className="font-mono uppercase" onChange={(e) => set("gstin", e.target.value)} />
+              className="" onChange={(e) => set("gstin", e.target.value)} />
             <label className="flex items-center gap-2 self-end pb-2 text-sm">
               <input type="checkbox" checked={form.compositionScheme} className="accent-brand"
                 onChange={(e) => set("compositionScheme", e.target.checked)} />
@@ -93,7 +93,7 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
         </div>
 
         <Input id="cp-udyam" label="Udyam number" value={form.udyamNumber} error={errors.udyamNumber}
-          placeholder="UDYAM-MH-01-0001234" className="font-mono uppercase" onChange={(e) => set("udyamNumber", e.target.value)} />
+          placeholder="UDYAM-MH-01-0001234" className="" onChange={(e) => set("udyamNumber", e.target.value)} />
         <Input id="cp-upi" label="UPI ID" value={form.upiVpa} error={errors.upiVpa} placeholder="name@bank"
           autoComplete="off" spellCheck={false} onChange={(e) => set("upiVpa", e.target.value)} />
 
@@ -103,16 +103,16 @@ function ProfileEditor({ organisation }: { organisation: Organisation }) {
         <Input id="cp-account" label="Account number" value={form.bankAccountNumber} error={errors.bankAccountNumber}
           inputMode="numeric" autoComplete="off" className="font-mono" onChange={(e) => set("bankAccountNumber", e.target.value)} />
         <Input id="cp-ifsc" label="IFSC" value={form.bankIfsc} error={errors.bankIfsc} maxLength={11}
-          autoComplete="off" spellCheck={false} className="font-mono uppercase" onChange={(e) => set("bankIfsc", e.target.value)} />
+          autoComplete="off" spellCheck={false} className="" onChange={(e) => set("bankIfsc", e.target.value)} />
       </div>
 
-      <p className="text-xs text-ink-muted">
+      <p className="text-[12.5px] text-ink-muted">
         UPI and bank details are printed on invoices and used in Collections reminders. Only owners and admins can save.
       </p>
       <div className="flex items-center gap-3">
         <Button type="submit" size="sm" isLoading={busy}>Save profile</Button>
         {message && (
-          <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-xs text-emerald-700" : "text-xs text-rose-700"}>
+          <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-[13px] text-ok" : "text-[13px] text-bad"}>
             {message.text}
           </p>
         )}

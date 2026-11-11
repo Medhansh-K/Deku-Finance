@@ -10,7 +10,7 @@ export default function JournalVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Journal Voucher"
+        title="Journal voucher"
         subtitle="Record non-cash accounting adjustments, depreciation, prepaid expenses, and accruals"
         badge={<Badge variant="teal">F7: Journal</Badge>}
         breadcrumbs={[
@@ -21,7 +21,7 @@ export default function JournalVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading journal voucher desk...
             </div>
           }

@@ -10,15 +10,15 @@ export default function ChartOfAccountsPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Chart of Accounts"
-        subtitle="ALERX 4-Tier Hierarchical Ledger Architecture (Assets, Liabilities, Equity, Revenue, Expense)"
-        badge={<Badge variant="teal">ALERX Hierarchical</Badge>}
+        title="Chart of accounts"
+        subtitle="Four-level ledger hierarchy: assets, liabilities, equity, revenue and expense"
+        badge={<Badge variant="teal">ALERX hierarchy</Badge>}
         breadcrumbs={[
           { label: "Masters" },
-          { label: "Chart of Accounts", href: "/masters/chart-of-accounts" },
+          { label: "Chart of accounts", href: "/masters/chart-of-accounts" },
         ]}
       >
-        <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-ink-subtle">Loading Chart of Accounts...</div>}>
+        <Suspense fallback={<div className="p-8 text-center text-[13.5px] text-ink-muted">Loading chart of accounts…</div>}>
           <ChartOfAccountsView />
         </Suspense>
       </WorkspaceLayout>

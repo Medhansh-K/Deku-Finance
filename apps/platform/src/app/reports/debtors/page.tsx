@@ -10,12 +10,12 @@ export default function DebtorsPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Trade Debtors (AR) & DSO Tracking"
-        subtitle="Accounts receivable aging analysis, customer exposure, outstanding invoices, and collection velocity"
-        badge={<Badge variant="teal">DSO Core Engine</Badge>}
+        title="Trade debtors and DSO"
+        subtitle="Accounts receivable ageing, customer exposure, outstanding invoices and collection speed"
+        badge={<Badge variant="teal">Receivables</Badge>}
         breadcrumbs={[
           { label: "Reports" },
-          { label: "Trade Debtors (DSO)", href: "/reports/debtors" },
+          { label: "Trade debtors (DSO)", href: "/reports/debtors" },
         ]}
       >
         <DebtorsDsoView />

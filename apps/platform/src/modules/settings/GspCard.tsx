@@ -53,11 +53,11 @@ export function GspCard({ orgId }: { orgId: string }) {
   const off = !status?.configured;
 
   return (
-    <section data-tour="settings-gsp" aria-labelledby="gsp-card-title" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+    <section data-tour="settings-gsp" aria-labelledby="gsp-card-title" className="bg-surface border border-line rounded-panel p-5 space-y-3">
       <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
         <div className="flex items-center gap-2">
           <Landmark className="h-4 w-4 text-ink-soft" aria-hidden />
-          <h3 id="gsp-card-title" className="text-sm font-bold uppercase text-ink font-mono">GST portal (GSP)</h3>
+          <h3 id="gsp-card-title" className="text-[15px] font-semibold tracking-tight text-ink">GST portal (GSP)</h3>
         </div>
         <Badge variant={off ? "outline" : badge.variant}>{off ? "Not available" : badge.label}</Badge>
       </div>
@@ -66,14 +66,14 @@ export function GspCard({ orgId }: { orgId: string }) {
 
       <p className="text-ink-muted">
         Optional. When connected, Deku files GSTR-1 / GSTR-3B and generates e-invoice IRNs and e-way bills through a GST
-        Suvidha Provider. <span className="font-semibold text-ink-soft">Shared with the provider:</span> your GSTIN and
+        Suvidha Provider. <span className="font-medium text-ink-soft">Shared with the provider:</span> your GSTIN and
         GST portal username, the OTP you enter, the return JSON shown in the filing wizard, and the invoice details
         (parties, items, amounts) of invoices you choose to register. Your portal password is never asked for. Deku stores
         the username and portal session encrypted, and logs each request (what and when, never the content).
       </p>
 
       {status && off && (
-        <p className="rounded border border-line bg-canvas p-3 text-ink-soft">
+        <p className="rounded-ctl bg-canvas px-4 py-3 text-ink-soft">
           {status.reason ?? "Not configured on this server."} Until then, download the JSON from the filing wizard and
           upload it on gst.gov.in yourself.
         </p>
@@ -85,7 +85,7 @@ export function GspCard({ orgId }: { orgId: string }) {
           {conn.session_expires_at && <> until {new Date(conn.session_expires_at).toLocaleString("en-IN")}</>}.
         </p>
       )}
-      {conn?.last_error && <p className="text-rose-700">Last error: {conn.last_error}</p>}
+      {conn?.last_error && <p className="text-bad">Last error: {conn.last_error}</p>}
 
       {!off && (
         <div className="space-y-3">
@@ -154,7 +154,7 @@ export function GspCard({ orgId }: { orgId: string }) {
       )}
 
       {message && (
-        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-emerald-700" : "text-rose-700"}>
+        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-ok" : "text-bad"}>
           {message.text}
         </p>
       )}

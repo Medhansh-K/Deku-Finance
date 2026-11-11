@@ -55,7 +55,7 @@ export function InvoicePaymentLink({ orgId, invoiceId, issued }: { orgId: string
     }
   };
 
-  if (!status) return note ? <p className="text-xs text-rose-700 print:hidden">{note}</p> : null;
+  if (!status) return note ? <p className="text-[13px] text-bad print:hidden">{note}</p> : null;
 
   let reason: string | null = null;
   if (!status.configured) reason = status.reason ?? "Online payment links are switched off.";
@@ -63,7 +63,7 @@ export function InvoicePaymentLink({ orgId, invoiceId, issued }: { orgId: string
   else if (!link && !issued) reason = "Issue the invoice to create a payment link.";
 
   return (
-    <div className={`rounded border border-line p-3 text-xs space-y-1 ${link ? "" : "print:hidden"}`}>
+    <div className={`rounded-ctl border border-line p-3 text-[13px] space-y-1 ${link ? "" : "print:hidden"}`}>
       {link ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-ink">

@@ -36,6 +36,7 @@ import {
   GripVertical,
   Save,
   List,
+  Shuffle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -91,69 +92,85 @@ export interface DocumentSidebarItem {
 const DOCUMENT_TYPES: DocumentSidebarItem[] = [
   {
     id: "invoice",
-    title: "Tax Invoice",
+    title: "Tax invoice",
     subtitle: "Raised in the GST hub so it reaches the ledger and returns",
     icon: FileText,
-    badge: "GST Strict",
-    badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    badge: "GST hub",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "quotation",
-    title: "Commercial Quote",
+    title: "Commercial quote",
     subtitle: "Formal quotation & estimate with validity terms",
     icon: FileCheck,
     badge: "Proposal",
-    badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "discount_coupon",
-    title: "Discount Coupon",
+    title: "Discount coupon",
     subtitle: "Promotional voucher, campaign codes & rebate cards",
     icon: Tag,
     badge: "Marketing",
-    badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "proforma",
-    title: "Proforma Invoice",
+    title: "Proforma invoice",
     subtitle: "Advance commercial invoice prior to goods dispatch",
     icon: Receipt,
     badge: "Advance",
-    badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "delivery_challan",
-    title: "Delivery Challan",
+    title: "Delivery challan",
     subtitle: "Rule 55 goods transport, job work & approval transit",
     icon: Truck,
     badge: "Rule 55",
-    badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "credit_note",
-    title: "Credit Note",
+    title: "Credit note",
     subtitle: "Raised in the GST hub against an issued invoice",
     icon: FileMinus,
     badge: "Adjustment",
-    badgeColor: "bg-rose-100 text-rose-800 border-rose-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "debit_note",
-    title: "Debit Note",
+    title: "Debit note",
     subtitle: "Raised in the GST hub against an issued invoice",
     icon: FilePlus,
     badge: "Adjustment",
-    badgeColor: "bg-cyan-100 text-cyan-800 border-cyan-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
   {
     id: "purchase_order",
-    title: "Purchase Order (PO)",
+    title: "Purchase order (PO)",
     subtitle: "Vendor procurement order with delivery milestones",
     icon: ShoppingCart,
     badge: "Procure",
-    badgeColor: "bg-teal-100 text-teal-800 border-teal-200",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
   },
 ];
+
+// Shared class strings for the builder chrome (premium UI tokens). The printed sheets keep their own layout.
+const KEYCAP = "font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-b-2 bg-surface shrink-0";
+const SEG = "flex items-center gap-1.5 h-8 px-3 rounded-[7px] text-[13px] font-medium transition-colors";
+const SEG_ON = "bg-surface text-ink shadow-[0_0_0_1px_var(--color-line)]";
+const SEG_OFF = "text-ink-muted hover:text-ink";
+const CTL = "h-9 min-w-0 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+const TEXTAREA = "w-full rounded-ctl border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+const LABEL = "block text-[13px] font-medium text-ink-soft mb-1";
+const MINI_LABEL = "block text-[12.5px] text-ink-muted mb-1";
+const CHIP = "inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium";
+const PANEL = "rounded-panel border border-line bg-surface";
+const PANEL_HEAD = "flex items-center justify-between gap-3 px-5 pt-4";
+const PANEL_TITLE = "text-[15px] font-semibold tracking-tight text-ink";
+const MENU_ITEM = "w-full text-left px-2.5 py-2 rounded-ctl hover:bg-canvas flex items-center gap-3 transition-colors";
+const MENU_ICON = "h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center shrink-0";
 
 export function DocumentBuilderView() {
   const router = useRouter();
@@ -584,7 +601,7 @@ export function DocumentBuilderView() {
     a.download = `${docNumber || "document"}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setIsSuccessAction("✓ Exported structured JSON document.");
+    setIsSuccessAction("Exported JSON.");
     setTimeout(() => setIsSuccessAction(null), 3000);
   };
 
@@ -650,7 +667,7 @@ export function DocumentBuilderView() {
     a.download = `${docNumber || "document"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-    setIsSuccessAction("✓ Exported Plain Text Ledger Document (.txt).");
+    setIsSuccessAction("Exported plain text (.txt).");
     setTimeout(() => setIsSuccessAction(null), 3000);
   };
 
@@ -816,7 +833,7 @@ export function DocumentBuilderView() {
     a.download = `${docNumber || "document"}.doc`;
     a.click();
     URL.revokeObjectURL(url);
-    setIsSuccessAction("✓ Exported Microsoft Word Document (.doc).");
+    setIsSuccessAction("Exported Word document (.doc).");
     setTimeout(() => setIsSuccessAction(null), 3000);
   };
 
@@ -861,7 +878,7 @@ export function DocumentBuilderView() {
         organisation_id: orgId,
         status: "success",
       });
-      setIsSuccessAction(`✓ Saved ${saved.doc_number} as a draft.`);
+      setIsSuccessAction(`Saved ${saved.doc_number} as a draft.`);
       setTimeout(() => setIsSuccessAction(null), 3000);
     } catch (err) {
       setFormErrs([err instanceof Error ? err.message : "Couldn't save the document."]);
@@ -871,7 +888,7 @@ export function DocumentBuilderView() {
   };
 
   return (
-    <div className="flex h-full w-full overflow-hidden font-sans text-xs bg-canvas print:h-auto print:w-auto print:overflow-visible print:bg-white">
+    <div className="flex h-full w-full overflow-hidden text-[13.5px] text-ink bg-canvas print:h-auto print:w-auto print:overflow-visible print:bg-white">
       {/* ========================================================================= */}
       {/* 1. SLIDEABLE & ADJUSTABLE SIDEBAR: DOCUMENT SELECTOR                      */}
       {/* ========================================================================= */}
@@ -879,36 +896,38 @@ export function DocumentBuilderView() {
         style={{
           width: isSidebarCollapsed ? 0 : sidebarWidth,
         }}
-        className={`bg-white flex flex-col shrink-0 select-none overflow-hidden transition-[width] duration-200 relative no-print ${
-          isSidebarCollapsed ? "w-0 border-none pointer-events-none" : "border-r border-line-strong"
+        className={`bg-surface flex flex-col shrink-0 select-none overflow-hidden transition-[width] duration-200 relative no-print ${
+          isSidebarCollapsed ? "w-0 border-none pointer-events-none" : "border-r border-line"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="p-3 border-b border-line-strong bg-slate-50 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded bg-panel-deep flex items-center justify-center text-brand">
+        <div className="px-4 py-3.5 border-b border-line flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="h-8 w-8 rounded-[8px] bg-brand-wash text-brand-strong grid place-items-center shrink-0">
               <FileText className="h-4 w-4" />
-            </div>
-            <div>
-              <h2 className="font-bold text-xs text-slate-900 tracking-tight">Document Builder</h2>
-              <p className="text-[10px] text-slate-500 font-mono">Shift+B • GST Suite</p>
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[15px] font-semibold tracking-tight text-ink truncate">Document builder</h2>
+              <p className="text-[12.5px] text-ink-muted flex items-center gap-1.5">
+                Hide or show <kbd className={`${KEYCAP} border-line-strong text-ink-muted`}>Shift B</kbd>
+              </p>
             </div>
           </div>
 
           <button
             suppressHydrationWarning
             onClick={() => setIsSidebarCollapsed(true)}
-            className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 transition-colors"
-            title="Collapse Sidebar (Shift+B)"
+            className="p-1.5 rounded-ctl text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors"
+            title="Collapse sidebar (Shift+B)"
           >
             <PanelLeftClose className="h-4 w-4" />
           </button>
         </div>
 
         {/* Document Navigation Menu */}
-        <div data-tour="builder-templates" className="flex-1 overflow-y-auto p-2 space-y-1">
-          <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Document Templates
+        <div data-tour="builder-templates" className="flex-1 overflow-y-auto p-2 space-y-0.5">
+          <div className="px-2 pt-1.5 pb-1 text-[12.5px] font-medium text-ink-muted">
+            Templates
           </div>
 
           {DOCUMENT_TYPES.map((doc) => {
@@ -920,49 +939,47 @@ export function DocumentBuilderView() {
                 key={doc.id}
                 suppressHydrationWarning
                 onClick={() => applyPresetForDocType(doc.id)}
-                className={`w-full text-left p-2.5 rounded-lg border transition-all flex items-start gap-2.5 group ${
+                className={`w-full text-left px-2 py-2 rounded-ctl transition-colors flex items-start gap-3 ${
                   isActive
-                    ? "bg-panel text-white border-brand shadow-sm"
-                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                    ? "bg-brand-wash shadow-[inset_3px_0_0_var(--color-brand)]"
+                    : "hover:bg-canvas"
                 }`}
               >
-                <div
-                  className={`h-7 w-7 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                    isActive
-                      ? "bg-brand text-ink"
-                      : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                <span
+                  className={`h-8 w-8 rounded-[8px] grid place-items-center shrink-0 ${
+                    isActive ? "bg-surface text-brand-strong" : "bg-canvas-sunken text-ink-soft"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                </div>
+                </span>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className={`font-bold text-xs truncate ${isActive ? "text-white" : "text-slate-900"}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-1.5">
+                    <span className={`text-[14px] font-[550] truncate ${isActive ? "text-ink" : "text-ink-soft"}`}>
                       {doc.title}
                     </span>
-                    <span className={`text-[9px] font-mono px-1 py-0.2 rounded border font-semibold ${doc.badgeColor}`}>
+                    <span className={`inline-flex items-center h-5 px-1.5 rounded-chip text-xs font-medium shrink-0 ${doc.badgeColor}`}>
                       {doc.badge}
                     </span>
-                  </div>
-                  <p className={`text-[10px] mt-0.5 line-clamp-1 ${isActive ? "text-slate-300" : "text-slate-500"}`}>
+                  </span>
+                  <span className="block text-[12.5px] text-ink-muted mt-0.5 line-clamp-1">
                     {doc.subtitle}
-                  </p>
-                </div>
+                  </span>
+                </span>
               </button>
             );
           })}
         </div>
 
         {/* Sidebar Footer Info */}
-        <div className="p-2.5 border-t border-line-strong bg-slate-50 text-[10px] text-slate-500 space-y-1">
+        <div className="px-4 py-3 border-t border-line text-[12.5px] text-ink-muted space-y-1">
           <div className="flex items-center justify-between">
-            <span>Authoritative Engine:</span>
-            <span className="font-mono font-bold text-slate-800">Deku OS v2.4</span>
+            <span>Engine</span>
+            <span className="text-ink-soft">Deku OS v2.4</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Print Standard:</span>
-            <span className="font-mono text-emerald-700 font-semibold">ISO A4 300DPI</span>
+            <span>Print size</span>
+            <span className="text-ink-soft">A4</span>
           </div>
         </div>
       </aside>
@@ -971,105 +988,88 @@ export function DocumentBuilderView() {
       {!isSidebarCollapsed && (
         <div
           onMouseDown={() => setIsDraggingSidebar(true)}
-          className="w-1.5 hover:w-2 bg-transparent hover:bg-brand/40 cursor-col-resize transition-all shrink-0 relative flex items-center justify-center select-none no-print"
+          className="w-1.5 hover:w-2 bg-transparent hover:bg-brand/30 cursor-col-resize transition-all shrink-0 relative flex items-center justify-center select-none no-print"
           title="Drag to resize sidebar width"
         >
-          <div className="h-8 w-0.5 bg-slate-300 group-hover:bg-brand rounded-full" />
+          <div className="h-8 w-0.5 bg-line-strong rounded-full" />
         </div>
       )}
 
       {/* ========================================================================= */}
       {/* 2. UNIFIED MAIN CONTAINER (Create / Preview / Split Toggle)                */}
       {/* ========================================================================= */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-white min-w-0 print:h-auto print:overflow-visible print:w-full print:block">
+      <main className="flex-1 flex flex-col h-full overflow-hidden bg-canvas min-w-0 print:h-auto print:overflow-visible print:w-full print:block">
         {/* Unified Top Toolbar */}
-        <header className="h-12 border-b border-line-strong bg-slate-50/90 px-4 flex items-center justify-between gap-3 shrink-0 select-none no-print">
+        <header className="h-14 border-b border-line bg-surface px-4 flex items-center justify-between gap-3 shrink-0 select-none no-print">
           {/* Left: Dedicated Sidebar Toggle + Document Title */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <button
+          <div className="flex items-center gap-3 min-w-0">
+            <Button
               suppressHydrationWarning
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs font-semibold transition-all shrink-0 ${
-                isSidebarCollapsed
-                  ? "bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:border-brand shadow-2xs"
-                  : "bg-slate-200/90 border-slate-300 text-slate-800 hover:bg-slate-300"
-              }`}
-              title={isSidebarCollapsed ? "Expand Templates Sidebar (Shift+B)" : "Collapse Sidebar to Full Width (Shift+B)"}
+              className="shrink-0"
+              title={isSidebarCollapsed ? "Expand templates sidebar (Shift+B)" : "Collapse sidebar to full width (Shift+B)"}
             >
               {isSidebarCollapsed ? (
                 <>
-                  <PanelLeft className="h-4 w-4 text-brand" />
-                  <span className="hidden md:inline font-mono text-[11px]">Templates</span>
+                  <PanelLeft className="h-4 w-4 text-brand-strong" />
+                  <span className="hidden md:inline">Templates</span>
                 </>
               ) : (
                 <>
-                  <PanelLeftClose className="h-4 w-4 text-slate-700" />
-                  <span className="hidden md:inline font-mono text-[11px]">Hide</span>
+                  <PanelLeftClose className="h-4 w-4" />
+                  <span className="hidden md:inline">Hide</span>
                 </>
               )}
-            </button>
+            </Button>
 
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block leading-tight truncate">
-                Form Specification &amp; Builder
+            <div className="min-w-0 flex items-center gap-2">
+              <h3 className="text-[15px] font-semibold tracking-tight text-ink truncate">
+                {DOCUMENT_TYPES.find((d) => d.id === activeDocType)?.title ?? activeDocType.replace("_", " ")}
+              </h3>
+              <span className="inline-flex items-center h-[22px] px-2 rounded-chip font-mono text-[12px] bg-canvas-sunken text-ink-soft shrink-0">
+                {docNumber || "unnumbered"}
               </span>
-              <div className="flex items-center gap-2 truncate">
-                <h3 className="font-bold text-xs text-slate-900 capitalize truncate">
-                  {activeDocType.replace("_", " ")} Specification
-                </h3>
-                <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 shrink-0">
-                  {docNumber || "unnumbered"}
-                </span>
-                {docId && <Badge variant={docStatus === "draft" ? "warning" : "teal"}>{docStatus}</Badge>}
-              </div>
+              {docId && (
+                <Badge variant={docStatus === "draft" ? "warning" : "teal"} className="capitalize">
+                  {docStatus}
+                </Badge>
+              )}
             </div>
           </div>
 
           {/* Center: Segmented Viewport Switcher [Create | Preview | Split] */}
-          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg border border-slate-300 shrink-0">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-ctl bg-canvas-sunken shrink-0">
             <button
               suppressHydrationWarning
               onClick={() => setViewMode("create")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                viewMode === "create"
-                  ? "bg-panel text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              className={`${SEG} ${viewMode === "create" ? SEG_ON : SEG_OFF}`}
             >
-              <Edit3 className="h-3.5 w-3.5 text-brand" />
-              <span>Create / Edit</span>
+              <Edit3 className="h-3.5 w-3.5" />
+              <span>Edit</span>
             </button>
 
             <button
               suppressHydrationWarning
               onClick={() => setViewMode("preview")}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                viewMode === "preview"
-                  ? "bg-panel text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+              className={`${SEG} ${viewMode === "preview" ? SEG_ON : SEG_OFF}`}
             >
-              <Eye className="h-3.5 w-3.5 text-brand" />
+              <Eye className="h-3.5 w-3.5" />
               <span>Preview</span>
             </button>
 
             <button
               suppressHydrationWarning
               onClick={() => setViewMode("split")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
-                viewMode === "split"
-                  ? "bg-panel text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-              title="Split View (Form & Preview side-by-side with real-time updates)"
+              className={`${SEG} ${viewMode === "split" ? SEG_ON : SEG_OFF}`}
+              title="Split view (form and preview side by side, updating live)"
             >
-              <Columns className="h-3.5 w-3.5 text-brand" />
+              <Columns className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Split</span>
               {viewMode === "split" && (
-                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-black/40 text-brand-soft">
-                  {Math.round(splitRatio)}%
-                </span>
+                <span className="text-xs text-ink-muted tabular-nums">{Math.round(splitRatio)}%</span>
               )}
             </button>
           </div>
@@ -1077,14 +1077,14 @@ export function DocumentBuilderView() {
           {/* Right: Actions, Zoom, Download & Post to Voucher Desk */}
           <div className="flex items-center gap-2 shrink-0">
             {isSuccessAction && (
-              <span className="text-emerald-700 text-[11px] font-semibold hidden md:flex items-center gap-1">
-                <Check className="h-3.5 w-3.5 text-emerald-600" /> {isSuccessAction}
+              <span className="text-ok text-[12.5px] font-medium hidden md:flex items-center gap-1">
+                <Check className="h-3.5 w-3.5" /> {isSuccessAction}
               </span>
             )}
 
             {/* Interactive Zoom Controls in Preview or Split mode */}
             {viewMode !== "create" && (
-              <div className="hidden lg:flex items-center gap-1 bg-slate-100 border border-slate-200 rounded px-1 py-0.5 text-[11px] font-mono">
+              <div className="hidden lg:flex items-center gap-0.5 rounded-ctl border border-line bg-surface p-0.5 text-[12.5px]">
                 <button
                   type="button"
                   onClick={() => {
@@ -1093,20 +1093,20 @@ export function DocumentBuilderView() {
                       return Math.max(0.4, Number((curr - 0.1).toFixed(1)));
                     });
                   }}
-                  className="p-1 hover:bg-slate-200 rounded text-slate-700 transition-colors"
-                  title="Zoom Out"
+                  className="p-1.5 rounded-[6px] text-ink-soft hover:bg-canvas-sunken transition-colors"
+                  title="Zoom out"
                 >
-                  <ZoomOut className="h-3 w-3" />
+                  <ZoomOut className="h-3.5 w-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setZoomMode("auto")}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                    zoomMode === "auto" ? "text-ink bg-white shadow-2xs" : "text-slate-600 hover:text-slate-900"
+                  className={`h-7 px-2 rounded-[6px] font-medium tabular-nums ${
+                    zoomMode === "auto" ? "bg-canvas-sunken text-ink" : "text-ink-muted hover:text-ink"
                   }`}
-                  title="Reset to Fit Width"
+                  title="Reset to fit width"
                 >
-                  {Math.round(effectiveScale * 100)}% {zoomMode === "auto" ? "(Fit)" : ""}
+                  {Math.round(effectiveScale * 100)}% {zoomMode === "auto" ? "(fit)" : ""}
                 </button>
                 <button
                   type="button"
@@ -1116,78 +1116,80 @@ export function DocumentBuilderView() {
                       return Math.min(1.5, Number((curr + 0.1).toFixed(1)));
                     });
                   }}
-                  className="p-1 hover:bg-slate-200 rounded text-slate-700 transition-colors"
-                  title="Zoom In"
+                  className="p-1.5 rounded-[6px] text-ink-soft hover:bg-canvas-sunken transition-colors"
+                  title="Zoom in"
                 >
-                  <ZoomIn className="h-3 w-3" />
+                  <ZoomIn className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
 
             {/* DOWNLOAD DROPDOWN BUTTON */}
             <div data-tour="builder-download" className="relative" ref={downloadDropdownRef}>
-              <button
+              <Button
                 suppressHydrationWarning
+                variant="primary"
+                size="sm"
                 onClick={() => setIsDownloadOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-panel text-white hover:bg-[#2A3032] border border-edge font-bold text-xs transition-colors shadow-xs"
+                aria-expanded={isDownloadOpen}
               >
-                <Download className="h-3.5 w-3.5 text-brand" />
+                <Download className="h-3.5 w-3.5" />
                 <span>Download</span>
-                <ChevronDown className="h-3 w-3 text-slate-400 ml-0.5" />
-              </button>
+                <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+              </Button>
 
               {isDownloadOpen && (
-                <div className="absolute right-0 mt-1 w-56 bg-white rounded-lg shadow-xl border border-slate-200 py-1.5 z-50 text-xs">
-                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                    Export Formats
+                <div className="absolute right-0 mt-1.5 w-64 rounded-panel border border-line bg-surface shadow-pop p-1.5 z-50">
+                  <div className="px-2.5 pt-1 pb-1.5 text-[12.5px] font-medium text-ink-muted">
+                    Export format
                   </div>
 
                   <button
                     suppressHydrationWarning
                     onClick={handleDownloadPDF}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-800 transition-colors"
+                    className={MENU_ITEM}
                   >
-                    <Printer className="h-4 w-4 text-emerald-600" />
-                    <div>
-                      <div className="font-bold">PDF Document (.pdf)</div>
-                      <div className="text-[10px] text-slate-400">Print-ready A4 PDF export</div>
-                    </div>
+                    <span className={MENU_ICON}><Printer className="h-4 w-4" /></span>
+                    <span>
+                      <span className="block text-[14px] font-[550] text-ink">PDF (.pdf)</span>
+                      <span className="block text-[12.5px] text-ink-muted">Print-ready A4</span>
+                    </span>
                   </button>
 
                   <button
                     suppressHydrationWarning
                     onClick={handleDownloadWord}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-800 transition-colors"
+                    className={MENU_ITEM}
                   >
-                    <FileType className="h-4 w-4 text-blue-600" />
-                    <div>
-                      <div className="font-bold">Microsoft Word (.doc)</div>
-                      <div className="text-[10px] text-slate-400">Formatted Word document table</div>
-                    </div>
+                    <span className={MENU_ICON}><FileType className="h-4 w-4" /></span>
+                    <span>
+                      <span className="block text-[14px] font-[550] text-ink">Microsoft Word (.doc)</span>
+                      <span className="block text-[12.5px] text-ink-muted">Formatted Word table</span>
+                    </span>
                   </button>
 
                   <button
                     suppressHydrationWarning
                     onClick={handleDownloadText}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-800 transition-colors"
+                    className={MENU_ITEM}
                   >
-                    <FileText className="h-4 w-4 text-amber-600" />
-                    <div>
-                      <div className="font-bold">Plain Text Ledger (.txt)</div>
-                      <div className="text-[10px] text-slate-400">Standard ASCII bordered format</div>
-                    </div>
+                    <span className={MENU_ICON}><FileText className="h-4 w-4" /></span>
+                    <span>
+                      <span className="block text-[14px] font-[550] text-ink">Plain text (.txt)</span>
+                      <span className="block text-[12.5px] text-ink-muted">Bordered text layout</span>
+                    </span>
                   </button>
 
                   <button
                     suppressHydrationWarning
                     onClick={handleDownloadJSON}
-                    className="w-full text-left px-3 py-2 hover:bg-slate-50 flex items-center gap-2 text-slate-800 transition-colors"
+                    className={MENU_ITEM}
                   >
-                    <FileCode className="h-4 w-4 text-purple-600" />
-                    <div>
-                      <div className="font-bold">Structured Schema (.json)</div>
-                      <div className="text-[10px] text-slate-400">Full JSON payload &amp; calculations</div>
-                    </div>
+                    <span className={MENU_ICON}><FileCode className="h-4 w-4" /></span>
+                    <span>
+                      <span className="block text-[14px] font-[550] text-ink">Structured data (.json)</span>
+                      <span className="block text-[12.5px] text-ink-muted">Full payload and calculations</span>
+                    </span>
                   </button>
                 </div>
               )}
@@ -1198,7 +1200,6 @@ export function DocumentBuilderView() {
               variant="outline"
               size="sm"
               onClick={() => setShowRegister((v) => !v)}
-              className="gap-1.5 text-xs font-bold px-3 py-1.5"
               title="Saved quotations, proformas, purchase orders and challans"
             >
               <List className="h-3.5 w-3.5" />
@@ -1213,10 +1214,9 @@ export function DocumentBuilderView() {
                 onClick={handleSave}
                 isLoading={isSaving}
                 disabled={docStatus !== "draft" || !orgId}
-                className="gap-1.5 text-xs font-bold px-3 py-1.5 shadow-xs"
                 title={docStatus === "draft" ? "Save this document as a draft" : `This document is ${docStatus}; only drafts can be edited`}
               >
-                <Save className="h-3.5 w-3.5 text-brand" />
+                <Save className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{docId ? "Save changes" : "Save draft"}</span>
                 <span className="sm:hidden">Save</span>
               </Button>
@@ -1229,23 +1229,21 @@ export function DocumentBuilderView() {
                 variant="outline"
                 size="sm"
                 onClick={copyCouponToClipboard}
-                className="gap-1 font-bold text-xs"
               >
-                {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                {copiedCode ? "Copied!" : "Copy Code"}
+                {copiedCode ? <Check className="h-3.5 w-3.5 text-ok" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedCode ? "Copied" : "Copy code"}
               </Button>
             )}
 
             {/* Reset */}
             <Button
               suppressHydrationWarning
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => applyPresetForDocType(activeDocType)}
-              className="gap-1 text-[11px] h-7 px-2"
               title="Start a new blank document"
             >
-              <RotateCcw className="h-3 w-3 text-slate-500" /> New
+              <RotateCcw className="h-3.5 w-3.5" /> New
             </Button>
           </div>
         </header>
@@ -1254,14 +1252,14 @@ export function DocumentBuilderView() {
         {/* WORKSPACE VIEWPORT (Unified, Resizable & Overlap-Free)              */}
         {/* =================================================================== */}
         {formErrs.length > 0 && !showRegister && (
-          <div role="alert" className="mx-4 mt-3 p-2.5 rounded border border-rose-200 bg-rose-50 text-xs text-rose-700 space-y-0.5 no-print">
+          <div role="alert" className="mx-4 mt-3 px-3.5 py-3 rounded-ctl bg-bad-wash text-[13px] text-bad space-y-0.5 no-print">
             {formErrs.map((m) => (
               <div key={m}>{m}</div>
             ))}
           </div>
         )}
         {showRegister && (
-          <div className="flex-1 overflow-y-auto p-4 bg-canvas no-print">
+          <div className="flex-1 overflow-y-auto p-5 bg-canvas no-print">
             <BusinessDocumentsRegister orgId={orgId} onOpen={loadDocument} />
           </div>
         )}
@@ -1275,402 +1273,400 @@ export function DocumentBuilderView() {
                 width: viewMode === "split" ? `${splitRatio}%` : "100%",
                 flexShrink: 0,
               }}
-              className="overflow-y-auto overflow-x-hidden p-6 space-y-5 bg-white min-w-0 transition-[width] duration-75 no-print"
+              className="overflow-y-auto overflow-x-hidden p-6 space-y-5 bg-canvas min-w-0 transition-[width] duration-75 no-print"
             >
-              <div className={`${viewMode === "create" ? "max-w-4xl mx-auto" : "w-full"} space-y-5`}>
+              <div className={`${viewMode === "create" ? "max-w-4xl mx-auto" : "w-full"} space-y-4`}>
                 {/* Document Identification */}
-                <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span>Document Identification</span>
-                    <span className="text-slate-400 font-mono">Series: 2026-27</span>
+                <section className={PANEL}>
+                  <div className={PANEL_HEAD}>
+                    <h4 className={PANEL_TITLE}>Document details</h4>
+                    <span className="text-[12.5px] text-ink-muted">Series 2026-27</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Input
-                      label="Document Number"
-                      value={docNumber}
-                      onChange={(e) => setDocNumber(e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Issue Date"
-                      type="date"
-                      value={docDate}
-                      onChange={(e) => setDocDate(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  {activeDocType !== "discount_coupon" && (
+                  <div className="p-5 space-y-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
-                        label="Due / Delivery Date"
-                        type="date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
+                        label="Document number"
+                        value={docNumber}
+                        onChange={(e) => setDocNumber(e.target.value)}
+                        className="font-mono"
                         required
                       />
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                          Place of Supply (POS)
-                        </label>
-                        <select
-                          suppressHydrationWarning
-                          value={placeOfSupply}
-                          onChange={(e) => setPlaceOfSupply(e.target.value)}
-                          className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
-                        >
-                          <option value="">Choose state</option>
-                          {GST_STATES.map(([code, name]) => (
-                            <option key={code} value={`${code}-${name}`}>
-                              {code} - {name}
-                              {activeStateCode ? (code === activeStateCode ? " (CGST + SGST)" : " (IGST)") : ""}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      <Input
+                        label="Issue date"
+                        type="date"
+                        value={docDate}
+                        onChange={(e) => setDocDate(e.target.value)}
+                        required
+                      />
                     </div>
-                  )}
-                </div>
+
+                    {activeDocType !== "discount_coupon" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Input
+                          label="Due or delivery date"
+                          type="date"
+                          value={dueDate}
+                          onChange={(e) => setDueDate(e.target.value)}
+                          required
+                        />
+                        <div>
+                          <label className={LABEL}>Place of supply</label>
+                          <select
+                            suppressHydrationWarning
+                            value={placeOfSupply}
+                            onChange={(e) => setPlaceOfSupply(e.target.value)}
+                            className={`${CTL} w-full`}
+                          >
+                            <option value="">Choose state</option>
+                            {GST_STATES.map(([code, name]) => (
+                              <option key={code} value={`${code}-${name}`}>
+                                {code} - {name}
+                                {activeStateCode ? (code === activeStateCode ? " (CGST + SGST)" : " (IGST)") : ""}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
 
                 {/* SPECIAL SECTION: DISCOUNT COUPON FORM */}
                 {activeDocType === "discount_coupon" && (
-                  <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 space-y-3">
-                    <div className="flex items-center justify-between border-b border-purple-200/60 pb-2">
-                      <span className="font-bold text-purple-900 text-xs flex items-center gap-1.5">
-                        <Tag className="h-3.5 w-3.5 text-purple-700" /> Coupon &amp; Promotional Campaign Setup
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-200 text-purple-900">
-                        Voucher
-                      </span>
+                  <section className={PANEL}>
+                    <div className={PANEL_HEAD}>
+                      <h4 className={`${PANEL_TITLE} flex items-center gap-2`}>
+                        <Tag className="h-4 w-4 text-brand-strong" /> Coupon and campaign
+                      </h4>
+                      <span className={`${CHIP} bg-canvas-sunken text-ink-soft`}>Voucher</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-purple-900 mb-1">
-                          Coupon Code
-                        </label>
-                        <div className="flex items-center gap-1">
-                          <input
-                            suppressHydrationWarning
-                            type="text"
-                            value={couponCode}
-                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                            className="flex-1 rounded border border-purple-300 font-mono font-bold text-xs uppercase px-2 py-1.5 text-purple-950 bg-white focus:outline-none focus:border-purple-600"
-                          />
-                          <Button
-                            suppressHydrationWarning
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCouponCode(`PROMO${Math.floor(1000 + Math.random() * 9000)}`)}
-                            className="h-8 px-2 text-[10px]"
-                            title="Randomize Code"
-                          >
-                            🎲
-                          </Button>
+                    <div className="p-5 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={LABEL}>Coupon code</label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              suppressHydrationWarning
+                              type="text"
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                              className={`${CTL} flex-1 font-mono uppercase`}
+                            />
+                            <Button
+                              suppressHydrationWarning
+                              type="button"
+                              variant="outline"
+                              size="md"
+                              onClick={() => setCouponCode(`PROMO${Math.floor(1000 + Math.random() * 9000)}`)}
+                              className="px-2.5"
+                              title="Randomise code"
+                              aria-label="Randomise code"
+                            >
+                              <Shuffle className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
+
+                        <Input
+                          label="Campaign title"
+                          value={couponTitle}
+                          onChange={(e) => setCouponTitle(e.target.value)}
+                          required
+                        />
                       </div>
 
-                      <Input
-                        label="Campaign Title"
-                        value={couponTitle}
-                        onChange={(e) => setCouponTitle(e.target.value)}
-                        required
-                      />
-                    </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={LABEL}>Discount structure</label>
+                          <select
+                            suppressHydrationWarning
+                            value={discountType}
+                            onChange={(e) => setDiscountType(e.target.value as "percentage" | "flat")}
+                            className={`${CTL} w-full`}
+                          >
+                            <option value="percentage">Percentage discount (%)</option>
+                            <option value="flat">Flat cash rebate (₹)</option>
+                          </select>
+                        </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Input
+                          label={discountType === "percentage" ? "Discount rate (%)" : "Flat amount (₹)"}
+                          type="number"
+                          value={discountValue.toString()}
+                          onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Input
+                          label="Minimum cart value (₹)"
+                          type="number"
+                          value={minOrderValue.toString()}
+                          onChange={(e) => setMinOrderValue(parseFloat(e.target.value) || 0)}
+                        />
+                        <Input
+                          label="Maximum discount cap (₹)"
+                          type="number"
+                          value={maxDiscountCap.toString()}
+                          onChange={(e) => setMaxDiscountCap(parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Input
+                          label="Valid until"
+                          type="date"
+                          value={couponValidUntil}
+                          onChange={(e) => setCouponValidUntil(e.target.value)}
+                        />
+                        <Input
+                          label="Usage limit"
+                          value={couponUsageLimit}
+                          onChange={(e) => setCouponUsageLimit(e.target.value)}
+                        />
+                      </div>
+
                       <div>
-                        <label className="block text-[10px] font-bold uppercase text-purple-900 mb-1">
-                          Discount Structure
-                        </label>
-                        <select
+                        <label className={LABEL}>Redemption scope and terms</label>
+                        <textarea
                           suppressHydrationWarning
-                          value={discountType}
-                          onChange={(e) => setDiscountType(e.target.value as "percentage" | "flat")}
-                          className="w-full rounded border border-purple-300 bg-white px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-purple-600"
-                        >
-                          <option value="percentage">Percentage Discount (%)</option>
-                          <option value="flat">Flat Cash Rebate (₹)</option>
-                        </select>
+                          rows={2}
+                          value={couponEligibleScope}
+                          onChange={(e) => setCouponEligibleScope(e.target.value)}
+                          className={TEXTAREA}
+                        />
                       </div>
-
-                      <Input
-                        label={discountType === "percentage" ? "Discount Rate (%)" : "Flat Amount (₹)"}
-                        type="number"
-                        value={discountValue.toString()}
-                        onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
-                        required
-                      />
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        label="Min Cart Value (₹)"
-                        type="number"
-                        value={minOrderValue.toString()}
-                        onChange={(e) => setMinOrderValue(parseFloat(e.target.value) || 0)}
-                      />
-                      <Input
-                        label="Max Discount Cap (₹)"
-                        type="number"
-                        value={maxDiscountCap.toString()}
-                        onChange={(e) => setMaxDiscountCap(parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        label="Valid Until"
-                        type="date"
-                        value={couponValidUntil}
-                        onChange={(e) => setCouponValidUntil(e.target.value)}
-                      />
-                      <Input
-                        label="Usage Limit"
-                        value={couponUsageLimit}
-                        onChange={(e) => setCouponUsageLimit(e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-bold uppercase text-purple-900 mb-1">
-                        Redemption Scope / Terms
-                      </label>
-                      <textarea
-                        suppressHydrationWarning
-                        rows={2}
-                        value={couponEligibleScope}
-                        onChange={(e) => setCouponEligibleScope(e.target.value)}
-                        className="w-full rounded border border-purple-300 p-2 text-xs text-slate-800 bg-white focus:outline-none focus:border-purple-600"
-                      />
-                    </div>
-                  </div>
+                  </section>
                 )}
 
                 {/* SPECIAL SECTION: DELIVERY CHALLAN (RULE 55) */}
                 {activeDocType === "delivery_challan" && (
-                  <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-3">
-                    <div className="flex items-center justify-between border-b border-indigo-200/60 pb-2">
-                      <span className="font-bold text-indigo-900 text-xs flex items-center gap-1.5">
-                        <Truck className="h-3.5 w-3.5 text-indigo-700" /> GST Rule 55 Transport &amp; Vehicle Mandate
-                      </span>
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-200 text-indigo-900">
-                        Goods in Transit
-                      </span>
+                  <section className={PANEL}>
+                    <div className={PANEL_HEAD}>
+                      <h4 className={`${PANEL_TITLE} flex items-center gap-2`}>
+                        <Truck className="h-4 w-4 text-brand-strong" /> Transport and vehicle (GST Rule 55)
+                      </h4>
+                      <span className={`${CHIP} bg-canvas-sunken text-ink-soft`}>Goods in transit</span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase text-indigo-900 mb-1">
-                          Nature of Transport
-                        </label>
-                        <select
-                          suppressHydrationWarning
-                          value={challanReason}
-                          onChange={(e) => setChallanReason(e.target.value)}
-                          className="w-full rounded border border-indigo-300 bg-white px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-indigo-600"
-                        >
-                          <option value="">Choose reason</option>
-                          <option value="Supply on Approval / Return">Supply on Approval / Return</option>
-                          <option value="Job Work / Processing">Job Work / Processing</option>
-                          <option value="Inter-Branch Stock Transit">Inter-Branch Stock Transit</option>
-                          <option value="Exhibition / Demonstration">Exhibition / Demonstration</option>
-                          <option value="Semi-Knocked Down Transport">Semi-Knocked Down Transport</option>
-                        </select>
+                    <div className="p-5 space-y-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={LABEL}>Nature of transport</label>
+                          <select
+                            suppressHydrationWarning
+                            value={challanReason}
+                            onChange={(e) => setChallanReason(e.target.value)}
+                            className={`${CTL} w-full`}
+                          >
+                            <option value="">Choose reason</option>
+                            <option value="Supply on Approval / Return">Supply on Approval / Return</option>
+                            <option value="Job Work / Processing">Job Work / Processing</option>
+                            <option value="Inter-Branch Stock Transit">Inter-Branch Stock Transit</option>
+                            <option value="Exhibition / Demonstration">Exhibition / Demonstration</option>
+                            <option value="Semi-Knocked Down Transport">Semi-Knocked Down Transport</option>
+                          </select>
+                        </div>
+
+                        <Input
+                          label="Vehicle or container no."
+                          value={vehicleNumber}
+                          onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+                          className="font-mono"
+                          required
+                        />
                       </div>
 
-                      <Input
-                        label="Vehicle / Container No"
-                        value={vehicleNumber}
-                        onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
-                        required
-                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Input
+                          label="Transporter name"
+                          value={transporterName}
+                          onChange={(e) => setTransporterName(e.target.value)}
+                        />
+                        <Input
+                          label="E-way bill number"
+                          value={ewayBillNo}
+                          onChange={(e) => setEwayBillNo(e.target.value)}
+                          className="font-mono"
+                        />
+                      </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <Input
-                        label="Transporter Name"
-                        value={transporterName}
-                        onChange={(e) => setTransporterName(e.target.value)}
-                      />
-                      <Input
-                        label="E-Way Bill Number"
-                        value={ewayBillNo}
-                        onChange={(e) => setEwayBillNo(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                  </section>
                 )}
 
                 {/* Counterparty / Party Information */}
-                <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span>
-                      {activeDocType === "purchase_order" ? "Vendor / Supplier Details" : "Customer / Bill To Details"}
-                    </span>
-                    <span className="text-slate-400 font-mono">Consignee</span>
+                <section className={PANEL}>
+                  <div className={PANEL_HEAD}>
+                    <h4 className={PANEL_TITLE}>
+                      {activeDocType === "purchase_order" ? "Vendor / supplier" : "Customer / bill to"}
+                    </h4>
+                    <span className="text-[12.5px] text-ink-muted">Consignee</span>
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                      Party from Parties
-                    </label>
-                    <select
-                      suppressHydrationWarning
-                      value={partyId}
-                      onChange={(e) => choosePartyRecord(e.target.value)}
-                      className="w-full rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-brand focus:outline-none"
-                    >
-                      <option value="">Not in Parties (type the details below)</option>
-                      {parties
-                        .filter((p) => (activeDocType === "purchase_order" ? p.type === "vendor" : p.type === "customer"))
-                        .map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.legal_name}
-                            {p.gstin ? ` · ${p.gstin}` : ""}
-                          </option>
-                        ))}
-                    </select>
-                    {(activeDocType === "quotation" || activeDocType === "proforma") && !partyId && (
-                      <p className="text-[10px] text-ink-muted mt-1">Converting to an invoice needs a customer from Parties.</p>
-                    )}
-                  </div>
+                  <div className="p-5 space-y-3">
+                    <div>
+                      <label className={LABEL}>Party from Parties</label>
+                      <select
+                        suppressHydrationWarning
+                        value={partyId}
+                        onChange={(e) => choosePartyRecord(e.target.value)}
+                        className={`${CTL} w-full`}
+                      >
+                        <option value="">Not in Parties (type the details below)</option>
+                        {parties
+                          .filter((p) => (activeDocType === "purchase_order" ? p.type === "vendor" : p.type === "customer"))
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.legal_name}
+                              {p.gstin ? ` · ${p.gstin}` : ""}
+                            </option>
+                          ))}
+                      </select>
+                      {(activeDocType === "quotation" || activeDocType === "proforma") && !partyId && (
+                        <p className="text-[12.5px] text-ink-muted mt-1">Converting to an invoice needs a customer from Parties.</p>
+                      )}
+                    </div>
 
-                  <Input
-                    label="Recipient Legal Name"
-                    value={partyName}
-                    onChange={(e) => setPartyName(e.target.value)}
-                    required
-                  />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Input
-                      label="Recipient GSTIN"
-                      value={partyGSTIN}
-                      onChange={(e) => setPartyGSTIN(e.target.value.toUpperCase())}
+                      label="Recipient legal name"
+                      value={partyName}
+                      onChange={(e) => setPartyName(e.target.value)}
+                      required
                     />
-                    <Input
-                      label="Phone Contact"
-                      value={partyPhone}
-                      onChange={(e) => setPartyPhone(e.target.value)}
-                    />
-                  </div>
 
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                      Full Registered Address
-                    </label>
-                    <textarea
-                      suppressHydrationWarning
-                      rows={2}
-                      value={partyAddress}
-                      onChange={(e) => setPartyAddress(e.target.value)}
-                      className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-brand focus:outline-none"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <Input
+                        label="Recipient GSTIN"
+                        value={partyGSTIN}
+                        onChange={(e) => setPartyGSTIN(e.target.value.toUpperCase())}
+                        className="font-mono"
+                      />
+                      <Input
+                        label="Phone"
+                        value={partyPhone}
+                        onChange={(e) => setPartyPhone(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={LABEL}>Registered address</label>
+                      <textarea
+                        suppressHydrationWarning
+                        rows={2}
+                        value={partyAddress}
+                        onChange={(e) => setPartyAddress(e.target.value)}
+                        className={TEXTAREA}
+                      />
+                    </div>
                   </div>
-                </div>
+                </section>
 
                 {/* Line Items Table */}
-                <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      Itemized Goods &amp; Services ({items.length})
-                    </span>
+                <section className={PANEL}>
+                  <div className={PANEL_HEAD}>
+                    <div>
+                      <h4 className={PANEL_TITLE}>Goods and services</h4>
+                      <p className="text-[13px] text-ink-muted">
+                        {items.length} {items.length === 1 ? "line" : "lines"}
+                      </p>
+                    </div>
                     <Button
                       suppressHydrationWarning
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleAddItem}
-                      className="gap-1 text-[10px] h-6 px-2 text-brand"
                     >
-                      <Plus className="h-3 w-3" /> Add Item
+                      <Plus className="h-3.5 w-3.5" /> Add item
                     </Button>
                   </div>
 
-                  <div className="space-y-2.5">
+                  <div className="p-5 space-y-3">
                     {items.map((item, idx) => (
                       <div
                         key={item.id}
-                        className="p-3 rounded-lg border border-slate-200 bg-slate-50/60 space-y-2"
+                        className="p-3.5 rounded-ctl border border-line bg-canvas/60 space-y-2.5"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono font-bold text-[10px] text-slate-400">#{idx + 1}</span>
+                          <span className="text-[12.5px] text-ink-muted tabular-nums w-6 shrink-0">{idx + 1}</span>
                           <input
                             suppressHydrationWarning
                             type="text"
-                            placeholder="Item name / description"
+                            placeholder="Item name or description"
+                            aria-label={`Line ${idx + 1} description`}
                             value={item.description}
                             onChange={(e) => handleItemChange(idx, "description", e.target.value)}
-                            className="flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 font-medium focus:border-brand focus:outline-none"
+                            className={`${CTL} flex-1 font-medium`}
                           />
                           <button
                             suppressHydrationWarning
                             type="button"
                             onClick={() => handleRemoveItem(idx)}
                             disabled={items.length <= 1}
-                            className="text-slate-400 hover:text-rose-600 disabled:opacity-30 p-1"
+                            className="text-ink-subtle hover:text-bad hover:bg-bad-wash disabled:opacity-30 p-1.5 rounded-chip transition-colors"
                             title="Remove line"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                          <div>
-                            <span className="text-[9px] text-slate-400 uppercase font-mono block">HSN/SAC</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:pl-8">
+                          <label className="block">
+                            <span className={MINI_LABEL}>HSN/SAC</span>
                             <input
                               suppressHydrationWarning
                               type="text"
                               value={item.hsn}
                               onChange={(e) => handleItemChange(idx, "hsn", e.target.value)}
-                              className="w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] font-mono text-slate-800 focus:outline-none"
+                              className={`${CTL} w-full font-mono`}
                             />
-                          </div>
+                          </label>
 
-                          <div>
-                            <span className="text-[9px] text-slate-400 uppercase font-mono block">Qty</span>
+                          <label className="block">
+                            <span className={MINI_LABEL}>Qty</span>
                             <input
                               suppressHydrationWarning
                               type="number"
                               min="1"
                               value={item.qty}
                               onChange={(e) => handleItemChange(idx, "qty", parseFloat(e.target.value) || 0)}
-                              className="w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] font-mono text-slate-800 focus:outline-none"
+                              className={`${CTL} w-full tabular-nums`}
                             />
-                          </div>
+                          </label>
 
-                          <div>
-                            <span className="text-[9px] text-slate-400 uppercase font-mono block">Unit</span>
+                          <label className="block">
+                            <span className={MINI_LABEL}>Unit</span>
                             <input
                               suppressHydrationWarning
                               type="text"
                               value={item.unit}
                               onChange={(e) => handleItemChange(idx, "unit", e.target.value)}
-                              className="w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] text-slate-800 focus:outline-none"
+                              className={`${CTL} w-full`}
                             />
-                          </div>
+                          </label>
 
-                          <div>
-                            <span className="text-[9px] text-slate-400 uppercase font-mono block">Rate (₹)</span>
+                          <label className="block">
+                            <span className={MINI_LABEL}>Rate (₹)</span>
                             <input
                               suppressHydrationWarning
                               type="number"
                               value={item.rate}
                               onChange={(e) => handleItemChange(idx, "rate", parseFloat(e.target.value) || 0)}
-                              className="w-full rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] font-mono text-slate-800 focus:outline-none"
+                              className={`${CTL} w-full tabular-nums`}
                             />
-                          </div>
+                          </label>
 
-                          <div>
-                            <span className="text-[9px] text-slate-400 uppercase font-mono block">GST %</span>
+                          <label className="block">
+                            <span className={MINI_LABEL}>GST %</span>
                             <select
                               suppressHydrationWarning
                               value={item.gstRate}
                               onChange={(e) => handleItemChange(idx, "gstRate", parseInt(e.target.value) || 0)}
-                              className="w-full rounded border border-slate-300 bg-white px-1 py-1 text-[11px] font-mono text-slate-800 focus:outline-none"
+                              className={`${CTL} w-full tabular-nums`}
                             >
                               <option value="0">0%</option>
                               <option value="5">5%</option>
@@ -1679,46 +1675,46 @@ export function DocumentBuilderView() {
                               <option value="28">28%</option>
                               <option value="40">40%</option>
                             </select>
-                          </div>
+                          </label>
                         </div>
                       </div>
                     ))}
-                  </div>
 
-                  {/* Calculations Summary Box */}
-                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Subtotal</span>
-                      <span className="font-mono font-bold text-slate-800">{formatINR(calculations.subtotal)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Taxable</span>
-                      <span className="font-mono font-bold text-slate-800">{formatINR(calculations.taxableAmount)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Total GST</span>
-                      <span className="font-mono font-bold text-slate-800">{formatINR(calculations.totalTax)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Grand Total</span>
-                      <span className="font-mono font-black text-slate-950 text-sm">{formatINR(calculations.roundedTotal)}</span>
+                    {/* Calculations Summary Box */}
+                    <div className="p-4 rounded-ctl bg-canvas-sunken grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div>
+                        <span className="text-[12.5px] text-ink-muted block">Subtotal</span>
+                        <span className="text-[14px] font-[550] text-ink tabular-nums">{formatINR(calculations.subtotal)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[12.5px] text-ink-muted block">Taxable</span>
+                        <span className="text-[14px] font-[550] text-ink tabular-nums">{formatINR(calculations.taxableAmount)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[12.5px] text-ink-muted block">Total GST</span>
+                        <span className="text-[14px] font-[550] text-ink tabular-nums">{formatINR(calculations.totalTax)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[12.5px] text-ink-muted block">Grand total</span>
+                        <span className="ledger-total text-[17px] font-semibold tracking-[-0.02em] text-ink tabular-nums">
+                          {formatINR(calculations.roundedTotal)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </section>
 
                 {/* Notes & Declarations */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">
-                    Terms &amp; Conditions / Commercial Notes
-                  </label>
+                <section className={`${PANEL} p-5`}>
+                  <label className={LABEL}>Terms, conditions and notes</label>
                   <textarea
                     suppressHydrationWarning
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full rounded border border-slate-300 p-2 text-xs text-slate-800 bg-white focus:border-brand focus:outline-none"
+                    className={TEXTAREA}
                   />
-                </div>
+                </section>
               </div>
             </div>
           )}
@@ -1730,14 +1726,14 @@ export function DocumentBuilderView() {
             <div
               onMouseDown={() => setIsDraggingSplit(true)}
               onDoubleClick={() => setSplitRatio(50)}
-              className="w-2 hover:w-2.5 bg-slate-200 hover:bg-brand cursor-col-resize transition-all shrink-0 flex items-center justify-center group select-none border-x border-slate-300 no-print"
-              title="Drag left/right to adjust form and preview container sizes (Double-click to reset 50/50)"
+              className="w-2 hover:w-2.5 bg-line hover:bg-brand cursor-col-resize transition-all shrink-0 flex items-center justify-center group select-none border-x border-line-strong no-print"
+              title="Drag left or right to resize the form and preview (double-click to reset to 50/50)"
             >
               <div className="flex flex-col gap-1 items-center">
-                <div className="h-1 w-1 rounded-full bg-slate-400 group-hover:bg-white" />
-                <div className="h-1 w-1 rounded-full bg-slate-400 group-hover:bg-white" />
-                <div className="h-1 w-1 rounded-full bg-slate-400 group-hover:bg-white" />
-                <div className="h-1 w-1 rounded-full bg-slate-400 group-hover:bg-white" />
+                <div className="h-1 w-1 rounded-full bg-ink-subtle group-hover:bg-surface" />
+                <div className="h-1 w-1 rounded-full bg-ink-subtle group-hover:bg-surface" />
+                <div className="h-1 w-1 rounded-full bg-ink-subtle group-hover:bg-surface" />
+                <div className="h-1 w-1 rounded-full bg-ink-subtle group-hover:bg-surface" />
               </div>
             </div>
           )}
@@ -1753,7 +1749,7 @@ export function DocumentBuilderView() {
                 width: viewMode === "split" ? `${100 - splitRatio}%` : "100%",
                 flexShrink: 0,
               }}
-              className="overflow-y-auto overflow-x-hidden p-6 flex flex-col items-center bg-slate-200/90 min-w-0 transition-[width] duration-75 relative print:p-0 print:m-0 print:bg-white print:overflow-visible print:w-full print:block"
+              className="overflow-y-auto overflow-x-hidden p-6 flex flex-col items-center bg-canvas-sunken min-w-0 transition-[width] duration-75 relative print:p-0 print:m-0 print:bg-white print:overflow-visible print:w-full print:block"
             >
               {activeDocType === "discount_coupon" ? (
                 /* LUXURY COUPON CARD (Centered, zero clipping) */
@@ -1768,13 +1764,13 @@ export function DocumentBuilderView() {
                 >
                   <div
                     id="printable-coupon-card"
-                    className="w-[620px] bg-white rounded-2xl shadow-xl border border-slate-300 overflow-hidden print:w-full print:max-w-full print:shadow-none"
+                    className="w-[620px] bg-surface rounded-2xl shadow-xl border border-line-strong overflow-hidden print:w-full print:max-w-full print:shadow-none"
                     style={{
                       transform: effectiveScale < 1 ? `scale(${effectiveScale})` : undefined,
                       transformOrigin: "top left",
                     }}
                   >
-                    <div className="bg-gradient-to-r from-panel-deep via-[#1A2526] to-panel-deep p-6 text-white relative overflow-hidden">
+                    <div className="bg-panel-deep p-6 text-white relative overflow-hidden">
                       <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 opacity-15 pointer-events-none">
                         <Tag className="h-44 w-44 text-brand" />
                       </div>
@@ -1785,14 +1781,14 @@ export function DocumentBuilderView() {
                             <span className="font-mono font-bold text-[10px] tracking-wider uppercase px-2 py-0.5 rounded bg-brand text-ink">
                               Verified Business Voucher
                             </span>
-                            <span className="text-slate-400 text-[10px] font-mono">FY 2026-27</span>
+                            <span className="text-white/60 text-[10px] font-mono">FY 2026-27</span>
                           </div>
                           <h2 className="text-xl font-black mt-2 tracking-tight text-white">{couponTitle}</h2>
-                          <p className="text-xs text-slate-300 mt-1">{activeCompanyName}</p>
+                          <p className="text-xs text-white/75 mt-1">{activeCompanyName}</p>
                         </div>
 
                         <div className="text-right">
-                          <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Voucher Value</span>
+                          <span className="text-[10px] uppercase tracking-wider text-white/60 block">Voucher Value</span>
                           <span className="text-2xl font-black text-brand">
                             {discountType === "percentage" ? `${discountValue}% OFF` : formatINR(discountValue)}
                           </span>
@@ -1800,22 +1796,22 @@ export function DocumentBuilderView() {
                       </div>
                     </div>
 
-                    <div className="relative h-6 bg-slate-100 flex items-center justify-between px-3">
-                      <div className="h-5 w-5 rounded-full bg-slate-200/90 -ml-5 border border-slate-300" />
-                      <div className="flex-1 border-t-2 border-dashed border-slate-400 mx-4" />
-                      <div className="h-5 w-5 rounded-full bg-slate-200/90 -mr-5 border border-slate-300" />
+                    <div className="relative h-6 bg-canvas-sunken flex items-center justify-between px-3">
+                      <div className="h-5 w-5 rounded-full bg-canvas-sunken -ml-5 border border-line-strong" />
+                      <div className="flex-1 border-t-2 border-dashed border-ink-subtle mx-4" />
+                      <div className="h-5 w-5 rounded-full bg-canvas-sunken -mr-5 border border-line-strong" />
                     </div>
 
-                    <div className="p-6 bg-white space-y-4">
-                      <div className="bg-slate-50 border-2 border-dashed border-brand/60 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="p-6 bg-surface space-y-4">
+                      <div className="bg-canvas border-2 border-dashed border-brand/60 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block mb-1">
                             Promotional Coupon Code
                           </span>
-                          <div className="font-mono font-black text-2xl tracking-widest text-slate-900 select-all">
+                          <div className="font-mono font-black text-2xl tracking-widest text-ink select-all">
                             {couponCode}
                           </div>
-                          <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                          <div className="text-[11px] text-ink-muted mt-1 flex items-center gap-2">
                             <span>Min Purchase: {formatINR(minOrderValue)}</span>
                             <span>•</span>
                             <span>Max Cap: {formatINR(maxDiscountCap)}</span>
@@ -1827,38 +1823,38 @@ export function DocumentBuilderView() {
                           onClick={copyCouponToClipboard}
                           variant="tally"
                           size="sm"
-                          className="gap-1.5 font-bold shrink-0 text-xs px-4 py-2 no-print"
+                          className="shrink-0 no-print"
                         >
                           {copiedCode ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                          {copiedCode ? "Copied!" : "Copy Voucher"}
+                          {copiedCode ? "Copied" : "Copy voucher"}
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50/70 p-3 rounded-lg border border-slate-200">
+                      <div className="grid grid-cols-2 gap-3 text-xs bg-canvas p-3 rounded-lg border border-line">
                         <div>
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">Redemption Validity</span>
-                          <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
+                          <span className="text-[10px] font-bold uppercase text-ink-subtle block">Redemption Validity</span>
+                          <span className="font-bold text-ink flex items-center gap-1 mt-0.5">
                             <Calendar className="h-3.5 w-3.5 text-brand" /> Valid until {couponValidUntil}
                           </span>
                         </div>
                         <div>
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">Account Eligibility</span>
-                          <span className="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
-                            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" /> {couponUsageLimit}
+                          <span className="text-[10px] font-bold uppercase text-ink-subtle block">Account Eligibility</span>
+                          <span className="font-bold text-ink flex items-center gap-1 mt-0.5">
+                            <ShieldCheck className="h-3.5 w-3.5 text-brand-strong" /> {couponUsageLimit}
                           </span>
                         </div>
                       </div>
 
                       <div className="text-xs space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block">
                           Scope of Application &amp; Terms
                         </span>
-                        <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded border border-slate-200">
+                        <p className="text-[11px] text-ink-soft leading-relaxed bg-canvas p-2.5 rounded border border-line">
                           {couponEligibleScope}
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                      <div className="pt-3 border-t border-line flex items-center justify-between text-[10px] text-ink-subtle font-mono">
                         <span>Authoritative Issuer: {activeGSTIN}</span>
                         <span>Deku Secure Coupon Engine</span>
                       </div>
@@ -1878,7 +1874,7 @@ export function DocumentBuilderView() {
                 >
                   <div
                     id="printable-a4-document"
-                    className="w-[794px] min-h-[1123px] bg-white shadow-2xl p-8 border border-slate-300 text-slate-900 flex flex-col justify-between print:w-full print:max-w-full print:min-h-0 print:p-0 print:border-none print:shadow-none"
+                    className="w-[794px] min-h-[1123px] bg-surface shadow-2xl p-8 border border-line-strong text-ink flex flex-col justify-between print:w-full print:max-w-full print:min-h-0 print:p-0 print:border-none print:shadow-none"
                     style={{
                       transform: `scale(${effectiveScale})`,
                       transformOrigin: "top left",
@@ -1887,17 +1883,17 @@ export function DocumentBuilderView() {
                   >
                     <div className="space-y-4">
                       {/* Header */}
-                      <div className="flex items-start justify-between pb-4 border-b-2 border-slate-900">
+                      <div className="flex items-start justify-between pb-4 border-b-2 border-ink">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-black text-xl tracking-tight text-slate-950 uppercase">
+                            <span className="font-black text-xl tracking-tight text-ink uppercase">
                               {activeCompanyName}
                             </span>
                           </div>
                           {companyAddress && (
-                            <p className="text-[11px] text-slate-600 max-w-sm mt-1">{companyAddress}</p>
+                            <p className="text-[11px] text-ink-soft max-w-sm mt-1">{companyAddress}</p>
                           )}
-                          <div className="text-[10px] font-mono text-slate-700 mt-1 flex items-center gap-3">
+                          <div className="text-[10px] font-mono text-ink-soft mt-1 flex items-center gap-3">
                             <span>GSTIN: <strong>{activeGSTIN}</strong></span>
                             <span>•</span>
                             <span>PAN: <strong>{activePAN}</strong></span>
@@ -1907,7 +1903,7 @@ export function DocumentBuilderView() {
                         </div>
 
                         <div className="text-right shrink-0">
-                          <span className="inline-block px-3 py-1 font-mono font-black text-sm uppercase tracking-wider bg-slate-900 text-white rounded border border-slate-900">
+                          <span className="inline-block px-3 py-1 font-mono font-black text-sm uppercase tracking-wider bg-ink text-surface rounded border border-ink">
                             {activeDocType === "invoice" && "TAX INVOICE"}
                             {activeDocType === "quotation" && "COMMERCIAL QUOTATION"}
                             {activeDocType === "proforma" && "PROFORMA INVOICE"}
@@ -1916,7 +1912,7 @@ export function DocumentBuilderView() {
                             {activeDocType === "debit_note" && "GST DEBIT NOTE"}
                             {activeDocType === "purchase_order" && "PURCHASE ORDER"}
                           </span>
-                          <div className="text-[10px] text-slate-500 font-mono mt-1 whitespace-nowrap">
+                          <div className="text-[10px] text-ink-muted font-mono mt-1 whitespace-nowrap">
                             {activeDocType === "delivery_challan"
                               ? "NOT FOR SALE • TRANSIT ONLY"
                               : "ORIGINAL FOR RECIPIENT"}
@@ -1925,90 +1921,90 @@ export function DocumentBuilderView() {
                       </div>
 
                       {/* Metadata Grid */}
-                      <div className="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3 rounded border border-slate-200">
+                      <div className="grid grid-cols-2 gap-4 text-xs bg-canvas p-3 rounded border border-line">
                         <div className="space-y-1">
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Document No:</span>
-                            <span className="font-mono font-bold text-slate-900">{docNumber}</span>
+                            <span className="text-ink-muted">Document No:</span>
+                            <span className="font-mono font-bold text-ink">{docNumber}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Issue Date:</span>
-                            <span className="font-mono text-slate-800">{docDate}</span>
+                            <span className="text-ink-muted">Issue Date:</span>
+                            <span className="font-mono text-ink">{docDate}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">
+                            <span className="text-ink-muted">
                               {activeDocType === "quotation" ? "Valid Until:" : "Due Date:"}
                             </span>
-                            <span className="font-mono text-slate-800">{dueDate}</span>
+                            <span className="font-mono text-ink">{dueDate}</span>
                           </div>
                         </div>
 
                         <div className="space-y-1">
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Place of Supply:</span>
-                            <span className="font-semibold text-slate-900">{placeOfSupply}</span>
+                            <span className="text-ink-muted">Place of Supply:</span>
+                            <span className="font-semibold text-ink">{placeOfSupply}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Tax Type:</span>
-                            <span className="font-mono font-bold text-slate-800">
+                            <span className="text-ink-muted">Tax Type:</span>
+                            <span className="font-mono font-bold text-ink">
                               {isInterstate ? "Interstate (IGST)" : "Intrastate (CGST + SGST)"}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-500">Reverse Charge:</span>
-                            <span className="font-mono text-slate-800">{reverseCharge ? "Yes" : "No"}</span>
+                            <span className="text-ink-muted">Reverse Charge:</span>
+                            <span className="font-mono text-ink">{reverseCharge ? "Yes" : "No"}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Logistics Strip for Delivery Challan */}
                       {activeDocType === "delivery_challan" && (
-                        <div className="p-2.5 rounded bg-indigo-50 border border-indigo-200 text-xs grid grid-cols-3 gap-2">
+                        <div className="p-2.5 rounded bg-canvas border border-line text-xs grid grid-cols-3 gap-2">
                           <div>
-                            <span className="text-[10px] font-bold text-indigo-900 uppercase block">Transport Reason</span>
-                            <span className="font-medium text-slate-800">{challanReason}</span>
+                            <span className="text-[10px] font-bold text-ink-soft uppercase block">Transport Reason</span>
+                            <span className="font-medium text-ink">{challanReason}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] font-bold text-indigo-900 uppercase block">Vehicle Number</span>
-                            <span className="font-mono font-bold text-slate-900">{vehicleNumber}</span>
+                            <span className="text-[10px] font-bold text-ink-soft uppercase block">Vehicle Number</span>
+                            <span className="font-mono font-bold text-ink">{vehicleNumber}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] font-bold text-indigo-900 uppercase block">Transporter / E-Way</span>
-                            <span className="font-mono text-slate-800">{transporterName}</span>
+                            <span className="text-[10px] font-bold text-ink-soft uppercase block">Transporter / E-Way</span>
+                            <span className="font-mono text-ink">{transporterName}</span>
                           </div>
                         </div>
                       )}
 
                       {/* Buyer / Recipient Details */}
                       <div className="grid grid-cols-2 gap-4 text-xs">
-                        <div className="p-3 rounded border border-slate-200 space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        <div className="p-3 rounded border border-line space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block mb-1">
                             {activeDocType === "purchase_order" ? "Vendor / Supplier" : "Bill To (Recipient)"}
                           </span>
-                          <div className="font-bold text-slate-900">{partyName}</div>
-                          <p className="text-[11px] text-slate-600 leading-tight">{partyAddress}</p>
-                          <div className="text-[10px] font-mono text-slate-700 pt-1">
+                          <div className="font-bold text-ink">{partyName}</div>
+                          <p className="text-[11px] text-ink-soft leading-tight">{partyAddress}</p>
+                          <div className="text-[10px] font-mono text-ink-soft pt-1">
                             GSTIN: <strong>{partyGSTIN || "Unregistered"}</strong>
                           </div>
                         </div>
 
-                        <div className="p-3 rounded border border-slate-200 space-y-1">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                        <div className="p-3 rounded border border-line space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block mb-1">
                             Ship To (Delivery Consignee)
                           </span>
-                          <div className="font-bold text-slate-900">{partyName}</div>
-                          <p className="text-[11px] text-slate-600 leading-tight">{partyAddress}</p>
-                          <div className="text-[10px] text-slate-500 pt-1">
+                          <div className="font-bold text-ink">{partyName}</div>
+                          <p className="text-[11px] text-ink-soft leading-tight">{partyAddress}</p>
+                          <div className="text-[10px] text-ink-muted pt-1">
                             Contact: {partyPhone} • {partyEmail}
                           </div>
                         </div>
                       </div>
 
                       {/* Items Table */}
-                      <div className="border border-slate-300 rounded overflow-hidden">
+                      <div className="border border-line-strong rounded overflow-hidden">
                         <table className="w-full text-left text-xs border-collapse">
                           <thead>
-                            <tr className="bg-slate-100 border-b border-slate-300 font-mono text-[11px] text-slate-800">
+                            <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink">
                               <th className="py-2 px-2.5 w-8 text-center">#</th>
                               <th className="py-2 px-2.5">Item Description</th>
                               <th className="py-2 px-2 text-center w-20 whitespace-nowrap">HSN</th>
@@ -2019,7 +2015,7 @@ export function DocumentBuilderView() {
                               <th className="py-2 px-3 text-right w-28 whitespace-nowrap">Taxable (₹)</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200">
+                          <tbody className="divide-y divide-line">
                             {items.map((item, idx) => {
                               const gross = item.qty * item.rate;
                               const disc = gross * (item.discountPct / 100);
@@ -2027,20 +2023,20 @@ export function DocumentBuilderView() {
 
                               return (
                                 <tr key={item.id} className="text-[11px]">
-                                  <td className="py-2 px-2.5 text-center font-mono text-slate-500">{idx + 1}</td>
-                                  <td className="py-2 px-2.5 font-medium text-slate-900">
+                                  <td className="py-2 px-2.5 text-center font-mono text-ink-muted">{idx + 1}</td>
+                                  <td className="py-2 px-2.5 font-medium text-ink">
                                     {item.description}
                                   </td>
-                                  <td className="py-2 px-2 text-center font-mono text-slate-600 whitespace-nowrap">{item.hsn}</td>
+                                  <td className="py-2 px-2 text-center font-mono text-ink-soft whitespace-nowrap">{item.hsn}</td>
                                   <td className="py-2 px-2 text-right font-mono whitespace-nowrap">
                                     {item.qty} {item.unit}
                                   </td>
                                   <td className="py-2 px-2 text-right font-mono whitespace-nowrap">{formatINR(item.rate, { showCurrencySymbol: false })}</td>
-                                  <td className="py-2 px-2 text-right font-mono text-slate-500 whitespace-nowrap">
+                                  <td className="py-2 px-2 text-right font-mono text-ink-muted whitespace-nowrap">
                                     {item.discountPct > 0 ? `${item.discountPct}%` : "—"}
                                   </td>
-                                  <td className="py-2 px-2 text-right font-mono text-slate-600 whitespace-nowrap">{item.gstRate}%</td>
-                                  <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                                  <td className="py-2 px-2 text-right font-mono text-ink-soft whitespace-nowrap">{item.gstRate}%</td>
+                                  <td className="py-2 px-3 text-right font-mono font-bold text-ink whitespace-nowrap">
                                     {formatINR(taxable, { showCurrencySymbol: false })}
                                   </td>
                                 </tr>
@@ -2053,11 +2049,11 @@ export function DocumentBuilderView() {
                       {/* Calculation Summary Block */}
                       <div className="grid grid-cols-2 gap-6 pt-2">
                         <div className="space-y-3">
-                          <div className="p-3 rounded bg-slate-50 border border-slate-200 text-xs">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                          <div className="p-3 rounded bg-canvas border border-line text-xs">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block mb-1">
                               Bank Details for Direct Settlement
                             </span>
-                            <div className="space-y-0.5 text-[11px] text-slate-700 font-mono">
+                            <div className="space-y-0.5 text-[11px] text-ink-soft font-mono">
                               <div>Bank: <strong>{bankName}</strong></div>
                               <div>A/c No: <strong>{bankAccount}</strong></div>
                               <div>IFSC: <strong>{bankIFSC}</strong></div>
@@ -2065,46 +2061,46 @@ export function DocumentBuilderView() {
                             </div>
                           </div>
 
-                          <div className="text-[11px] text-slate-600 space-y-1">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                          <div className="text-[11px] text-ink-soft space-y-1">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-subtle block">
                               Commercial Terms
                             </span>
-                            <p className="whitespace-pre-line leading-relaxed text-[10px] text-slate-500">
+                            <p className="whitespace-pre-line leading-relaxed text-[10px] text-ink-muted">
                               {notes}
                             </p>
                           </div>
                         </div>
 
                         <div className="space-y-1.5 text-xs">
-                          <div className="flex justify-between py-1 border-b border-slate-200">
-                            <span className="text-slate-600">Subtotal (Gross Item Total):</span>
-                            <span className="font-mono text-slate-800">{formatINR(calculations.subtotal)}</span>
+                          <div className="flex justify-between py-1 border-b border-line">
+                            <span className="text-ink-soft">Subtotal (Gross Item Total):</span>
+                            <span className="font-mono text-ink">{formatINR(calculations.subtotal)}</span>
                           </div>
 
                           {calculations.totalDiscount > 0 && (
-                            <div className="flex justify-between py-1 border-b border-slate-200 text-emerald-700">
+                            <div className="flex justify-between py-1 border-b border-line text-ok">
                               <span>Less Discount:</span>
                               <span className="font-mono">- {formatINR(calculations.totalDiscount)}</span>
                             </div>
                           )}
 
-                          <div className="flex justify-between py-1 border-b border-slate-200 font-semibold">
+                          <div className="flex justify-between py-1 border-b border-line font-semibold">
                             <span>Total Taxable Value:</span>
-                            <span className="font-mono text-slate-900">{formatINR(calculations.taxableAmount)}</span>
+                            <span className="font-mono text-ink">{formatINR(calculations.taxableAmount)}</span>
                           </div>
 
                           {isInterstate ? (
-                            <div className="flex justify-between py-1 border-b border-slate-200 text-slate-600">
+                            <div className="flex justify-between py-1 border-b border-line text-ink-soft">
                               <span>Integrated Tax (IGST):</span>
                               <span className="font-mono">{formatINR(calculations.totalIgst)}</span>
                             </div>
                           ) : (
                             <>
-                              <div className="flex justify-between py-1 border-b border-slate-200 text-slate-600">
+                              <div className="flex justify-between py-1 border-b border-line text-ink-soft">
                                 <span>Central Tax (CGST):</span>
                                 <span className="font-mono">{formatINR(calculations.totalCgst)}</span>
                               </div>
-                              <div className="flex justify-between py-1 border-b border-slate-200 text-slate-600">
+                              <div className="flex justify-between py-1 border-b border-line text-ink-soft">
                                 <span>State Tax (SGST):</span>
                                 <span className="font-mono">{formatINR(calculations.totalSgst)}</span>
                               </div>
@@ -2112,18 +2108,18 @@ export function DocumentBuilderView() {
                           )}
 
                           {calculations.roundOff !== 0 && (
-                            <div className="flex justify-between py-1 border-b border-slate-200 text-slate-500 text-[11px]">
+                            <div className="flex justify-between py-1 border-b border-line text-ink-muted text-[11px]">
                               <span>Round Off:</span>
                               <span className="font-mono">{formatINR(calculations.roundOff)}</span>
                             </div>
                           )}
 
-                          <div className="flex justify-between py-2 border-t-2 border-b-2 border-slate-900 font-bold text-sm bg-slate-50 px-2 rounded">
-                            <span className="uppercase text-slate-950">Grand Total (INR):</span>
-                            <span className="font-mono text-slate-950 text-base">{formatINR(calculations.roundedTotal)}</span>
+                          <div className="flex justify-between py-2 border-t-2 border-b-2 border-ink font-bold text-sm bg-canvas px-2 rounded">
+                            <span className="uppercase text-ink">Grand Total (INR):</span>
+                            <span className="font-mono text-ink text-base">{formatINR(calculations.roundedTotal)}</span>
                           </div>
 
-                          <div className="pt-1 text-[10px] text-slate-600 italic">
+                          <div className="pt-1 text-[10px] text-ink-soft italic">
                             <strong>Amount in Words:</strong> {calculations.words}
                           </div>
                         </div>
@@ -2131,22 +2127,22 @@ export function DocumentBuilderView() {
                     </div>
 
                     {/* Signatory */}
-                    <div className="pt-6 border-t border-slate-300 mt-6 flex items-end justify-between text-xs">
-                      <div className="text-[10px] text-slate-400 space-y-0.5 font-mono">
+                    <div className="pt-6 border-t border-line-strong mt-6 flex items-end justify-between text-xs">
+                      <div className="text-[10px] text-ink-subtle space-y-0.5 font-mono">
                         <div>Deku Financial Technologies Operating System</div>
                       </div>
 
                       <div className="text-right space-y-1">
-                        <div className="text-[10px] text-slate-500 font-semibold">
+                        <div className="text-[10px] text-ink-muted font-semibold">
                           For <strong>{activeCompanyName}</strong>
                         </div>
-                        <div className="h-12 flex items-center justify-end pr-4 text-slate-400 italic font-mono text-[11px]">
+                        <div className="h-12 flex items-center justify-end pr-4 text-ink-subtle italic font-mono text-[11px]">
                           [Authorized Digital Seal]
                         </div>
-                        <div className="font-bold text-slate-900 border-t border-slate-400 pt-1 w-48 text-center ml-auto">
+                        <div className="font-bold text-ink border-t border-ink-subtle pt-1 w-48 text-center ml-auto">
                           {signatoryName}
                         </div>
-                        <div className="text-[10px] text-slate-500 text-center w-48 ml-auto">
+                        <div className="text-[10px] text-ink-muted text-center w-48 ml-auto">
                           {signatoryTitle}
                         </div>
                       </div>

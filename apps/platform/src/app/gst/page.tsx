@@ -10,12 +10,12 @@ export default function GstPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="GST & Invoicing Hub"
-        subtitle="GST compliance, intra-state & inter-state tax engine, and sales invoice generation"
-        badge={<Badge variant="teal">GST Rules & Invoicing</Badge>}
+        title="GST & invoicing"
+        subtitle="GST compliance, intra-state and inter-state tax, and sales invoices"
+        badge={<Badge variant="teal">GST rules & invoicing</Badge>}
         breadcrumbs={[
           { label: "Statutory" },
-          { label: "GST & Invoicing", href: "/gst" },
+          { label: "GST & invoicing", href: "/gst" },
         ]}
       >
         <GstTaxHubView />

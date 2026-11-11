@@ -23,7 +23,7 @@ export function ReportDateRange({
         <Input label="To" type="date" value={to} onChange={(e) => onTo(e.target.value)} />
       </div>
       {problem && (
-        <p role="alert" className="basis-full text-xs font-medium text-rose-700">
+        <p role="alert" className="basis-full text-[12.5px] font-medium text-bad">
           {problem}
         </p>
       )}

@@ -2,15 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import {
-  FileSpreadsheet,
-  RefreshCw,
-  Printer,
-  CheckCircle2,
-  AlertTriangle,
-  Scale,
-  Download,
-} from "lucide-react";
+import { RefreshCw, Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
@@ -20,6 +12,7 @@ import { formatINR } from "@/lib/formatters/currency";
 import { downloadFile } from "@/lib/download";
 import { balanceSheetCsv } from "@/lib/import/export";
 import { indiaToday } from "@/lib/reports/date-range";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 
 export function BalanceSheetView() {
   const router = useRouter();
@@ -88,11 +81,49 @@ export function BalanceSheetView() {
   const difference = Math.round(Math.abs(totalAssets - totalLiabilitiesAndEquity) * 100) / 100;
   const isBalanced = difference === 0;
 
+  const section = (title: string, accounts: BalanceSheetRow[]) => (
+    <>
+      <div className={ui.band}>{title}</div>
+      <table className="w-full text-left border-collapse">
+        <tbody className="divide-y divide-line">
+          {accounts.map((acc) => (
+            <tr
+              key={acc.account_id ?? "accumulated-profit"}
+              onClick={() => openLedger(acc)}
+              className={acc.account_code ? ui.rowLink : ""}
+            >
+              <td className={`${ui.td} ${ui.code} w-20`}>{acc.account_code}</td>
+              <td className={ui.td}>{acc.account_name}</td>
+              <td className={`${ui.td} text-right tabular-nums w-32`}>
+                {formatINR(acc.balance, { showCurrencySymbol: false })}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
+  );
+
+  const side = (title: string, total: number, totalLabel: string, body: React.ReactNode) => (
+    <div className={`${ui.panel} flex flex-col justify-between`}>
+      <div>
+        <div className={ui.panelHead}>
+          <h3 className={ui.panelTitle}>{title}</h3>
+        </div>
+        {body}
+      </div>
+      <div className="flex items-center justify-between border-t border-line-strong px-3.5 py-3 font-semibold">
+        <span>{totalLabel}</span>
+        <span className="tabular-nums">{loaded ? <span className="ledger-total">{money(total)}</span> : "–"}</span>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-4 font-sans text-xs">
+    <div className={ui.page}>
       {/* Reporting Toolbar */}
-      <div data-tour="balance-sheet-status" className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="space-y-2">
+      <div data-tour="balance-sheet-status" className={ui.toolbar}>
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             {loaded ? (
               <Badge variant={isBalanced ? "success" : "warning"}>
@@ -101,15 +132,13 @@ export function BalanceSheetView() {
             ) : (
               <Badge variant="warning">Difference: –</Badge>
             )}
-            <span className="text-ink-muted font-mono text-[11px]">
-              ALERX Double-Entry Balance Sheet
-            </span>
+            <span className={ui.note}>Double-entry balance sheet from posted ledger entries</span>
           </div>
           <div className="w-36">
             <Input label="As of" type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
           </div>
           {orgId && !asOf && (
-            <p role="alert" className="text-xs font-medium text-rose-700">
+            <p role="alert" className="text-[12.5px] font-medium text-bad">
               Choose a date to load this report.
             </p>
           )}
@@ -117,168 +146,38 @@ export function BalanceSheetView() {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() => loaded && downloadFile(`balance-sheet-as-of-${asOf}.csv`, balanceSheetCsv(loaded, asOf), "text/csv;charset=utf-8")}
             disabled={!loaded}
-            className="gap-1.5"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV
+            <Download className="h-4 w-4" /> Export CSV
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-1.5"
-          >
-            <Printer className="h-3.5 w-3.5" /> Print Statement
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" /> Print statement
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchBalanceSheet}
-            isLoading={isLoading}
-            disabled={!asOf}
-            className="gap-1.5"
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <Button variant="secondary" onClick={fetchBalanceSheet} isLoading={isLoading} disabled={!asOf}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">Authoritative Balance Sheet Unavailable</p>
-              <p>{error}</p>
-            </div>
-          </div>
-          <button onClick={fetchBalanceSheet} className="font-bold underline">
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ReportError title="Balance Sheet unavailable" message={error} onRetry={fetchBalanceSheet} />}
 
       {/* T-Account Two Column Balance Sheet */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left Side: Liabilities & Equity */}
-        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
-          <div>
-            <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
-              <span>Capital & Liabilities</span>
-              <span className="text-slate-300 font-bold">
-                {money(totalLiabilitiesAndEquity)}
-              </span>
-            </div>
-
-            {/* Equity Section */}
-            <div className="p-2 bg-canvas border-b border-line font-mono text-[11px] font-bold text-ink-soft">
-              Shareholders&apos; Funds & Capital (Equity)
-            </div>
-            <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-line">
-                {equityRows.map((acc) => (
-                  <tr
-                    key={acc.account_id ?? "accumulated-profit"}
-                    onClick={() => openLedger(acc)}
-                    className={acc.account_code ? "hover:bg-canvas cursor-pointer" : ""}
-                  >
-                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
-                      {acc.account_code}
-                    </td>
-                    <td className="py-2 px-3 font-medium text-ink">
-                      {acc.account_name}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
-                      {formatINR(acc.balance, { showCurrencySymbol: false })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Liabilities Section */}
-            <div className="p-2 bg-canvas border-y border-line font-mono text-[11px] font-bold text-ink-soft mt-2">
-              Current & Non-Current Liabilities
-            </div>
-            <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-line">
-                {liabilityRows.map((acc) => (
-                  <tr
-                    key={acc.account_id}
-                    onClick={() =>
-                      router.push(`/day-book?account_code=${acc.account_code}`)
-                    }
-                    className="hover:bg-canvas cursor-pointer"
-                  >
-                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
-                      {acc.account_code}
-                    </td>
-                    <td className="py-2 px-3 font-medium text-ink">
-                      {acc.account_name}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
-                      {formatINR(acc.balance, { showCurrencySymbol: false })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="bg-panel text-white p-3 border-t-2 border-edge flex items-center justify-between font-mono font-bold">
-            <span>Total Liabilities & Equity</span>
-            <span className="text-emerald-400">
-              {money(totalLiabilitiesAndEquity)}
-            </span>
-          </div>
-        </div>
+        {side(
+          "Capital and liabilities",
+          totalLiabilitiesAndEquity,
+          "Total liabilities and equity",
+          <>
+            {section("Shareholders' funds and capital (equity)", equityRows)}
+            {section("Current and non-current liabilities", liabilityRows)}
+          </>
+        )}
 
         {/* Right Side: Assets */}
-        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden flex flex-col justify-between">
-          <div>
-            <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
-              <span>Assets (Property & Liquid Capital)</span>
-              <span className="text-emerald-400 font-bold">
-                {money(totalAssets)}
-              </span>
-            </div>
-
-            <div className="p-2 bg-canvas border-b border-line font-mono text-[11px] font-bold text-ink-soft">
-              Current & Fixed Assets
-            </div>
-            <table className="w-full text-left border-collapse text-xs">
-              <tbody className="divide-y divide-line">
-                {assetRows.map((acc) => (
-                  <tr
-                    key={acc.account_id}
-                    onClick={() =>
-                      router.push(`/day-book?account_code=${acc.account_code}`)
-                    }
-                    className="hover:bg-canvas cursor-pointer"
-                  >
-                    <td className="py-2 px-3 font-mono font-bold text-ink-soft w-20">
-                      {acc.account_code}
-                    </td>
-                    <td className="py-2 px-3 font-medium text-ink">
-                      {acc.account_name}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink w-32">
-                      {formatINR(acc.balance, { showCurrencySymbol: false })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="bg-panel text-white p-3 border-t-2 border-edge flex items-center justify-between font-mono font-bold">
-            <span>Total Assets</span>
-            <span className="text-emerald-400">{money(totalAssets)}</span>
-          </div>
-        </div>
+        {side("Assets", totalAssets, "Total assets", section("Current and fixed assets", assetRows))}
       </div>
     </div>
   );

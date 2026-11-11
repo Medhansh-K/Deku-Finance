@@ -28,9 +28,9 @@ function UsageRow({ label, used, limit, reached }: { label: string; used: number
   const pct = unlimited || limit === 0 ? (unlimited ? 0 : 100) : Math.min(100, Math.round((used / limit) * 100));
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-semibold text-ink-soft">{label}</span>
-        <span className={`font-bold ${reached ? "text-rose-700" : "text-ink"}`}>
+      <div className="flex items-center justify-between text-[13.5px]">
+        <span className="text-ink-soft">{label}</span>
+        <span className={`font-medium tabular-nums ${reached ? "text-bad" : "text-ink"}`}>
           {used} / {unlimited ? "Unlimited" : limit}
         </span>
       </div>
@@ -43,7 +43,7 @@ function UsageRow({ label, used, limit, reached }: { label: string; used: number
           aria-valuemin={0}
           aria-valuemax={limit}
         >
-          <div className={`h-full ${reached ? "bg-rose-600" : "bg-brand"}`} style={{ width: `${pct}%` }} />
+          <div className={`h-full ${reached ? "bg-bad" : "bg-brand"}`} style={{ width: `${pct}%` }} />
         </div>
       )}
     </div>
@@ -58,16 +58,15 @@ export default function PlanBillingPage() {
   return (
     <AppShell>
       <WorkspaceLayout title="Plan & billing" breadcrumbs={[{ label: "Settings", href: "/settings" }, { label: "Plan & billing", href: "/settings/license" }]}>
-        <div className="max-w-4xl mx-auto space-y-6 font-sans">
-          <div className="border-b border-line pb-5">
-            <h2 className="text-2xl font-black text-ink">Plan & billing</h2>
-            <p className="text-xs text-ink-muted mt-1">
+        <div className="max-w-4xl mx-auto space-y-4 font-sans">
+          <div>
+            <p className="text-[14px] text-ink-muted">
               {organisation?.name ?? "No company selected"}: your plan and this month&apos;s usage, as recorded by Deku.
             </p>
           </div>
 
           {!subscription ? (
-            <div className="bg-surface rounded-2xl p-6 border border-line flex items-center gap-3 text-xs text-ink-muted">
+            <div className="bg-surface rounded-panel p-5 border border-line flex items-center gap-3 text-[13.5px] text-ink-muted">
               {organisation ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               <span>
                 {organisation ? "Loading the plan… If this doesn't finish, Deku couldn't be reached; reload the page." : "Select a company to see its plan."}
@@ -75,56 +74,56 @@ export default function PlanBillingPage() {
             </div>
           ) : (
             <>
-              <section className="bg-surface rounded-2xl p-6 border border-line space-y-5">
+              <section className="bg-surface rounded-panel p-5 border border-line space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-xl bg-brand text-panel-deep flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-[10px] bg-brand-wash text-brand-strong grid place-items-center">
                       <CreditCard className="h-5 w-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-black text-ink">{subscription.plan?.name ?? "No plan"}</span>
+                        <span className="text-[17px] font-semibold tracking-tight text-ink">{subscription.plan?.name ?? "No plan"}</span>
                         {subscription.status && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border border-line-strong text-ink-soft">
+                          <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-canvas-sunken text-ink-soft">
                             {STATUS_LABEL[subscription.status]}
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-ink-muted">
+                      <span className="text-[13px] text-ink-muted tabular-nums">
                         {price === null || price === undefined ? "Price on request" : `${formatINR(price / 100, { minimumFractionDigits: 0 })} / month`}
                       </span>
                     </div>
                   </div>
-                  <dl className="grid grid-cols-2 gap-4 text-xs">
+                  <dl className="grid grid-cols-2 gap-6 text-[13.5px]">
                     <div>
-                      <dt className="text-[10px] uppercase font-bold text-ink-subtle">{timeline ? "Trial ends" : "Renews / ends"}</dt>
-                      <dd className="font-bold text-ink mt-0.5">
+                      <dt className="text-[13px] text-ink-muted">{timeline ? "Trial ends" : "Renews / ends"}</dt>
+                      <dd className="font-medium text-ink mt-0.5 tabular-nums">
                         {formatDateTally(timeline ? subscription.trial_ends_at : subscription.current_period_end)}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-[10px] uppercase font-bold text-ink-subtle">Access until</dt>
-                      <dd className="font-bold text-ink mt-0.5">{formatDateTally(subscription.current_period_end)}</dd>
+                      <dt className="text-[13px] text-ink-muted">Access until</dt>
+                      <dd className="font-medium text-ink mt-0.5 tabular-nums">{formatDateTally(subscription.current_period_end)}</dd>
                     </div>
                   </dl>
                 </div>
 
                 {timeline && (
-                  <p className={`rounded-xl p-3 text-xs font-semibold border ${timeline.inGrace ? "bg-amber-50 border-amber-300 text-amber-900" : "bg-canvas border-line text-ink-soft"}`}>
+                  <p className={`rounded-ctl px-4 py-3 text-[13px] ${timeline.inGrace ? "bg-warn-wash text-warn" : "bg-canvas text-ink-soft"}`}>
                     {timeline.inGrace
                       ? `Your trial has ended. You have ${timeline.accessDaysLeft} day(s) of grace left to choose a plan before the company becomes read-only.`
                       : `${timeline.trialDaysLeft} day(s) left in your free trial, then ${(timeline.accessDaysLeft ?? 0) - (timeline.trialDaysLeft ?? 0)} days' grace.`}
                   </p>
                 )}
                 {entitlements?.read_only && (
-                  <p className="rounded-xl p-3 text-xs font-semibold border bg-rose-50 border-rose-300 text-rose-900">
+                  <p className="rounded-ctl px-4 py-3 text-[13px] bg-bad-wash text-bad">
                     This company has no active plan. Your books stay readable, but new invoices and members are blocked.
                   </p>
                 )}
               </section>
 
-              <section className="bg-surface rounded-2xl p-6 border border-line space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-ink-subtle">Usage this month</h3>
+              <section className="bg-surface rounded-panel p-5 border border-line space-y-4">
+                <h3 className="text-[15px] font-semibold tracking-tight text-ink">Usage this month</h3>
                 <UsageRow
                   label="Invoices issued"
                   used={subscription.usage.invoices_this_month}
@@ -137,12 +136,12 @@ export default function PlanBillingPage() {
                   limit={entitlements?.seats}
                   reached={limitReached(entitlements, "seats", subscription.usage.seats_used)}
                 />
-                <ul className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <ul className="pt-3 border-t border-line grid grid-cols-1 sm:grid-cols-3 gap-2 text-[13.5px]">
                   {FEATURES.map((f) => {
                     const on = hasFeature(entitlements, f.key);
                     return (
                       <li key={f.key} className="flex items-center gap-1.5 text-ink-soft">
-                        {on ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <MinusCircle className="h-4 w-4 text-ink-subtle" />}
+                        {on ? <CheckCircle2 className="h-4 w-4 text-ok" /> : <MinusCircle className="h-4 w-4 text-ink-subtle" />}
                         <span>{f.label}</span>
                         <span className="sr-only">{on ? "included" : "not included"}</span>
                       </li>
@@ -154,16 +153,16 @@ export default function PlanBillingPage() {
           )}
 
           {subscription?.plan?.code !== "single_org" && (
-          <section className="bg-surface rounded-2xl p-6 border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <section className="bg-surface rounded-panel p-5 border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-black text-ink">Upgrade or renew</h3>
-              <p className="text-xs text-ink-muted mt-1">
+              <h3 className="text-[15px] font-semibold tracking-tight text-ink">Upgrade or renew</h3>
+              <p className="text-[13px] text-ink-muted mt-1">
                 Online payment isn&apos;t available yet. Contact us and we&apos;ll switch your plan once payment is received.
               </p>
             </div>
             <a
               href="tel:+917506461004"
-              className="py-2.5 px-4 rounded-xl bg-brand hover:bg-brand-hover text-panel-deep text-xs font-bold flex items-center gap-2 shrink-0"
+              className="h-9 px-3.5 rounded-ctl bg-ink hover:bg-ink-soft text-white text-[13.5px] font-medium flex items-center gap-2 shrink-0 tabular-nums"
             >
               <PhoneCall className="h-4 w-4" />
               <span>+91 7506461004</span>

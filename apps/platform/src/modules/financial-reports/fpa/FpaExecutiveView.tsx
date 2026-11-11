@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
 import { formatINR } from "@/lib/formatters/currency";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 
 export function FpaExecutiveView() {
   const [fpaMetrics, setFpaMetrics] = useState<any>(null);
@@ -77,157 +78,125 @@ export function FpaExecutiveView() {
   const depts = budgetVariance?.departments || [];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {error && (
-        <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800">
-          {error}. The figures below are unavailable until this loads.
-        </div>
-      )}
+    <div className={`${ui.page} space-y-5 max-w-7xl mx-auto`}>
+      {error && <ReportError title="FP&A figures unavailable" message={`${error}. The figures below are unavailable until this loads.`} />}
 
       {/* Top Action & Control Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface p-4 rounded-xl border border-line shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-brand/10 border border-brand/20 rounded-lg text-brand-strong">
-            <Activity className="h-5 w-5" />
-          </div>
+      <div className={`${ui.toolbar} sm:items-center`}>
+        <div className="flex items-start gap-3">
+          <span className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center shrink-0">
+            <Activity className="h-4 w-4" />
+          </span>
           <div>
-            <h3 className="text-sm font-bold text-ink">
-              FP&A Strategic Intelligence &amp; Corporate Health
-            </h3>
-            <p className="text-xs text-ink-muted">
-              Profitability margins, liquidity ratios, working capital gap, and departmental budget variances
+            <h3 className={ui.panelTitle}>FP&amp;A and business health</h3>
+            <p className={ui.panelSub}>
+              Profitability margins, liquidity ratios, working capital and department budget variances
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchFpaData}
-            disabled={isLoading}
-            className="text-xs font-semibold"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
+          <Button variant="secondary" onClick={fetchFpaData} disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="text-xs font-semibold"
-          >
-            <Printer className="h-3.5 w-3.5 mr-1.5" />
-            Print Report
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Print report
           </Button>
         </div>
       </div>
 
       {/* KPI Section 1: Margins & Profitability */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
         {/* Topline Revenue */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Total Topline Revenue</span>
-            <span className="text-[11px] font-semibold text-ink-subtle">Gross</span>
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Total revenue <span className="ml-auto text-[12.5px] text-ink-subtle">Gross</span>
           </div>
-          <div className="text-2xl font-black font-mono text-ink">
-            {formatINR(prof.total_revenue)}
-          </div>
-          <div className="text-xs text-emerald-700 flex items-center mt-2 font-medium">
-            <TrendingUp className="h-3.5 w-3.5 mr-1 shrink-0" /> Recognized billings
+          <div className={ui.kpiValue}>{formatINR(prof.total_revenue)}</div>
+          <div className={`${ui.kpiNote} flex items-center`}>
+            <TrendingUp className="h-3.5 w-3.5 mr-1 shrink-0 text-ok" /> Recognised billings
           </div>
         </div>
 
         {/* Gross Margin */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Gross Margin %</span>
-            <Badge variant="teal" size="sm">{num(prof.gross_margin_pct, "%")}</Badge>
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Gross margin <Badge variant="teal" className="ml-auto">{num(prof.gross_margin_pct, "%")}</Badge>
           </div>
-          <div className="text-2xl font-black font-mono text-brand-strong">
-            {formatINR(prof.gross_profit)}
-          </div>
-          <div className="text-xs text-ink-muted mt-2">Revenue minus COGS direct cost</div>
+          <div className={ui.kpiValue}>{formatINR(prof.gross_profit)}</div>
+          <div className={ui.kpiNote}>Revenue minus direct cost of goods sold</div>
         </div>
 
         {/* Operating Expenses */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Operating Expenses</span>
-            <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">OPEX</span>
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Operating expenses <Badge className="ml-auto">Opex</Badge>
           </div>
-          <div className="text-2xl font-black font-mono text-amber-700">
-            {formatINR(prof.opex)}
-          </div>
-          <div className="text-xs text-ink-muted mt-2">SG&amp;A, payroll, departmental burns</div>
+          <div className={ui.kpiValue}>{formatINR(prof.opex)}</div>
+          <div className={ui.kpiNote}>SG&amp;A, payroll and department spend</div>
         </div>
 
         {/* Net Profit Margin */}
-        <div className="bg-surface border border-line rounded-xl p-4 shadow-2xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">Net Profit Margin</span>
-            <Badge variant={prof.net_profit >= 0 ? "teal" : "danger"} size="sm">
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Net profit margin
+            <Badge variant={prof.net_profit >= 0 ? "success" : "danger"} className="ml-auto">
               {num(prof.net_margin_pct, "%")}
             </Badge>
           </div>
-          <div className={`text-2xl font-black font-mono ${prof.net_profit >= 0 ? "text-emerald-700" : "text-rose-700"}`}>
+          <div className={`${ui.kpiValue} ${prof.net_profit >= 0 ? "text-ok" : "text-bad"}`}>
             {formatINR(prof.net_profit)}
           </div>
-          <div className="text-xs text-ink-muted mt-2">Net surplus to retained earnings</div>
+          <div className={ui.kpiNote}>Net surplus to retained earnings</div>
         </div>
       </div>
 
       {/* KPI Section 2: Liquidity, Working Capital & Runway */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Working Capital Box */}
-        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
+        <div className={`${ui.kpi} px-5`}>
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-50 text-blue-700 rounded-md">
+              <span className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center">
                 <Briefcase className="h-4 w-4" />
-              </div>
-              <h4 className="text-sm font-bold text-ink">Working Capital Buffer</h4>
+              </span>
+              <h4 className={ui.panelTitle}>Working capital</h4>
             </div>
-            <span className="text-[11px] font-semibold text-ink-soft bg-canvas-sunken px-2 py-0.5 rounded border border-line">
-              Net Gap
-            </span>
+            <Badge>Net gap</Badge>
           </div>
-          <div className="text-2xl font-black font-mono text-ink">
-            {formatINR(liq.working_capital)}
-          </div>
-          <div className="mt-4 space-y-2 text-xs border-t border-line pt-3">
+          <div className={ui.kpiValue}>{formatINR(liq.working_capital)}</div>
+          <div className="mt-3 space-y-2 border-t border-line pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Current Assets (AR, Cash, Bank):</span>
-              <span className="text-ink font-mono font-semibold">{formatINR(liq.current_assets)}</span>
+              <span className="text-ink-muted">Current assets (AR, cash, bank)</span>
+              <span className="tabular-nums font-medium">{formatINR(liq.current_assets)}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Current Liabilities (AP, Taxes):</span>
-              <span className="text-rose-700 font-mono font-semibold">{formatINR(liq.current_liabilities)}</span>
+              <span className="text-ink-muted">Current liabilities (AP, taxes)</span>
+              <span className="tabular-nums font-medium">{formatINR(liq.current_liabilities)}</span>
             </div>
           </div>
         </div>
 
         {/* Corporate Health Ratios */}
-        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-emerald-50 text-emerald-700 rounded-md">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <h4 className="text-sm font-bold text-ink">Solvency Ratios</h4>
-            </div>
+        <div className={`${ui.kpi} px-5`}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center">
+              <ShieldCheck className="h-4 w-4" />
+            </span>
+            <h4 className={ui.panelTitle}>Solvency ratios</h4>
           </div>
           <div className="grid grid-cols-2 gap-3 mt-3">
-            <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
-              <div className="text-xs text-ink-muted font-medium">Current Ratio</div>
-              <div className="text-xl font-black font-mono text-emerald-700 mt-1">
+            <div className="bg-canvas-sunken/60 p-3 rounded-ctl">
+              <div className="text-[13px] text-ink-muted">Current ratio</div>
+              <div className="text-[22px] font-semibold tracking-[-0.03em] tabular-nums mt-1">
                 {num(liq.current_ratio, "x")}
               </div>
             </div>
-            <div className="bg-canvas-sunken p-3 rounded-lg border border-line/60">
-              <div className="text-xs text-ink-muted font-medium">Quick Ratio</div>
-              <div className="text-xl font-black font-mono text-blue-700 mt-1">
+            <div className="bg-canvas-sunken/60 p-3 rounded-ctl">
+              <div className="text-[13px] text-ink-muted">Quick ratio</div>
+              <div className="text-[22px] font-semibold tracking-[-0.03em] tabular-nums mt-1">
                 {num(liq.quick_ratio, "x")}
               </div>
             </div>
@@ -235,68 +204,58 @@ export function FpaExecutiveView() {
         </div>
 
         {/* Runway & Burn Engine */}
-        <div className="bg-surface border border-line rounded-xl p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-3">
+        <div className={`${ui.kpi} px-5`}>
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-amber-50 text-amber-700 rounded-md">
+              <span className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center">
                 <Clock className="h-4 w-4" />
-              </div>
-              <h4 className="text-sm font-bold text-ink">Treasury Runway</h4>
+              </span>
+              <h4 className={ui.panelTitle}>Cash runway</h4>
             </div>
-            <span className="text-xs text-amber-700 font-semibold flex items-center bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-              <Flame className="h-3.5 w-3.5 mr-1" />
-              {num(runway.cash_runway_months, " months")}
-            </span>
+            <Badge variant="warning">{num(runway.cash_runway_months, " months")}</Badge>
           </div>
-          <div className="text-2xl font-black font-mono text-amber-700">
-            {formatINR(runway.cash_and_bank_reserves)}
-          </div>
-          <div className="mt-4 space-y-2 text-xs border-t border-line pt-3">
+          <div className={ui.kpiValue}>{formatINR(runway.cash_and_bank_reserves)}</div>
+          <div className="mt-3 space-y-2 border-t border-line pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Trailing Monthly Burn:</span>
-              <span className="text-ink font-mono font-semibold">{formatINR(runway.estimated_monthly_burn)} / mo</span>
+              <span className="text-ink-muted">Trailing monthly burn</span>
+              <span className="tabular-nums font-medium">{formatINR(runway.estimated_monthly_burn)} / mo</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-ink-muted">Runway Horizon:</span>
-              <span className="text-ink font-mono font-semibold">{num(runway.cash_runway_months, " months")}</span>
+              <span className="text-ink-muted">Runway</span>
+              <span className="tabular-nums font-medium">{num(runway.cash_runway_months, " months")}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Section 3: Departmental Budget vs. Actual Variance Rollup */}
-      <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-2xs">
-        <div className="px-5 py-4 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-canvas-sunken/40">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-brand-strong" />
-            <h4 className="font-bold text-ink text-sm">
-              Departmental Budget vs. Actual Utilization Rollup
-            </h4>
-          </div>
-          <div className="flex items-center gap-4 text-xs">
+      <div className={ui.panel}>
+        <div className={`${ui.panelHead} flex-col sm:flex-row sm:items-center`}>
+          <h4 className={ui.panelTitle}>Department budget against actual</h4>
+          <div className="flex items-center gap-4 text-[13px]">
             <span className="text-ink-muted">
-              Total Allocated: <strong className="font-mono text-ink">{budgetVariance?.total_budget_allocated == null ? "–" : formatINR(budgetVariance.total_budget_allocated)}</strong>
+              Total allocated <strong className="font-semibold tabular-nums text-ink">{budgetVariance?.total_budget_allocated == null ? "–" : formatINR(budgetVariance.total_budget_allocated)}</strong>
             </span>
             <span className="text-ink-muted">
-              Total Utilized: <strong className="font-mono text-amber-700">{budgetVariance?.total_budget_utilized == null ? "–" : formatINR(budgetVariance.total_budget_utilized)}</strong>
+              Total utilised <strong className="font-semibold tabular-nums text-ink">{budgetVariance?.total_budget_utilized == null ? "–" : formatINR(budgetVariance.total_budget_utilized)}</strong>
             </span>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-canvas-sunken border-b border-line text-ink-muted uppercase tracking-wider font-semibold text-[11px]">
+          <table className="w-full text-left">
+            <thead>
               <tr>
-                <th className="py-3 px-4">Department</th>
-                <th className="py-3 px-4 font-mono">Code</th>
-                <th className="py-3 px-4 text-right">Allocated Budget</th>
-                <th className="py-3 px-4 text-right">Utilized to Date</th>
-                <th className="py-3 px-4 text-right">Remaining Headroom</th>
-                <th className="py-3 px-4">Burn %</th>
-                <th className="py-3 px-4 text-center">Headcount</th>
+                <th className={ui.th}>Department</th>
+                <th className={ui.th}>Code</th>
+                <th className={`${ui.th} text-right`}>Allocated budget</th>
+                <th className={`${ui.th} text-right`}>Utilised to date</th>
+                <th className={`${ui.th} text-right`}>Remaining</th>
+                <th className={ui.th}>Burn</th>
+                <th className={`${ui.th} text-center`}>Headcount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/60">
+            <tbody className="divide-y divide-line">
               {depts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-ink-muted">
@@ -308,38 +267,27 @@ export function FpaExecutiveView() {
                   const burnPct = Number(d.burn_percentage) || 0;
                   const isHighBurn = burnPct > 80;
                   return (
-                    <tr key={d.id} className="hover:bg-canvas-sunken/50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-ink flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
-                        {d.name}
-                      </td>
-                      <td className="py-3 px-4 text-ink-muted font-mono">{d.code}</td>
-                      <td className="py-3 px-4 text-right font-mono font-medium text-ink">
-                        {formatINR(d.budget_allocated)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-medium text-amber-700">
-                        {formatINR(d.budget_utilized)}
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-medium text-emerald-700">
-                        {formatINR(d.budget_remaining)}
-                      </td>
-                      <td className="py-3 px-4">
+                    <tr key={d.id} className="hover:bg-brand-wash/60 transition-colors">
+                      <td className={`${ui.td} font-medium`}>{d.name}</td>
+                      <td className={`${ui.td} ${ui.code}`}>{d.code}</td>
+                      <td className={`${ui.td} text-right tabular-nums`}>{formatINR(d.budget_allocated)}</td>
+                      <td className={`${ui.td} text-right tabular-nums`}>{formatINR(d.budget_utilized)}</td>
+                      <td className={`${ui.td} text-right tabular-nums`}>{formatINR(d.budget_remaining)}</td>
+                      <td className={ui.td}>
                         <div className="flex items-center gap-2">
-                          <div className="w-24 bg-canvas-sunken rounded-full h-2 overflow-hidden border border-line/60">
+                          <div className="w-24 bg-canvas-sunken rounded-[3px] h-1.5 overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${
-                                isHighBurn ? "bg-rose-500" : "bg-brand"
-                              }`}
+                              className={`h-full rounded-[3px] ${isHighBurn ? "bg-bad" : "bg-brand"}`}
                               style={{ width: `${Math.min(100, burnPct)}%` }}
                             />
                           </div>
-                          <span className={`font-mono text-[11px] font-semibold ${isHighBurn ? "text-rose-700" : "text-ink"}`}>
+                          <span className={`tabular-nums text-[12.5px] font-medium ${isHighBurn ? "text-bad" : "text-ink"}`}>
                             {burnPct}%
                           </span>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 bg-canvas-sunken px-2 py-0.5 rounded text-[11px] text-ink border border-line font-medium">
+                      <td className={`${ui.td} text-center`}>
+                        <span className={`${ui.chip} bg-canvas-sunken text-ink-soft`}>
                           <Users className="h-3 w-3 text-ink-muted" />
                           {d.headcount ?? "–"}
                         </span>

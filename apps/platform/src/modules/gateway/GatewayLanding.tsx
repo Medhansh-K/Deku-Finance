@@ -4,18 +4,33 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Building2,
-  Layers,
-  TrendingUp,
-  Activity,
-  ChevronDown,
+  ArrowLeftRight,
   ArrowRightLeft,
-  ArrowUpRight,
-  ArrowRight,
+  BookOpen,
+  BookText,
+  ChevronDown,
+  ClipboardCheck,
+  FilePen,
+  FileText,
+  Landmark,
+  List,
+  MessageSquare,
+  Network,
+  Package,
+  PieChart,
+  Plus,
+  Receipt,
+  Scale,
+  Settings,
+  ShieldCheck,
+  ShoppingCart,
   Sparkles,
-  Bot,
+  TrendingUp,
+  Users,
+  UsersRound,
+  type LucideIcon,
 } from "lucide-react";
-import { organisationsApi, OrgSummary } from "@/api/endpoints";
+import { organisationsApi, OrgSummary, subscriptionApi } from "@/api/endpoints";
 import {
   emptyKpis,
   getQuickKpiKeys,
@@ -26,6 +41,116 @@ import {
 import { setActiveOrg } from "@/lib/organisation/active-org";
 import { GATEWAY_ALPHABET_KEY_MAP, isTargetInteractive } from "@/lib/keyboard/shortcuts";
 import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
+import { DekuLogo } from "@/components/ui/DekuLogo";
+import { GST_STATES } from "@/lib/invoices/tax-summary";
+import { formatDateTally } from "@/lib/formatters/date";
+import type { Subscription, SubscriptionStatus } from "@/lib/subscription/entitlements";
+
+type ActiveOrg = Pick<OrgSummary, "id" | "name" | "slug" | "currency"> & Partial<Omit<OrgSummary, "id" | "name" | "slug" | "currency">>;
+
+/** Each row's key is a key of GATEWAY_ALPHABET_KEY_MAP, and its link is that key's route, so the cap shown is always the key bound. */
+type LaunchItem = { key: string; title: string; desc: string; icon: LucideIcon };
+type LaunchGroup = { title: string; items: LaunchItem[] };
+
+const LAUNCH_COLUMNS: LaunchGroup[][] = [
+  [
+    {
+      title: "Transactions & registers",
+      items: [
+        { key: "V", title: "Accounting vouchers", desc: "Contra, payment, receipt, journal, sales, purchase (F4–F9)", icon: FileText },
+        { key: "D", title: "Day Book", desc: "Every voucher in date order", icon: BookOpen },
+        { key: "U", title: "Purchases & ITC", desc: "Inward supply and purchase bills", icon: ShoppingCart },
+        { key: "W", title: "Collections & WhatsApp", desc: "Unpaid invoices with WhatsApp reminders", icon: MessageSquare },
+        { key: "Shift+B", title: "Builder", desc: "Documents, quotes and coupons", icon: FilePen },
+      ],
+    },
+    {
+      title: "Utilities & statutory",
+      items: [
+        { key: "G", title: "GST returns", desc: "GSTR-1, GSTR-3B and tax breakdown", icon: Receipt },
+        { key: "M", title: "Departments & members", desc: "Teams, roles and invitations", icon: UsersRound },
+        { key: "Q", title: "Approvals queue", desc: "Maker-checker review", icon: ClipboardCheck },
+        { key: "R", title: "Reconciliation & settlements", desc: "Bank and marketplace matching", icon: Landmark },
+        { key: "L", title: "Audit log", desc: "User activity and changes", icon: ShieldCheck },
+        { key: "S", title: "Settings", desc: "Company and accounting preferences", icon: Settings },
+      ],
+    },
+  ],
+  [
+    {
+      title: "Financial reports",
+      items: [
+        { key: "B", title: "Balance Sheet", desc: "Assets, liabilities and equity", icon: Scale },
+        { key: "O", title: "Profit & Loss", desc: "Revenue, expenses and net profit", icon: TrendingUp },
+        { key: "T", title: "Trial Balance", desc: "Debit and credit balances", icon: List },
+        { key: "N", title: "General Ledger", desc: "One account, every entry", icon: BookText },
+        { key: "C", title: "Cash Flow", desc: "Working capital and cash movement", icon: ArrowLeftRight },
+        { key: "F", title: "FP&A", desc: "Budgets, forecasts and variance", icon: PieChart },
+        { key: "K", title: "Deku Consultant", desc: "Questions answered from your ledger", icon: Sparkles },
+      ],
+    },
+    {
+      title: "Masters",
+      items: [
+        { key: "A", title: "Chart of accounts", desc: "Ledgers and account hierarchy", icon: Network },
+        { key: "P", title: "Parties", desc: "Customers and vendors with GSTIN", icon: Users },
+        { key: "I", title: "Stock & services", desc: "Items, HSN/SAC codes and tax rates", icon: Package },
+      ],
+    },
+  ],
+];
+
+const STATUS: Record<SubscriptionStatus, [string, string]> = {
+  trialing: ["Free trial", "text-brand-strong bg-brand-wash"],
+  active: ["Active", "text-ok bg-ok-wash"],
+  past_due: ["Payment overdue", "text-warn bg-warn-wash"],
+  cancelled: ["Cancelled", "text-bad bg-bad-wash"],
+  expired: ["Expired", "text-bad bg-bad-wash"],
+};
+
+const CHIP = "inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium whitespace-nowrap";
+const BTN = "inline-flex items-center gap-2 h-9 px-3.5 rounded-ctl text-[13.5px] font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand";
+
+function Kbd({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <kbd className={`font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted ${className}`}>
+      {children}
+    </kbd>
+  );
+}
+
+const keyCap = (key: string) => (key === "Shift+B" ? "⇧ B" : key);
+
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter((w) => /^[A-Za-z0-9]/.test(w))
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("") || "–";
+
+function BookRow({ href, title, label, sub, amount, amountClass = "text-ink", chip }: {
+  href: string;
+  title: string;
+  label: string;
+  sub: string;
+  amount: string;
+  amountClass?: string;
+  chip?: React.ReactNode;
+}) {
+  return (
+    <Link href={href} title={title} className="flex items-start gap-3 py-3 border-b border-line last:border-b-0 group">
+      <div className="flex-1 min-w-0">
+        <span className="block text-sm font-[550] text-ink group-hover:text-brand-strong transition-colors">{label}</span>
+        <span className="block text-[12.5px] text-ink-muted">{sub}</span>
+      </div>
+      <div className="text-right shrink-0">
+        <span className={`block text-[15px] font-semibold tabular-nums ${amountClass}`}>{amount}</span>
+        {chip && <div className="mt-1">{chip}</div>}
+      </div>
+    </Link>
+  );
+}
 
 export function GatewayLanding() {
   const router = useRouter();
@@ -34,17 +159,19 @@ export function GatewayLanding() {
   const [orgList, setOrgList] = useState<OrgSummary[]>([]);
   const [orgsLoaded, setOrgsLoaded] = useState(false);
 
-  const [activeOrg, setActiveOrgState] = useState({
+  const [activeOrg, setActiveOrgState] = useState<ActiveOrg>({
     id: "",
     name: "",
     slug: "",
-    gstin: "" as string | null,
+    gstin: null,
     currency: "INR",
   });
 
   const [profile, setProfile] = useState<FormattedKpiProfile>(emptyKpis);
   const [quickKeys, setQuickKeys] = useState<KpiKey[]>([]);
   const show = (k: KpiKey) => quickKeys.includes(k);
+  // undefined while loading, null when the plan couldn't be read.
+  const [plan, setPlan] = useState<Subscription | null | undefined>(undefined);
 
   useEffect(() => {
     if (!activeOrg.id) return;
@@ -53,6 +180,19 @@ export function GatewayLanding() {
     loadKpis(activeOrg.id)
       .then((p) => live && setProfile(p))
       .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [activeOrg.id]);
+
+  useEffect(() => {
+    if (!activeOrg.id) return;
+    setPlan(undefined);
+    let live = true;
+    subscriptionApi
+      .get(activeOrg.id)
+      .then((r) => live && setPlan(r.data ?? null))
+      .catch(() => live && setPlan(null));
     return () => {
       live = false;
     };
@@ -69,8 +209,7 @@ export function GatewayLanding() {
   // Handle switching company
   const handleSwitchCompany = (org: OrgSummary | { id: string; name: string; gstin?: string | null; currency?: string; slug?: string }) => {
     setActiveOrgState({
-      id: org.id,
-      name: org.name,
+      ...org,
       slug: org.slug || org.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
       gstin: org.gstin ?? null,
       currency: org.currency || "INR",
@@ -105,13 +244,7 @@ export function GatewayLanding() {
           .then((res) => {
             if (res.data && res.data.length > 0) {
               const org = res.data[0];
-              setActiveOrgState({
-                id: org.id,
-                name: org.name,
-                slug: org.slug,
-                gstin: org.gstin ?? null,
-                currency: org.currency || "INR",
-              });
+              setActiveOrgState({ ...org, gstin: org.gstin ?? null, currency: org.currency || "INR" });
             } else if (savedName) {
               setActiveOrgState((prev) => ({
                 ...prev,
@@ -148,756 +281,322 @@ export function GatewayLanding() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [demo, router]);
 
+  const gstin = activeOrg.gstin?.trim() || null;
+  const stateCode = activeOrg.state_code || gstin?.slice(0, 2) || "";
+  const stateName = GST_STATES.find(([c]) => c === stateCode)?.[1] ?? null;
+  const city = activeOrg.registered_address?.city?.trim() || null;
+  const place = [city, stateName].filter(Boolean).join(", ");
+  const regime = !activeOrg.id ? null : gstin ? (activeOrg.composition_scheme ? "GST registered, composition" : "GST registered") : "No GSTIN, Section 22";
 
-
-  const companyShortName = activeOrg.name.split(" ")[0];
+  const status = plan?.status ? STATUS[plan.status] : null;
+  const seatLimit = plan?.entitlements?.seats;
+  const validLine = !plan
+    ? null
+    : plan.status === "trialing"
+    ? `Trial ends ${formatDateTally(plan.trial_ends_at)}`
+    : plan.current_period_end
+    ? `Valid until ${formatDateTally(plan.current_period_end)}`
+    : "No end date on record";
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-start p-3 lg:px-5 lg:py-3.5 bg-canvas w-full min-h-0">
-      <div className="w-full max-w-[1400px] flex flex-col xl:flex-row gap-3.5 items-stretch">
-        {/* ========================================================================= */}
-        {/* Column 1 (Left): Company Status & Instant Shift Switcher */}
-        {/* ========================================================================= */}
-        <div data-tour="gateway-company" className="w-full xl:w-[290px] shrink-0 bg-surface border border-line-strong rounded-xl p-3.5 shadow-xs flex flex-col justify-between">
-          <div className="space-y-2.5">
-            {/* Header with Company Selector Dropdown */}
-            <div className="border-b border-line pb-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft">
-                  Current Active Company
-                </span>
-                <span className="text-[9px] font-mono font-bold text-brand bg-panel px-1.5 py-0.5 rounded">
-                  Shift
-                </span>
-              </div>
-
-              {/* Instant Switcher Dropdown */}
-              <div className="relative mt-1.5">
-                <select
-                  id="company-shift-select"
-                  value={activeOrg.id}
-                  onChange={(e) => {
-                    const chosen = orgList.find((o) => o.id === e.target.value);
-                    if (chosen) handleSwitchCompany(chosen);
-                  }}
-                  className="w-full bg-panel text-white font-bold text-xs py-1.5 px-2.5 rounded border border-edge focus:border-brand focus:outline-none cursor-pointer appearance-none pr-8 shadow-xs hover:border-brand transition-colors"
-                  title="Select and switch active company workspace"
-                >
-                  {orgList.map((org) => (
-                    <option key={org.id} value={org.id} className="bg-panel text-white py-1">
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="h-4 w-4 text-brand absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="text-[10px] font-mono bg-canvas-sunken text-ink-soft px-1.5 py-0.5 rounded border border-line-strong">
-                  GSTIN: {activeOrg.gstin || "–"}
-                </span>
-                <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-300 font-bold">
-                  {activeOrg.currency}
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Shift Entities (Clickable Switcher Buttons) */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft">
-                <span className="flex items-center gap-1">
-                  <ArrowRightLeft className="h-3 w-3 text-brand" /> Shift Company
-                </span>
-                {/* One company per deployment: adding one is only for someone who has none yet. */}
-                {orgsLoaded && (
-                  <Link
-                    href="/companies"
-                    className="text-brand-strong hover:text-brand transition-colors"
-                    title="Manage companies"
-                  >
-                    {orgList.length > 0 ? "Switch" : "+ Add company"}
-                  </Link>
-                )}
-              </div>
-
-              <div className="space-y-1">
-                {orgList.slice(0, 3).map((org) => {
-                  const isSelected = org.id === activeOrg.id;
-                  return (
-                    <button
-                      key={org.id}
-                      id={`shift-company-${org.id}`}
-                      type="button"
-                      onClick={() => handleSwitchCompany(org)}
-                      className={`w-full text-left px-2 py-1 rounded text-[11px] transition-all flex items-center justify-between border cursor-pointer ${
-                        isSelected
-                          ? "bg-panel text-brand-soft border-edge font-bold shadow-xs"
-                          : "bg-canvas hover:bg-canvas-sunken text-ink-soft border-line"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 truncate">
-                        <Building2
-                          className={`h-3 w-3 shrink-0 ${
-                            isSelected ? "text-brand" : "text-ink-subtle"
-                          }`}
-                        />
-                        <span className="truncate">{org.name}</span>
-                      </div>
-                      {isSelected ? (
-                        <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-brand text-panel-deep font-bold shrink-0">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-mono text-ink-subtle hover:text-ink-soft shrink-0">
-                          Shift ➔
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Company Metadata Info */}
-            <div className="space-y-1 text-[11px] pt-1">
-              <div className="flex justify-between py-0.5 border-b border-line">
-                <span className="text-ink-muted">Current Period:</span>
-                <span className="font-mono font-bold text-ink">
-                  {profile.periodLabel}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5 border-b border-line">
-                <span className="text-ink-muted">Date of Last Entry:</span>
-                <span className="font-mono font-bold text-ink">
-                  {profile.lastEntry}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5 border-b border-line">
-                <span className="text-ink-muted">Accounting Standard:</span>
-                <span className="font-mono text-ink">
-                  ALERX 4-Tier Double Entry
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 mt-1.5 border-t border-line text-[10px] text-ink-muted">
-            <p className="font-mono text-[9px] text-ink-subtle">
-              Click above or use header to shift company. Highlighted keys open menu items directly.
+    <div className="w-full px-4 pt-6 pb-8 sm:px-8 sm:pt-7">
+      <div className="mx-auto w-full max-w-[1400px] space-y-5">
+        {/* Page head */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-[28px] leading-tight font-semibold tracking-[-0.03em] text-ink">Gateway of Deku</h1>
+            <p className="text-sm text-ink-muted mt-1">
+              {activeOrg.name || (orgsLoaded ? "No company selected" : "–")}
+              <span className="mx-2">·</span>
+              {gstin ? <>GSTIN <span className="font-mono">{gstin}</span></> : regime ?? "GST –"}
+              <span className="mx-2">·</span>
+              Last entry {profile.lastEntry}
             </p>
           </div>
+          <Link href="/vouchers" className={`${BTN} bg-ink text-white hover:bg-panel-raised self-start sm:self-auto`}>
+            <Plus className="h-4 w-4" />
+            New voucher
+            <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-white/25 border-b-2 text-white/70">F3</kbd>
+          </Link>
         </div>
 
-        <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 gap-3.5 items-stretch">
-        {/* ========================================================================= */}
-        {/* Column 2 (Center): Gateway of Deku Navigation Menu (Enlarged & Focused)  */}
-        {/* ========================================================================= */}
-        <div data-tour="gateway-menu" className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
-          <div>
-            {/* Menu Title Header */}
-            <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-brand" />
-                <span className="text-xs font-mono font-black tracking-wider uppercase">
-                  Gateway of Deku
-                </span>
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-5 items-start">
+          <div className="min-w-0 space-y-5">
+            {/* Deku Consultant */}
+            <div className="flex flex-col md:flex-row md:items-center gap-4 rounded-panel border border-brand-wash-strong bg-brand-wash px-5 py-4">
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                <DekuLogo size={44} className="shrink-0" aria-hidden="true" />
+                <div className="min-w-0">
+                  <h2 className="text-[15.5px] font-semibold tracking-tight text-ink">Deku Consultant</h2>
+                  <p className="text-[13.5px] text-ink-soft">Ask about overdue payments, expense spikes or margins, answered from your ledger.</p>
+                </div>
               </div>
-              <span className="text-[10px] font-mono text-brand-soft truncate max-w-[220px] bg-white/10 px-2 py-0.5 rounded border border-brand/30">
-                🏢 {companyShortName} Workspace
-              </span>
+              <div className="flex flex-wrap gap-2.5">
+                <Link href="/consultant" className={`${BTN} border border-line-strong bg-surface text-ink hover:bg-canvas`}>
+                  Ask a question <Kbd>K</Kbd>
+                </Link>
+                <Link href="/executive" className={`${BTN} border border-line-strong bg-surface text-ink hover:bg-canvas`}>
+                  Executive dashboard <Kbd>E</Kbd>
+                </Link>
+              </div>
             </div>
 
-            <div className="p-2.5 space-y-1.5 divide-y divide-line text-xs font-sans">
-              {/* EXECUTIVE DASHBOARD & DEKU KONSULTANT SPOTLIGHT */}
-              <div className="pb-0.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-1 px-1.5 flex items-center justify-between">
-                  <span>Executive Overview</span>
-                </div>
-                <Link
-                  href="/consultant"
-                  style={{
-                    backgroundColor: "#141C1E",
-                    border: "1px solid #233134",
-                    color: "#FFFFFF",
-                  }}
-                  className="flex items-center justify-between px-2.5 py-2 rounded hover:border-[#00F5A0]/60 shadow-xs group transition-all"
-                  title="Launch Deku Konsultant Executive Dashboard & Consultant (K or E)"
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-6 w-6 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform shrink-0"
-                      style={{
-                        backgroundColor: "rgba(0, 245, 160, 0.15)",
-                        border: "1px solid rgba(0, 245, 160, 0.4)",
-                        color: "#00F5A0",
-                      }}
-                    >
-                      <Sparkles className="h-3.5 w-3.5" />
-                    </span>
-                    <div>
-                      <span className="font-bold text-xs block text-white group-hover:text-[#00F5A0] transition-colors">
-                        Deku <u>K</u>onsultant (<u>E</u>xecutive Dashboard)
-                      </span>
-                      <span className="text-[10px] text-ink-subtle block font-mono">
-                        {companyShortName} Consultant &amp; Real-time Ledger Intelligence
-                      </span>
+            {/* Active company */}
+            <div
+              data-tour="gateway-company"
+              className="rounded-panel border border-line bg-surface flex flex-col lg:flex-row lg:items-center divide-y lg:divide-y-0 lg:divide-x divide-line"
+            >
+              <div className="flex items-center gap-3 px-5 py-3.5 min-w-0 lg:w-[30%]">
+                <span className="h-9 w-9 shrink-0 rounded-[9px] bg-ink text-white grid place-items-center text-[13px] font-semibold">
+                  {activeOrg.name ? initials(activeOrg.name) : "–"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  {orgList.length > 0 ? (
+                    <div className="relative">
+                      <select
+                        id="company-shift-select"
+                        aria-label="Shift company"
+                        title="Shift the active company"
+                        value={activeOrg.id}
+                        onChange={(e) => {
+                          const chosen = orgList.find((o) => o.id === e.target.value);
+                          if (chosen) handleSwitchCompany(chosen);
+                        }}
+                        className="w-full appearance-none bg-transparent pr-6 text-[15px] font-semibold tracking-tight text-ink truncate cursor-pointer rounded-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                      >
+                        {orgList.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="h-4 w-4 text-ink-muted absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <kbd
-                      className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded shadow-xs"
-                      style={{ backgroundColor: "#00F5A0", color: "#000000" }}
-                    >
-                      K
-                    </kbd>
-                    <kbd
-                      className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border"
-                      style={{
-                        backgroundColor: "rgba(0,0,0,0.4)",
-                        borderColor: "#3E4848",
-                        color: "#CBD5E1",
-                      }}
-                    >
-                      E
-                    </kbd>
-                  </div>
+                  ) : (
+                    <span className="block text-[15px] font-semibold tracking-tight text-ink truncate">
+                      {activeOrg.name || (orgsLoaded ? "No company yet" : "–")}
+                    </span>
+                  )}
+                  <span className="block text-[12.5px] text-ink-muted truncate">
+                    {profile.periodLabel === "–" ? "Financial year –, books not read yet" : profile.periodLabel}
+                  </span>
+                </div>
+              </div>
+
+              <div className="px-5 py-3.5 min-w-0 lg:flex-1">
+                <span className="block text-[12.5px] text-ink-muted">GST</span>
+                <span className="block text-[13.5px] text-ink truncate">
+                  {gstin ? <span className="font-mono">{gstin}</span> : activeOrg.id ? "No GSTIN" : "–"}
+                  {regime && <span className="text-ink-muted"> · {regime}</span>}
+                </span>
+                <span className="block text-[12.5px] text-ink-muted truncate">
+                  {place || (activeOrg.id ? "State –, not on the company record" : "–")}
+                </span>
+              </div>
+
+              <div className="px-5 py-3.5 min-w-0 lg:flex-1">
+                <span className="block text-[12.5px] text-ink-muted">Licence</span>
+                {plan ? (
+                  <>
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="text-[13.5px] text-ink truncate">{plan.plan?.name ?? "No plan"}</span>
+                      {status && <span className={`${CHIP} ${status[1]}`}>{status[0]}</span>}
+                      {plan.entitlements?.read_only && <span className={`${CHIP} text-bad bg-bad-wash`}>Read only</span>}
+                    </span>
+                    <span className="block text-[12.5px] text-ink-muted truncate">
+                      {validLine} · Seats {plan.usage.seats_used} of {seatLimit === null || seatLimit === undefined ? "unlimited" : seatLimit}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="block text-[13.5px] text-ink">–</span>
+                    <span className="block text-[12.5px] text-ink-muted">
+                      {!activeOrg.id ? "No company selected" : plan === undefined ? "Loading the plan" : "Plan couldn't be read"}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* One company per deployment: adding one is only for someone who has none yet. */}
+              {orgsLoaded && (
+                <div className="px-5 py-3.5 shrink-0">
+                  <Link
+                    href="/companies"
+                    title="Manage companies"
+                    className={`${BTN} h-8 text-[13px] border border-line-strong bg-surface text-ink hover:bg-canvas`}
+                  >
+                    {orgList.length > 0 ? <ArrowRightLeft className="h-3.5 w-3.5" aria-hidden="true" /> : <Plus className="h-3.5 w-3.5" aria-hidden="true" />}
+                    {orgList.length > 0 ? "Switch" : "+ Add company"}
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Launcher */}
+            <div data-tour="gateway-menu" className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+              {LAUNCH_COLUMNS.map((column, ci) => (
+                <div key={ci} className="rounded-panel border border-line bg-surface overflow-hidden">
+                  {column.map((group, gi) => (
+                    <div key={group.title} className={`pt-1.5 pb-2 ${gi > 0 ? "border-t border-line" : ""}`}>
+                      <h3 className="px-5 pt-3 pb-2 text-[13px] font-semibold text-ink-soft">{group.title}</h3>
+                      {group.items.map(({ key, title, desc, icon: Icon }) => (
+                        <Link
+                          key={key}
+                          href={GATEWAY_ALPHABET_KEY_MAP[key]}
+                          title={`${title} (${key})`}
+                          className="group mx-2 flex items-center gap-3 rounded-[10px] px-3 py-2 hover:bg-brand-wash focus-visible:bg-brand-wash focus-visible:outline-none transition-colors"
+                        >
+                          <span className="h-8 w-8 shrink-0 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center group-hover:bg-surface group-hover:text-brand-strong transition-colors">
+                            <Icon className="h-4 w-4" aria-hidden="true" />
+                          </span>
+                          <span className="flex-1 min-w-0 leading-tight">
+                            <span className="block text-sm font-[550] text-ink">{title}</span>
+                            <span className="block text-[12.5px] text-ink-muted truncate">{desc}</span>
+                          </span>
+                          <Kbd className="shrink-0 group-hover:text-brand-strong group-hover:border-brand-wash-strong">{keyCap(key)}</Kbd>
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* From the books */}
+          <div data-tour="gateway-kpis" className="min-w-0 rounded-panel border border-line bg-surface overflow-hidden">
+            <div className="px-5 pt-4">
+              <h2 className="text-[15px] font-semibold tracking-tight text-ink">From the books</h2>
+              <p className="text-[13px] text-ink-muted truncate">{activeOrg.name || "–"}, posted entries only</p>
+            </div>
+            <div className="px-5 pt-4 pb-1">
+              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-line">
+                <Link href="/gst" className="min-w-0 group" title="Sales invoices and billed turnover">
+                  <span className="block text-[13px] text-ink-muted">Turnover, FY to date</span>
+                  <span className="block text-[26px] sm:text-[30px] font-semibold tracking-[-0.035em] tabular-nums text-ink group-hover:text-brand-strong transition-colors truncate">
+                    {profile.turnover}
+                  </span>
+                  <span className="block text-[12.5px] text-ink-muted">{profile.periodLabel}</span>
+                </Link>
+                <Link href="/reports/profit-loss" className="min-w-0 group" title="Profit & Loss account (O)">
+                  <span className="block text-[13px] text-ink-muted">Net profit</span>
+                  <span className="block text-[26px] sm:text-[30px] font-semibold tracking-[-0.035em] tabular-nums text-ink group-hover:text-brand-strong transition-colors truncate">
+                    {profile.profit}
+                  </span>
+                  <span className="block text-[12.5px] text-ink-muted">
+                    <span className="font-medium text-ok">{profile.margin}</span> net margin
+                  </span>
                 </Link>
               </div>
 
-              {/* MASTERS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-0.5 px-1.5">
-                  Masters
-                </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/masters/chart-of-accounts"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>C</u>hart of <u>A</u>ccounts (ALERX Ledgers)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      A
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/masters/parties"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>P</u>arties (Customers &amp; Vendors Master)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      P
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/masters/products-services"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Stock &amp; Services <u>I</u>tems
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      I
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
-
-              {/* TRANSACTIONS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-0.5 px-1.5">
-                  Transactions &amp; Registers
-                </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/vouchers"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Accounting <u>V</u>ouchers (F4-F9)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      V
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/purchases"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      P<u>u</u>rchases &amp; ITC
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      U
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/collect"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Collections &amp; <u>W</u>hatsApp
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      W
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/day-book"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>D</u>ay Book (Chronological Register)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      D
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/builder"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span><u>B</u>uilder (Docs, Quotes &amp; Coupons)</span>
-                      <span className="text-[9px] px-1 py-0.1 rounded bg-teal-100 text-teal-900 font-bold">New</span>
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      Shift+B
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
-
-              {/* FINANCIAL REPORTS */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-0.5 px-1.5">
-                  Financial Reports
-                </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/reports/balance-sheet"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>B</u>alance Sheet
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      B
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/profit-loss"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Pr<u>o</u>fit &amp; Loss A/c
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      O
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/trial-balance"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>T</u>rial Balance
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      T
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/general-ledger"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Ge<u>n</u>eral Ledger
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      N
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/cash-flow"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>C</u>ash Flow (WCM)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-brand bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      C
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reports/fpa"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>F</u>P&amp;A Intelligence
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-brand bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      F
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/consultant"
-                    className="flex items-center justify-between px-2 py-0.5 rounded bg-teal-500/10 hover:bg-teal-500/20 text-teal-950 hover:text-teal-900 transition-colors font-bold border border-teal-500/30"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span>Deku <u>K</u>onsultant</span>
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      K
-                    </kbd>
-                  </Link>
-                </div>
-              </div>
-
-              {/* UTILITIES & STATUTORY */}
-              <div className="pt-1.5">
-                <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft mb-0.5 px-1.5">
-                  Utilities &amp; Statutory
-                </div>
-                <div className="space-y-0.5">
-                  <Link
-                    href="/gst"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>G</u>ST Returns &amp; Tax Breakdown
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      G
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/departments-members"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Departments &amp; <u>M</u>embers
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      M
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/approvals"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      Approvals <u>Q</u>ueue (Maker-Checker)
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      Q
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/reconciliation"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>R</u>econciliation &amp; Settlements
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      R
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/audit"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      User Activity &amp; Audit <u>L</u>ogs
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-white bg-panel px-1.5 py-0.2 rounded border border-edge">
-                      L
-                    </kbd>
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="flex items-center justify-between px-2 py-0.5 rounded hover:bg-brand/10 text-ink hover:text-ink transition-colors font-medium"
-                  >
-                    <span>
-                      <u>S</u>ettings &amp; Accounting Preferences
-                    </span>
-                    <kbd className="font-mono text-[10px] font-bold text-ink-soft bg-canvas-sunken px-1.5 py-0.2 rounded border border-line-strong">
-                      S
-                    </kbd>
-                  </Link>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Balanced Card Footer */}
-          <div className="px-3.5 py-1.5 bg-canvas border-t border-line flex items-center justify-between text-xs">
-            <span className="text-[10px] font-mono text-ink-muted">
-              Press highlighted key to navigate
-            </span>
-            <span className="text-[10px] font-mono text-brand-strong font-semibold">
-              ALERX Double-Entry
-            </span>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* Column 3 (Right): Quick KPI Table (Dynamically Synced with Company)       */}
-        {/* ========================================================================= */}
-        <div data-tour="gateway-kpis" className="min-w-0 bg-surface border border-edge rounded-xl shadow-md overflow-hidden flex flex-col justify-between">
-          <div>
-            {/* KPI Title Header */}
-            <div className="bg-panel px-3.5 py-1.5 border-b border-edge flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-brand" />
-                <span className="text-xs font-mono font-black tracking-wider uppercase">
-                  Quick Business KPIs
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 font-bold">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                From the books ({companyShortName})
-              </span>
-            </div>
-
-            {/* Top Revenue & Margin Highlight Strip with Direct Drilldown */}
-            <div className="p-2.5 bg-canvas border-b border-line grid grid-cols-2 gap-2">
-              <Link
-                href="/gst"
-                className="p-1.5 rounded bg-surface hover:bg-brand/10 border border-line/80 hover:border-brand block shadow-2xs group transition-all cursor-pointer"
-                title="View Sales Invoices & Billed Turnover Register"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-ink-muted uppercase block font-semibold group-hover:text-ink transition-colors">
-                    Turnover (FY to date)
-                  </span>
-                  <ArrowUpRight className="h-3 w-3 text-ink-subtle group-hover:text-brand transition-colors" />
-                </div>
-                <span className="text-base font-black font-mono text-ink group-hover:text-brand-strong transition-colors">
-                  {profile.turnover}
-                </span>
-              </Link>
-              <Link
-                href="/reports/profit-loss"
-                className="p-1.5 rounded bg-surface hover:bg-brand/10 border border-line/80 hover:border-brand text-right block shadow-2xs group transition-all cursor-pointer"
-                title="View Profit & Loss Account & Net Profit Statement (O)"
-              >
-                <div className="flex items-center justify-end gap-1">
-                  <span className="text-[10px] font-mono text-ink-muted uppercase block font-semibold group-hover:text-ink transition-colors">
-                    Net Profit
-                  </span>
-                  <ArrowUpRight className="h-3 w-3 text-ink-subtle group-hover:text-brand transition-colors" />
-                </div>
-                <span className="text-base font-black font-mono text-emerald-700 group-hover:text-emerald-600 transition-colors">
-                  {profile.profit}
-                </span>
-              </Link>
-            </div>
-
-            {/* Quick KPI Table: Numerical Business Metrics with Direct Drilldown */}
-            <div className="p-2.5 space-y-1.5 text-xs">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft px-1 flex items-center justify-between">
-                <span>Business Metric (Click to view details)</span>
-                <span>Position / Amount</span>
-              </div>
-
-              <div className="divide-y divide-line border border-line rounded overflow-hidden bg-surface text-xs">
-                {/* 1. Billed Turnover & Invoices Hub -> /gst */}
+              <div className="pt-1">
                 {show("billed") && (
-                <Link
-                  href="/gst"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open Sales Invoices Register, Issuance & Conversion Tracking"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        Billed Turnover
+                  <BookRow
+                    href="/gst"
+                    title="Sales invoices register"
+                    label="Billed turnover"
+                    sub={profile.billedLimit}
+                    amount={profile.billed}
+                    chip={
+                      <span
+                        className={`${CHIP} ${
+                          profile.sec22Variant === "safe" ? "text-ok bg-ok-wash" : profile.sec22Variant === "warn" ? "text-warn bg-warn-wash" : "text-brand-strong bg-brand-wash"
+                        }`}
+                      >
+                        {profile.sec22Badge}
                       </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.billedLimit}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
-                      {profile.billed}
-                    </span>
-                    <span
-                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded border font-bold ${
-                        profile.sec22Variant === "safe"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : profile.sec22Variant === "warn"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
-                          : "bg-blue-50 text-blue-800 border-blue-200"
-                      }`}
-                    >
-                      {profile.sec22Badge}
-                    </span>
-                  </div>
-                </Link>
+                    }
+                  />
                 )}
-
-                {/* 2. Liquid Funds (Cash & Bank) -> /masters/chart-of-accounts?group=asset&filter=liquid */}
                 {show("liquid") && (
-                <Link
-                  href="/masters/chart-of-accounts?group=asset&filter=liquid"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open Chart of Accounts: Liquid Cash & Bank Asset Units and Values"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        Liquid Funds
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.liquidBank}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-emerald-700 group-hover:text-emerald-600 block transition-colors text-xs">
-                      {profile.liquid}
-                    </span>
-                    <span className="text-[10px] text-ink-subtle font-mono">Instant Liquidity</span>
-                  </div>
-                </Link>
+                  <BookRow
+                    href="/masters/chart-of-accounts?group=asset&filter=liquid"
+                    title="Cash and bank ledgers"
+                    label="Liquid funds"
+                    sub={profile.liquidBank}
+                    amount={profile.liquid}
+                    amountClass="text-ok"
+                  />
                 )}
-
-                {/* 3. Trade Debtors (AR DSO Tracking) -> /reports/debtors */}
                 {show("debtors") && (
-                <Link
-                  href="/reports/debtors"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open Trade Debtors (AR) DSO Analysis & Customer Outstanding Invoices"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        Trade Debtors (AR)
+                  <BookRow
+                    href="/reports/debtors"
+                    title="Trade debtors and ageing"
+                    label="Trade debtors"
+                    sub={profile.debtorsCount}
+                    amount={profile.debtors}
+                    chip={
+                      <span className={`${CHIP} ${profile.debtorsAging.startsWith("0 ") ? "text-ink-soft bg-canvas-sunken" : "text-warn bg-warn-wash"}`}>
+                        {profile.debtorsAging}
                       </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.debtorsCount}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
-                      {profile.debtors}
-                    </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
-                      {profile.debtorsAging}
-                    </span>
-                  </div>
-                </Link>
+                    }
+                  />
                 )}
-
-                {/* 4. Trade Creditors (AP DPO Tracking) -> /reports/creditors */}
                 {show("creditors") && (
-                <Link
-                  href="/reports/creditors"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open Trade Creditors (AP) DPO Analysis & Vendor Bills Tracker"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        Trade Creditors (AP)
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.creditorsCount}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
-                      {profile.creditors}
-                    </span>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.creditorsTerms}</span>
-                  </div>
-                </Link>
+                  <BookRow
+                    href="/reports/creditors"
+                    title="Trade creditors and vendor bills"
+                    label="Trade creditors"
+                    sub={`${profile.creditorsCount} · ${profile.creditorsTerms}`}
+                    amount={profile.creditors}
+                  />
                 )}
-
-                {/* 5. Operating Expenses & Payment Vouchers -> /reports/operating-expenses */}
                 {show("expenses") && (
-                <Link
-                  href="/reports/operating-expenses"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open Operating Expenses Hub: Payment Vouchers & Department-wise Tracking"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        Operating Expenses
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.expensesHeads}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-ink group-hover:text-brand block transition-colors text-xs">
-                      {profile.expenses}
-                    </span>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.expenseRatio}</span>
-                  </div>
-                </Link>
+                  <BookRow
+                    href="/reports/operating-expenses"
+                    title="Operating expenses by head"
+                    label="Operating expenses"
+                    sub={profile.expensesHeads}
+                    amount={profile.expenses}
+                    chip={<span className="text-[12.5px] text-ink-muted">{profile.expenseRatio}</span>}
+                  />
                 )}
-
-                {/* 6. GST Net Liability -> /gst */}
                 {show("gst") && (
-                <Link
-                  href="/gst"
-                  className="flex items-center justify-between px-2.5 py-1.5 hover:bg-brand/10 transition-colors group cursor-pointer"
-                  title="Open GST Returns & Tax Breakdown Hub (G)"
-                >
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-ink group-hover:text-ink block text-xs">
-                        GST Net Payable
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 text-ink-soft opacity-40 group-hover:opacity-100 group-hover:text-brand transition-all" />
-                    </div>
-                    <span className="text-[10px] text-ink-subtle font-mono">{profile.gstBreakdown}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-rose-700 group-hover:text-rose-600 block transition-colors text-xs">
-                      {profile.gst}
-                    </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-canvas-sunken text-ink-soft border border-line">
-                      {profile.gstStatus}
-                    </span>
-                  </div>
-                </Link>
+                  <BookRow
+                    href="/gst"
+                    title="GST returns and tax breakdown (G)"
+                    label="GST net payable"
+                    sub={profile.gstBreakdown}
+                    amount={profile.gst}
+                    amountClass="text-bad"
+                    chip={<span className={`${CHIP} text-ink-soft bg-canvas-sunken`}>{profile.gstStatus}</span>}
+                  />
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Bottom Card Footer with Direct Drilldown to Executive Dashboard & Deku Consultant */}
-          <div className="px-3.5 py-1.5 bg-canvas border-t border-line flex items-center justify-between text-xs">
-            <Link
-              href="/consultant"
-              className="inline-flex items-center gap-1.5 font-bold text-teal-800 hover:text-teal-600 transition-colors"
-              title="Launch Deku Consultant AI Advisor (K)"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Deku Konsultant (K)</span>
-            </Link>
-            <Link
-              href="/executive"
-              className="inline-flex items-center gap-1 font-bold text-ink hover:text-brand transition-colors"
-              title="Open Executive Dashboard (E)"
-            >
-              <span>Executive Dashboard (E)</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="mx-5 mb-4 mt-2 rounded-[11px] bg-canvas px-4 py-3.5 text-[13.5px] text-ink-soft">
+              <div className="flex items-center gap-2 mb-1.5 font-semibold text-ink">
+                <Scale className="h-4 w-4" aria-hidden="true" />
+                Balance check
+                <span
+                  className={`ml-auto ${CHIP} ${
+                    profile.balanced === true ? "text-ok bg-ok-wash" : profile.balanced === false ? "text-bad bg-bad-wash" : "text-ink-soft bg-canvas-sunken"
+                  }`}
+                >
+                  {profile.balanced === true ? "Balanced" : profile.balanced === false ? "Out of balance" : "Not computed yet"}
+                </span>
+              </div>
+              <span className="flex flex-wrap gap-x-1.5 gap-y-1 tabular-nums">
+                <span className="whitespace-nowrap">Assets <b className="font-semibold text-ink ledger-total">{profile.assets}</b></span>
+                <span>=</span>
+                <span className="whitespace-nowrap">Liabilities <b className="font-semibold text-ink">{profile.liabilities}</b></span>
+                <span>+</span>
+                <span className="whitespace-nowrap">equity <b className="font-semibold text-ink">{profile.equity}</b></span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-5 py-3 text-[13.5px]">
+              <Link href="/consultant" className="inline-flex items-center gap-2 font-medium text-brand-strong hover:text-ink transition-colors">
+                Deku Consultant <Kbd>K</Kbd>
+              </Link>
+              <Link href="/executive" className="inline-flex items-center gap-2 font-medium text-ink hover:text-brand-strong transition-colors">
+                Executive dashboard <Kbd>E</Kbd>
+              </Link>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
   );
 }
-

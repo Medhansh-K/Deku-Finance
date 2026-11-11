@@ -54,16 +54,16 @@ export function DemoControlBar() {
       <div
         data-testid="learn-demo-control-bar"
         data-tour="demo-control-bar"
-        className="no-print shrink-0 border-b border-brand/30 bg-gradient-to-r from-brand/10 via-sky-500/5 to-amber-500/10 px-3 sm:px-4 py-2 text-xs text-ink"
+        className="no-print shrink-0 border-b border-line bg-surface px-3 sm:px-6 py-2 text-[13px] text-ink"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           {/* Left: Non-transactional demo badge */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-amber-900">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-600 animate-pulse" />
-              DEMO ENVIRONMENT — NO REAL FINANCIAL TRANSACTIONS
+            <span className="inline-flex items-center gap-1.5 rounded-chip bg-warn-wash px-2 py-0.5 text-xs font-medium text-warn">
+              <span className="h-1.5 w-1.5 rounded-full bg-warn" />
+              Demo, sample books only
             </span>
-            <span className="hidden xl:inline text-[11px] text-ink-soft truncate">
+            <span className="hidden xl:inline text-[13px] text-ink-muted truncate">
               {roleConfig.readOnly
                 ? "Read-only preview role"
                 : `${roleConfig.label} preview · in-browser sample data`}
@@ -73,14 +73,14 @@ export function DemoControlBar() {
           {/* Center/Right: Interactive switchers & utility actions */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* 4 Demo Companies */}
-            <label className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-1 text-[11px]">
-              <Building2 className="h-3.5 w-3.5 text-brand-strong shrink-0" />
+            <label className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface h-8 px-2.5 text-[13px]">
+              <Building2 className="h-3.5 w-3.5 text-ink-muted shrink-0" />
               <span className="sr-only">Demo Company</span>
               <select
                 aria-label="Demo Company"
                 value={companySlug}
                 onChange={(e) => switchCompany(e.target.value as DemoCompanySlug)}
-                className="bg-transparent font-semibold text-ink focus:outline-none cursor-pointer"
+                className="bg-transparent font-medium text-ink focus:outline-none cursor-pointer"
               >
                 {DEMO_COMPANIES.map((c) => (
                   <option key={c.slug} value={c.slug}>
@@ -91,14 +91,14 @@ export function DemoControlBar() {
             </label>
 
             {/* 7 User Roles */}
-            <label className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-1 text-[11px]">
-              <Shield className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+            <label className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface h-8 px-2.5 text-[13px]">
+              <Shield className="h-3.5 w-3.5 text-ink-muted shrink-0" />
               <span className="sr-only">Demo Role</span>
               <select
                 aria-label="Demo Role"
                 value={role}
                 onChange={(e) => switchRole(e.target.value as OrgRole)}
-                className="bg-transparent font-semibold text-ink focus:outline-none cursor-pointer"
+                className="bg-transparent font-medium text-ink focus:outline-none cursor-pointer"
               >
                 {DEMO_ROLES.map((r) => (
                   <option key={r.role} value={r.role}>
@@ -109,14 +109,14 @@ export function DemoControlBar() {
             </label>
 
             {/* 3 Subscription Plans */}
-            <label className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface px-2 py-1 text-[11px]">
-              <Crown className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+            <label className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface h-8 px-2.5 text-[13px]">
+              <Crown className="h-3.5 w-3.5 text-ink-muted shrink-0" />
               <span className="sr-only">Demo Plan</span>
               <select
                 aria-label="Demo Plan"
                 value={plan}
                 onChange={(e) => switchPlan(e.target.value as DemoPlanId)}
-                className="bg-transparent font-semibold text-ink focus:outline-none cursor-pointer"
+                className="bg-transparent font-medium text-ink focus:outline-none cursor-pointer"
               >
                 {Object.values(DEMO_PLANS).map((p) => (
                   <option key={p.id} value={p.id}>
@@ -129,7 +129,7 @@ export function DemoControlBar() {
             <button
               type="button"
               onClick={() => launchTutorial("product-walkthrough", "/gateway")}
-              className="inline-flex items-center gap-1 rounded-lg bg-panel text-white hover:bg-panel-deep border border-edge px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-ctl bg-ink text-white hover:bg-panel-raised h-8 px-3 text-[13px] font-medium transition-colors cursor-pointer"
             >
               <Compass className="h-3.5 w-3.5 text-brand" />
               <span>Guided Tour</span>
@@ -138,7 +138,7 @@ export function DemoControlBar() {
             <button
               type="button"
               onClick={() => setWorkflowDrawerOpen(true)}
-              className="inline-flex items-center gap-1 rounded-lg border border-brand/40 bg-brand/15 hover:bg-brand/25 px-2.5 py-1 text-[11px] font-bold text-ink transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-ctl border border-brand-wash-strong bg-brand-wash hover:bg-brand-wash-strong h-8 px-3 text-[13px] font-medium text-brand-strong transition-colors cursor-pointer"
             >
               <Compass className="h-3.5 w-3.5 text-brand-strong" />
               <span>8 Workflows</span>
@@ -146,7 +146,7 @@ export function DemoControlBar() {
 
             <Link
               href="/learn/docs"
-              className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface hover:bg-canvas px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface hover:bg-canvas h-8 px-3 text-[13px] font-medium text-ink transition-colors"
             >
               <BookOpen className="h-3.5 w-3.5 text-ink-soft" />
               <span>Learn</span>
@@ -155,7 +155,7 @@ export function DemoControlBar() {
             <button
               type="button"
               onClick={resetDemo}
-              className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface hover:bg-canvas px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface hover:bg-canvas h-8 px-3 text-[13px] font-medium text-ink transition-colors"
               title="Restore initial sample books for this company"
             >
               <RotateCcw className="h-3.5 w-3.5 text-ink-soft" />
@@ -164,7 +164,7 @@ export function DemoControlBar() {
 
             <Link
               href="/learn"
-              className="inline-flex items-center gap-1 rounded-lg border border-rose-300 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-800 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface hover:bg-bad-wash h-8 px-3 text-[13px] font-medium text-bad transition-colors"
             >
               <XCircle className="h-3.5 w-3.5" />
               <span>Exit Demo</span>

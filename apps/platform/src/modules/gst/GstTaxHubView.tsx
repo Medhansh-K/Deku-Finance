@@ -24,6 +24,11 @@ import { InvoiceSettlementBlock } from "./InvoiceSettlementBlock";
 import { InvoicePaymentLink } from "./InvoicePaymentLink";
 import { InvoiceEInvoiceBlock } from "./InvoiceEInvoiceBlock";
 
+const segBtn = (on: boolean) =>
+  `inline-flex items-center gap-1.5 h-[30px] px-3 rounded-[7px] text-[13.5px] transition-colors ${
+    on ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]" : "text-ink-muted hover:text-ink"
+  }`;
+
 export function GstTaxHubView() {
   const { organisation } = useAuth();
   const [activeTab, setActiveTab] = useState<"invoices" | "create" | "notes" | "note">("invoices");
@@ -166,9 +171,9 @@ export function GstTaxHubView() {
 
   const noteColumns: ColumnDef<SalesNote>[] = [
     {
-      header: "Note No.",
+      header: "Note no.",
       sortKey: (n) => n.note_number,
-      cell: (n) => <span className="font-mono font-bold text-ink">{n.note_number}</span>,
+      cell: (n) => <span className="font-mono text-[13px] font-medium text-ink">{n.note_number}</span>,
     },
     {
       header: "Type",
@@ -178,12 +183,12 @@ export function GstTaxHubView() {
     {
       header: "Date",
       sortKey: (n) => n.note_date,
-      cell: (n) => <span className="font-mono text-ink">{formatDateTally(n.note_date)}</span>,
+      cell: (n) => <span className="text-ink-soft">{formatDateTally(n.note_date)}</span>,
     },
     {
       header: "Against invoice",
       sortKey: (n) => n.sales_invoices?.invoice_number ?? "",
-      cell: (n) => <span className="font-mono text-ink-soft">{n.sales_invoices?.invoice_number ?? "–"}</span>,
+      cell: (n) => <span className="font-mono text-[13px] text-ink-soft">{n.sales_invoices?.invoice_number ?? "–"}</span>,
     },
     {
       header: "Customer",
@@ -196,19 +201,20 @@ export function GstTaxHubView() {
     },
     {
       header: "Total",
+      align: "right",
       sortKey: (n) => n.total_amount,
       cell: (n) =>
         n.status === "draft" ? (
           <span className="text-ink-muted">On issue</span>
         ) : (
-          <span className="font-mono font-bold text-ink">{formatINR(n.total_amount)}</span>
+          <span className="font-medium text-ink">{formatINR(n.total_amount)}</span>
         ),
     },
     {
       header: "Status",
       sortKey: (n) => n.status,
       cell: (n) => {
-        if (n.status === "issued") return <Badge variant="success">Issued / Posted</Badge>;
+        if (n.status === "issued") return <Badge variant="success">Issued / posted</Badge>;
         if (n.status === "cancelled") return <Badge variant="danger">Cancelled</Badge>;
         return <Badge variant="warning">Draft</Badge>;
       },
@@ -230,10 +236,10 @@ export function GstTaxHubView() {
 
   const columns: ColumnDef<SalesInvoice>[] = [
     {
-      header: "Invoice No.",
+      header: "Invoice no.",
       sortKey: (inv) => inv.invoice_number,
       cell: (inv) => (
-        <span className="font-mono font-bold text-ink">
+        <span className="font-mono text-[13px] font-medium text-ink">
           {inv.invoice_number}
         </span>
       ),
@@ -242,27 +248,27 @@ export function GstTaxHubView() {
       header: "Date",
       sortKey: (inv) => inv.invoice_date,
       cell: (inv) => (
-        <span className="font-mono text-ink">
+        <span className="text-ink-soft">
           {formatDateTally(inv.invoice_date)}
         </span>
       ),
     },
     {
-      header: "Customer Name & GSTIN",
+      header: "Customer and GSTIN",
       sortKey: (inv) => inv.parties?.legal_name || "",
       cell: (inv) => (
         <div>
-          <span className="font-bold text-ink block">
+          <span className="font-medium text-ink block">
             {inv.parties?.legal_name || "Enterprise Customer"}
           </span>
-          <span className="text-[11px] font-mono text-ink-muted">
+          <span className="font-mono text-[12.5px] text-ink-muted">
             GSTIN: {inv.parties?.gstin || "Unregistered"}
           </span>
         </div>
       ),
     },
     {
-      header: "Supply Type",
+      header: "Supply type",
       cell: (inv) => (
         <div className="space-y-0.5">
           <Badge
@@ -270,28 +276,30 @@ export function GstTaxHubView() {
               inv.supply_type === "intra_state" ? "teal" : "default"
             }
           >
-            {inv.supply_type === "intra_state" ? "Intra-State (CGST+SGST)" : inv.supply_type === "export" ? "Export" : "Inter-State (IGST)"}
+            {inv.supply_type === "intra_state" ? "Intra-state (CGST + SGST)" : inv.supply_type === "export" ? "Export" : "Inter-state (IGST)"}
           </Badge>
           {(inv.invoice_type ?? "tax_invoice") !== "tax_invoice" && (
-            <span className="block text-[11px] text-ink-muted">{typeLabel(inv)}</span>
+            <span className="block text-[12.5px] text-ink-muted">{typeLabel(inv)}</span>
           )}
         </div>
       ),
     },
     {
-      header: "Taxable Value",
+      header: "Taxable value",
+      align: "right",
       sortKey: (inv) => inv.taxable_amount,
       cell: (inv) => (
-        <span className="font-mono font-semibold text-ink-soft">
+        <span className="text-ink-soft">
           {formatINR(inv.taxable_amount)}
         </span>
       ),
     },
     {
-      header: "Invoice Total",
+      header: "Invoice total",
+      align: "right",
       sortKey: (inv) => inv.total_amount,
       cell: (inv) => (
-        <span className="font-mono font-bold text-ink">
+        <span className="font-medium text-ink">
           {formatINR(inv.total_amount)}
         </span>
       ),
@@ -301,7 +309,7 @@ export function GstTaxHubView() {
       sortKey: (inv) => inv.status,
       cell: (inv) => {
         const s = inv.status;
-        if (s === "issued") return <Badge variant="success">Issued / Posted</Badge>;
+        if (s === "issued") return <Badge variant="success">Issued / posted</Badge>;
         if (s === "cancelled") return <Badge variant="danger">Cancelled</Badge>;
         return <Badge variant="warning">Draft</Badge>;
       },
@@ -309,39 +317,18 @@ export function GstTaxHubView() {
   ];
 
   return (
-    <div className="space-y-4 font-sans text-xs">
+    <div className="space-y-4 font-sans text-[13.5px]">
       {/* Navigation Tabs */}
-      <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
-        <div data-tour="gst-tabs" className="flex items-center gap-1 font-semibold">
-          <button
-            onClick={() => setActiveTab("invoices")}
-            className={`px-3 py-1.5 rounded transition-colors ${
-              activeTab === "invoices"
-                ? "bg-panel text-white font-bold"
-                : "text-ink-soft hover:bg-canvas-sunken"
-            }`}
-          >
-            Sales Invoices Register
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div data-tour="gst-tabs" className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px]">
+          <button onClick={() => setActiveTab("invoices")} className={segBtn(activeTab === "invoices")}>
+            Sales invoices register
           </button>
-          <button
-            onClick={() => setActiveTab("create")}
-            className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1 ${
-              activeTab === "create"
-                ? "bg-brand text-panel-deep font-bold"
-                : "text-ink-soft hover:bg-canvas-sunken"
-            }`}
-          >
-            <Plus className="h-3.5 w-3.5" /> Create GST Invoice
+          <button onClick={() => setActiveTab("create")} className={segBtn(activeTab === "create")}>
+            <Plus className="h-3.5 w-3.5" /> Create GST invoice
           </button>
-          <button
-            onClick={() => setActiveTab("notes")}
-            className={`px-3 py-1.5 rounded transition-colors ${
-              activeTab === "notes" || activeTab === "note"
-                ? "bg-panel text-white font-bold"
-                : "text-ink-soft hover:bg-canvas-sunken"
-            }`}
-          >
-            Credit / Debit Notes
+          <button onClick={() => setActiveTab("notes")} className={segBtn(activeTab === "notes" || activeTab === "note")}>
+            Credit / debit notes
           </button>
         </div>
 
@@ -358,12 +345,12 @@ export function GstTaxHubView() {
       </div>
 
       {error && (
-        <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+        <div className="p-3 rounded-ctl bg-bad-wash border border-bad/25 text-[13px] text-bad flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             <span>{error}</span>
           </div>
-          <button onClick={loadData} className="underline font-bold ml-2">
+          <button onClick={loadData} className="underline font-semibold ml-2">
             Retry
           </button>
         </div>
@@ -432,15 +419,15 @@ export function GstTaxHubView() {
           description={`Customer: ${selectedInvoice.parties?.legal_name || "Enterprise Client"}`}
           maxWidth="2xl"
         >
-          <div className="space-y-4 font-sans text-xs">
+          <div className="space-y-4 font-sans text-[13px]">
             {/* Printable Invoice Header */}
-            <div className="border border-line-strong rounded p-4 bg-canvas space-y-3">
+            <div className="rounded-panel border border-line bg-surface p-5 space-y-4">
               <div className="flex justify-between items-start border-b border-line pb-3">
                 <div>
-                  <h3 className="text-base font-black text-ink font-mono uppercase">
+                  <h3 className="text-[17px] font-semibold tracking-tight text-ink">
                     {selectedInvoice.invoice_type === "bill_of_supply" ? "Bill of Supply" : "Tax Invoice"}
                   </h3>
-                  <p className="text-[11px] text-ink-muted">
+                  <p className="mt-0.5 text-[12.5px] text-ink-muted">
                     Issued under Rule {selectedInvoice.invoice_type === "bill_of_supply" ? "49" : "46"} of Central Goods & Services Tax Rules
                     {selectedInvoice.invoice_type?.endsWith("without_payment") &&
                       ` · Supply meant for ${selectedInvoice.invoice_type.startsWith("sez") ? "SEZ" : "export"} under bond or LUT without payment of IGST`}
@@ -454,41 +441,42 @@ export function GstTaxHubView() {
                       ? "danger"
                       : "warning"
                   }
+                  className="capitalize"
                 >
                   {selectedInvoice.status}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 text-[13px]">
                 <div>
-                  <span className="text-ink-subtle font-mono text-[10px] uppercase block">
-                    Billed To:
+                  <span className="text-[12.5px] text-ink-muted block">
+                    Billed to
                   </span>
-                  <div className="font-bold text-ink mt-0.5">
+                  <div className="font-medium text-ink mt-1">
                     {selectedInvoice.parties?.legal_name || "Client"}
                   </div>
-                  <div className="font-mono text-ink-soft text-[11px]">
-                    GSTIN: {selectedInvoice.parties?.gstin || "Unregistered"}
+                  <div className="text-ink-soft text-[12.5px]">
+                    GSTIN: <span className="font-mono">{selectedInvoice.parties?.gstin || "Unregistered"}</span>
                   </div>
-                  <div className="text-ink-muted text-[11px]">
-                    Place of Supply: {selectedInvoice.place_of_supply}
+                  <div className="text-ink-muted text-[12.5px]">
+                    Place of supply: {selectedInvoice.place_of_supply}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-ink-subtle font-mono text-[10px] uppercase block">
-                    Invoice Details:
+                  <span className="text-[12.5px] text-ink-muted block">
+                    Invoice details
                   </span>
-                  <div className="font-mono font-bold text-ink mt-0.5">
-                    No: {selectedInvoice.invoice_number}
+                  <div className="font-medium text-ink mt-1">
+                    No: <span className="font-mono">{selectedInvoice.invoice_number}</span>
                   </div>
-                  <div className="font-mono text-ink-soft text-[11px]">
+                  <div className="text-ink-soft text-[12.5px]">
                     Date: {formatDateTally(selectedInvoice.invoice_date)}
                   </div>
-                  <div className="font-mono text-ink-soft text-[11px]">
+                  <div className="text-ink-soft text-[12.5px]">
                     Supply: {selectedInvoice.supply_type}
                   </div>
-                  <div className="text-ink-soft text-[11px]">
+                  <div className="text-ink-soft text-[12.5px]">
                     Channel: {SALES_CHANNELS.find((c) => c.value === (selectedInvoice.sales_channel ?? "direct"))?.label}
                   </div>
                 </div>
@@ -496,38 +484,38 @@ export function GstTaxHubView() {
             </div>
 
             {/* Invoice Line Breakdown */}
-            <div className="rounded border border-line-strong overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="rounded-panel border border-line bg-surface overflow-x-auto">
+              <table className="w-full text-left border-collapse text-[13.5px]">
                 <thead>
-                  <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[10px] text-ink-soft">
+                  <tr className="bg-[#fafbfa] border-b border-line text-[12.5px] font-medium text-ink-muted">
                     <th className="py-2 px-3">Description</th>
                     <th className="py-2 px-2 text-right">Qty</th>
-                    <th className="py-2 px-3 text-right">Unit Price</th>
+                    <th className="py-2 px-3 text-right">Unit price</th>
                     <th className="py-2 px-3 text-right">Taxable</th>
                     <th className="py-2 px-3 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
                   {(selectedInvoice.sales_invoice_lines || []).map((l, i) => (
-                    <tr key={i} className="hover:bg-canvas">
+                    <tr key={i}>
                       <td className="py-2 px-3">
-                        <span className="font-bold text-ink block">
+                        <span className="font-medium text-ink block">
                           {l.item_name}
                         </span>
                         {l.description && (
-                          <span className="text-[11px] text-ink-muted">
+                          <span className="text-[12.5px] text-ink-muted">
                             {l.description}
                           </span>
                         )}
                       </td>
-                      <td className="py-2 px-2 text-right font-mono">{l.quantity}</td>
-                      <td className="py-2 px-3 text-right font-mono">
+                      <td className="py-2 px-2 text-right">{l.quantity}</td>
+                      <td className="py-2 px-3 text-right">
                         {formatINR(l.unit_price)}
                       </td>
-                      <td className="py-2 px-3 text-right font-mono">
+                      <td className="py-2 px-3 text-right">
                         {formatINR(l.taxable_amount)}
                       </td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-ink">
+                      <td className="py-2 px-3 text-right font-medium text-ink">
                         {formatINR(l.total_amount)}
                       </td>
                     </tr>
@@ -537,8 +525,8 @@ export function GstTaxHubView() {
             </div>
 
             <div className="flex items-baseline justify-between gap-4">
-              <p className="text-xs text-ink-soft">{numberToIndianWords(selectedInvoice.total_amount)}</p>
-              <p className="font-mono text-sm font-semibold text-ink">{formatINR(selectedInvoice.total_amount)}</p>
+              <p className="text-[12.5px] text-ink-muted">{numberToIndianWords(selectedInvoice.total_amount)}</p>
+              <p className="ledger-total tabular-nums text-[17px] font-semibold tracking-tight text-ink">{formatINR(selectedInvoice.total_amount)}</p>
             </div>
 
             <InvoiceSettlementBlock
@@ -550,14 +538,14 @@ export function GstTaxHubView() {
             <InvoicePaymentLink orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
             <InvoiceEInvoiceBlock orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
 
-            <div className="flex justify-between items-center pt-2 border-t border-line">
+            <div className="flex justify-between items-center pt-3 border-t border-line">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => window.print()}
                 className="gap-1.5"
               >
-                <Printer className="h-3.5 w-3.5" /> Print Invoice
+                <Printer className="h-3.5 w-3.5" /> Print invoice
               </Button>
 
               <div className="flex items-center gap-2">
@@ -569,7 +557,7 @@ export function GstTaxHubView() {
                     isLoading={isActionPending}
                     className="gap-1.5"
                   >
-                    <Send className="h-3.5 w-3.5" /> Issue & Post Double Entry
+                    <Send className="h-3.5 w-3.5" /> Issue & post double entry
                   </Button>
                 )}
 
@@ -594,7 +582,7 @@ export function GstTaxHubView() {
                     isLoading={isActionPending}
                     className="gap-1.5"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" /> Cancel Invoice
+                    <RotateCcw className="h-3.5 w-3.5" /> Cancel invoice
                   </Button>
                 )}
 

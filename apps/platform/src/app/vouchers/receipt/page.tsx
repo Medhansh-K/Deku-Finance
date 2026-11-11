@@ -10,7 +10,7 @@ export default function ReceiptVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Receipt Voucher"
+        title="Receipt voucher"
         subtitle="Record funds received into Cash or Bank accounts from Customers, Debtors, or Capital Inflows"
         badge={<Badge variant="teal">F6: Receipt</Badge>}
         breadcrumbs={[
@@ -21,7 +21,7 @@ export default function ReceiptVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading receipt voucher desk...
             </div>
           }

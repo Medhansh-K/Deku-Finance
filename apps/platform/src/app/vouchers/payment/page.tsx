@@ -10,7 +10,7 @@ export default function PaymentVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Payment Voucher"
+        title="Payment voucher"
         subtitle="Record payments made from Cash or Bank accounts to Vendors, Creditors or Expense Ledgers"
         badge={<Badge variant="teal">F5: Payment</Badge>}
         breadcrumbs={[
@@ -21,7 +21,7 @@ export default function PaymentVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading payment voucher desk...
             </div>
           }

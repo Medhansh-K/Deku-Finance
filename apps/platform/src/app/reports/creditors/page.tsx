@@ -10,12 +10,12 @@ export default function CreditorsPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Trade Creditors (AP) & DPO Tracking"
-        subtitle="Accounts payable tracking as per Days Payable Outstanding (DPO), vendor credit terms, and scheduled payouts"
-        badge={<Badge variant="teal">DPO Core Engine</Badge>}
+        title="Trade creditors and DPO"
+        subtitle="Accounts payable by days payable outstanding (DPO), vendor credit terms and scheduled payouts"
+        badge={<Badge variant="teal">Payables</Badge>}
         breadcrumbs={[
           { label: "Reports" },
-          { label: "Trade Creditors (DPO)", href: "/reports/creditors" },
+          { label: "Trade creditors (DPO)", href: "/reports/creditors" },
         ]}
       >
         <CreditorsDpoView />

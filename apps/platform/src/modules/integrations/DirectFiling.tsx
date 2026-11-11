@@ -64,8 +64,8 @@ export function DirectFiling({ orgId, retPeriod, canFile }: { orgId: string; ret
     });
 
   return (
-    <div className="space-y-3 rounded-lg border border-line p-3">
-      <h3 className="text-sm font-semibold text-ink">File directly</h3>
+    <div className="space-y-3 rounded-panel border border-line p-4">
+      <h3 className="text-[15px] font-semibold tracking-tight text-ink">File directly</h3>
       {status?.sandbox && <SandboxBanner what="GSP" />}
       {blocker ? (
         <>
@@ -76,23 +76,23 @@ export function DirectFiling({ orgId, retPeriod, canFile }: { orgId: string; ret
               </Button>
             ))}
           </div>
-          <p id="direct-filing-reason" className="text-xs text-ink-muted">
+          <p id="direct-filing-reason" className="text-[12.5px] text-ink-muted">
             {blocker}
           </p>
         </>
       ) : (
         <>
-          <p className="text-xs text-ink-muted">
+          <p className="text-[12.5px] text-ink-muted">
             Filing is final. The return is recorded as computed now, then submitted and filed with EVC by the authorised
             signatory.
           </p>
           <div className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1 text-xs font-medium text-ink-soft">
+            <label className="flex flex-col gap-1 text-[13px] text-ink-muted">
               Return
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as GstReturnType)}
-                className="h-9 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink"
+                className="h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none"
               >
                 {RETURNS.map((r) => (
                   <option key={r.type} value={r.type} disabled={!canFile[r.type]}>
@@ -127,7 +127,7 @@ export function DirectFiling({ orgId, retPeriod, canFile }: { orgId: string; ret
         </>
       )}
       {message && (
-        <p role="status" className={`text-xs ${message.ok ? "text-emerald-800" : "text-rose-800"}`}>
+        <p role="status" className={`text-[13px] ${message.ok ? "text-ok" : "text-bad"}`}>
           {message.text}
         </p>
       )}

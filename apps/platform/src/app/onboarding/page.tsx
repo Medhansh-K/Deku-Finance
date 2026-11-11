@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 import { useAuth } from "@/context/AuthContext";
 import { accountingApi, organisationsApi } from "@/api/endpoints";
 import type { Organisation } from "@/types";
@@ -28,12 +29,12 @@ const STEP_TITLES: Record<OnboardingStep, string> = {
 };
 
 const selectClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
 export default function OnboardingPage() {
   const { organisation } = useAuth();
   if (!organisation) {
-    return <main className="min-h-screen bg-canvas p-8 text-sm text-ink-muted">Loading your company…</main>;
+    return <main className="min-h-screen bg-canvas p-8 text-[13.5px] text-ink-muted">Loading your company…</main>;
   }
   // Keyed so the form starts from this company's saved profile.
   return <Wizard key={organisation.id} organisation={organisation} />;
@@ -90,13 +91,14 @@ function Wizard({ organisation }: { organisation: Organisation }) {
     });
 
   return (
-    <main className="min-h-screen bg-canvas px-4 py-10 text-ink">
-      <div className="mx-auto max-w-xl space-y-5 rounded-lg border border-line bg-surface p-6 shadow-card">
+    <main className="min-h-screen bg-canvas px-4 py-12 text-ink">
+      <DekuLogo size={36} className="mx-auto mb-6" />
+      <div className="mx-auto max-w-xl space-y-5 rounded-panel border border-line bg-surface p-6">
         <header className="space-y-1">
-          <p className="text-xs font-medium text-ink-muted">
+          <p className="text-[13px] text-ink-muted">
             Set up {organisation.name} · step {index + 1} of {steps.length}
           </p>
-          <h1 className="text-lg font-semibold">{STEP_TITLES[step]}</h1>
+          <h1 className="text-[22px] font-semibold tracking-[-0.02em]">{STEP_TITLES[step]}</h1>
         </header>
 
         {step === "mode" && (
@@ -108,7 +110,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
                 ["pure", "Not GST registered", "Plain bookkeeping under the Section 22 threshold; no GST on invoices."],
               ] as const
             ).map(([value, label, hint]) => (
-              <label key={value} className="flex cursor-pointer gap-3 rounded-md border border-line-strong p-3 has-[:checked]:border-brand">
+              <label key={value} className="flex cursor-pointer gap-3 rounded-ctl border border-line-strong px-4 py-3 transition-colors hover:bg-canvas has-[:checked]:border-brand has-[:checked]:bg-brand-wash">
                 <input
                   type="radio"
                   name="mode"
@@ -118,8 +120,8 @@ function Wizard({ organisation }: { organisation: Organisation }) {
                   className="mt-1 accent-brand"
                 />
                 <span>
-                  <span className="block text-sm font-semibold">{label}</span>
-                  <span className="block text-xs text-ink-muted">{hint}</span>
+                  <span className="block text-[14px] font-[550]">{label}</span>
+                  <span className="block text-[12.5px] text-ink-muted">{hint}</span>
                 </span>
               </label>
             ))}
@@ -129,7 +131,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
         {step === "details" && (
           <div className="space-y-3">
             <div className="space-y-1">
-              <label htmlFor="ob-state" className="block text-sm font-medium text-ink-soft">
+              <label htmlFor="ob-state" className="block text-[13px] text-ink-muted">
                 State of registration
               </label>
               <select id="ob-state" value={form.stateCode} onChange={(e) => set("stateCode", e.target.value)} className={selectClass}>
@@ -154,7 +156,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
                 onChange={(e) => set("address", { ...form.address, pincode: e.target.value })} />
             </div>
             <Input id="ob-udyam" label="Udyam number (optional)" value={form.udyamNumber} error={errors.udyamNumber}
-              placeholder="UDYAM-MH-01-0001234" className="font-mono uppercase"
+              placeholder="UDYAM-MH-01-0001234" className=""
               onChange={(e) => set("udyamNumber", e.target.value)} />
           </div>
         )}
@@ -162,8 +164,8 @@ function Wizard({ organisation }: { organisation: Organisation }) {
         {step === "gstin" && (
           <div className="space-y-3">
             <Input id="ob-gstin" label="GSTIN" value={form.gstin} error={form.gstin ? errors.gstin : undefined}
-              maxLength={15} className="font-mono uppercase" onChange={(e) => set("gstin", e.target.value)} />
-            <label className="flex items-center gap-2 text-sm">
+              maxLength={15} className="" onChange={(e) => set("gstin", e.target.value)} />
+            <label className="flex items-center gap-2 text-[13.5px]">
               <input type="checkbox" checked={form.compositionScheme} className="accent-brand"
                 onChange={(e) => set("compositionScheme", e.target.checked)} />
               Registered under the composition scheme
@@ -173,7 +175,7 @@ function Wizard({ organisation }: { organisation: Organisation }) {
 
         {step === "fiscal" && (
           <div className="space-y-3">
-            <p className="text-xs text-ink-muted">Vouchers can only be posted inside an open financial year.</p>
+            <p className="text-[13px] text-ink-muted">Vouchers can only be posted inside an open financial year.</p>
             <Input id="ob-fy-name" label="Name" value={period.name} onChange={(e) => setPeriod({ ...period, name: e.target.value })} />
             <div className="grid grid-cols-2 gap-3">
               <Input id="ob-fy-start" label="Starts" type="date" value={period.start_date}
@@ -185,13 +187,13 @@ function Wizard({ organisation }: { organisation: Organisation }) {
         )}
 
         {step === "accounts" && (
-          <p className="text-sm text-ink-soft">
+          <p className="text-[13.5px] text-ink-soft">
             Your company starts with the standard chart of accounts (assets, liabilities, income, expenses and GST ledgers). You can review and add accounts later under Masters.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="text-sm text-rose-700">
+          <p role="alert" className="text-[13px] text-bad">
             {error}
           </p>
         )}

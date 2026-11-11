@@ -44,7 +44,7 @@ import { GSTR1_NOT_COVERED, GSTR3B_NOT_COVERED } from "@/lib/gst/returns";
 import { useReturnPeriod } from "@/lib/gst/period";
 import { useReturnBooks } from "@/lib/gst/useReturnBooks";
 import { downloadJson } from "@/lib/download";
-import { RecentlyAddedVouchers } from "@/modules/executive/RecentlyAddedVouchers";
+import { ExecutiveSummaryView } from "@/modules/executive/ExecutiveSummaryView";
 import { loadProgress, saveProgress, startPath } from "@/lib/tutorials/progress";
 import { PRODUCT_WALKTHROUGH_PATH } from "@/lib/tutorials/workflows";
 import type { DemoCompanySlug } from "@/lib/learn/companies";
@@ -59,12 +59,12 @@ function GstReturnsDemoScreen() {
 
   return (
     <WorkspaceLayout
-      title="GST Returns: GSTR-1 & GSTR-3B"
-      subtitle="Generated deterministically from demo invoices and purchase ledgers. Offline JSON requires PRO or Enterprise."
-      badge={<Badge variant={canJson ? "teal" : "warning"}>{canJson ? "Offline JSON Active" : "GO Summary Mode"}</Badge>}
+      title="GST returns"
+      subtitle="GSTR-1 and GSTR-3B from the demo invoices and purchases. Offline JSON needs PRO or Enterprise."
+      badge={<Badge variant={canJson ? "teal" : "warning"}>{canJson ? "Offline JSON" : "Summary only on GO"}</Badge>}
       actions={
         <div className="w-44">
-          <label className="block text-[10px] font-mono uppercase text-ink-muted mb-1" htmlFor="demo-ret-period">
+          <label className="block text-[13px] text-ink-muted mb-1" htmlFor="demo-ret-period">
             Return period (FY {fy || "2026-27"})
           </label>
           <input
@@ -114,8 +114,8 @@ function DemoScreenDispatcher() {
   const { activeRoute, datasetVersion, dataset } = useLearnDemo();
   const basePath = activeRoute.split("?")[0];
 
-  const wrap = (title: string, subtitle: string, badgeText: string, node: React.ReactNode) => (
-    <WorkspaceLayout title={title} subtitle={subtitle} badge={<Badge variant="teal">{badgeText}</Badge>}>
+  const wrap = (title: string, subtitle: string, node: React.ReactNode) => (
+    <WorkspaceLayout title={title} subtitle={subtitle}>
       {node}
     </WorkspaceLayout>
   );
@@ -132,125 +132,106 @@ function DemoScreenDispatcher() {
     const seg = basePath.split("/")[2] as VoucherMode | undefined;
     const validModes: VoucherMode[] = ["contra", "payment", "receipt", "journal", "sales", "purchase"];
     const mode: VoucherMode = seg && validModes.includes(seg) ? seg : "payment";
-    return wrap(
-      "Accounting Vouchers (F4–F9)",
-      "Unified double-entry desk with ALERX debit-credit parity and Maker-Checker controls",
-      "F4–F9 Desk",
-      <VoucherWorkspace key={`v-${mode}-${datasetVersion}`} initialMode={mode} />
+    return wrap("Vouchers", "Contra, payment, receipt, journal, sales and purchase entries", <VoucherWorkspace key={`v-${mode}-${datasetVersion}`} initialMode={mode} />
     );
   }
 
   if (basePath === "/day-book") {
-    return wrap(
-      "Day Book",
-      "Chronological immutable register of posted and draft vouchers",
-      "Journal Log",
-      <DayBookView key={`db-${datasetVersion}`} />
+    return wrap("Day Book", "Every voucher in date order, posted and draft", <DayBookView key={`db-${datasetVersion}`} />
     );
   }
   if (basePath === "/approvals") {
-    return wrap("Maker-Checker Approvals", "Independent Checker sign-off queue (Owner / CFO / Admin)", "Governance", <ApprovalsView key={`ap-${datasetVersion}`} />);
+    return wrap("Approvals", "Vouchers waiting for a checker to post or send back", <ApprovalsView key={`ap-${datasetVersion}`} />);
   }
   if (basePath === "/gst") {
-    return wrap("GST & Invoicing Hub", "CGST/SGST vs IGST Place-of-Supply engine and Tax Invoices", "GST Engine", <GstTaxHubView key={`gst-${datasetVersion}`} />);
+    return wrap("Sales & GST invoices", "Tax invoices, bills of supply and credit or debit notes", <GstTaxHubView key={`gst-${datasetVersion}`} />);
   }
   if (basePath === "/gst/returns" || basePath === "/gst/file" || basePath === "/gst-returns") {
     return <GstReturnsDemoScreen key={`gstr-${datasetVersion}`} />;
   }
   if (basePath === "/purchases") {
-    return wrap("Purchases & ITC Register", "Vendor bills, Section 17(5) blocked credit & voucher linkage", "ITC & AP", <PurchasesView key={`pur-${datasetVersion}`} />);
+    return wrap("Purchases & ITC", "Vendor bills, input tax credit and blocked credit", <PurchasesView key={`pur-${datasetVersion}`} />);
   }
   if (basePath === "/collect") {
-    return wrap("Receivables & Collections", "FIFO invoice settlement and MSME 45-day Sec 43B(h) tracker", "Collections", <CollectView key={`col-${datasetVersion}`} />);
+    return wrap("Collections", "Unpaid invoices, settlements and WhatsApp reminders", <CollectView key={`col-${datasetVersion}`} />);
   }
   if (basePath === "/inventory") {
-    return wrap("Inventory & FIFO Warehouses", "Item valuation, batch layers and multi-godown tracking", "Stock & FIFO", <InventoryView key={`inv-${datasetVersion}`} />);
+    return wrap("Inventory & stock", "Items, warehouses and FIFO valuation", <InventoryView key={`inv-${datasetVersion}`} />);
   }
   if (basePath === "/banking/reconciliation") {
-    return wrap("Bank Statement Reconciliation", "Match CSV bank statements against Bank Ledger 1020", "F10 Banking", <ReconciliationView key={`br-${datasetVersion}`} />);
+    return wrap("Bank reconciliation", "Match a bank statement against the bank ledger", <ReconciliationView key={`br-${datasetVersion}`} />);
   }
   if (basePath === "/reconciliation") {
-    return wrap("Marketplace Settlement Engine", "Split ECO Table 3.1.1 gross sales, fees & Sec 52 TCS", "ECO Sec 14", <MarketplaceView key={`mkt-${datasetVersion}`} />);
+    return wrap("Marketplace settlements", "Gross sales, fees and TCS from marketplace payouts", <MarketplaceView key={`mkt-${datasetVersion}`} />);
   }
   if (basePath === "/builder") {
-    return wrap("Document Builder", "Quotations, Proforma Invoices and delivery chalans", "Pre-Sales Docs", <DocumentBuilderView key={`bld-${datasetVersion}`} />);
+    return wrap("Document builder", "Quotations, proforma invoices and delivery challans", <DocumentBuilderView key={`bld-${datasetVersion}`} />);
   }
   if (basePath === "/masters/chart-of-accounts") {
-    return wrap("Chart of Accounts", "ALERX hierarchy of Assets, Liabilities, Equity, Revenue & Expenses", "Masters", <ChartOfAccountsView key={`coa-${datasetVersion}`} />);
+    return wrap("Chart of accounts", "Assets, liabilities, equity, revenue and expense ledgers", <ChartOfAccountsView key={`coa-${datasetVersion}`} />);
   }
   if (basePath === "/masters/parties") {
-    return wrap("Parties & Counterparties", "Customer & supplier masters with GSTIN check-digit validation", "Masters", <PartiesView key={`pty-${datasetVersion}`} />);
+    return wrap("Parties", "Customers and suppliers with GSTIN", <PartiesView key={`pty-${datasetVersion}`} />);
   }
   if (basePath === "/masters/products-services") {
-    return wrap("Products & Services Catalogue", "HSN/SAC codes, tax rates and FIFO stock toggles", "Masters", <ProductsServicesView key={`cat-${datasetVersion}`} />);
+    return wrap("Stock & services", "Items with HSN/SAC codes and tax rates", <ProductsServicesView key={`cat-${datasetVersion}`} />);
   }
   if (basePath === "/reports/trial-balance") {
-    return wrap("Trial Balance", "Real-time debit-credit parity across all posted ledgers", "Statement", <TrialBalanceView key={`tb-${datasetVersion}`} />);
+    return wrap("Trial Balance", "Debit and credit balances across posted ledgers", <TrialBalanceView key={`tb-${datasetVersion}`} />);
   }
   if (basePath === "/reports/profit-loss") {
-    return wrap("Profit & Loss Statement", "Operating revenue, COGS, overheads & net surplus", "Statement", <ProfitLossView key={`pl-${datasetVersion}`} />);
+    return wrap("Profit & Loss", "Revenue, cost of goods, overheads and net profit", <ProfitLossView key={`pl-${datasetVersion}`} />);
   }
   if (basePath === "/reports/balance-sheet") {
-    return wrap("Balance Sheet", "Assets, Liabilities, Equity & current period profit roll-up", "Statement", <BalanceSheetView key={`bs-${datasetVersion}`} />);
+    return wrap("Balance Sheet", "Assets, liabilities and equity, with profit to date", <BalanceSheetView key={`bs-${datasetVersion}`} />);
   }
   if (basePath === "/reports/general-ledger") {
-    return wrap("General Ledger", "Account-level transaction drill-down with running balances", "Audit Detail", <GeneralLedgerView key={`gl-${datasetVersion}`} />);
+    return wrap("General Ledger", "One account, every entry, with running balance", <GeneralLedgerView key={`gl-${datasetVersion}`} />);
   }
   if (basePath === "/reports/cash-flow") {
-    return wrap("Cash Flow Statement", "Operating inflows, outflows and closing liquidity", "Treasury", <CashFlowView key={`cf-${datasetVersion}`} />);
+    return wrap("Cash Flow", "Operating inflows, outflows and closing cash", <CashFlowView key={`cf-${datasetVersion}`} />);
   }
   if (basePath === "/reports/debtors") {
-    return wrap("Debtors & DSO Ageing", "Customer receivables ageing buckets & collection days", "Receivables", <DebtorsDsoView key={`dso-${datasetVersion}`} />);
+    return wrap("Debtors & DSO", "Customer receivables by age and collection days", <DebtorsDsoView key={`dso-${datasetVersion}`} />);
   }
   if (basePath === "/reports/creditors") {
-    return wrap("Creditors & DPO Ageing", "Supplier payables ageing buckets & settlement timing", "Payables", <CreditorsDpoView key={`dpo-${datasetVersion}`} />);
+    return wrap("Creditors & DPO", "Supplier payables by age and payment days", <CreditorsDpoView key={`dpo-${datasetVersion}`} />);
   }
   if (basePath === "/reports/fpa") {
-    return wrap("FP&A Corporate Intelligence", "EBITDA margins, DSO/DPO, runway and department budgets", "FP&A", <FpaExecutiveView key={`fpa-${datasetVersion}`} />);
+    return wrap("FP&A", "Margins, DSO and DPO, runway and department budgets", <FpaExecutiveView key={`fpa-${datasetVersion}`} />);
   }
   if (basePath === "/reports/operating-expenses") {
-    return wrap("Operating Expenses Breakdown", "Ledger-wise operating cost drivers", "Expenses", <OperatingExpensesView key={`opex-${datasetVersion}`} />);
+    return wrap("Operating expenses", "Operating costs by ledger", <OperatingExpensesView key={`opex-${datasetVersion}`} />);
   }
   if (basePath === "/executive") {
-    return wrap(
-      `Executive Summary — ${dataset.org.name}`,
-      "Live financial KPIs, FP&A variance & recently posted vouchers",
-      "F1 Executive",
-      <div className="space-y-6" key={`exec-${datasetVersion}`}>
-        <FpaExecutiveView />
-        <RecentlyAddedVouchers
-          activeOrgId={dataset.org.id}
-          activeOrgName={dataset.org.name}
-        />
-      </div>
-    );
+    return <ExecutiveSummaryView key={`exec-${datasetVersion}`} />;
   }
   if (basePath === "/departments-members") {
-    return wrap("Departments, Roles & Payroll", "7-Role RBAC governance, budgets and privacy-masked payroll", "Governance", <DepartmentsMembersView key={`dm-${datasetVersion}`} />);
+    return wrap("Departments & members", "Teams, roles and payroll runs", <DepartmentsMembersView key={`dm-${datasetVersion}`} />);
   }
   if (basePath === "/audit") {
-    return wrap("Immutable Audit Trail", "Append-only governance log of postings, approvals & reversals", "Compliance", <AuditTrailView key={`aud-${datasetVersion}`} />);
+    return wrap("Audit log", "Postings, approvals and reversals, in order", <AuditTrailView key={`aud-${datasetVersion}`} />);
   }
   if (basePath === "/consultant") {
-    return wrap("Deku Konsultant (Demo)", "Deterministic ledger intelligence preview", "F2 Consultant", <DekuConsultantView key={`con-${datasetVersion}`} />);
+    return wrap("Deku Consultant", "Questions answered from the ledger", <DekuConsultantView key={`con-${datasetVersion}`} />);
   }
   if (basePath === "/settings") {
-    return wrap("Company Settings & Connectors", "Fiscal periods, Maker-Checker controls & integration simulation", "Settings", <SettingsView key={`set-${datasetVersion}`} />);
+    return wrap("Settings", "Fiscal periods, approval controls and connections", <SettingsView key={`set-${datasetVersion}`} />);
   }
   if (basePath === "/help") {
-    return wrap("Help & Guided Tours", "Interactive walkthroughs across all modules and workflows", "Tutorials", <HelpCentreView key={`hlp-${datasetVersion}`} />);
+    return wrap("Help & tutorials", "Walkthroughs for every module and workflow", <HelpCentreView key={`hlp-${datasetVersion}`} />);
   }
   if (basePath === "/companies") {
-    return wrap("Company Profile Overview", "Active demonstration entity details", "Company", <CompaniesView key={`cmp-${datasetVersion}`} />);
+    return wrap("Company", "The demo company's details", <CompaniesView key={`cmp-${datasetVersion}`} />);
   }
   if (basePath === "/import") {
-    return wrap("Import Data Preview", "Tally XML / CSV review workflow", "Utility", <ImportView key={`imp-${datasetVersion}`} />);
+    return wrap("Import", "Bring in data from Tally XML or CSV", <ImportView key={`imp-${datasetVersion}`} />);
   }
   if (basePath === "/export") {
-    return wrap("Export Books", "CSV Day Book and Master exports", "Utility", <ExportView key={`exp-${datasetVersion}`} />);
+    return wrap("Export", "Day Book and masters as CSV", <ExportView key={`exp-${datasetVersion}`} />);
   }
   if (basePath === "/kyc") {
-    return wrap("Identity & KYC Verification", "Requires external KYC provider in production (simulated)", "Simulated", <KycHubView key={`kyc-${datasetVersion}`} />);
+    return wrap("Identity & KYC", "Needs a KYC provider in production; simulated here", <KycHubView key={`kyc-${datasetVersion}`} />);
   }
 
   return (

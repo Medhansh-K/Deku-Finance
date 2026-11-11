@@ -45,29 +45,31 @@ export default function GstFilePage() {
         breadcrumbs={[{ label: "GST", href: "/gst" }, { label: "File returns", href: "/gst/file" }]}
       >
         <div className="mx-auto max-w-4xl space-y-5">
-          <ol className="flex flex-wrap gap-2" aria-label="Filing steps">
+          <ol className="inline-flex flex-wrap items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px]" aria-label="Filing steps">
             {STEPS.map((s, i) => (
               <li key={s}>
                 <button
                   onClick={() => setStep(i)}
                   aria-current={step === i ? "step" : undefined}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                    step === i ? "bg-panel text-white" : "bg-surface text-ink-muted border border-line hover:text-ink"
+                  className={`inline-flex h-[30px] items-center gap-2 rounded-[7px] px-3 text-[13.5px] transition-colors ${
+                    step === i
+                      ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]"
+                      : "text-ink-muted hover:text-ink"
                   }`}
                 >
-                  {i + 1}. {s}
+                  <span className={`tabular-nums ${step === i ? "text-brand-strong" : "text-ink-subtle"}`}>{i + 1}</span> {s}
                 </button>
               </li>
             ))}
           </ol>
 
-          {!orgId && <p className="text-sm text-ink-muted">Select a company first.</p>}
+          {!orgId && <p className="text-[13.5px] text-ink-muted">Select a company first.</p>}
 
-          <section className="rounded-xl border border-line bg-surface p-5 shadow-card space-y-4" aria-live="polite">
+          <section className="rounded-panel border border-line bg-surface p-5 space-y-4" aria-live="polite">
             {step === 0 && (
               <>
-                <h2 className="text-base font-semibold text-ink">Pick the return period</h2>
-                <p className="text-sm text-ink-muted">
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink">Pick the return period</h2>
+                <p className="text-[13.5px] text-ink-muted">
                   Returns are filed for the month just ended, so this starts on last month.{fy && ` FY ${fy}.`}
                 </p>
                 <div className="w-48">
@@ -76,33 +78,40 @@ export default function GstFilePage() {
               </>
             )}
 
-            {step > 0 && loading && <p className="text-sm text-ink-muted">Loading invoices and ledgers…</p>}
+            {step > 0 && loading && <p className="text-[13.5px] text-ink-muted">Loading invoices and ledgers…</p>}
             {step > 0 && loadError && (
-              <div role="alert" className="flex items-center gap-2 rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900">
+              <div role="alert" className="flex items-center gap-2 rounded-ctl border border-bad/25 bg-bad-wash p-3 text-[13.5px] text-bad">
                 <AlertCircle className="h-4 w-4 shrink-0" aria-hidden /> {loadError}. Nothing can be exported.
               </div>
             )}
 
             {step === 1 && ready && (
               <>
-                <h2 className="text-base font-semibold text-ink">Readiness check</h2>
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-[15px] font-semibold tracking-tight text-ink">Readiness check</h2>
+                  {errors.length === 0 ? (
+                    <Badge variant="success">Ready</Badge>
+                  ) : (
+                    <Badge variant="danger">{errors.length} blocking</Badge>
+                  )}
+                </div>
                 {errors.length === 0 ? (
-                  <p className="flex items-center gap-2 text-sm text-emerald-800">
+                  <p className="flex items-center gap-2 text-[13.5px] text-ok">
                     <CheckCircle2 className="h-4 w-4" aria-hidden /> Every check passed for {month}. Both returns can be downloaded.
                   </p>
                 ) : (
                   <>
-                    <p className="text-sm text-ink-muted">
+                    <p className="text-[13.5px] text-ink-muted">
                       {errors.length} issue{errors.length === 1 ? "" : "s"} block the download. Fix them in the books, then come back.
                     </p>
-                    <ul className="divide-y divide-line rounded-lg border border-rose-200">
+                    <ul className="divide-y divide-line rounded-ctl border border-line">
                       {errors.map((e) => {
                         const fix = fixLink(e);
                         return (
-                          <li key={e} className="flex flex-wrap items-start justify-between gap-2 p-3 text-sm text-rose-900">
-                            <span>{e}</span>
+                          <li key={e} className="flex flex-wrap items-start justify-between gap-2 p-3 text-[13.5px] text-ink">
+                            <span className="flex items-start gap-2"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-bad" aria-hidden />{e}</span>
                             {fix && (
-                              <a href={fix.href} className="shrink-0 text-xs font-semibold text-brand-strong underline">
+                              <a href={fix.href} className="shrink-0 text-[13px] font-medium text-brand-strong underline">
                                 {fix.label}
                               </a>
                             )}
@@ -117,8 +126,8 @@ export default function GstFilePage() {
 
             {step === 2 && ready && (
               <>
-                <h2 className="text-base font-semibold text-ink">Review the figures</h2>
-                <p className="text-sm text-ink-muted">Amounts in rupees for {month}, computed by the server from your issued invoices and purchase bills (or Input GST ledgers).</p>
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink">Review the figures</h2>
+                <p className="text-[13.5px] text-ink-muted">Amounts in rupees for {month}, computed by the server from your issued invoices and purchase bills (or Input GST ledgers).</p>
                 <ReturnCard title="GSTR-1" result={gstr1!} notCovered={GSTR1_NOT_COVERED} />
                 <ReturnCard title="GSTR-3B" result={gstr3b!} notCovered={GSTR3B_NOT_COVERED} />
                 <Table6Card table6={gstr3b!.table6} />
@@ -127,9 +136,9 @@ export default function GstFilePage() {
 
             {step === 3 && ready && (
               <>
-                <h2 className="text-base font-semibold text-ink">Download and upload</h2>
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink">Download and upload</h2>
                 {errors.length > 0 && (
-                  <p className="text-sm text-rose-800">
+                  <p className="text-[13.5px] text-bad">
                     A return with blocking issues can&apos;t be downloaded. See step 2.
                   </p>
                 )}
@@ -150,14 +159,14 @@ export default function GstFilePage() {
                     <Upload className="h-4 w-4" aria-hidden /> How to upload on gst.gov.in
                   </Button>
                 </div>
-                <p className="text-xs text-ink-muted">
+                <p className="text-[12.5px] text-ink-muted">
                   The downloaded files stay on your computer until you upload them yourself.{" "}
                   <a href="/gst/guide" className="text-brand-strong underline">Full portal guide</a>
                 </p>
                 <DirectFiling orgId={orgId} retPeriod={retPeriod} canFile={{ gstr1: !!gstr1!.json, gstr3b: !!gstr3b!.json }} />
                 <div className="space-y-3 border-t border-line pt-4">
-                  <h3 className="text-sm font-semibold text-ink">Keep a record</h3>
-                  <p className="text-xs text-ink-muted">
+                  <h3 className="text-[14px] font-semibold text-ink">Keep a record</h3>
+                  <p className="text-[12.5px] text-ink-muted">
                     Recording stores the return exactly as the server computed it. After you file on the portal, enter the ARN it
                     shows; a filed return can&apos;t be changed.
                   </p>
@@ -178,7 +187,7 @@ export default function GstFilePage() {
           </section>
 
           <Modal isOpen={guideOpen} onClose={() => setGuideOpen(false)} title="Upload on gst.gov.in" maxWidth="lg">
-            <ol className="list-decimal space-y-2 pl-5 text-sm text-ink-soft">
+            <ol className="list-decimal space-y-2 pl-5 text-[13.5px] text-ink-soft">
               <li>
                 Log in at <span className="font-medium">gst.gov.in</span>, go to Services → Returns → Returns Dashboard and
                 choose FY {fy} and the period {month}.
@@ -191,7 +200,7 @@ export default function GstFilePage() {
                 Open the return online, compare the figures with step 3, then submit and file it with EVC (OTP) or DSC.
               </li>
             </ol>
-            <p className="mt-3 text-xs text-ink-muted">Portal menus change from time to time; verify on gst.gov.in.</p>
+            <p className="mt-3 text-[12.5px] text-ink-muted">Portal menus change from time to time; verify on gst.gov.in.</p>
           </Modal>
         </div>
       </WorkspaceLayout>
@@ -232,7 +241,7 @@ function FilingRecord({
   };
 
   return (
-    <div className="rounded-lg border border-line p-3 space-y-2">
+    <div className="rounded-ctl border border-line p-3 space-y-2">
       <div className="flex flex-wrap items-end gap-2">
         <Button
           size="sm"
@@ -260,7 +269,7 @@ function FilingRecord({
         </Button>
       </div>
       {message && (
-        <p role="status" className={`text-xs ${message.ok ? "text-emerald-800" : "text-rose-800"}`}>
+        <p role="status" className={`text-[13px] ${message.ok ? "text-ok" : "text-bad"}`}>
           {message.text}
         </p>
       )}

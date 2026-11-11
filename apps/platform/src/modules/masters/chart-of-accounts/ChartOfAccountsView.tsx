@@ -423,13 +423,13 @@ export function ChartOfAccountsView() {
       header: "Code",
       sortKey: (acc) => acc.code,
       cell: (acc) => (
-        <span className="font-mono font-bold text-ink">
+        <span className="font-mono text-[13px] font-medium text-ink">
           {acc.code}
         </span>
       ),
     },
     {
-      header: "Account Name / Label",
+      header: "Account name / label",
       sortKey: (acc) => acc.name,
       cell: (acc) => {
         const isHeader = !acc.is_postable;
@@ -438,19 +438,19 @@ export function ChartOfAccountsView() {
             <div className="flex items-center gap-2">
               <span
                 className={`font-sans ${
-                  isHeader ? "font-bold text-ink" : "text-ink"
+                  isHeader ? "font-semibold text-ink" : "text-ink"
                 }`}
               >
                 {acc.name}
               </span>
               {!acc.is_active && (
-                <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono uppercase font-bold">
+                <span className="inline-flex items-center h-[20px] px-1.5 rounded-chip bg-warn-wash text-warn text-xs font-medium">
                   Inactive
                 </span>
               )}
             </div>
             {acc.label && acc.label !== acc.name && (
-              <span className="text-[11px] text-ink-subtle font-mono">
+              <span className="text-[12.5px] text-ink-muted">
                 {acc.label}
               </span>
             )}
@@ -459,34 +459,26 @@ export function ChartOfAccountsView() {
       },
     },
     {
-      header: "ALERX Group",
+      header: "ALERX group",
       sortKey: (acc) => acc.account_group || acc.type,
       cell: (acc) => {
-        const grp = (acc.account_group || acc.type).toUpperCase();
-        const colors: Record<string, "default" | "success" | "warning" | "danger" | "teal"> = {
-          ASSET: "teal",
-          LIABILITY: "danger",
-          EQUITY: "warning",
-          REVENUE: "success",
-          INCOME: "success",
-          EXPENSE: "default",
-        };
-        return <Badge variant={colors[grp] || "default"}>{grp}</Badge>;
+        const grp = (acc.account_group || acc.type).toLowerCase();
+        return <Badge variant={grp === "asset" ? "teal" : "default"} className="capitalize">{grp}</Badge>;
       },
     },
     {
       header: "Ledger",
       cell: (acc) => (
-        <span className="text-ink-soft font-mono text-[11px]">
+        <span className="text-ink-soft text-[13px]">
           {acc.ledger || "General"}
         </span>
       ),
     },
     {
-      header: "Sub-Ledger",
+      header: "Sub-ledger",
       cell: (acc) => (
-        <span className="text-ink-soft text-[11px]">
-          {acc.sub_ledger || "—"}
+        <span className="text-ink-soft text-[13px]">
+          {acc.sub_ledger || "–"}
         </span>
       ),
     },
@@ -497,17 +489,15 @@ export function ChartOfAccountsView() {
         const units = acc.units ?? 0;
         const isHeader = !acc.is_postable;
         return (
-          <div className="flex items-center gap-1 font-mono">
+          <div className="flex items-center gap-1 tabular-nums">
             <span
-              className={`text-xs font-bold ${
-                units > 0
-                  ? "text-ink bg-canvas-sunken px-1.5 py-0.5 rounded border border-line"
-                  : "text-ink-subtle"
+              className={`text-[13px] font-medium ${
+                units > 0 ? "text-ink" : "text-ink-subtle"
               }`}
             >
               {units}
             </span>
-            <span className="text-[10px] text-ink-subtle font-mono">
+            <span className="text-[12.5px] text-ink-subtle">
               {isHeader ? "total" : units === 1 ? "unit" : "units"}
             </span>
           </div>
@@ -533,16 +523,16 @@ export function ChartOfAccountsView() {
         }
 
         return (
-          <div className="text-right font-mono">
-            <div className="flex items-center justify-end gap-1">
+          <div className="text-right tabular-nums">
+            <div className="flex items-center justify-end gap-1.5">
               <span
-                className={`text-xs font-bold ${
+                className={`text-[13.5px] ${
                   isHeader
-                    ? "font-black text-ink"
+                    ? "font-semibold text-ink"
                     : val > 0
                     ? "text-ink"
                     : val < 0
-                    ? "text-rose-700"
+                    ? "text-bad"
                     : "text-ink-subtle"
                 }`}
               >
@@ -550,10 +540,8 @@ export function ChartOfAccountsView() {
               </span>
               {drCr && (
                 <span
-                  className={`text-[9px] font-bold px-1 py-0.2 rounded ${
-                    drCr === "Dr"
-                      ? "bg-blue-50 text-blue-700 border border-blue-200"
-                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  className={`inline-flex items-center h-[20px] px-1.5 rounded-chip text-xs font-medium ${
+                    drCr === "Dr" ? "bg-canvas-sunken text-ink-soft" : "bg-brand-wash text-brand-strong"
                   }`}
                 >
                   {drCr}
@@ -561,8 +549,8 @@ export function ChartOfAccountsView() {
               )}
             </div>
             {isHeader && (
-              <span className="text-[9px] text-ink-subtle block font-mono">
-                Group Rollup
+              <span className="text-[12.5px] text-ink-subtle block">
+                Group rollup
               </span>
             )}
           </div>
@@ -570,12 +558,12 @@ export function ChartOfAccountsView() {
       },
     },
     {
-      header: "Posting Status",
+      header: "Posting status",
       cell: (acc) =>
         acc.is_postable ? (
-          <Badge variant="success">Postable Leaf</Badge>
+          <Badge variant="success">Postable leaf</Badge>
         ) : (
-          <Badge variant="outline">Group Header</Badge>
+          <Badge variant="outline">Group header</Badge>
         ),
     },
     {
@@ -591,8 +579,8 @@ export function ChartOfAccountsView() {
               setSelectedAccount(acc);
               setIsDetailOpen(true);
             }}
-            title="View Account Details"
-            className="p-1 text-ink-muted hover:text-ink hover:bg-canvas-sunken rounded transition-colors"
+            title="View account details"
+            className="p-1.5 text-ink-muted hover:text-ink hover:bg-canvas-sunken rounded-chip transition-colors"
           >
             <Eye className="h-3.5 w-3.5" />
           </button>
@@ -603,8 +591,8 @@ export function ChartOfAccountsView() {
                 setDeleteError(null);
                 setIsDeleteOpen(true);
               }}
-              title="Remove / Delete Account"
-              className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors"
+              title="Remove / delete account"
+              className="p-1.5 text-ink-muted hover:text-bad hover:bg-bad-wash rounded-chip transition-colors"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -617,11 +605,12 @@ export function ChartOfAccountsView() {
   return (
     <div className="space-y-4">
       {/* Top Controls: Tab filters, Add Account, Refresh, and Seed */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3 rounded border border-line">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* ALERX Tabs */}
-        <div data-tour="coa-tabs" className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
+        <div data-tour="coa-tabs" className="flex items-center gap-2 overflow-x-auto">
+          <div className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px]">
           {[
-            { id: "all", label: "All Accounts" },
+            { id: "all", label: "All accounts" },
             { id: "asset", label: "Assets" },
             { id: "liability", label: "Liabilities" },
             { id: "equity", label: "Equity" },
@@ -634,27 +623,28 @@ export function ChartOfAccountsView() {
                 setActiveGroup(tab.id);
                 if (tab.id !== "asset") setLiquidFilter(false);
               }}
-              className={`px-3 py-1.5 rounded transition-colors whitespace-nowrap ${
+              className={`inline-flex h-[30px] items-center px-3 rounded-[7px] text-[13.5px] transition-colors whitespace-nowrap ${
                 activeGroup === tab.id
-                  ? "bg-panel text-white font-bold"
-                  : "text-ink-soft hover:bg-canvas-sunken"
+                  ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
               {tab.label}
             </button>
           ))}
+          </div>
           {activeGroup === "asset" && (
             <button
               onClick={() => setLiquidFilter((prev) => !prev)}
-              className={`ml-1 px-2.5 py-1 rounded text-xs font-mono font-semibold transition-colors flex items-center gap-1 border cursor-pointer ${
+              className={`inline-flex h-8 items-center gap-1.5 rounded-ctl border px-3 text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
                 liquidFilter
-                  ? "bg-emerald-600 text-white border-emerald-700 shadow-2xs"
-                  : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+                  ? "bg-brand-wash text-brand-strong border-brand/30"
+                  : "bg-surface text-ink-soft border-line-strong hover:bg-canvas"
               }`}
-              title="Filter to Liquid Funds (Cash & Bank Ledgers)"
+              title="Filter to liquid funds (cash and bank ledgers)"
             >
-              <DollarSign className="h-3 w-3" />
-              <span>Liquid Funds ({liquidTotalUnits} units)</span>
+              <DollarSign className="h-3.5 w-3.5" />
+              <span>Liquid funds ({liquidTotalUnits} units)</span>
             </button>
           )}
         </div>
@@ -669,7 +659,7 @@ export function ChartOfAccountsView() {
             title="Create new accounting ledger (Alt+C)"
             shortcutHint="Alt+C"
           >
-            <Plus className="h-3.5 w-3.5" /> Add Account
+            <Plus className="h-3.5 w-3.5" /> Add account
           </Button>
 
           <Button
@@ -689,7 +679,7 @@ export function ChartOfAccountsView() {
               onClick={handleSeed}
               className="gap-1"
             >
-              <Sparkles className="h-3.5 w-3.5" /> Seed Default COA
+              <Sparkles className="h-3.5 w-3.5" /> Seed default COA
             </Button>
           )}
         </div>
@@ -697,56 +687,55 @@ export function ChartOfAccountsView() {
 
       {/* Liquid Funds Dedicated Drilldown Banner (When visiting from Business KPIs or toggled) */}
       {activeGroup === "asset" && liquidFilter && (
-        <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="rounded-panel border border-line bg-surface p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <DollarSign className="h-5 w-5" />
+            <div className="h-8 w-8 rounded-[8px] bg-brand-wash text-brand-strong grid place-items-center shrink-0">
+              <DollarSign className="h-4 w-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-emerald-950">Liquid Funds &amp; Immediate Liquidity</span>
-                <span className="text-[10px] font-mono font-bold bg-surface px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
-                  ALERX Asset Sub-Ledger
-                </span>
+                <span className="text-[15px] font-semibold tracking-tight text-ink">Liquid funds and immediate liquidity</span>
+                <Badge variant="teal">ALERX asset sub-ledger</Badge>
               </div>
-              <p className="text-xs text-emerald-800 mt-0.5">
-                Current operational cash in hand, commercial bank current accounts, and instant liquid vaults
+              <p className="text-[13px] text-ink-muted mt-0.5">
+                Cash in hand, bank current accounts and other instantly liquid ledgers
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 bg-white/80 px-4 py-2 rounded-lg border border-emerald-200">
+          <div className="flex items-center gap-5">
             <div className="text-right">
-              <div className="text-[10px] font-mono text-emerald-800 uppercase font-bold">Liquid Units</div>
-              <div className="text-sm font-black font-mono text-ink">{liquidTotalUnits} Active Accounts</div>
+              <div className="text-[12.5px] text-ink-muted">Liquid units</div>
+              <div className="text-[14px] font-medium tabular-nums text-ink">{liquidTotalUnits} active accounts</div>
             </div>
-            <div className="h-8 w-px bg-emerald-200" />
+            <div className="h-8 w-px bg-line" />
             <div className="text-right">
-              <div className="text-[10px] font-mono text-emerald-800 uppercase font-bold">Total Liquid Value</div>
-              <div className="text-base font-black font-mono text-emerald-700">
-                {formatINR(Math.abs(liquidTotalValue))} {liquidTotalValue >= 0 ? "Dr" : "Cr"}
+              <div className="text-[12.5px] text-ink-muted">Total liquid value</div>
+              <div className="text-[17px] font-semibold tracking-tight tabular-nums text-ink">
+                <span className="ledger-total">{formatINR(Math.abs(liquidTotalValue))}</span> {liquidTotalValue >= 0 ? "Dr" : "Cr"}
               </div>
             </div>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setLiquidFilter(false)}
-              className="ml-2 px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors shadow-2xs cursor-pointer"
-              title="Show all asset accounts in Chart of Accounts"
+              title="Show all asset accounts in the chart of accounts"
             >
-              Show All Assets
-            </button>
+              Show all assets
+            </Button>
           </div>
         </div>
       )}
 
       {/* Error Banner */}
       {error && (
-        <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+        <div className="p-3 rounded-ctl bg-bad-wash border border-bad/25 text-[13px] text-bad flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
           <button
             onClick={fetchAccounts}
-            className="font-bold underline ml-2 hover:text-rose-900"
+            className="font-semibold underline ml-2 hover:text-bad"
           >
             Retry
           </button>
@@ -773,12 +762,12 @@ export function ChartOfAccountsView() {
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Create New Ledger Account"
+        title="Create new ledger account"
         description="Add an authoritative ledger account to the Indian GAAP ALERX hierarchy."
       >
-        <form onSubmit={handleCreateSubmit} className="space-y-4 text-xs font-sans">
+        <form onSubmit={handleCreateSubmit} className="space-y-4 text-[13.5px] font-sans">
           {createError && (
-            <div className="p-2.5 rounded bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+            <div className="p-2.5 rounded-ctl bg-bad-wash border border-bad/25 text-bad flex items-center gap-2">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{createError}</span>
             </div>
@@ -786,8 +775,8 @@ export function ChartOfAccountsView() {
 
           {/* ALERX Classification Pills */}
           <div>
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-soft mb-1.5">
-              ALERX Account Group *
+            <label className="block text-[13px] font-medium text-ink-soft mb-1.5">
+              ALERX account group *
             </label>
             <div className="grid grid-cols-5 gap-1.5">
               {(["asset", "liability", "equity", "revenue", "expense"] as AlerxGroup[]).map(
@@ -796,9 +785,9 @@ export function ChartOfAccountsView() {
                     key={grp}
                     type="button"
                     onClick={() => handleGroupChange(grp)}
-                    className={`py-1.5 px-2 text-center rounded border text-xs font-semibold capitalize transition-all ${
+                    className={`h-9 px-2 text-center rounded-ctl border text-[13px] font-medium capitalize transition-colors ${
                       newGroup === grp
-                        ? "bg-panel text-white border-panel shadow-sm"
+                        ? "bg-brand-wash text-brand-strong border-brand/40"
                         : "bg-surface text-ink-soft border-line-strong hover:bg-canvas"
                     }`}
                   >
@@ -813,20 +802,20 @@ export function ChartOfAccountsView() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <Input
-                label="Account Code *"
+                label="Account code *"
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
                 placeholder="e.g. 1040"
-                className="font-mono font-bold"
+                className="font-mono"
                 required
               />
-              <span className="text-[10px] text-ink-subtle block mt-0.5">
+              <span className="text-[12.5px] text-ink-muted block mt-1">
                 Numeric code for fast Tally-style voucher entry
               </span>
             </div>
             <div className="sm:col-span-2">
               <Input
-                label="Account Name *"
+                label="Account name *"
                 value={newName}
                 onChange={(e) => {
                   setNewName(e.target.value);
@@ -841,8 +830,8 @@ export function ChartOfAccountsView() {
           {/* Ledger Group & Sub-Ledger */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-soft mb-1">
-                Parent Ledger Group
+              <label className="block text-[13px] font-medium text-ink-soft mb-1.5">
+                Parent ledger group
               </label>
               <input
                 type="text"
@@ -850,7 +839,7 @@ export function ChartOfAccountsView() {
                 value={newLedger}
                 onChange={(e) => setNewLedger(e.target.value)}
                 placeholder="Select or enter ledger"
-                className="w-full rounded border border-line-strong bg-surface text-sm text-ink px-3 py-1.5 focus:border-brand focus:outline-none"
+                className="w-full h-9 rounded-ctl border border-line-strong bg-surface text-[13.5px] text-ink px-3 focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
               />
               <datalist id="ledger-options">
                 {COMMON_LEDGERS[newGroup]?.map((opt) => (
@@ -860,7 +849,7 @@ export function ChartOfAccountsView() {
             </div>
             <div>
               <Input
-                label="Sub-Ledger (Optional)"
+                label="Sub-ledger (optional)"
                 value={newSubLedger}
                 onChange={(e) => setNewSubLedger(e.target.value)}
                 placeholder="e.g. Mumbai Branch / Operating"
@@ -872,7 +861,7 @@ export function ChartOfAccountsView() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Input
-                label="Display Label"
+                label="Display label"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="Invoice & statement label"
@@ -880,7 +869,7 @@ export function ChartOfAccountsView() {
             </div>
             <div>
               <Input
-                label="Description / Purpose"
+                label="Description / purpose"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
                 placeholder="Internal notes or GST classification"
@@ -889,19 +878,19 @@ export function ChartOfAccountsView() {
           </div>
 
           {/* Postable Leaf Checkbox */}
-          <div className="flex items-start gap-2.5 p-2.5 rounded bg-canvas border border-line">
+          <div className="flex items-start gap-2.5 p-3 rounded-ctl bg-canvas border border-line">
             <input
               type="checkbox"
               id="is-postable-toggle"
               checked={newIsPostable}
               onChange={(e) => setNewIsPostable(e.target.checked)}
-              className="mt-0.5 rounded border-line-strong text-teal-600 focus:ring-teal-500 h-4 w-4"
+              className="mt-0.5 h-4 w-4 accent-brand"
             />
             <label htmlFor="is-postable-toggle" className="cursor-pointer select-none">
-              <span className="font-bold text-ink block">
-                Postable Leaf Account
+              <span className="font-medium text-ink block">
+                Postable leaf account
               </span>
-              <span className="text-[11px] text-ink-muted block">
+              <span className="text-[12.5px] text-ink-muted block">
                 Allow journal entries, payment vouchers, and invoices to record lines directly
                 to this account. (Uncheck if this is a header rollup group).
               </span>
@@ -926,7 +915,7 @@ export function ChartOfAccountsView() {
               isLoading={isCreating}
               className="gap-1.5"
             >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Save Account
+              <CheckCircle2 className="h-3.5 w-3.5" /> Save account
             </Button>
           </div>
         </form>
@@ -944,17 +933,17 @@ export function ChartOfAccountsView() {
               setAccountToDelete(null);
             }
           }}
-          title="Remove Ledger Account"
+          title="Remove ledger account"
           description={`Confirm deletion or deactivation of account #${accountToDelete.code}`}
         >
-          <div className="space-y-4 text-xs font-sans">
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+          <div className="space-y-4 text-[13.5px] font-sans">
+            <div className="p-3 bg-bad-wash border border-bad/25 rounded-ctl flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-bad shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-rose-900 text-sm">
-                  Delete Account #{accountToDelete.code} — {accountToDelete.name}?
+                <p className="font-semibold text-bad text-[14px]">
+                  Delete account #{accountToDelete.code} — {accountToDelete.name}?
                 </p>
-                <p className="text-rose-700 text-xs mt-1">
+                <p className="text-bad text-[13px] mt-1">
                   Accounting rules enforce data integrity: accounts with existing journal transactions
                   cannot be permanently deleted to protect the audit trail.
                 </p>
@@ -962,36 +951,36 @@ export function ChartOfAccountsView() {
             </div>
 
             {deleteError && (
-              <div className="p-3 bg-amber-50 border border-amber-300 rounded space-y-2">
-                <div className="flex items-center gap-2 text-amber-800 font-semibold">
-                  <ShieldAlert className="h-4 w-4 shrink-0 text-amber-600" />
+              <div className="p-3 bg-warn-wash border border-warn/30 rounded-ctl space-y-2">
+                <div className="flex items-center gap-2 text-warn font-medium">
+                  <ShieldAlert className="h-4 w-4 shrink-0 text-warn" />
                   <span>{deleteError}</span>
                 </div>
-                <div className="pt-2 border-t border-amber-200 flex justify-end">
+                <div className="pt-2 border-t border-warn/30 flex justify-end">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => handleToggleActive(accountToDelete)}
                     isLoading={isDeactivating}
-                    className="gap-1.5 bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-900"
+                    className="gap-1.5"
                   >
-                    <Power className="h-3.5 w-3.5" /> Deactivate Account Instead
+                    <Power className="h-3.5 w-3.5" /> Deactivate account instead
                   </Button>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2 p-2.5 bg-canvas rounded border border-line text-[11px]">
+            <div className="grid grid-cols-2 gap-2 p-3 bg-canvas rounded-ctl border border-line text-[13px]">
               <div>
-                <span className="text-ink-subtle block font-mono uppercase">ALERX Group</span>
-                <span className="font-semibold text-ink capitalize">
+                <span className="text-[12.5px] text-ink-muted block">ALERX group</span>
+                <span className="font-medium text-ink capitalize">
                   {accountToDelete.account_group || accountToDelete.type}
                 </span>
               </div>
               <div>
-                <span className="text-ink-subtle block font-mono uppercase">Ledger Group</span>
-                <span className="font-semibold text-ink">
+                <span className="text-[12.5px] text-ink-muted block">Ledger group</span>
+                <span className="font-medium text-ink">
                   {accountToDelete.ledger || "General Ledger"}
                 </span>
               </div>
@@ -1032,7 +1021,7 @@ export function ChartOfAccountsView() {
                   disabled={isDeactivating}
                   className="gap-1"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete Permanently
+                  <Trash2 className="h-3.5 w-3.5" /> Delete permanently
                 </Button>
               </div>
             </div>
@@ -1048,20 +1037,20 @@ export function ChartOfAccountsView() {
           isOpen={isDetailOpen}
           onClose={() => setIsDetailOpen(false)}
           title={`Account #${selectedAccount.code} — ${selectedAccount.name}`}
-          description={`ALERX Classification: ${selectedAccount.account_group || selectedAccount.type}`}
+          description={`ALERX classification: ${selectedAccount.account_group || selectedAccount.type}`}
         >
-          <div className="space-y-4 text-xs font-sans">
-            <div className="grid grid-cols-2 gap-3 p-3 bg-canvas rounded border border-line">
+          <div className="space-y-4 text-[13.5px] font-sans">
+            <div className="grid grid-cols-2 gap-3 p-4 bg-canvas rounded-ctl border border-line">
               <div>
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  Account Code
+                <span className="text-[12.5px] text-ink-muted block">
+                  Account code
                 </span>
-                <span className="font-mono font-bold text-sm text-ink">
+                <span className="font-mono text-[13.5px] font-medium text-ink">
                   {selectedAccount.code}
                 </span>
               </div>
               <div>
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
+                <span className="text-[12.5px] text-ink-muted block">
                   Status
                 </span>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -1069,52 +1058,52 @@ export function ChartOfAccountsView() {
                     {selectedAccount.is_active ? "Active" : "Inactive"}
                   </Badge>
                   {selectedAccount.is_system && (
-                    <Badge variant="outline">System Core</Badge>
+                    <Badge variant="outline">System core</Badge>
                   )}
                 </div>
               </div>
               <div>
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  Posting Status
+                <span className="text-[12.5px] text-ink-muted block">
+                  Posting status
                 </span>
-                <span className="font-bold text-ink">
+                <span className="font-medium text-ink">
                   {selectedAccount.is_postable
-                    ? "Postable (Can receive journal lines)"
-                    : "Header Only (Summary rollup)"}
+                    ? "Postable (can receive journal lines)"
+                    : "Header only (summary rollup)"}
                 </span>
               </div>
               <div>
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  Ledger Group
+                <span className="text-[12.5px] text-ink-muted block">
+                  Ledger group
                 </span>
-                <span className="font-semibold text-ink">
+                <span className="font-medium text-ink">
                   {selectedAccount.ledger || "General Ledger"}
                 </span>
               </div>
 
               {/* State Units and Monetary Value */}
-              <div className="p-2.5 bg-surface rounded border border-line">
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  State-Change Units
+              <div className="p-3 bg-surface rounded-ctl border border-line">
+                <span className="text-[12.5px] text-ink-muted block">
+                  State-change units
                 </span>
-                <div className="flex items-center gap-1.5 mt-0.5 font-mono">
-                  <span className="font-bold text-sm text-ink">
+                <div className="flex items-center gap-1.5 mt-0.5 tabular-nums">
+                  <span className="font-semibold text-[15px] text-ink">
                     {selectedAccount.units ?? 0}
                   </span>
-                  <span className="text-[10px] text-ink-muted">
+                  <span className="text-[12.5px] text-ink-muted">
                     {(selectedAccount.units ?? 0) === 1 ? "state mutation" : "state mutations"}
                   </span>
                 </div>
               </div>
-              <div className="p-2.5 bg-surface rounded border border-line">
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  Current Ledger Value
+              <div className="p-3 bg-surface rounded-ctl border border-line">
+                <span className="text-[12.5px] text-ink-muted block">
+                  Current ledger value
                 </span>
-                <div className="flex items-center gap-1.5 mt-0.5 font-mono">
-                  <span className="font-black text-sm text-ink">
+                <div className="flex items-center gap-1.5 mt-0.5 tabular-nums">
+                  <span className="font-semibold text-[15px] text-ink">
                     {formatINR(Math.abs(selectedAccount.value ?? 0))}
                   </span>
-                  <span className="text-[10px] text-emerald-700 font-bold">
+                  <span className="text-[12.5px] text-ink-muted font-medium">
                     {(selectedAccount.account_group || selectedAccount.type) === "asset" || (selectedAccount.account_group || selectedAccount.type) === "expense"
                       ? ((selectedAccount.value ?? 0) >= 0 ? "Dr" : "Cr")
                       : ((selectedAccount.value ?? 0) >= 0 ? "Cr" : "Dr")}
@@ -1123,27 +1112,27 @@ export function ChartOfAccountsView() {
               </div>
 
               <div className="col-span-2">
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono">
-                  Sub-Ledger
+                <span className="text-[12.5px] text-ink-muted block">
+                  Sub-ledger
                 </span>
-                <span className="font-semibold text-ink">
-                  {selectedAccount.sub_ledger || "—"}
+                <span className="font-medium text-ink">
+                  {selectedAccount.sub_ledger || "–"}
                 </span>
               </div>
             </div>
 
             {selectedAccount.description && (
               <div>
-                <span className="text-ink-subtle block text-[10px] uppercase font-mono mb-1">
-                  Description & Purpose
+                <span className="text-[12.5px] text-ink-muted block mb-1">
+                  Description and purpose
                 </span>
-                <p className="text-ink-soft bg-surface p-2.5 rounded border border-line">
+                <p className="text-ink-soft bg-surface p-3 rounded-ctl border border-line">
                   {selectedAccount.description}
                 </p>
               </div>
             )}
 
-            <div className="pt-2 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-line">
+            <div className="pt-3 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-line">
               <Button
                 variant="outline"
                 size="sm"
@@ -1153,7 +1142,7 @@ export function ChartOfAccountsView() {
                 }}
                 className="gap-1"
               >
-                <ExternalLink className="h-3.5 w-3.5" /> View Ledger Transactions
+                <ExternalLink className="h-3.5 w-3.5" /> View ledger transactions
               </Button>
 
               <div className="flex items-center gap-2">

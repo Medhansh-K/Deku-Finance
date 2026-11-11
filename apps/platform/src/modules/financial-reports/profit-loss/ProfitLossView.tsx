@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, RefreshCw, Printer, AlertTriangle, ArrowUpRight, ArrowDownRight, Download } from "lucide-react";
+import { RefreshCw, Printer, ArrowUpRight, ArrowDownRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { reportsApi } from "@/api/endpoints";
@@ -12,6 +12,7 @@ import { downloadFile } from "@/lib/download";
 import { profitLossCsv } from "@/lib/import/export";
 import { currentFyRange, rangeProblem } from "@/lib/reports/date-range";
 import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 
 export function ProfitLossView() {
   const router = useRouter();
@@ -77,217 +78,131 @@ export function ProfitLossView() {
   const isNetProfit = netProfit >= 0;
   const money = (v: number) => (loaded ? formatINR(v) : "–");
 
+  const side = (title: string, total: number, head: string, accounts: ProfitLossRow[], empty: string) => (
+    <div className={ui.panel}>
+      <div className={ui.panelHead}>
+        <h3 className={ui.panelTitle}>{title}</h3>
+      </div>
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr>
+            <th className={`${ui.th} w-24`}>Code</th>
+            <th className={ui.th}>{head}</th>
+            <th className={`${ui.th} text-right`}>Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {accounts.length > 0 ? (
+            accounts.map((acc) => (
+              <tr
+                key={acc.account_id}
+                onClick={() => router.push(`/day-book?account_code=${acc.account_code}`)}
+                className={ui.rowLink}
+              >
+                <td className={`${ui.td} ${ui.code}`}>{acc.account_code}</td>
+                <td className={ui.td}>{acc.account_name}</td>
+                <td className={`${ui.td} text-right tabular-nums`}>
+                  {formatINR(acc.net_amount, { showCurrencySymbol: false })}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="py-6 text-center text-ink-muted">
+                {loaded ? empty : "–"}
+              </td>
+            </tr>
+          )}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={2} className={ui.total}>Total</td>
+            <td className={`${ui.total} text-right tabular-nums`}>{money(total)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+
   return (
-    <div className="space-y-4 font-sans text-xs">
+    <div className={ui.page}>
       {/* Reporting Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
-        <div className="space-y-2">
+      <div className={ui.toolbar}>
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             {loaded ? (
               <Badge variant={isNetProfit ? "success" : "danger"}>
-                {isNetProfit ? "Net Profit" : "Net Loss"}: {formatINR(Math.abs(netProfit))}
+                {isNetProfit ? "Net profit" : "Net loss"}: {formatINR(Math.abs(netProfit))}
               </Badge>
             ) : (
-              <Badge variant="warning">Net Result: –</Badge>
+              <Badge variant="warning">Net result: –</Badge>
             )}
-            <span className="text-ink-muted font-mono text-[11px]">
-              From posted ledger entries
-            </span>
+            <span className={ui.note}>From posted ledger entries</span>
           </div>
           <ReportDateRange from={from} to={to} onFrom={setFrom} onTo={setTo} problem={orgId ? problem : null} />
         </div>
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() => loaded && downloadFile(`profit-and-loss-${from}-to-${to}.csv`, profitLossCsv(loaded, from, to), "text/csv;charset=utf-8")}
             disabled={!loaded}
-            className="gap-1.5"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV
+            <Download className="h-4 w-4" /> Export CSV
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-1.5"
-          >
-            <Printer className="h-3.5 w-3.5" /> Print Statement
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" /> Print statement
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchPnL}
-            isLoading={isLoading}
-            disabled={!!problem}
-            className="gap-1.5"
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <Button variant="secondary" onClick={fetchPnL} isLoading={isLoading} disabled={!!problem}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">Authoritative Report Unavailable</p>
-              <p>{error}</p>
-            </div>
-          </div>
-          <button onClick={fetchPnL} className="font-bold underline">
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ReportError title="Profit & Loss unavailable" message={error} onRetry={fetchPnL} />}
 
       {/* Summary KPI Strip */}
-      <div data-tour="profit-loss-summary" className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
-          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
-            Operating Revenue & Income
-          </span>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-base font-bold font-mono text-ink">
-              {money(totalIncome)}
-            </span>
-            <ArrowUpRight className="h-4 w-4 text-emerald-600" />
+      <div data-tour="profit-loss-summary" className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Revenue and income <ArrowUpRight className="ml-auto h-4 w-4 text-ok" />
           </div>
+          <div className={ui.kpiValue}>{money(totalIncome)}</div>
         </div>
 
-        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
-          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
-            Operating Expenses & Overhead
-          </span>
-          <div className="flex items-center justify-between mt-1">
-            <span className="text-base font-bold font-mono text-ink">
-              {money(totalExpense)}
-            </span>
-            <ArrowDownRight className="h-4 w-4 text-rose-600" />
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Expenses and overheads <ArrowDownRight className="ml-auto h-4 w-4 text-bad" />
           </div>
+          <div className={ui.kpiValue}>{money(totalExpense)}</div>
         </div>
 
-        <div className="bg-surface p-3.5 rounded border border-line shadow-xs">
-          <span className="text-ink-subtle font-mono text-[10px] uppercase block">
-            Net Result for Period
-          </span>
-          <div className="flex items-center justify-between mt-1">
+        <div className={ui.kpi}>
+          <div className={ui.kpiLabel}>
+            Net result for the period
+            {loaded && (
+              <Badge variant={isNetProfit ? "success" : "danger"} className="ml-auto">
+                {isNetProfit ? "Surplus" : "Deficit"}
+              </Badge>
+            )}
+          </div>
+          <div className={`${ui.kpiValue} ${loaded ? (isNetProfit ? "text-ok" : "text-bad") : ""}`}>
             {loaded ? (
-              <>
-                <span
-                  className={`text-base font-bold font-mono ${
-                    isNetProfit ? "text-emerald-700" : "text-rose-700"
-                  }`}
-                >
-                  {isNetProfit ? "+" : "-"}
-                  {formatINR(Math.abs(netProfit))}
-                </span>
-                <Badge variant={isNetProfit ? "success" : "danger"}>
-                  {isNetProfit ? "Surplus" : "Deficit"}
-                </Badge>
-              </>
+              <span className="ledger-total">
+                {isNetProfit ? "+" : "-"}
+                {formatINR(Math.abs(netProfit))}
+              </span>
             ) : (
-              <span className="text-base font-bold font-mono text-ink">–</span>
+              "–"
             )}
           </div>
         </div>
       </div>
 
       {/* Detailed Dual-Column Statement */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Expenses Side */}
-        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
-          <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
-            <span>Expenses & Outflows</span>
-            <span className="text-slate-300 font-bold">{money(totalExpense)}</span>
-          </div>
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-canvas-sunken border-b border-line font-mono text-[10px] text-ink-muted">
-                <th className="py-2 px-3">Code</th>
-                <th className="py-2 px-3">Expense Head</th>
-                <th className="py-2 px-3 text-right">Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {expenseAccounts.length > 0 ? (
-                expenseAccounts.map((acc) => (
-                  <tr
-                    key={acc.account_id}
-                    onClick={() =>
-                      router.push(`/day-book?account_code=${acc.account_code}`)
-                    }
-                    className="hover:bg-canvas cursor-pointer"
-                  >
-                    <td className="py-2 px-3 font-mono font-bold text-ink-soft">
-                      {acc.account_code}
-                    </td>
-                    <td className="py-2 px-3 font-medium text-ink">
-                      {acc.account_name}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
-                      {formatINR(acc.net_amount, { showCurrencySymbol: false })}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
-                    {loaded ? "No expense movements recorded." : "–"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Income / Revenue Side */}
-        <div className="bg-surface border border-edge rounded-lg shadow-xs overflow-hidden">
-          <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono">
-            <span>Income & Inflows</span>
-            <span className="text-emerald-400 font-bold">{money(totalIncome)}</span>
-          </div>
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-canvas-sunken border-b border-line font-mono text-[10px] text-ink-muted">
-                <th className="py-2 px-3">Code</th>
-                <th className="py-2 px-3">Revenue Head</th>
-                <th className="py-2 px-3 text-right">Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {incomeAccounts.length > 0 ? (
-                incomeAccounts.map((acc) => (
-                  <tr
-                    key={acc.account_id}
-                    onClick={() =>
-                      router.push(`/day-book?account_code=${acc.account_code}`)
-                    }
-                    className="hover:bg-canvas cursor-pointer"
-                  >
-                    <td className="py-2 px-3 font-mono font-bold text-ink-soft">
-                      {acc.account_code}
-                    </td>
-                    <td className="py-2 px-3 font-medium text-ink">
-                      {acc.account_name}
-                    </td>
-                    <td className="py-2 px-3 text-right font-mono font-bold text-ink">
-                      {formatINR(acc.net_amount, { showCurrencySymbol: false })}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="py-6 text-center text-ink-subtle font-mono">
-                    {loaded ? "No revenue movements recorded." : "–"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        {side("Expenses and outflows", totalExpense, "Expense head", expenseAccounts, "No expense movements recorded.")}
+        {side("Income and inflows", totalIncome, "Revenue head", incomeAccounts, "No revenue movements recorded.")}
       </div>
     </div>
   );

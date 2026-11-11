@@ -11,8 +11,8 @@ export default function TrialBalancePage() {
     <AppShell>
       <WorkspaceLayout
         title="Trial Balance"
-        subtitle="Verification of debit and credit equilibrium across all ALERX chart of accounts"
-        badge={<Badge variant="teal">Authoritative Statement</Badge>}
+        subtitle="Debit and credit equilibrium across the chart of accounts"
+        badge={<Badge variant="teal">Authoritative statement</Badge>}
         breadcrumbs={[
           { label: "Reports" },
           { label: "Trial Balance", href: "/reports/trial-balance" },

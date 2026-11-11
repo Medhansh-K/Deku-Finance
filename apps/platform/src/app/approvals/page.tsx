@@ -12,7 +12,7 @@ export default function ApprovalsPage() {
       <WorkspaceLayout
         title="Voucher Approvals"
         subtitle="Maker-checker review: vouchers reach the ledger only after a second person approves them"
-        badge={<Badge variant="teal">Internal Control</Badge>}
+        badge={<Badge variant="teal">Internal control</Badge>}
         breadcrumbs={[{ label: "Approvals", href: "/approvals" }]}
       >
         <ApprovalsView />

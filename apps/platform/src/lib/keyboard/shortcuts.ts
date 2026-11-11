@@ -88,7 +88,7 @@ export const STANDARD_SHORTCUTS: KeyboardShortcut[] = [
   },
   {
     key: "F2",
-    label: "F2: Deku Konsultant",
+    label: "F2: Deku Consultant",
     description: "Questions answered from your ledger figures",
     category: "navigation",
     actionRoute: "/consultant",

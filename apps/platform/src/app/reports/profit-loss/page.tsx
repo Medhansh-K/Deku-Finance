@@ -10,9 +10,9 @@ export default function ProfitLossPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Profit & Loss Account"
+        title="Profit & Loss account"
         subtitle="Real-time financial statement of operating revenue, direct costs and net profit"
-        badge={<Badge variant="teal">Authoritative Statement</Badge>}
+        badge={<Badge variant="teal">Authoritative statement</Badge>}
         breadcrumbs={[
           { label: "Reports" },
           { label: "Profit & Loss", href: "/reports/profit-loss" },

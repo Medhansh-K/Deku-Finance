@@ -28,7 +28,7 @@ function SignedQr({ value }: { value: string }) {
     };
   }, [value]);
   // eslint-disable-next-line @next/next/no-img-element
-  return url ? <img src={url} alt="e-invoice signed QR code" className="h-28 w-28 rounded border border-line" /> : null;
+  return url ? <img src={url} alt="e-invoice signed QR code" className="h-28 w-28 rounded-ctl border border-line" /> : null;
 }
 
 /** IRN and e-way bill for an issued invoice. The IRN and its signed QR print with the invoice. */
@@ -84,12 +84,12 @@ export function InvoiceEInvoiceBlock({ orgId, invoiceId, issued }: { orgId: stri
   if (!irn && !ewb && !issued) return null;
 
   return (
-    <section aria-label="E-invoice and e-way bill" className="space-y-3 rounded-lg border border-line bg-surface p-4">
+    <section aria-label="E-invoice and e-way bill" className="space-y-3 rounded-panel border border-line bg-surface p-4">
       {status?.sandbox && (irn || ewb || !blocker) && <SandboxBanner what="GSP" />}
 
       {irn && (
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
             <dt className="text-ink-muted">IRN</dt>
             <dd className="break-all font-mono text-ink">{irn.irn}</dd>
             {irn.ack_no && (
@@ -110,7 +110,7 @@ export function InvoiceEInvoiceBlock({ orgId, invoiceId, issued }: { orgId: stri
       )}
 
       {ewb && (
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
           <dt className="text-ink-muted">E-way bill</dt>
           <dd className="font-mono text-ink">{ewb.ewb_no}</dd>
           {ewb.valid_upto && (
@@ -152,7 +152,7 @@ export function InvoiceEInvoiceBlock({ orgId, invoiceId, issued }: { orgId: stri
               </Button>
             )}
           </div>
-          {blocker && <p className="text-xs text-ink-muted">{blocker}</p>}
+          {blocker && <p className="text-[12.5px] text-ink-muted">{blocker}</p>}
 
           {ewbForm.open && !blocker && (
             <form
@@ -201,12 +201,12 @@ export function InvoiceEInvoiceBlock({ orgId, invoiceId, issued }: { orgId: stri
                 run(act, cancel.what === "irn" ? "IRN cancelled." : "E-way bill cancelled.");
               }}
             >
-              <label className="flex flex-col gap-1 text-xs font-medium text-ink-soft">
+              <label className="flex flex-col gap-1.5 text-[13px] font-medium text-ink-soft">
                 Reason
                 <select
                   value={cancel.code}
                   onChange={(e) => setCancel({ ...cancel, code: Number(e.target.value) })}
-                  className="h-9 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink"
+                  className="h-9 rounded-ctl border border-line-strong bg-surface px-2 text-[13.5px] text-ink"
                 >
                   {CANCEL_REASONS.map((r) => (
                     <option key={r.code} value={r.code}>
@@ -230,7 +230,7 @@ export function InvoiceEInvoiceBlock({ orgId, invoiceId, issued }: { orgId: stri
       )}
 
       {message && (
-        <p role="status" className={`text-xs print:hidden ${message.ok ? "text-emerald-800" : "text-rose-800"}`}>
+        <p role="status" className={`text-[13px] print:hidden ${message.ok ? "text-ok" : "text-bad"}`}>
           {message.text}
         </p>
       )}

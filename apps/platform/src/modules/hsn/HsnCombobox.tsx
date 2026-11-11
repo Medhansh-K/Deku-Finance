@@ -136,27 +136,27 @@ export function HsnCombobox({ value, onChange, label, ariaLabel, inputClassName 
         setActive(-1);
       }}
       onKeyDown={onKeyDown}
-      className={`${inputClassName} font-mono ${error ? "border-rose-500" : ""}`}
+      className={`${inputClassName} font-mono ${error ? "border-bad" : ""}`}
     />
   );
 
   return (
     <div className="w-full space-y-1">
       {label && (
-        <label htmlFor={id} className="block text-xs font-medium text-ink-soft">
+        <label htmlFor={id} className="block text-[13px] font-medium text-ink-soft">
           {label}
         </label>
       )}
       {input}
       {error && (
-        <p id={errorId} className="text-xs font-medium text-rose-600">
+        <p id={errorId} className="text-[12.5px] font-medium text-bad">
           {error}
         </p>
       )}
       {showPopup && rect && typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed z-[60] max-h-64 w-80 max-w-[calc(100vw-32px)] overflow-y-auto rounded-md border border-line bg-surface text-xs shadow-pop"
+            className="fixed z-[60] max-h-64 w-80 max-w-[calc(100vw-32px)] overflow-y-auto rounded-ctl border border-line bg-surface p-1 text-[13px] shadow-pop"
             style={{ top: rect.bottom + 4, left: Math.max(16, Math.min(rect.left, window.innerWidth - 336)) }}
           >
             <ul id={listId} role="listbox" aria-label="HSN/SAC suggestions">
@@ -172,9 +172,9 @@ export function HsnCombobox({ value, onChange, label, ariaLabel, inputClassName 
                     pick(m);
                   }}
                   onMouseEnter={() => setActive(i)}
-                  className={`flex cursor-pointer gap-2 px-2.5 py-1.5 ${i === active ? "bg-brand-soft text-ink" : "text-ink-soft"}`}
+                  className={`flex cursor-pointer gap-2 rounded-[7px] px-2.5 py-1.5 ${i === active ? "bg-brand-wash text-ink" : "text-ink-soft"}`}
                 >
-                  <span className="w-16 shrink-0 font-mono font-semibold text-ink">{m.code}</span>
+                  <span className="w-16 shrink-0 font-mono text-[12.5px] font-medium text-ink">{m.code}</span>
                   <span className="min-w-0">{m.description}</span>
                 </li>
               ))}

@@ -12,32 +12,14 @@ import {
   Clock,
   TrendingUp,
   PieChart,
-  Layers,
   ArrowRight,
-  RotateCcw,
-  Bot,
   User,
   Paperclip,
   Database,
-  Globe,
   Plus,
-  ChevronDown,
-  ChevronRight,
   Settings,
-  Bell,
-  MoreVertical,
-  ArrowUpRight,
   Activity,
-  Flame,
-  CheckCircle2,
   Building2,
-  Compass,
-  FileSpreadsheet,
-  Download,
-  ShieldCheck,
-  DollarSign,
-  Receipt,
-  Scale,
   Copy,
   Check,
   Search,
@@ -45,6 +27,7 @@ import {
 import { consultantApi, organisationsApi, OrgSummary } from "@/api/endpoints";
 import { formatINR } from "@/lib/formatters/currency";
 import { setActiveOrg } from "@/lib/organisation/active-org";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 
 interface ChatMessage {
   id: string;
@@ -55,7 +38,7 @@ interface ChatMessage {
 }
 
 // =============================================================================
-// FINANCIAL TABLE COMPONENT (MATCHING DABBY IMAGE 1)
+// FINANCIAL TABLE COMPONENT 
 // =============================================================================
 function FinancialTable({
   categoryNumber,
@@ -91,34 +74,34 @@ function FinancialTable({
   };
 
   return (
-    <div className="my-3 rounded-xl border border-line-strong bg-surface overflow-hidden shadow-xs">
-      {/* Top Table Toolbar (Matching Image 1 Dabby) */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-canvas border-b border-line-strong">
+    <div className="my-3 rounded-panel border border-line bg-surface overflow-hidden">
+      {/* Top Table Toolbar */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-canvas border-b border-line">
         <div className="flex items-center gap-2">
           {categoryNumber && (
-            <span className="h-5 w-5 rounded bg-blue-600 text-white font-mono font-bold text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
+            <span className="h-5 min-w-5 px-1 rounded-chip bg-brand-wash text-brand-strong font-mono text-xs font-medium flex items-center justify-center shrink-0">
               {categoryNumber}
             </span>
           )}
-          <span className="font-bold text-xs text-ink tracking-tight">
-            {categoryTitle || "Financial Statement Rollup"}
+          <span className="font-semibold text-[13.5px] text-ink tracking-tight">
+            {categoryTitle || "Financial statement rollup"}
           </span>
         </div>
 
         {/* Copy to Excel Button (Matching Glowing Button from Reference) */}
         <button
           onClick={handleCopyToExcel}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-bold transition-all shadow-2xs cursor-pointer bg-[#00F5A0] hover:bg-[#00D98E] text-[#080B0C]"
+          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-ctl text-[12.5px] font-medium transition-colors cursor-pointer border border-line-strong bg-surface text-ink-soft hover:bg-canvas-sunken hover:text-ink"
           title="Copy structured financial table directly to Excel / Google Sheets"
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-black" />
-              <span>Copied to Excel!</span>
+              <Check className="h-3.5 w-3.5 text-ok" />
+              <span>Copied</span>
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5 text-black" />
+              <Copy className="h-3.5 w-3.5" />
               <span>Copy to Excel</span>
             </>
           )}
@@ -127,13 +110,13 @@ function FinancialTable({
 
       {/* Structured Multi-Column Accounting Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
+        <table className="w-full text-left text-[13px] border-collapse tabular-nums">
           <thead>
-            <tr className="border-b border-line-strong bg-canvas-sunken/80 text-[10px] font-mono font-bold uppercase tracking-wider text-brand-strong">
+            <tr className="border-b border-line bg-[#fafbfa] text-[12.5px] font-medium text-ink-muted">
               {headers.map((h, idx) => (
                 <th
                   key={idx}
-                  className={`py-2.5 px-3.5 ${
+                  className={`py-2 px-4 ${
                     idx === 0 ? "text-left" : "text-right"
                   }`}
                 >
@@ -142,7 +125,7 @@ function FinancialTable({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line font-mono text-xs">
+          <tbody className="divide-y divide-line">
             {rows.map((row, rowIdx) => {
               const isGroupRow =
                 row[0]?.startsWith("**") && row[0]?.endsWith("**");
@@ -151,7 +134,7 @@ function FinancialTable({
                   key={rowIdx}
                   className={`transition-colors hover:bg-canvas/80 ${
                     isGroupRow
-                      ? "bg-canvas/70 font-bold text-ink"
+                      ? "bg-canvas/70 font-semibold text-ink"
                       : "text-ink-soft"
                   }`}
                 >
@@ -161,12 +144,12 @@ function FinancialTable({
                     return (
                       <td
                         key={colIdx}
-                        className={`py-2 px-3.5 whitespace-nowrap ${
+                        className={`py-2 px-4 whitespace-nowrap ${
                           colIdx === 0
                             ? isGroupRow
-                              ? "font-bold text-ink"
+                              ? "font-semibold text-ink"
                               : "text-ink"
-                            : "text-right font-mono"
+                            : "text-right"
                         } ${isNil ? "text-ink-subtle font-normal" : ""}`}
                       >
                         {cleanCell}
@@ -303,7 +286,7 @@ function FinancialMessageRenderer({ content }: { content: string }) {
   flushText();
 
   return (
-    <div className="space-y-2.5 font-sans text-xs leading-relaxed">
+    <div className="space-y-2.5 font-sans text-[13.5px] leading-relaxed">
       {blocks.map((block, idx) => {
         if (block.type === "table") {
           return (
@@ -321,11 +304,11 @@ function FinancialMessageRenderer({ content }: { content: string }) {
           return (
             <div key={idx} className="flex items-center gap-2 pt-2 pb-1">
               {block.badgeNumber && (
-                <span className="h-4 w-4 rounded bg-blue-600 text-white font-mono font-bold text-[10px] flex items-center justify-center shrink-0">
+                <span className="h-5 min-w-5 px-1 rounded-chip bg-brand-wash text-brand-strong font-mono text-xs font-medium flex items-center justify-center shrink-0">
                   {block.badgeNumber}
                 </span>
               )}
-              <h4 className="font-bold text-xs text-ink tracking-tight">
+              <h4 className="font-semibold text-[14px] text-ink tracking-tight">
                 {block.text}
               </h4>
             </div>
@@ -344,7 +327,7 @@ function FinancialMessageRenderer({ content }: { content: string }) {
                 const bulletContent = trimmed.substring(2);
                 return (
                   <div key={lIdx} className="flex items-start gap-2 pl-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-brand-strong mt-1.5 shrink-0" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand mt-2 shrink-0" />
                     <span>{renderInlineMarkdown(bulletContent)}</span>
                   </div>
                 );
@@ -353,7 +336,7 @@ function FinancialMessageRenderer({ content }: { content: string }) {
               if (trimmed.match(/^\d+\.\s+/)) {
                 return (
                   <div key={lIdx} className="flex items-start gap-2 pl-1">
-                    <span className="font-bold font-mono text-[10px] text-brand-strong mt-0.5 shrink-0">
+                    <span className="font-medium tabular-nums text-[13px] text-brand-strong shrink-0">
                       {trimmed.match(/^\d+\./)?.[0]}
                     </span>
                     <span>{renderInlineMarkdown(trimmed.replace(/^\d+\.\s+/, ""))}</span>
@@ -376,7 +359,7 @@ function renderInlineMarkdown(str: string): React.ReactNode {
   return parts.map((part, idx) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={idx} className="font-bold text-ink">
+        <strong key={idx} className="font-semibold text-ink">
           {part.slice(2, -2)}
         </strong>
       );
@@ -385,7 +368,7 @@ function renderInlineMarkdown(str: string): React.ReactNode {
       return (
         <code
           key={idx}
-          className="font-mono text-[11px] bg-canvas-sunken text-ink px-1 py-0.2 rounded border border-line"
+          className="font-mono text-[12.5px] bg-canvas-sunken text-ink px-1 rounded-[4px] border border-line"
         >
           {part.slice(1, -1)}
         </code>
@@ -396,7 +379,7 @@ function renderInlineMarkdown(str: string): React.ReactNode {
 }
 
 // =============================================================================
-// MAIN DEKU KONSULTANT VIEW COMPONENT
+// MAIN DEKU CONSULTANT VIEW COMPONENT
 // =============================================================================
 export function DekuConsultantView() {
   const router = useRouter();
@@ -529,59 +512,53 @@ export function DekuConsultantView() {
     }
   };
 
-  // 6 Quick Executive Prompt Cards (Exact Dabby layout in clean light theme)
+  // Suggested prompts shown in the empty state
   const promptCards = [
     {
-      category: "WARNINGS",
-      categoryBadge: "bg-amber-50 text-amber-800 border-amber-200",
+      category: "Warnings",
+      categoryBadge: "bg-warn-wash text-warn",
       icon: AlertTriangle,
-      iconColor: "text-amber-600",
-      title: "Expense Spikes",
+      title: "Expense spikes",
       description: "Identify any unusual expense spikes or unbudgeted OPEX this month",
       prompt: "Identify any unusual expense spikes or cost abnormalities in our accounts this month.",
     },
     {
-      category: "EXCEPTIONS",
-      categoryBadge: "bg-rose-50 text-rose-800 border-rose-200",
+      category: "Exceptions",
+      categoryBadge: "bg-bad-wash text-bad",
       icon: ShieldAlert,
-      iconColor: "text-rose-600",
-      title: "Overdue Payments",
+      title: "Overdue payments",
       description: "Are there any overdue invoices or bills? Check DSO velocity & aging",
       prompt: "Are there any overdue invoices or bills? What is our current Accounts Receivable aging and DSO?",
     },
     {
-      category: "WARNINGS",
-      categoryBadge: "bg-amber-50 text-amber-800 border-amber-200",
+      category: "Warnings",
+      categoryBadge: "bg-warn-wash text-warn",
       icon: Clock,
-      iconColor: "text-amber-600",
-      title: "Budget Limits",
+      title: "Budget limits",
       description: "Highlight department budget categories nearing or exceeding limits",
       prompt: "Highlight which departmental budget categories are running nearest to their limits or over-budget.",
     },
     {
-      category: "GROWTH",
-      categoryBadge: "bg-emerald-50 text-emerald-800 border-emerald-200",
+      category: "Growth",
+      categoryBadge: "bg-ok-wash text-ok",
       icon: TrendingUp,
-      iconColor: "text-emerald-600",
-      title: "Top Revenue",
+      title: "Top revenue",
       description: "What are our most profitable revenue streams and product margins?",
       prompt: "What are our most profitable revenue streams, top clients, and gross profit margins?",
     },
     {
-      category: "CLARITY",
-      categoryBadge: "bg-cyan-50 text-cyan-800 border-cyan-200",
+      category: "Clarity",
+      categoryBadge: "bg-brand-wash text-brand-strong",
       icon: Activity,
-      iconColor: "text-cyan-600",
-      title: "Performance Summary",
+      title: "Performance summary",
       description: "Summarize financial performance, net profit, and cash runway for the quarter",
       prompt: "Summarize our complete financial performance, net profit margin, and treasury cash runway for this quarter.",
     },
     {
-      category: "CLARITY",
-      categoryBadge: "bg-cyan-50 text-cyan-800 border-cyan-200",
+      category: "Clarity",
+      categoryBadge: "bg-brand-wash text-brand-strong",
       icon: PieChart,
-      iconColor: "text-cyan-600",
-      title: "Operating Expenses",
+      title: "Operating expenses",
       description: "Provide a detailed breakdown of operating expenses across departments",
       prompt: "Provide a comprehensive breakdown of our operating expenses (OPEX) and departmental cost centers.",
     },
@@ -603,59 +580,41 @@ export function DekuConsultantView() {
 
   return (
     <div className="flex h-full w-full bg-canvas text-ink font-sans select-none overflow-hidden">
-      {/* ========================================================================= */}
-      {/* 1. LEFT SIDEBAR (WORKBENCHES, LEDGER SNAPSHOT, SESSIONS)                   */}
-      {/* ========================================================================= */}
-      <aside className="w-64 xl:w-72 bg-surface border-r border-line-strong flex flex-col justify-between shrink-0 shadow-xs">
-        <div className="p-3.5 space-y-4 overflow-y-auto">
-          {/* New Chat Button (Deku Charcoal with Teal Highlight) */}
+      {/* Left panel: workbenches, ledger snapshot, account */}
+      <aside className="w-64 xl:w-72 bg-surface border-r border-line flex flex-col justify-between shrink-0">
+        <div className="p-4 space-y-5 overflow-y-auto">
           <button
             onClick={handleStartNewChat}
-            className="w-full bg-panel hover:bg-panel-deep text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-between border border-edge shadow-xs hover:border-brand transition-all transform active:scale-98 cursor-pointer group"
+            className="w-full h-9 bg-ink hover:bg-ink-soft text-white font-medium text-[13.5px] px-3.5 rounded-ctl flex items-center gap-2 transition-colors cursor-pointer"
           >
-            <span className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-brand group-hover:scale-110 transition-transform" />
-              <span>New Chat</span>
-            </span>
-            <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-brand text-panel-deep font-black">
-              Ctrl + K
-            </kbd>
+            <Plus className="h-4 w-4" />
+            <span>New chat</span>
           </button>
 
           {/* Workbenches / Organisation Tenants */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between px-2 text-[10px] font-mono uppercase tracking-wider text-ink-muted font-bold">
-              <span className="flex items-center gap-1.5">
-                <Building2 className="h-3.5 w-3.5 text-brand-strong" />
-                Workbenches
-              </span>
-              <ChevronDown className="h-3 w-3 text-ink-subtle" />
+            <div className="flex items-center gap-1.5 px-2 text-[12.5px] font-medium text-ink-muted">
+              <Building2 className="h-3.5 w-3.5" />
+              Workbenches
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {orgList.map((org) => {
                 const isActive = org.id === activeOrgId;
                 return (
                   <button
                     key={org.id}
                     onClick={() => handleSelectOrg(org)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between transition-colors cursor-pointer ${
+                    className={`w-full text-left px-2.5 py-1.5 rounded-[8px] text-[13.5px] flex items-center justify-between transition-colors cursor-pointer ${
                       isActive
-                        ? "bg-emerald-50/80 text-emerald-950 border border-emerald-300 font-bold shadow-xs"
-                        : "text-ink-soft hover:text-ink hover:bg-canvas-sunken border border-transparent"
+                        ? "bg-brand-wash text-ink font-medium shadow-[inset_3px_0_0_var(--color-brand)]"
+                        : "text-ink-soft hover:text-ink hover:bg-canvas-sunken"
                     }`}
                   >
-                    <span className="truncate flex items-center gap-2">
-                      <span
-                        className={`h-2 w-2 rounded-full shrink-0 ${
-                          isActive ? "bg-emerald-500 shadow-xs" : "bg-slate-400"
-                        }`}
-                      />
-                      <span className="truncate">{org.name}</span>
-                    </span>
+                    <span className="truncate">{org.name}</span>
                     {isActive && (
-                      <span className="text-[9px] font-mono uppercase font-black px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0 ml-1">
-                        ACTIVE
+                      <span className="text-xs font-medium text-brand-strong shrink-0 ml-2">
+                        Active
                       </span>
                     )}
                   </button>
@@ -664,141 +623,99 @@ export function DekuConsultantView() {
 
               <Link
                 href="/companies"
-                className="w-full text-left px-3 py-1.5 text-[11px] font-bold text-brand-strong hover:text-brand flex items-center gap-1 transition-colors"
+                className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium text-brand-strong hover:text-ink flex items-center gap-1 transition-colors"
               >
-                <span>+ VIEW ALL</span>
+                <span>View all companies</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </div>
 
           {/* Ledger snapshot */}
-          <div className="bg-canvas border border-line rounded-xl p-3 space-y-2">
-            <div className="flex items-center justify-between text-[10px] font-mono text-ink-muted font-bold uppercase">
-              <span>Ledger Snapshot</span>
-              {contextFailed && <span className="text-rose-700 font-bold normal-case">Couldn't load</span>}
+          <div className="bg-canvas border border-line rounded-panel p-3.5 space-y-2.5">
+            <div className="flex items-center justify-between text-[12.5px] font-medium text-ink-muted">
+              <span>Ledger snapshot</span>
+              {contextFailed && <span className="text-bad">Couldn&apos;t load</span>}
             </div>
-            <div className="space-y-1.5 text-xs">
+            <div className="space-y-1.5 text-[13px] tabular-nums">
               <div className="flex justify-between">
-                <span className="text-ink-muted">Turnover:</span>
-                <span className="font-bold text-ink font-mono">{prof.total_revenue == null ? "–" : formatINR(prof.total_revenue)}</span>
+                <span className="text-ink-muted">Turnover</span>
+                <span className="font-medium text-ink">{prof.total_revenue == null ? "–" : formatINR(prof.total_revenue)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ink-muted">Net Margin:</span>
-                <span className="font-bold text-emerald-700 font-mono">{prof.net_margin_pct == null ? "–" : `${prof.net_margin_pct}%`}</span>
+                <span className="text-ink-muted">Net margin</span>
+                <span className="font-medium text-ink">{prof.net_margin_pct == null ? "–" : `${prof.net_margin_pct}%`}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ink-muted">Runway:</span>
-                <span className="font-bold text-amber-700 font-mono">{runway.cash_runway_months == null ? "–" : `${runway.cash_runway_months} Mo`}</span>
+                <span className="text-ink-muted">Runway</span>
+                <span className="font-medium text-ink">{runway.cash_runway_months == null ? "–" : `${runway.cash_runway_months} mo`}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ink-muted">Debtors DSO:</span>
-                <span className="font-bold text-blue-700 font-mono">{dso == null ? "–" : `${dso} Days`}</span>
+                <span className="text-ink-muted">Debtors DSO</span>
+                <span className="font-medium text-ink">{dso == null ? "–" : `${dso} days`}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sidebar Footer (User Account & Settings) */}
-        <div className="p-3 space-y-1.5 bg-canvas border-t border-line-strong">
-          <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-surface transition-colors cursor-pointer border border-transparent hover:border-line">
-            <div className="flex items-center gap-2 truncate">
-              <div className="h-7 w-7 rounded-full bg-brand/20 border border-brand/40 flex items-center justify-center font-bold text-xs text-brand-strong shrink-0">
-                {userName.charAt(0)}
-              </div>
-              <div className="truncate text-left">
-                <div className="text-xs font-bold text-ink truncate">{userName}</div>
-                <div className="text-[10px] text-ink-muted truncate font-mono">{user?.email}</div>
-              </div>
+        {/* Left panel footer: account and settings */}
+        <div className="p-3 space-y-2 border-t border-line">
+          <div className="flex items-center gap-2.5 px-2 py-1.5">
+            <div className="h-7 w-7 rounded-full bg-brand-wash-strong flex items-center justify-center font-semibold text-xs text-brand-strong shrink-0">
+              {userName.charAt(0)}
+            </div>
+            <div className="truncate text-left leading-tight">
+              <div className="text-[13px] font-medium text-ink truncate">{userName}</div>
+              <div className="text-xs text-ink-muted truncate">{user?.email}</div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-2 text-xs pt-1 text-ink-muted">
+          <div className="flex items-center justify-between px-2 text-[13px] text-ink-muted">
             <Link
               href="/settings"
               className="flex items-center gap-1.5 hover:text-ink transition-colors"
             >
-              <Settings className="h-3.5 w-3.5 text-ink-subtle" />
+              <Settings className="h-3.5 w-3.5" />
               <span>Settings</span>
             </Link>
             <Link
               href="/gateway"
-              className="flex items-center gap-1 text-[11px] font-mono text-brand-strong hover:text-brand transition-colors font-bold"
+              className="flex items-center gap-1.5 hover:text-ink transition-colors"
             >
-              <span>Gateway (Esc)</span>
+              <span>Gateway</span>
+              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Esc</kbd>
             </Link>
           </div>
         </div>
       </aside>
 
-      {/* ========================================================================= */}
-      {/* 2. MAIN CENTER CANVAS (WHITE HERO OR CONVERSATION STREAM WITH TABLES)     */}
-      {/* ========================================================================= */}
+      {/* Main column: empty state or conversation */}
       <main className="flex-1 flex flex-col justify-between overflow-hidden relative bg-canvas">
-        {/* Top Header Bar */}
-        <header className="h-12 px-6 flex items-center justify-between shrink-0 bg-surface border-b border-line-strong z-10 shadow-2xs">
+        <header className="h-14 px-6 flex items-center justify-between shrink-0 bg-surface border-b border-line z-10">
           <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg bg-brand/15 border border-brand/40 flex items-center justify-center text-brand-strong">
-              <Bot className="h-4 w-4" />
-            </div>
-            <span className="font-black text-sm tracking-tight text-ink">Deku Konsultant</span>
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded uppercase font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
-              Ledger Consultant
-            </span>
+            <DekuLogo size={24} />
+            <span className="font-semibold text-[15px] tracking-tight text-ink">Deku Consultant</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-canvas-sunken border border-line-strong text-ink-soft">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              <span className="font-bold font-mono text-ink">Ledger Analyst · on-premise</span>
-              <ChevronDown className="h-3 w-3 text-ink-subtle" />
-            </div>
-
-            <button
-              onClick={() => alert("Notification center: 0 unread alerts. Universal Ledger balanced.")}
-              className="p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => alert("Deku Konsultant: Operating with real-time FP&A, WCM, and Universal Ledger grounding.")}
-              className="p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
+          <div className="inline-flex items-center gap-2 h-8 px-3 rounded-ctl text-[13px] bg-brand-wash text-brand-strong border border-brand-wash-strong">
+            <span className="h-[7px] w-[7px] rounded-full bg-brand inline-block" />
+            <span>Ledger analyst · on-premise</span>
           </div>
         </header>
 
-        {/* Content Body: Hero with 6 Cards OR Conversation Stream */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-6 flex flex-col items-center">
           {messages.length === 0 ? (
-            /* =================================================================== */
-            /* HERO + 6 PROMPT CARDS (MATCHING IMAGE 1 & 2 CLEAN LIGHT THEME)      */
-            /* =================================================================== */
-            <div className="w-full max-w-4xl flex flex-col items-center space-y-6 my-auto">
-              {/* Mascot & Typewriter Greeting */}
-              <div className="flex flex-col items-center text-center space-y-1.5">
-                <div className="h-14 w-14 rounded-2xl bg-surface border border-line-strong shadow-xs flex items-center justify-center text-brand-strong mb-1">
-                  <Bot className="h-8 w-8" />
-                </div>
-                <h1 className="text-2xl lg:text-3xl font-black text-ink tracking-tight flex items-center gap-1">
-                  <span>Welcome back, {userName}</span>
-                  <span className="inline-block w-2.5 h-6 bg-brand-strong animate-pulse ml-0.5" />
+            <div className="w-full max-w-4xl flex flex-col items-center space-y-7 my-auto">
+              <div className="flex flex-col items-center text-center space-y-2">
+                <DekuLogo size={56} className="mb-2" />
+                <h1 className="text-[28px] font-semibold text-ink tracking-[-0.03em]">
+                  Welcome back, {userName}
                 </h1>
-                <p className="text-xs lg:text-sm text-ink-muted max-w-lg">
-                  Your AI-powered executive business intelligence &amp; CFO assistant
+                <p className="text-[14px] text-ink-muted max-w-lg">
+                  Ask Deku Consultant about your books. Answers are grounded in your ledger.
                 </p>
               </div>
 
-              {/* Subheading Divider "ASK DEKU KONSULTANT" */}
-              <div className="w-full flex items-center gap-4 pt-1">
-                <div className="flex-1 h-px bg-line" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-ink-subtle font-bold">
-                  Ask Deku Konsultant
-                </span>
-                <div className="flex-1 h-px bg-line" />
-              </div>
-
-              {/* 6 Executive Cards Grid (3x2) - Clean Light Theme */}
               <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {promptCards.map((card, idx) => {
                   const Icon = card.icon;
@@ -806,24 +723,24 @@ export function DekuConsultantView() {
                     <button
                       key={idx}
                       onClick={() => handleSendMessage(card.prompt)}
-                      className="bg-surface hover:bg-canvas border border-line-strong hover:border-brand rounded-xl p-4 text-left transition-all duration-150 group flex flex-col justify-between min-h-[110px] shadow-xs hover:shadow-md cursor-pointer"
+                      className="bg-surface border border-line hover:border-line-strong hover:bg-canvas rounded-panel p-4 text-left transition-colors group flex flex-col justify-between min-h-[120px] cursor-pointer"
                     >
-                      <div className="flex items-center justify-between w-full mb-2">
+                      <div className="flex items-center justify-between w-full mb-3">
                         <span
-                          className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded border ${card.categoryBadge}`}
+                          className={`inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium ${card.categoryBadge}`}
                         >
                           {card.category}
                         </span>
-                        <div className="p-1 rounded-md bg-canvas-sunken text-ink-muted group-hover:text-brand-strong transition-colors">
-                          <Icon className="h-3.5 w-3.5" />
+                        <div className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center group-hover:text-brand-strong transition-colors">
+                          <Icon className="h-4 w-4" />
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-ink group-hover:text-ink transition-colors">
+                        <h4 className="text-[14px] font-[550] text-ink">
                           {card.title}
                         </h4>
-                        <p className="text-[11px] text-ink-muted line-clamp-2 leading-relaxed">
+                        <p className="text-[12.5px] text-ink-muted line-clamp-2 leading-relaxed">
                           {card.description}
                         </p>
                       </div>
@@ -833,30 +750,25 @@ export function DekuConsultantView() {
               </div>
             </div>
           ) : (
-            /* =================================================================== */
-            /* ACTIVE CONVERSATION STREAM (WITH DABBY CHAT HEADER & ACCOUNTING TAB)*/
-            /* =================================================================== */
-            <div className="w-full max-w-4xl space-y-4 pb-6">
-              {/* Dabby-Style Chat Header Bar (Matching Image 1) */}
-              <div className="flex items-center justify-between border-b border-line-strong pb-3 mb-2">
+            <div className="w-full max-w-4xl space-y-5 pb-6">
+              <div className="flex items-center justify-between border-b border-line pb-3 mb-2">
                 <div>
-                  <h2 className="text-base font-black text-ink tracking-tight">
+                  <h2 className="text-[15px] font-semibold text-ink tracking-tight">
                     Chat
                   </h2>
-                  <p className="text-[11px] text-ink-muted">
-                    Early preview agent — grounded in Universal Ledger. Double-check critical outputs.
+                  <p className="text-[13px] text-ink-muted">
+                    Early preview, grounded in the Universal Ledger. Double-check critical outputs.
                   </p>
                 </div>
 
-                {/* Search Box (Matching Image 1 Dabby) */}
                 <div className="relative w-48 sm:w-64">
                   <Search className="h-3.5 w-3.5 text-ink-subtle absolute left-2.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
-                    placeholder="Search messages..."
-                    className="w-full pl-8 pr-3 py-1 bg-surface border border-line-strong rounded-lg text-xs text-ink placeholder:text-ink-subtle focus:outline-none focus:border-brand"
+                    placeholder="Search messages"
+                    className="w-full h-8 pl-8 pr-3 bg-surface border border-line-strong rounded-ctl text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
@@ -866,44 +778,38 @@ export function DekuConsultantView() {
                 return (
                   <div
                     key={m.id}
-                    className={`flex items-start gap-3.5 ${
+                    className={`flex items-start gap-3 ${
                       isUser ? "flex-row-reverse" : "flex-row"
                     }`}
                   >
-                    <div
-                      className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold shadow-xs ${
-                        isUser
-                          ? "bg-panel text-white"
-                          : "bg-brand/15 text-brand-strong border border-brand/40"
-                      }`}
-                    >
-                      {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                    </div>
+                    {isUser ? (
+                      <div className="h-8 w-8 rounded-full bg-canvas-sunken text-ink-soft flex items-center justify-center shrink-0">
+                        <User className="h-4 w-4" />
+                      </div>
+                    ) : (
+                      <DekuLogo size={30} className="shrink-0 mt-0.5" />
+                    )}
 
                     <div
-                      className={`max-w-[95%] sm:max-w-[90%] rounded-2xl p-4 text-xs leading-relaxed shadow-xs ${
+                      className={`max-w-[95%] sm:max-w-[90%] px-4 py-3 text-[13.5px] leading-relaxed ${
                         isUser
-                          ? "bg-panel text-white rounded-tr-none border border-edge"
-                          : "bg-surface text-ink rounded-tl-none border border-line-strong"
+                          ? "bg-ink text-white rounded-[14px]"
+                          : "bg-surface text-ink rounded-panel border border-line"
                       }`}
                     >
                       {isUser ? (
-                        <div className="whitespace-pre-wrap font-sans text-xs">{m.content}</div>
+                        <div className="whitespace-pre-wrap font-sans">{m.content}</div>
                       ) : (
                         <FinancialMessageRenderer content={m.content} />
                       )}
 
                       <div
-                        className={`flex items-center justify-between mt-3 pt-2 text-[10px] border-t ${
-                          isUser ? "border-slate-700 text-ink-subtle" : "border-line text-ink-muted"
+                        className={`flex items-center justify-between gap-4 mt-2.5 pt-2 text-xs border-t ${
+                          isUser ? "border-white/15 text-white/60" : "border-line text-ink-muted"
                         }`}
                       >
                         <span>{m.timestamp}</span>
-                        {m.model && (
-                          <span className="font-mono font-bold text-brand-strong">
-                            {m.model}
-                          </span>
-                        )}
+                        {m.model && <span>{m.model}</span>}
                       </div>
                     </div>
                   </div>
@@ -911,13 +817,11 @@ export function DekuConsultantView() {
               })}
 
               {isSending && (
-                <div className="flex items-start gap-3.5">
-                  <div className="h-8 w-8 rounded-xl flex items-center justify-center shrink-0 bg-brand/15 text-brand-strong border border-brand/40">
-                    <Bot className="h-4 w-4 animate-pulse" />
-                  </div>
-                  <div className="rounded-2xl p-3.5 text-xs text-ink-soft flex items-center gap-2 bg-surface border border-line-strong shadow-xs">
+                <div className="flex items-start gap-3">
+                  <DekuLogo size={30} className="shrink-0 mt-0.5" />
+                  <div className="rounded-panel px-4 py-3 text-[13.5px] text-ink-muted flex items-center gap-2 bg-surface border border-line">
                     <Sparkles className="h-3.5 w-3.5 animate-spin text-brand-strong" />
-                    <span>Analyzing Universal Ledger &amp; synthesizing financial statements...</span>
+                    <span>Reading the ledger and preparing an answer…</span>
                   </div>
                 </div>
               )}
@@ -926,42 +830,28 @@ export function DekuConsultantView() {
           )}
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. BOTTOM FLOATING PROMPT BAR (CLEAN LIGHT THEME)                          */}
-        {/* ========================================================================= */}
-        <div className="p-4 lg:p-6 w-full flex flex-col items-center shrink-0 bg-gradient-to-t from-canvas via-canvas to-transparent">
-          <div className="w-full max-w-3xl bg-surface border border-line-strong rounded-2xl p-2.5 shadow-md flex flex-col gap-2 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 transition-all">
-            <div className="flex items-center gap-2 px-1">
-              {/* Attachment Button */}
+        {/* Prompt bar */}
+        <div className="px-4 pb-4 pt-2 lg:px-6 lg:pb-5 w-full flex flex-col items-center shrink-0 bg-canvas">
+          <div className="w-full max-w-3xl bg-surface border border-line-strong rounded-panel p-2 shadow-pop flex flex-col gap-2 focus-within:border-brand transition-colors">
+            <div className="flex items-center gap-1 px-1">
               <button
                 type="button"
                 onClick={() => router.push("/vouchers")}
-                className="p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
+                className="h-8 w-8 grid place-items-center rounded-ctl text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
                 title="Upload a bill: it is read on this device, never uploaded"
               >
                 <Paperclip className="h-4 w-4" />
               </button>
 
-              {/* Live Ledger Grounding Toggle */}
               <button
                 type="button"
                 onClick={() => loadContext(activeOrgId)}
-                className="p-1.5 rounded-lg text-brand-strong hover:bg-canvas-sunken transition-colors cursor-pointer"
-                title="Live Universal Ledger connection active"
+                className="h-8 w-8 grid place-items-center rounded-ctl text-brand-strong hover:bg-canvas-sunken transition-colors cursor-pointer"
+                title="Reload ledger context"
               >
                 <Database className="h-4 w-4" />
               </button>
 
-              {/* Web / Statutory Toggle */}
-              <button
-                type="button"
-                className="p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
-                title="Indian Commercial Law & GST Grounding active"
-              >
-                <Globe className="h-4 w-4" />
-              </button>
-
-              {/* Text Input */}
               <input
                 type="text"
                 value={inputQuery}
@@ -972,33 +862,32 @@ export function DekuConsultantView() {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask Deku Konsultant anything, or upload a bill to begin analysis..."
-                className="flex-1 bg-transparent text-xs text-ink placeholder:text-ink-subtle focus:outline-none px-2"
+                placeholder="Ask Deku Consultant anything, or upload a bill to begin"
+                className="flex-1 h-9 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle focus:outline-none px-2"
                 disabled={isSending}
               />
 
-              {/* Send Button */}
               <button
                 type="button"
                 onClick={() => handleSendMessage()}
                 disabled={isSending || !inputQuery.trim()}
-                className={`h-8 w-8 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                className={`h-8 w-8 rounded-ctl flex items-center justify-center transition-colors shrink-0 ${
                   inputQuery.trim()
-                    ? "bg-panel hover:bg-panel-deep text-white shadow-xs cursor-pointer"
+                    ? "bg-ink hover:bg-ink-soft text-white cursor-pointer"
                     : "bg-canvas-sunken text-ink-subtle cursor-not-allowed"
                 }`}
+                aria-label="Send"
               >
                 <Send className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Footer Subtext */}
-          <div className="w-full max-w-3xl flex items-center justify-between mt-2 px-2 text-[10px] text-ink-subtle font-mono">
+          <div className="w-full max-w-3xl flex items-center justify-between mt-2 px-2 text-xs text-ink-subtle">
             <span>
-              AI responses are grounded in the active Universal Ledger. Double check critical statutory filings.
+              Answers are grounded in the active ledger. Double-check critical statutory filings.
             </span>
-            <span>{inputQuery.length} / 2000</span>
+            <span className="tabular-nums">{inputQuery.length} / 2000</span>
           </div>
         </div>
       </main>

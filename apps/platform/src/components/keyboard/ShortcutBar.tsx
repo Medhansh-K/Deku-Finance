@@ -28,7 +28,7 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
   // Unified F1-F11 shortcuts across the platform: F4-F9 are always Vouchers
   const shortcuts: ShortcutItem[] = [
     { key: "F1", label: "Executive", route: "/executive", active: pathname === "/executive" },
-    { key: "F2", label: "Konsultant", route: "/consultant", active: pathname === "/consultant" },
+    { key: "F2", label: "Consultant", route: "/consultant", active: pathname === "/consultant" },
     { key: "F3", label: "Vouchers", route: "/vouchers", active: pathname === "/vouchers" },
     { key: "F4", label: "Contra", route: "/vouchers/contra", active: pathname === "/vouchers/contra" },
     { key: "F5", label: "Payment", route: "/vouchers/payment", active: pathname === "/vouchers/payment" },
@@ -36,9 +36,9 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
     { key: "F7", label: "Journal", route: "/vouchers/journal", active: pathname === "/vouchers/journal" },
     { key: "F8", label: "Sales", route: "/vouchers/sales", active: pathname === "/vouchers/sales" },
     { key: "F9", label: "Purchase", route: "/vouchers/purchase", active: pathname === "/vouchers/purchase" },
-    { key: "F10", label: "Bank Rec", route: "/banking/reconciliation", active: pathname === "/banking/reconciliation" },
-    { key: "F11", label: "GST File", route: "/gst/file", active: pathname === "/gst/file" },
-    { key: "Ctrl+K", label: "Go To", onClick: onOpenGoTo },
+    { key: "F10", label: "Bank rec", route: "/banking/reconciliation", active: pathname === "/banking/reconciliation" },
+    { key: "F11", label: "GST file", route: "/gst/file", active: pathname === "/gst/file" },
+    { key: "Ctrl K", label: "Go to", onClick: onOpenGoTo },
     { key: "Help", label: "Cheatsheet", onClick: onOpenHelp },
     { key: "Esc", label: "Gateway", route: "/gateway", active: pathname === "/gateway" },
   ];
@@ -47,24 +47,24 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
     <footer
       id="keyboard-shortcut-bar"
       data-tour="shortcut-bar"
-      className="flex h-8 bg-panel-deep border-t border-edge text-slate-300 items-center justify-between px-3 select-none text-[11px] font-sans shrink-0 z-30 no-print overflow-hidden shadow-inner"
+      className="flex h-10 bg-surface border-t border-line text-ink-muted items-center justify-between px-3 sm:px-6 select-none text-[12.5px] font-sans shrink-0 z-30 no-print overflow-hidden"
     >
       <div className="flex items-center gap-1 overflow-x-auto py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {shortcuts.map((sc, i) => {
           const content = (
             <div
-              className={`flex items-center gap-1 px-2 py-0.5 rounded cursor-pointer transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-[7px] cursor-pointer transition-colors whitespace-nowrap ${
                 sc.active
-                  ? "bg-brand/20 text-brand font-bold shadow-2xs border border-brand/30"
-                  : "hover:bg-panel hover:text-white text-slate-300"
+                  ? "bg-brand-wash text-brand-strong font-medium"
+                  : "hover:bg-canvas-sunken hover:text-ink text-ink-muted"
               }`}
             >
               <kbd
-                className={`font-mono text-[10px] font-bold ${
-                  keyboardNavEnabled ? "text-brand" : "text-slate-400 opacity-70"
+                className={`font-mono text-[11px] font-medium leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface ${
+                  keyboardNavEnabled ? "text-ink-soft" : "text-ink-subtle opacity-70"
                 }`}
               >
-                {sc.key}:
+                {sc.key}
               </kbd>
               <span className="truncate">{sc.label}</span>
             </div>
@@ -86,17 +86,15 @@ export function ShortcutBar({ onOpenHelp, onOpenGoTo }: ShortcutBarProps) {
         })}
       </div>
 
-      <div className="text-[10px] font-mono text-slate-400 hidden xl:flex items-center gap-2 pl-2 border-l border-edge shrink-0">
+      <div className="text-[12px] text-ink-muted hidden xl:flex items-center gap-2 pl-3 border-l border-line shrink-0">
         <span
           className={`h-1.5 w-1.5 rounded-full ${
-            keyboardNavEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-500"
+            keyboardNavEnabled ? "bg-brand" : "bg-ink-subtle"
           }`}
         />
-        <span className={keyboardNavEnabled ? "text-emerald-300" : "text-slate-400"}>
-          {keyboardNavEnabled ? "F-Keys Active" : "F-Keys Paused"}
+        <span className={keyboardNavEnabled ? "text-brand-strong" : "text-ink-muted"}>
+          {keyboardNavEnabled ? "F-keys active" : "F-keys paused"}
         </span>
-        <span>•</span>
-        <span>Deku Financial OS · Double-Entry Strict</span>
       </div>
     </footer>
   );

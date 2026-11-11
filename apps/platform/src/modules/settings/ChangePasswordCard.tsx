@@ -50,7 +50,7 @@ export function ChangePasswordCard() {
     }
   };
 
-  const inputClass = "w-full px-3 py-2 rounded-lg border border-line bg-canvas text-xs text-ink";
+  const inputClass = "w-full h-9 px-3 rounded-ctl border border-line-strong bg-surface text-[13.5px] text-ink focus:border-brand focus:outline-none";
   const fields = [
     { id: "current-password", label: "Current password", value: current, set: setCurrent, autoComplete: "current-password" },
     { id: "new-password", label: "New password", value: next, set: setNext, autoComplete: "new-password" },
@@ -58,12 +58,12 @@ export function ChangePasswordCard() {
   ];
 
   return (
-    <div className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
-      <h3 className="text-sm font-bold uppercase text-ink font-mono">Password</h3>
+    <div className="bg-surface border border-line rounded-panel p-5 space-y-3">
+      <h3 className="text-[15px] font-semibold tracking-tight text-ink">Password</h3>
       <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-3">
         {fields.map((f) => (
           <div key={f.id}>
-            <label htmlFor={f.id} className="block text-xs font-semibold text-ink-soft mb-1">
+            <label htmlFor={f.id} className="block text-[13px] text-ink-muted mb-1.5">
               {f.label}
             </label>
             <input
@@ -83,7 +83,7 @@ export function ChangePasswordCard() {
             {isSaving ? "Saving…" : "Change password"}
           </Button>
           {message && (
-            <span role="status" className={`text-xs ${message.ok ? "text-emerald-700" : "text-rose-700"}`}>
+            <span role="status" className={`text-[13px] ${message.ok ? "text-ok" : "text-bad"}`}>
               {message.text}
             </span>
           )}

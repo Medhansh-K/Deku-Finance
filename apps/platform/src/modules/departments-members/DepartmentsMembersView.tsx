@@ -41,7 +41,7 @@ const TABS: { id: Tab; label: string; icon: typeof Users }[] = [
 
 const INVITE_BADGE = { pending: "warning", accepted: "success", expired: "default", revoked: "default" } as const;
 
-const selectClass = "h-8 rounded-md border border-line-strong bg-surface px-2 text-xs text-ink";
+const selectClass = "h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none";
 const date = (iso: string | null | undefined) => (iso ? formatDateTally(iso.slice(0, 10)) : "–");
 
 export function DepartmentsMembersView() {
@@ -105,7 +105,7 @@ export function DepartmentsMembersView() {
     }
   };
 
-  if (!orgId) return <p className="p-6 text-xs text-ink-muted">Select a company to see its team.</p>;
+  if (!orgId) return <p className="p-6 text-[13.5px] text-ink-muted">Select a company to see its team.</p>;
 
   const myRole = members.find((m) => m.user_id === user?.id)?.role ?? null;
   const nowMs = Date.parse(subscription?.server_time ?? "") || Date.now();
@@ -160,7 +160,7 @@ export function DepartmentsMembersView() {
   };
 
   return (
-    <div className="space-y-4 font-sans text-xs">
+    <div className="space-y-4 font-sans text-[13.5px]">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat label="Members" value={String(members.length)} />
         <Stat label="Pending invitations" value={String(pending.length)} />
@@ -168,24 +168,24 @@ export function DepartmentsMembersView() {
         <Stat label="Departments" value={String(departments.length)} />
       </div>
 
-      <div data-tour="members-tabs" role="tablist" className="flex flex-wrap gap-1 border-b border-line pb-1">
+      <div data-tour="members-tabs" role="tablist" className="inline-flex flex-wrap gap-0.5 rounded-ctl bg-canvas-sunken p-0.5">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`px-3 py-1.5 font-bold rounded flex items-center gap-1.5 ${
-              tab === id ? "bg-panel text-white" : "text-ink-soft hover:bg-canvas-sunken"
+            className={`h-8 px-3 font-medium rounded-[7px] flex items-center gap-1.5 transition-colors ${
+              tab === id ? "bg-surface text-ink shadow-[0_0_0_1px_var(--color-line)]" : "text-ink-muted hover:text-ink"
             }`}
           >
-            <Icon className="h-3.5 w-3.5 text-brand" aria-hidden /> {label}
+            <Icon className={`h-4 w-4 ${tab === id ? "text-brand-strong" : ""}`} aria-hidden /> {label}
           </button>
         ))}
       </div>
 
       {message && (
-        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-emerald-700" : "text-rose-700"}>
+        <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-ok" : "text-bad"}>
           {message.text}
         </p>
       )}
@@ -200,14 +200,15 @@ export function DepartmentsMembersView() {
             </div>
           )}
 
+          <div className="overflow-x-auto rounded-ctl border border-line">
           <table className="w-full text-left">
-            <thead className="text-ink-muted">
+            <thead>
               <tr>
-                <th className="py-1">Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th />
+                <th className="deku-table-th">Name</th>
+                <th className="deku-table-th">Email</th>
+                <th className="deku-table-th">Role</th>
+                <th className="deku-table-th">Joined</th>
+                <th className="deku-table-th" />
               </tr>
             </thead>
             <tbody>
@@ -215,10 +216,10 @@ export function DepartmentsMembersView() {
                 const editable =
                   canManageMembers(myRole) && m.user_id !== user?.id && (m.role !== "owner" || myRole === "owner");
                 return (
-                  <tr key={m.id} className="border-t border-line">
-                    <td className="py-1.5 font-semibold text-ink">{memberName(m)}</td>
-                    <td className="text-ink-soft">{m.profiles?.email ?? "–"}</td>
-                    <td>
+                  <tr key={m.id} className="hover:bg-canvas">
+                    <td className="deku-table-td font-[550]">{memberName(m)}</td>
+                    <td className="deku-table-td !text-ink-soft">{m.profiles?.email ?? "–"}</td>
+                    <td className="deku-table-td">
                       {editable ? (
                         <select
                           aria-label={`Role of ${memberName(m)}`}
@@ -239,8 +240,8 @@ export function DepartmentsMembersView() {
                         <Badge variant={m.role === "owner" ? "teal" : "default"}>{roleLabel(m.role)}</Badge>
                       )}
                     </td>
-                    <td className="text-ink-soft">{date(m.created_at)}</td>
-                    <td className="text-right">
+                    <td className="deku-table-td !text-ink-soft">{date(m.created_at)}</td>
+                    <td className="deku-table-td text-right">
                       {editable && (
                         <Button
                           variant="ghost"
@@ -278,10 +279,11 @@ export function DepartmentsMembersView() {
               })}
             </tbody>
           </table>
-          <dl data-tour="members-roles" className="grid sm:grid-cols-2 gap-x-4 gap-y-1 pt-2 border-t border-line text-ink-muted">
+          </div>
+          <dl data-tour="members-roles" className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 pt-3 text-[13px] text-ink-muted">
             {ROLES.map((r) => (
               <div key={r.value}>
-                <dt className="inline font-semibold text-ink-soft">{r.label}:</dt> <dd className="inline">{r.duty}</dd>
+                <dt className="inline font-medium text-ink-soft">{r.label}:</dt> <dd className="inline">{r.duty}</dd>
               </div>
             ))}
           </dl>
@@ -294,7 +296,7 @@ export function DepartmentsMembersView() {
             <form onSubmit={sendInvite} className="grid sm:grid-cols-5 gap-2 items-end">
               <Input label="Email" type="email" required value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} />
               <label className="space-y-1">
-                <span className="block font-medium text-ink-soft">Role</span>
+                <span className="block text-[13px] text-ink-muted">Role</span>
                 <select className={`${selectClass} w-full`} value={invite.role} onChange={(e) => setInvite({ ...invite, role: e.target.value })}>
                   {assignableRoles(myRole).map((r) => (
                     <option key={r} value={r}>
@@ -305,7 +307,7 @@ export function DepartmentsMembersView() {
               </label>
               <Input label="Designation" value={invite.designation} onChange={(e) => setInvite({ ...invite, designation: e.target.value })} />
               <label className="space-y-1">
-                <span className="block font-medium text-ink-soft">Department</span>
+                <span className="block text-[13px] text-ink-muted">Department</span>
                 <select className={`${selectClass} w-full`} value={invite.department_id} onChange={(e) => setInvite({ ...invite, department_id: e.target.value })}>
                   <option value="">None</option>
                   {departments.map((d) => (
@@ -322,31 +324,32 @@ export function DepartmentsMembersView() {
           ) : (
             <p className="text-ink-muted">Only the owner, CFO or an admin can invite people.</p>
           )}
-          {seats.reached && <p role="alert" className="text-rose-700">{seatsFullText}</p>}
+          {seats.reached && <p role="alert" className="text-bad">{seatsFullText}</p>}
           {inviteLink && <CopyRow text={inviteLink} copied={copied === inviteLink} onCopy={copy} />}
 
+          <div className="overflow-x-auto rounded-ctl border border-line">
           <table className="w-full text-left">
-            <thead className="text-ink-muted">
+            <thead>
               <tr>
-                <th className="py-1">Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Expires</th>
-                <th />
+                <th className="deku-table-th">Email</th>
+                <th className="deku-table-th">Role</th>
+                <th className="deku-table-th">Status</th>
+                <th className="deku-table-th">Expires</th>
+                <th className="deku-table-th" />
               </tr>
             </thead>
             <tbody>
               {invites.map((i) => {
                 const status = inviteStatus(i, nowMs);
                 return (
-                  <tr key={i.id} className="border-t border-line">
-                    <td className="py-1.5 text-ink">{i.email}</td>
-                    <td>{roleLabel(i.role)}</td>
-                    <td>
-                      <Badge variant={INVITE_BADGE[status]}>{status}</Badge>
+                  <tr key={i.id} className="hover:bg-canvas">
+                    <td className="deku-table-td">{i.email}</td>
+                    <td className="deku-table-td">{roleLabel(i.role)}</td>
+                    <td className="deku-table-td">
+                      <Badge variant={INVITE_BADGE[status]} className="capitalize">{status}</Badge>
                     </td>
-                    <td className="text-ink-soft">{date(i.expires_at)}</td>
-                    <td className="text-right">
+                    <td className="deku-table-td !text-ink-soft">{date(i.expires_at)}</td>
+                    <td className="deku-table-td text-right">
                       {status === "pending" && i.token && canInvite(myRole) && (
                         <Button variant="ghost" size="sm" onClick={() => copy(joinUrl(i.token!))}>
                           {copied === joinUrl(i.token) ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} Link
@@ -358,11 +361,12 @@ export function DepartmentsMembersView() {
               })}
               {!invites.length && !loading && (
                 <tr>
-                  <td colSpan={5} className="py-2 text-ink-muted">No invitations yet.</td>
+                  <td colSpan={5} className="deku-table-td !text-ink-muted">No invitations yet.</td>
                 </tr>
               )}
             </tbody>
           </table>
+          </div>
           <p className="text-ink-muted">The invitee signs in with the invited email and opens the link to join.</p>
         </Panel>
       )}
@@ -383,13 +387,13 @@ export function DepartmentsMembersView() {
           {!departments.length && !loading && <p className="text-ink-muted">No departments yet.</p>}
           <div className="grid md:grid-cols-2 gap-3">
             {departments.map((d) => (
-              <div key={d.id} className="rounded border border-line bg-canvas p-3 space-y-2">
+              <div key={d.id} className="rounded-panel border border-line bg-surface p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-bold text-ink">
-                      {d.name} <span className="font-mono text-ink-subtle">{d.code}</span>
+                    <p className="text-[14px] font-[550] text-ink">
+                      {d.name} <span className="ml-1 font-mono text-[12.5px] text-ink-subtle">{d.code}</span>
                     </p>
-                    {d.description && <p className="text-ink-muted">{d.description}</p>}
+                    {d.description && <p className="text-[12.5px] text-ink-muted">{d.description}</p>}
                   </div>
                   {canManageDepartments(myRole) && (
                     <Button
@@ -405,15 +409,15 @@ export function DepartmentsMembersView() {
                     </Button>
                   )}
                 </div>
-                <p className="text-ink-soft">
+                <p className="text-[13px] text-ink-soft tabular-nums">
                   Lead: {d.lead_name ?? "–"} · Budget {formatINR(d.budget_allocated)} · Used {formatINR(d.budget_utilized)}
                 </p>
                 {!!d.department_tasks?.length && (
-                  <ul className="space-y-0.5 border-t border-line pt-2">
+                  <ul className="space-y-1 border-t border-line pt-2 text-[13px]">
                     {d.department_tasks.map((t) => (
                       <li key={t.id} className="flex justify-between gap-2">
                         <span className="text-ink">{t.title}</span>
-                        <span className="text-ink-muted">
+                        <span className="text-ink-muted first-letter:uppercase">
                           {t.status.replace("_", " ")} · {t.priority}
                         </span>
                       </li>
@@ -443,7 +447,7 @@ export function DepartmentsMembersView() {
           )}
           {payrollResult &&
             (payrollResult.success ? (
-              <p role="status" className="text-emerald-700">
+              <p role="status" className="text-ok">
                 Payroll for {payrollResult.period}: {payrollResult.headcount} employees, net{" "}
                 {formatINR(payrollResult.total_net_disbursed)}, TDS {formatINR(payrollResult.total_tds)}, EPF{" "}
                 {formatINR(payrollResult.total_epf)}.{" "}
@@ -453,39 +457,41 @@ export function DepartmentsMembersView() {
                     : `Posted to the ledger as ${payrollResult.entry_number}. Record the salary, TDS and EPF payments as payment vouchers against the payable accounts.`)}
               </p>
             ) : (
-              <p role="alert" className="text-rose-700">{payrollResult.message}</p>
+              <p role="alert" className="text-bad">{payrollResult.message}</p>
             ))}
+          <div className="overflow-x-auto rounded-ctl border border-line">
           <table className="w-full text-left">
-            <thead className="text-ink-muted">
+            <thead>
               <tr>
-                <th className="py-1">Period</th>
-                <th>Headcount</th>
-                <th className="text-right">Gross</th>
-                <th className="text-right">Net paid</th>
-                <th className="text-right">TDS</th>
-                <th className="text-right">EPF</th>
-                <th className="text-right">Run on</th>
+                <th className="deku-table-th">Period</th>
+                <th className="deku-table-th">Headcount</th>
+                <th className="deku-table-th !text-right">Gross</th>
+                <th className="deku-table-th !text-right">Net paid</th>
+                <th className="deku-table-th !text-right">TDS</th>
+                <th className="deku-table-th !text-right">EPF</th>
+                <th className="deku-table-th !text-right">Run on</th>
               </tr>
             </thead>
-            <tbody className="font-mono">
+            <tbody>
               {runs.map((r) => (
-                <tr key={r.id} className="border-t border-line">
-                  <td className="py-1.5">{r.period}</td>
-                  <td>{r.headcount}</td>
-                  <td className="text-right">{formatINR(r.total_gross)}</td>
-                  <td className="text-right">{formatINR(r.total_net_disbursed)}</td>
-                  <td className="text-right">{formatINR(r.total_tds)}</td>
-                  <td className="text-right">{formatINR(r.total_epf)}</td>
-                  <td className="text-right">{date(r.executed_at)}</td>
+                <tr key={r.id} className="hover:bg-canvas">
+                  <td className="deku-table-td">{r.period}</td>
+                  <td className="deku-table-td">{r.headcount}</td>
+                  <td className="deku-table-td text-right">{formatINR(r.total_gross)}</td>
+                  <td className="deku-table-td text-right">{formatINR(r.total_net_disbursed)}</td>
+                  <td className="deku-table-td text-right">{formatINR(r.total_tds)}</td>
+                  <td className="deku-table-td text-right">{formatINR(r.total_epf)}</td>
+                  <td className="deku-table-td text-right">{date(r.executed_at)}</td>
                 </tr>
               ))}
               {!runs.length && !loading && (
                 <tr>
-                  <td colSpan={7} className="py-2 font-sans text-ink-muted">No payroll runs yet.</td>
+                  <td colSpan={7} className="deku-table-td !text-ink-muted">No payroll runs yet.</td>
                 </tr>
               )}
             </tbody>
           </table>
+          </div>
         </Panel>
       )}
     </div>
@@ -494,17 +500,17 @@ export function DepartmentsMembersView() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface border border-line rounded-lg p-3 shadow-xs">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mb-1">{label}</div>
-      <div className="text-xl font-bold font-mono text-ink">{value}</div>
+    <div className="bg-surface border border-line rounded-panel px-5 py-4">
+      <div className="text-[13px] text-ink-muted mb-1">{label}</div>
+      <div className="text-[26px] font-semibold tracking-[-0.035em] tabular-nums text-ink">{value}</div>
     </div>
   );
 }
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
-      <h3 className="text-sm font-bold text-ink">{title}</h3>
+    <section className="bg-surface border border-line rounded-panel p-5 space-y-4">
+      <h3 className="text-[15px] font-semibold tracking-tight text-ink">{title}</h3>
       {children}
     </section>
   );
@@ -512,8 +518,8 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function CopyRow({ text, copied, onCopy }: { text: string; copied: boolean; onCopy: (t: string) => void }) {
   return (
-    <div className="flex items-center gap-2 rounded border border-line bg-canvas p-2">
-      <code className="flex-1 truncate font-mono text-ink">{text}</code>
+    <div className="flex items-center gap-2 rounded-ctl border border-line bg-canvas px-3 py-2">
+      <code className="flex-1 truncate font-mono text-[12.5px] text-ink">{text}</code>
       <Button variant="outline" size="sm" onClick={() => onCopy(text)}>
         {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Copied" : "Copy"}
       </Button>

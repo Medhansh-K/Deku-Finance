@@ -31,9 +31,9 @@ export default function CommonVouchersPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Accounting Vouchers"
+        title="Accounting vouchers"
         subtitle="Unified double-entry transaction desk with direct document auto-extraction & ALERX parity"
-        badge={<Badge variant="teal">Voucher Desk • F4—F9</Badge>}
+        badge={<Badge variant="teal">Voucher desk · F4 to F9</Badge>}
         breadcrumbs={[
           { label: "Transactions" },
           { label: "Vouchers", href: "/vouchers" },
@@ -41,7 +41,7 @@ export default function CommonVouchersPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading accounting voucher desk...
             </div>
           }

@@ -75,10 +75,10 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   contra: {
     mode: "contra",
     fKey: "F4",
-    title: "Contra Voucher Entry",
+    title: "Contra voucher entry",
     shortLabel: "Contra",
     prefix: "CNT",
-    subtitle: "Internal transfers between Cash and Bank accounts",
+    subtitle: "Internal transfers between cash and bank accounts",
     defaultNarration: "Internal cash/bank contra transfer",
     icon: ArrowRightLeft,
     accentColor: "#3B82F6",
@@ -86,7 +86,7 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   payment: {
     mode: "payment",
     fKey: "F5",
-    title: "Payment Voucher Entry",
+    title: "Payment voucher entry",
     shortLabel: "Payment",
     prefix: "PAY",
     subtitle: "Payments made to vendors, creditors or expense ledgers",
@@ -97,7 +97,7 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   receipt: {
     mode: "receipt",
     fKey: "F6",
-    title: "Receipt Voucher Entry",
+    title: "Receipt voucher entry",
     shortLabel: "Receipt",
     prefix: "RCT",
     subtitle: "Inward customer settlements and revenue receipts",
@@ -108,7 +108,7 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   journal: {
     mode: "journal",
     fKey: "F7",
-    title: "Journal Voucher Entry",
+    title: "Journal voucher entry",
     shortLabel: "Journal",
     prefix: "JRN",
     subtitle: "Non-cash adjustments, depreciation and period-end accruals",
@@ -119,7 +119,7 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   sales: {
     mode: "sales",
     fKey: "F8",
-    title: "Sales Voucher Entry",
+    title: "Sales voucher entry",
     shortLabel: "Sales",
     prefix: "SAL",
     subtitle: "Outward sales transactions and customer receivables",
@@ -130,7 +130,7 @@ export const VOUCHER_CONFIGS: Record<VoucherMode, VoucherTypeConfig> = {
   purchase: {
     mode: "purchase",
     fKey: "F9",
-    title: "Purchase Voucher Entry",
+    title: "Purchase voucher entry",
     shortLabel: "Purchase",
     prefix: "PUR",
     subtitle: "Inward purchases, inventory and supplier payables",
@@ -196,6 +196,17 @@ const VOUCHER_MODE_KEYS: Record<string, VoucherMode> = {
   F8: "sales",
   F9: "purchase",
 };
+
+// Shared class strings for the voucher desk (premium UI tokens).
+const KEYCAP = "font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-b-2 bg-surface shrink-0";
+const SEG = "flex-1 h-8 px-2 rounded-[7px] text-[13px] font-medium flex items-center justify-center gap-1.5 transition-colors";
+const SEG_ON = "bg-surface text-ink shadow-[0_0_0_1px_var(--color-line)]";
+const SEG_OFF = "text-ink-muted hover:text-ink";
+const CTL = "h-9 min-w-0 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+const CHIP = "inline-flex items-center gap-1 h-[22px] px-2 rounded-chip text-xs font-medium";
+const NOTE = "px-3.5 py-2.5 rounded-ctl bg-canvas-sunken text-ink-soft text-[13px] flex items-start gap-2";
+const SUBPANEL = "p-3.5 rounded-ctl border border-line bg-canvas/60 space-y-2.5";
+const RADIO = "flex items-center gap-2 cursor-pointer text-[13px] text-ink";
 
 export function VoucherWorkspace({
   mode: propMode,
@@ -877,23 +888,17 @@ export function VoucherWorkspace({
   const ActiveIcon = activeConfig.icon;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 font-sans text-xs select-none">
-      {/* ============================================================ */}
-      {/* SIDE COLUMN: Voucher Type Selection & Document Auto-Extraction */}
-      {/* ============================================================ */}
-      <div className="w-full lg:w-72 shrink-0 space-y-3 lg:sticky lg:top-0 lg:self-start">
-        {/* Card 1: Voucher Types Selector */}
-        <div data-tour="voucher-types" className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-line">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-ink">
-              Voucher Type
-            </span>
-            <span className="text-[10px] font-mono text-ink-muted font-bold">
-              F4 — F9
-            </span>
+    <div className="flex flex-col lg:flex-row gap-5 text-[13.5px] text-ink select-none">
+      {/* Side column: voucher type and document intake */}
+      <div className="w-full lg:w-72 shrink-0 space-y-4 lg:sticky lg:top-0 lg:self-start">
+        {/* Voucher type selector */}
+        <div data-tour="voucher-types" className="rounded-panel border border-line bg-surface">
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink">Voucher type</h3>
+            <span className="text-[12.5px] text-ink-muted">F4 to F9</span>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="px-2 pb-2 space-y-0.5">
             {(
               [
                 "contra",
@@ -913,60 +918,52 @@ export function VoucherWorkspace({
                   key={vMode}
                   suppressHydrationWarning
                   onClick={() => handleSwitchMode(vMode)}
-                  className={`w-full flex items-center justify-between p-2 rounded transition-all text-left ${
+                  aria-pressed={isCurrent}
+                  className={`w-full flex items-center gap-3 px-2 py-2 rounded-ctl text-left transition-colors ${
                     isCurrent
-                      ? "bg-panel text-white shadow-sm ring-1 ring-brand"
-                      : "bg-canvas hover:bg-canvas-sunken text-ink-soft border border-line"
+                      ? "bg-brand-wash shadow-[inset_3px_0_0_var(--color-brand)]"
+                      : "hover:bg-canvas"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`font-mono font-bold text-[10px] px-1.5 py-0.5 rounded ${
-                        isCurrent
-                          ? "bg-brand text-panel-deep"
-                          : "bg-surface border border-line-strong text-ink-soft"
-                      }`}
-                    >
-                      {cfg.fKey}
+                  <span
+                    className={`h-8 w-8 rounded-[8px] grid place-items-center shrink-0 ${
+                      isCurrent ? "bg-surface text-brand-strong" : "bg-canvas-sunken text-ink-soft"
+                    }`}
+                  >
+                    <IconComponent className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className={`block text-[14px] font-[550] ${isCurrent ? "text-ink" : "text-ink-soft"}`}>
+                      {cfg.shortLabel}
                     </span>
-                    <div>
-                      <div className="font-bold text-xs flex items-center gap-1.5">
-                        <IconComponent className="h-3 w-3 shrink-0" />
-                        <span>{cfg.shortLabel}</span>
-                      </div>
-                      <div
-                        className={`text-[10px] line-clamp-1 ${
-                          isCurrent ? "text-slate-300" : "text-ink-muted"
-                        }`}
-                      >
-                        {cfg.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                  {isCurrent && (
-                    <div className="h-2 w-2 rounded-full bg-brand shrink-0" />
-                  )}
+                    <span className="block text-[12.5px] text-ink-muted line-clamp-1">
+                      {cfg.subtitle}
+                    </span>
+                  </span>
+                  <kbd
+                    className={`${KEYCAP} ${
+                      isCurrent ? "border-brand-wash-strong text-brand-strong" : "border-line-strong text-ink-muted"
+                    }`}
+                  >
+                    {cfg.fKey}
+                  </kbd>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Sidebar Sub-Tabs: Builder Drafts vs Smart OCR */}
-        <div className="flex items-center bg-line/90 p-0.5 rounded-lg border border-line-strong">
+        {/* Purchase orders / Smart OCR switch */}
+        <div className="flex items-center gap-0.5 p-0.5 rounded-ctl bg-canvas-sunken">
           <button
             type="button"
             onClick={() => setSidebarTab("drafts")}
-            className={`flex-1 py-1.5 px-2 rounded-md font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-              sidebarTab === "drafts"
-                ? "bg-panel text-white shadow-xs"
-                : "text-ink-soft hover:text-ink"
-            }`}
+            className={`${SEG} ${sidebarTab === "drafts" ? SEG_ON : SEG_OFF}`}
           >
-            <FileSpreadsheet className="h-3.5 w-3.5 text-brand" />
+            <FileSpreadsheet className="h-3.5 w-3.5" />
             <span>Purchase orders</span>
             {pendingDraftsCount > 0 && (
-              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-400 text-black font-black">
+              <span className="inline-flex items-center h-[18px] px-1.5 rounded-chip bg-warn-wash text-warn text-xs font-medium tabular-nums">
                 {pendingDraftsCount}
               </span>
             )}
@@ -975,13 +972,9 @@ export function VoucherWorkspace({
           <button
             type="button"
             onClick={() => setSidebarTab("ocr")}
-            className={`flex-1 py-1.5 px-2 rounded-md font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
-              sidebarTab === "ocr"
-                ? "bg-panel text-white shadow-xs"
-                : "text-ink-soft hover:text-ink"
-            }`}
+            className={`${SEG} ${sidebarTab === "ocr" ? SEG_ON : SEG_OFF}`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-brand" />
+            <Sparkles className="h-3.5 w-3.5" />
             <span>Smart OCR</span>
           </button>
         </div>
@@ -996,20 +989,18 @@ export function VoucherWorkspace({
           />
         ) : (
           /* Tab 2: Document Auto-Extraction (OCR) */
-          <div className="bg-surface border border-edge rounded-lg p-3 shadow-xs">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-line">
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-brand" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-ink">
-                  Smart Extraction
-                </span>
-              </div>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-brand/15 text-ink border border-brand/30">
-                ALERX OCR
+          <div className="rounded-panel border border-line bg-surface p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[15px] font-semibold tracking-tight text-ink flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-brand-strong" />
+                Smart extraction
+              </h3>
+              <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-brand-wash text-brand-strong">
+                On this device
               </span>
             </div>
 
-            <p className="text-[11px] text-ink-muted mb-2.5 leading-snug">
+            <p className="text-[12.5px] text-ink-muted leading-snug">
               Drop a GST invoice to pre-fill the voucher. It is read on this device and never
               uploaded. Anything it can&apos;t read is left blank for you.
             </p>
@@ -1032,83 +1023,75 @@ export function VoucherWorkspace({
               onDragLeave={() => setIsDragOver(false)}
               onDrop={handleFileDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-lg p-3 text-center cursor-pointer transition-colors ${
+              className={`border border-dashed rounded-ctl px-3 py-4 text-center cursor-pointer transition-colors ${
                 isDragOver
-                  ? "border-brand bg-brand/10"
+                  ? "border-brand bg-brand-wash"
                   : "border-line-strong hover:border-brand hover:bg-canvas"
               }`}
             >
-              <UploadCloud className="h-6 w-6 text-ink-subtle mx-auto mb-1" />
-              <div className="font-semibold text-ink text-[11px]">
-                Upload Invoice or Bill
-              </div>
-              <div className="text-[10px] text-ink-subtle mt-0.5">
-                PDF, PNG, JPG (Drag & drop or click)
+              <UploadCloud className="h-5 w-5 text-ink-subtle mx-auto mb-1.5" />
+              <div className="text-[13.5px] font-medium text-ink">Upload invoice or bill</div>
+              <div className="text-[12.5px] text-ink-muted mt-0.5">
+                PDF, PNG or JPG. Drag and drop, or click
               </div>
             </div>
 
             {/* Extracting Progress State */}
             {isExtracting && (
-              <div className="mt-2.5 p-2.5 rounded bg-panel text-white border border-edge space-y-1.5 animate-pulse">
-                <div className="flex items-center gap-2 text-xs font-semibold text-brand-soft">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />
-                  <span>Extracting Document...</span>
+              <div className="p-3 rounded-ctl bg-canvas-sunken space-y-1">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-strong" />
+                  <span>Extracting document…</span>
                 </div>
-                <div className="text-[10px] font-mono text-slate-300">
-                  {extractionProgressText}
-                </div>
+                <div className="text-[12.5px] text-ink-muted">{extractionProgressText}</div>
               </div>
             )}
 
             {/* Extracted Document Info Card */}
             {extractedData && !isExtracting && (
-              <div className={`mt-2.5 p-2 rounded border space-y-1.5 ${
-                extractedData.missingFields.length || extractedData.warnings.length
-                  ? "bg-amber-50 border-amber-300 text-amber-950"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-900"
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-[11px]">
-                    <FileCheck2 className="h-3.5 w-3.5 text-emerald-600" />
-                    <span className="truncate max-w-[150px]">
-                      {extractedData.documentName}
-                    </span>
+              <div
+                className={`p-3 rounded-ctl space-y-2 text-ink ${
+                  extractedData.missingFields.length || extractedData.warnings.length
+                    ? "bg-warn-wash"
+                    : "bg-ok-wash"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-[13px] font-medium min-w-0">
+                    <FileCheck2 className="h-3.5 w-3.5 text-ok shrink-0" />
+                    <span className="truncate">{extractedData.documentName}</span>
                   </div>
                   <button
                     suppressHydrationWarning
                     onClick={handleClearExtracted}
-                    className="text-ink-subtle hover:text-rose-600 p-0.5"
+                    className="text-ink-muted hover:text-bad p-0.5 rounded-chip"
                     title="Remove extracted data"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-1 text-[10px] font-mono pt-1 border-t border-emerald-200/70">
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[12.5px] pt-2 border-t border-line">
                   <div>
-                    <span className="text-ink-muted">Mode: </span>
-                    <span className="font-bold text-ink uppercase">
-                      {extractedData.detectedType}
-                    </span>
+                    <dt className="text-ink-muted">Mode</dt>
+                    <dd className="font-medium capitalize">{extractedData.detectedType}</dd>
                   </div>
                   <div className="text-right">
-                    <span className="text-ink-muted">Invoice: </span>
-                    <span className="font-bold text-ink">
-                      {extractedData.reference ?? "not read"}
-                    </span>
+                    <dt className="text-ink-muted">Invoice</dt>
+                    <dd className="font-mono text-[12.5px]">{extractedData.reference ?? "not read"}</dd>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-ink-muted">Total: </span>
-                    <span className="font-bold text-ink">
+                    <dt className="text-ink-muted">Total</dt>
+                    <dd className="font-medium tabular-nums">
                       {extractedData.totalAmount === null ? "not read" : formatINR(extractedData.totalAmount)}
-                    </span>
+                    </dd>
                   </div>
-                </div>
+                </dl>
 
                 {extractedData.missingFields.length > 0 && (
-                  <div className="text-[10px] bg-white/70 px-1.5 py-1 rounded border border-amber-300">
-                    <span className="font-bold">Not found, please fill in:</span>
-                    <ul className="list-disc pl-4">
+                  <div className="text-[12.5px] bg-surface px-2.5 py-2 rounded-chip">
+                    <span className="font-medium">Not found, please fill in:</span>
+                    <ul className="list-disc pl-4 text-ink-soft">
                       {extractedData.missingFields.map((f) => (
                         <li key={f}>{f}</li>
                       ))}
@@ -1116,11 +1099,11 @@ export function VoucherWorkspace({
                   </div>
                 )}
                 {extractedData.warnings.map((w) => (
-                  <div key={w} role="alert" className="text-[10px] font-semibold text-rose-700 bg-white/70 px-1.5 py-1 rounded border border-rose-200">
+                  <div key={w} role="alert" className="text-[12.5px] font-medium text-bad bg-bad-wash px-2.5 py-1.5 rounded-chip">
                     {w}
                   </div>
                 ))}
-                <div className="text-[9px] bg-white/70 px-1.5 py-0.5 rounded border border-line text-ink-soft">
+                <div className="text-[12.5px] text-ink-muted">
                   Filled into the voucher form. Review every line before posting.
                 </div>
               </div>
@@ -1129,28 +1112,26 @@ export function VoucherWorkspace({
         )}
       </div>
 
-      {/* ============================================================ */}
-      {/* MAIN WORKSPACE AREA: Double-Entry Voucher Form */}
-      {/* ============================================================ */}
+      {/* Main column: the double-entry voucher form */}
       <div className="flex-1 space-y-4 min-w-0">
-        {/* Banner when Builder Draft is Loaded */}
+        {/* Banner when a purchase order from the builder is loaded */}
         {loadedBuilderDraft && (
-          <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-300 text-amber-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-start gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-panel-deep text-brand flex items-center justify-center shrink-0 font-bold mt-0.5">
+          <div className="p-4 rounded-panel border border-line bg-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="h-8 w-8 rounded-[8px] bg-warn-wash text-warn grid place-items-center shrink-0">
                 <FileSpreadsheet className="h-4 w-4" />
-              </div>
+              </span>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-xs text-amber-950">
-                    Purchase order: <span className="font-mono">{loadedBuilderDraft.doc_number}</span>
+                  <span className="text-[14px] font-[550] text-ink">
+                    Purchase order <span className="font-mono text-[13px]">{loadedBuilderDraft.doc_number}</span>
                   </span>
-                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 border border-amber-300">
-                    {loadedBuilderDraft.status.toUpperCase()}
+                  <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-warn-wash text-warn capitalize">
+                    {loadedBuilderDraft.status}
                   </span>
                 </div>
-                <p className="text-[11px] text-amber-900 mt-0.5">
-                  Supplier: <strong>{loadedBuilderDraft.parties?.legal_name ?? loadedBuilderDraft.party_snapshot?.name ?? "–"}</strong> • PO value: <strong>{formatINR(Number(loadedBuilderDraft.total_amount))}</strong>. Lines pre-filled from the PO; check them against the supplier&apos;s bill, attach the bill, then post.
+                <p className="text-[12.5px] text-ink-muted mt-0.5">
+                  Supplier: <strong className="font-medium text-ink">{loadedBuilderDraft.parties?.legal_name ?? loadedBuilderDraft.party_snapshot?.name ?? "–"}</strong> · PO value: <strong className="font-medium text-ink tabular-nums">{formatINR(Number(loadedBuilderDraft.total_amount))}</strong>. Lines pre-filled from the PO; check them against the supplier&apos;s bill, attach the bill, then post.
                 </p>
               </div>
             </div>
@@ -1163,53 +1144,58 @@ export function VoucherWorkspace({
                   setLoadedBuilderDraft(null);
                   handleClearExtracted();
                 }}
-                className="text-[11px] h-7 px-2 border-amber-300 text-amber-900 hover:bg-amber-100"
               >
-                Clear Draft
+                Clear draft
               </Button>
             </div>
           </div>
         )}
-        {/* Notification Banner when Document Details were Auto-Extracted */}
+        {/* Notice when document details were read into the form */}
         {extractedData && (
-          <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center justify-between gap-2 shadow-xs">
-            <div className="flex items-center gap-2 text-xs">
-              <Sparkles className="h-4 w-4 text-emerald-600 shrink-0" />
+          <div className="px-3.5 py-2.5 rounded-ctl bg-ok-wash text-ink flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-[13px]">
+              <Sparkles className="h-4 w-4 text-ok shrink-0" />
               <span>
-                <strong>Document Auto-Extracted:</strong> Loaded from{" "}
-                <span className="font-mono font-semibold">
-                  {extractedData.documentName}
-                </span>{" "}
-                ({extractedData.documentSize}). Form fields and balanced lines
-                populated.
+                <span className="font-medium">Read from the document:</span>{" "}
+                <span className="font-mono text-[12.5px]">{extractedData.documentName}</span>{" "}
+                ({extractedData.documentSize}). Form fields and balanced lines filled in.
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <button
+              <Button
                 suppressHydrationWarning
+                variant="ghost"
+                size="sm"
                 onClick={handleClearExtracted}
-                className="text-[11px] font-bold text-rose-700 hover:underline px-2 py-0.5 rounded hover:bg-rose-100"
+                className="text-bad hover:text-bad hover:bg-bad-wash"
               >
                 Reset
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Voucher Header Strip */}
-        <div className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-line gap-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="teal">{activeConfig.fKey}</Badge>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
-                <ActiveIcon className="h-4 w-4 text-brand" />
-                <span>{activeConfig.title}</span>
-              </h2>
+        {/* Voucher header */}
+        <div className="rounded-panel border border-line bg-surface">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 pt-4 gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="h-8 w-8 rounded-[8px] bg-brand-wash text-brand-strong grid place-items-center shrink-0">
+                <ActiveIcon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink flex items-center gap-2">
+                  <span>{activeConfig.title}</span>
+                  <kbd className={`${KEYCAP} border-line-strong text-ink-muted`}>{activeConfig.fKey}</kbd>
+                </h2>
+                <p className="text-[13px] text-ink-muted truncate">{activeConfig.subtitle}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-ink-muted font-mono text-[11px]">
+            <div className="flex items-center gap-3 text-[12.5px] text-ink-muted shrink-0">
               {demo && (
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   data-tour="voucher-autofill"
                   onClick={() => {
                     const byCode = (code: string) =>
@@ -1265,34 +1251,32 @@ export function VoucherWorkspace({
                       { id: `demo-2-${Date.now()}`, line_number: 2, dr_cr: "Cr", account_id: crAcc, party_id: crParty, description: `Credit allocation (${activeMode})`, amount: amt },
                     ]);
                   }}
-                  className="inline-flex items-center gap-1 rounded-lg border border-brand/40 bg-brand/15 hover:bg-brand/25 px-2.5 py-1 text-[11px] font-sans font-bold text-ink transition-colors cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
-                  <span>Autofill Sample</span>
-                </button>
+                  <span>Autofill sample</span>
+                </Button>
               )}
-              <span>Double-Entry Strict</span>
-              <span>•</span>
-              <span className="text-brand font-bold">ALERX Postable Only</span>
+              <span>Double-entry · postable accounts only</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-5">
             <Input
-              label="Voucher / Entry Number"
+              label="Voucher / entry number"
               value={voucherNumber}
               onChange={(e) => setVoucherNumber(e.target.value)}
+              className="font-mono"
               required
             />
             <Input
-              label="Date (YYYY-MM-DD)"
+              label="Date"
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
               required
             />
             <Input
-              label="Reference / Cheque / UTR / Bill No"
+              label="Reference, cheque, UTR or bill no."
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="e.g. INV-9041 or NEFT-88219"
@@ -1300,42 +1284,43 @@ export function VoucherWorkspace({
           </div>
         </div>
 
-        {/* Line Items Table */}
-        <div data-tour="voucher-lines" className="bg-surface border border-edge rounded-lg overflow-hidden shadow-xs">
-          <div className="bg-panel px-4 py-2 border-b border-edge text-white flex items-center justify-between font-mono text-[11px]">
-            <div className="flex items-center gap-2">
-              <span>Accounting Allocation Table</span>
-              <span className="text-[10px] text-ink-subtle">
-                ({activeConfig.shortLabel} Mode)
-              </span>
+        {/* Line items */}
+        <div data-tour="voucher-lines" className="rounded-panel border border-line bg-surface overflow-hidden">
+          <div className="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
+            <div>
+              <h3 className="text-[15px] font-semibold tracking-tight text-ink">Accounting lines</h3>
+              <p className="text-[13px] text-ink-muted">{activeConfig.shortLabel} voucher</p>
             </div>
-            <span className="text-brand-soft">Press Enter to advance</span>
+            <span className="text-[12.5px] text-ink-muted flex items-center gap-1.5">
+              <kbd className={`${KEYCAP} border-line-strong text-ink-muted`}>Enter</kbd>
+              on the last amount adds a row
+            </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
-                  <th className="py-2 px-3 w-16 text-center">Type</th>
-                  <th className="py-2 px-3">Particulars / Account Label</th>
-                  <th className="py-2 px-3 w-48">Counterparty (Optional)</th>
-                  <th className="py-2 px-3 text-right w-36">Debit (INR)</th>
-                  <th className="py-2 px-3 text-right w-36">Credit (INR)</th>
-                  <th className="py-2 px-2 w-10 text-center"></th>
+                <tr>
+                  <th className="deku-table-th w-24">Dr / Cr</th>
+                  <th className="deku-table-th">Account</th>
+                  <th className="deku-table-th w-52">Counterparty (optional)</th>
+                  <th className="deku-table-th text-right! w-40">Debit (₹)</th>
+                  <th className="deku-table-th text-right! w-40">Credit (₹)</th>
+                  <th className="deku-table-th w-12"><span className="sr-only">Remove</span></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {lines.map((line, idx) => (
-                  <tr key={line.id} className="hover:bg-canvas/70">
+                  <tr key={line.id} className="border-b border-line hover:bg-canvas/60">
                     {/* Dr / Cr Selector */}
-                    <td className="py-2 px-3 text-center">
+                    <td className="py-2 px-3.5">
                       <select
                         suppressHydrationWarning
                         value={line.dr_cr}
                         onChange={(e) =>
                           handleLineChange(idx, "dr_cr", e.target.value as "Dr" | "Cr")
                         }
-                        className="font-mono font-bold text-xs bg-canvas-sunken border border-line-strong rounded px-1.5 py-1 text-ink focus:border-brand focus:outline-none"
+                        className={`${CTL} w-full font-semibold text-brand-strong`}
                       >
                         <option value="Dr">Dr</option>
                         <option value="Cr">To (Cr)</option>
@@ -1343,36 +1328,36 @@ export function VoucherWorkspace({
                     </td>
 
                     {/* Account Selector */}
-                    <td className="py-2 px-3">
+                    <td className="py-2 px-3.5">
                       <select
                         suppressHydrationWarning
                         value={line.account_id}
                         onChange={(e) =>
                           handleLineChange(idx, "account_id", e.target.value)
                         }
-                        className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs text-ink focus:border-brand focus:outline-none"
+                        className={`${CTL} w-full text-ink`}
                       >
-                        <option value="">— Select Postable Leaf Account —</option>
+                        <option value="">Select a postable account</option>
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.code} • {acc.name} ({acc.account_group})
+                            {acc.code} · {acc.name} ({acc.account_group})
                           </option>
                         ))}
                       </select>
                     </td>
 
                     {/* Party Selector */}
-                    <td className="py-2 px-3">
+                    <td className="py-2 px-3.5">
                       <select
                         suppressHydrationWarning
                         value={line.party_id || ""}
                         onChange={(e) =>
                           handleLineChange(idx, "party_id", e.target.value)
                         }
-                        className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs text-ink-soft focus:border-brand focus:outline-none"
+                        className={`${CTL} w-full text-ink-soft`}
                       >
-                        <option value="self">🏢 Self ({activeCompanyName})</option>
-                        <option value="">(None / General)</option>
+                        <option value="self">Self ({activeCompanyName})</option>
+                        <option value="">None / general</option>
                         {parties.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.legal_name}
@@ -1382,7 +1367,7 @@ export function VoucherWorkspace({
                     </td>
 
                     {/* Debit Input */}
-                    <td className="py-2 px-3 text-right">
+                    <td className="py-2 px-3.5 text-right">
                       {line.dr_cr === "Dr" ? (
                         <input
                           suppressHydrationWarning
@@ -1393,15 +1378,16 @@ export function VoucherWorkspace({
                           }
                           onKeyDown={(e) => handleLineKeyDown(e, idx, "amount")}
                           placeholder="0.00"
-                          className="w-full text-right font-mono font-semibold text-xs border border-line-strong rounded px-2 py-1 focus:border-brand focus:outline-none"
+                          aria-label={`Line ${idx + 1} debit amount`}
+                          className={`${CTL} w-full text-right tabular-nums font-medium text-ink`}
                         />
                       ) : (
-                        <span className="text-ink-subtle font-mono select-none">—</span>
+                        <span className="text-ink-subtle select-none">–</span>
                       )}
                     </td>
 
                     {/* Credit Input */}
-                    <td className="py-2 px-3 text-right">
+                    <td className="py-2 px-3.5 text-right">
                       {line.dr_cr === "Cr" ? (
                         <input
                           suppressHydrationWarning
@@ -1412,10 +1398,11 @@ export function VoucherWorkspace({
                           }
                           onKeyDown={(e) => handleLineKeyDown(e, idx, "amount")}
                           placeholder="0.00"
-                          className="w-full text-right font-mono font-semibold text-xs border border-line-strong rounded px-2 py-1 focus:border-brand focus:outline-none"
+                          aria-label={`Line ${idx + 1} credit amount`}
+                          className={`${CTL} w-full text-right tabular-nums font-medium text-ink`}
                         />
                       ) : (
-                        <span className="text-ink-subtle font-mono select-none">—</span>
+                        <span className="text-ink-subtle select-none">–</span>
                       )}
                     </td>
 
@@ -1424,7 +1411,7 @@ export function VoucherWorkspace({
                       <button
                         suppressHydrationWarning
                         onClick={() => handleRemoveLine(idx)}
-                        className="text-ink-subtle hover:text-rose-600 p-1"
+                        className="text-ink-subtle hover:text-bad hover:bg-bad-wash p-1.5 rounded-chip transition-colors"
                         title="Remove line"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1434,23 +1421,22 @@ export function VoucherWorkspace({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-canvas border-t-2 border-line-strong font-mono font-bold text-xs">
-                  <td colSpan={3} className="py-2.5 px-3">
+                <tr className="text-[13.5px] font-semibold text-ink">
+                  <td colSpan={3} className="py-3 px-3.5">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleAddLine}
-                      className="gap-1 font-sans"
                     >
-                      <Plus className="h-3.5 w-3.5" /> Add Row
+                      <Plus className="h-3.5 w-3.5" /> Add row
                     </Button>
                   </td>
-                  <td className="py-2.5 px-3 text-right text-ink">
-                    {formatINR(totalDebit)}
+                  <td className="py-3 px-3.5 text-right tabular-nums">
+                    <span className={isBalanced ? "ledger-total" : ""}>{formatINR(totalDebit)}</span>
                   </td>
-                  <td className="py-2.5 px-3 text-right text-ink">
-                    {formatINR(totalCredit)}
+                  <td className="py-3 px-3.5 text-right tabular-nums">
+                    <span className={isBalanced ? "ledger-total" : ""}>{formatINR(totalCredit)}</span>
                   </td>
                   <td></td>
                 </tr>
@@ -1458,66 +1444,61 @@ export function VoucherWorkspace({
             </table>
           </div>
 
-          {/* Balance Status Indicator */}
+          {/* Balance status */}
           <div
-            data-tour="voucher-balance" className={`p-2.5 flex items-center justify-between font-mono text-xs border-t ${
-              isBalanced
-                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                : "bg-amber-50 text-amber-800 border-amber-200"
+            data-tour="voucher-balance"
+            className={`px-5 py-3 flex items-center justify-between gap-3 text-[13px] border-t border-line ${
+              isBalanced ? "bg-ok-wash text-ok" : "bg-bad-wash text-bad"
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 font-medium">
               {isBalanced ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <CheckCircle2 className="h-4 w-4" />
               ) : (
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertTriangle className="h-4 w-4" />
               )}
               <span>
                 {isBalanced
-                  ? "Double-Entry Parity Verified: Debits = Credits"
-                  : `Out of Balance: Difference of ${formatINR(difference)}`}
+                  ? "Balanced: debits equal credits"
+                  : <>Out of balance by <span className="tabular-nums">{formatINR(difference)}</span></>}
               </span>
             </div>
-            <span className="text-[11px]">
-              {isBalanced ? "Ready to Post" : "Must balance before posting"}
+            <span className="text-[12.5px]">
+              {isBalanced ? "Ready to post" : "Must balance before posting"}
             </span>
           </div>
         </div>
 
-        {/* ============================================================ */}
-        {/* SUPPORTING DOCUMENT */}
-        {/* ============================================================ */}
-        <div data-tour="voucher-document" className="bg-surface border border-line-strong rounded-lg p-4 shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-line gap-2">
-            <div className="flex items-center gap-2">
-              <div
-                className={`h-7 w-7 rounded-lg flex items-center justify-center font-bold ${
-                  documentProof
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-amber-100 text-amber-800"
+        {/* Supporting document */}
+        <div data-tour="voucher-document" className="rounded-panel border border-line bg-surface">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between px-5 pt-4 gap-3">
+            <div className="flex items-start gap-3">
+              <span
+                className={`h-8 w-8 rounded-[8px] grid place-items-center shrink-0 ${
+                  documentProof ? "bg-ok-wash text-ok" : "bg-warn-wash text-warn"
                 }`}
               >
                 <Paperclip className="h-4 w-4" />
-              </div>
+              </span>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-ink">
-                    Supporting Document
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+                    Supporting document
                   </h3>
                   {documentProof ? (
-                    <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3 text-emerald-700" />
-                      Document Attached
+                    <span className={`${CHIP} bg-ok-wash text-ok`}>
+                      <ShieldCheck className="h-3 w-3" />
+                      Document attached
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 flex items-center gap-1">
-                      <ShieldAlert className="h-3 w-3 text-amber-700" />
-                      Proof Required for COA &amp; P&amp;L Post
+                    <span className={`${CHIP} bg-warn-wash text-warn`}>
+                      <ShieldAlert className="h-3 w-3" />
+                      Needed before posting
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-ink-muted font-mono">
-                  Attach the supporting document. It's stored with the voucher; nothing checks what it says.
+                <p className="text-[13px] text-ink-muted">
+                  Attach the supporting document. It&apos;s stored with the voucher; nothing checks what it says.
                 </p>
               </div>
             </div>
@@ -1525,15 +1506,15 @@ export function VoucherWorkspace({
             {documentProof && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => {
                   setDocumentProof(null);
                   setSelectedInvoiceId("");
-                          }}
-                className="text-[11px] h-7 px-2 border-line-strong text-rose-700 hover:bg-rose-50"
+                }}
+                className="text-bad hover:text-bad hover:bg-bad-wash shrink-0"
               >
-                <X className="h-3 w-3 mr-1" /> Detach Proof
+                <X className="h-3.5 w-3.5" /> Detach
               </Button>
             )}
           </div>
@@ -1547,91 +1528,87 @@ export function VoucherWorkspace({
             className="hidden"
           />
 
+          <div className="p-5">
           {documentProof ? (
-            /* ACTIVE PROOF ATTACHED CARD */
-            <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-              <div className="flex items-start gap-2.5">
-                <div className="p-2 rounded bg-emerald-100 text-emerald-800 shrink-0 mt-0.5">
+            /* Attached document */
+            <div className="p-3.5 rounded-ctl bg-ok-wash flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <span className="h-8 w-8 rounded-[8px] bg-surface text-ok grid place-items-center shrink-0">
                   <FileCheck className="h-4 w-4" />
-                </div>
+                </span>
                 <div>
-                  <span className="font-mono font-bold text-emerald-950 text-xs block">
+                  <span className="text-[14px] font-[550] text-ink block">
                     {documentProof.title}
                   </span>
-                  <div className="flex items-center gap-3 text-[11px] text-emerald-800 mt-0.5 flex-wrap font-mono">
+                  <div className="flex items-center gap-3 text-[12.5px] text-ink-muted mt-0.5 flex-wrap">
                     <span>
-                      Category: <strong>{documentProof.categoryLabel}</strong>
+                      Category: <span className="text-ink">{documentProof.categoryLabel}</span>
                     </span>
                     {documentProof.refNumber && (
                       <span>
-                        Ref / Ack #: <strong>{documentProof.refNumber}</strong>
+                        Ref: <span className="font-mono text-ink">{documentProof.refNumber}</span>
                       </span>
                     )}
                     {documentProof.fileSize && (
                       <span>
-                        Size: <strong>{documentProof.fileSize}</strong>
+                        Size: <span className="text-ink tabular-nums">{documentProof.fileSize}</span>
                       </span>
                     )}
                     {documentProof.approvedBy && (
-                      <span className="text-emerald-900 bg-emerald-200/80 px-1.5 py-0.2 rounded font-bold">
-                        ✓ {documentProof.approvedBy}
+                      <span className={`${CHIP} bg-surface text-ok`}>
+                        <Check className="h-3 w-3" /> {documentProof.approvedBy}
                       </span>
                     )}
                   </div>
                   {documentProof.notes && (
-                    <p className="text-[10px] text-emerald-700 mt-1 italic">
+                    <p className="text-[12.5px] text-ink-muted mt-1">
                       {documentProof.notes}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                <span className="text-[10px] font-mono text-emerald-700 font-bold bg-surface px-2 py-1 rounded border border-emerald-300">
-                  ✓ READY FOR COA POSTING
-                </span>
-              </div>
+              <span className={`${CHIP} bg-surface text-ok shrink-0 self-end sm:self-center`}>
+                <Check className="h-3 w-3" /> Ready to post
+              </span>
             </div>
           ) : (
-            /* PROOF INPUT INTERFACE ACCORDING TO ACTIVE MODE */
+            /* Proof input for the active voucher type */
             <div className="space-y-3">
               {/* Mode: Sales (F8) */}
               {activeMode === "sales" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <FileText className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Sales Voucher Proof:</strong> Upload the sales invoice. Invoices raised in the GST hub post their own journal when issued.
+                      <span className="font-medium text-ink">Sales voucher proof:</span> upload the sales invoice. Invoices raised in the GST hub post their own journal when issued.
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3">
-                    {/* Upload External Invoice */}
-                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
-                      <span className="font-bold text-ink text-xs flex items-center gap-1.5">
-                        <UploadCloud className="h-3.5 w-3.5 text-brand" /> Upload Sales Invoice
-                      </span>
-                      <p className="text-[11px] text-ink-muted">
-                        Upload invoice copy (PDF/PNG/JPG) generated from external billing/ERP.
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={proofRefInput}
-                          onChange={(e) => setProofRefInput(e.target.value)}
-                          placeholder="External Invoice No (e.g. EXT-8819)"
-                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => proofFileInputRef.current?.click()}
-                          className="text-xs shrink-0"
-                        >
-                          Upload Invoice File
-                        </Button>
-                      </div>
+                  <div className={SUBPANEL}>
+                    <span className="text-[13.5px] font-medium text-ink flex items-center gap-1.5">
+                      <UploadCloud className="h-4 w-4 text-brand-strong" /> Upload sales invoice
+                    </span>
+                    <p className="text-[12.5px] text-ink-muted">
+                      Upload the invoice copy (PDF, PNG or JPG) from your external billing or ERP.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={proofRefInput}
+                        onChange={(e) => setProofRefInput(e.target.value)}
+                        placeholder="External invoice no. (e.g. EXT-8819)"
+                        className={`${CTL} flex-1`}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => proofFileInputRef.current?.click()}
+                        className="shrink-0"
+                      >
+                        Upload invoice file
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -1640,34 +1617,34 @@ export function VoucherWorkspace({
               {/* Mode: Contra (F4) */}
               {activeMode === "contra" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <Landmark className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <Landmark className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Contra Voucher Proof:</strong> Cash ↔ Bank transfer requires an authoritative Bank Deposit Slip or Cash Withdrawal Slip.
+                      <span className="font-medium text-ink">Contra voucher proof:</span> a cash and bank transfer needs a bank deposit slip or a cash withdrawal slip.
                     </span>
                   </div>
 
-                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                  <div className={SUBPANEL}>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="contraSlipType"
                           checked={contraSlipType === "deposit"}
                           onChange={() => setContraSlipType("deposit")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Bank Deposit Slip (Cash Deposited into Bank)</span>
+                        <span>Bank deposit slip (cash deposited into bank)</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="contraSlipType"
                           checked={contraSlipType === "withdrawal"}
                           onChange={() => setContraSlipType("withdrawal")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Cash Withdrawal Slip / Cheque Leaf (Cash Withdrawn)</span>
+                        <span>Cash withdrawal slip or cheque leaf (cash withdrawn)</span>
                       </label>
                     </div>
 
@@ -1678,19 +1655,19 @@ export function VoucherWorkspace({
                         onChange={(e) => setProofRefInput(e.target.value)}
                         placeholder={
                           contraSlipType === "deposit"
-                            ? "Deposit Ack No. (e.g. HDFC-DEP-99482)"
-                            : "Cheque / Slip No. (e.g. CHQ-004921)"
+                            ? "Deposit ack no. (e.g. HDFC-DEP-99482)"
+                            : "Cheque or slip no. (e.g. CHQ-004921)"
                         }
-                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                        className={`${CTL} flex-1`}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => proofFileInputRef.current?.click()}
-                        className="text-xs shrink-0"
+                        className="shrink-0"
                       >
-                        Upload Slip Scan / Photo
+                        Upload slip scan or photo
                       </Button>
                     </div>
                   </div>
@@ -1700,34 +1677,34 @@ export function VoucherWorkspace({
               {/* Mode: Payment (F5) */}
               {activeMode === "payment" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <Banknote className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Payment Disbursement Proof:</strong> If paid digitally, upload bank payment screenshot / UTR confirmation. If paid in cash, CFO's approval memo is mandatory.
+                      <span className="font-medium text-ink">Payment proof:</span> if paid digitally, upload the bank payment screenshot or UTR confirmation. If paid in cash, the CFO&apos;s approval memo is mandatory.
                     </span>
                   </div>
 
-                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                  <div className={SUBPANEL}>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="paymentMethod"
                           checked={paymentMethod === "digital"}
                           onChange={() => setPaymentMethod("digital")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Digital Payment (NEFT / RTGS / UPI / Netbanking)</span>
+                        <span>Digital payment (NEFT, RTGS, UPI, netbanking)</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="paymentMethod"
                           checked={paymentMethod === "cash"}
                           onChange={() => setPaymentMethod("cash")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Cash Disbursement (CFO Approval Mandatory)</span>
+                        <span>Cash disbursement (CFO approval mandatory)</span>
                       </label>
                     </div>
 
@@ -1737,24 +1714,24 @@ export function VoucherWorkspace({
                           type="text"
                           value={proofRefInput}
                           onChange={(e) => setProofRefInput(e.target.value)}
-                          placeholder="Bank UTR / Transaction ID (e.g. UTR-HDFC261023941)"
-                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                          placeholder="Bank UTR or transaction ID (e.g. UTR-HDFC261023941)"
+                          className={`${CTL} flex-1`}
                         />
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => proofFileInputRef.current?.click()}
-                          className="text-xs shrink-0"
+                          className="shrink-0"
                         >
-                          Upload Payment Screenshot / Advice
+                          Upload payment screenshot or advice
                         </Button>
                       </div>
                     ) : (
-                      <div className="space-y-2 bg-amber-50/80 p-2.5 rounded border border-amber-300">
-                        <div className="flex items-center justify-between text-amber-950 font-bold text-xs">
-                          <span>Physical Cash Disbursement Sanction</span>
-                          <span className="text-[10px] bg-amber-200 px-2 py-0.5 rounded text-amber-900 border border-amber-400">
+                      <div className="space-y-2.5 bg-warn-wash p-3 rounded-ctl">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] font-medium text-ink">
+                          <span>Cash disbursement sanction</span>
+                          <span className={`${CHIP} bg-surface text-warn`}>
                             Signatory: Chief Financial Officer (CFO)
                           </span>
                         </div>
@@ -1763,17 +1740,17 @@ export function VoucherWorkspace({
                             type="text"
                             value={proofRefInput}
                             onChange={(e) => setProofRefInput(e.target.value)}
-                            placeholder="CFO Sanction Memo Ref # (e.g. CFO-AUTH-2026-081)"
-                            className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                            placeholder="CFO sanction memo ref (e.g. CFO-AUTH-2026-081)"
+                            className={`${CTL} flex-1`}
                           />
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => proofFileInputRef.current?.click()}
-                            className="text-xs shrink-0 border-amber-400 text-amber-950"
+                            className="shrink-0 bg-surface"
                           >
-                            Upload Signed CFO Memo
+                            Upload signed CFO memo
                           </Button>
                         </div>
                       </div>
@@ -1785,69 +1762,67 @@ export function VoucherWorkspace({
               {/* Mode: Receipt (F6) */}
               {activeMode === "receipt" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <FileCheck className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <FileCheck className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Receipt Proof Requirement:</strong> Attach customer remittance advice / vendor invoice copy, OR settle directly against an open sales invoice.
+                      <span className="font-medium text-ink">Receipt proof:</span> attach the customer&apos;s remittance advice or invoice copy, or settle directly against an open sales invoice.
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Bill-wise Matching */}
-                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-ink text-xs flex items-center gap-1.5">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-brand" /> Option 1: Settle Open Sales Invoice
+                    <div className={SUBPANEL}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[13.5px] font-medium text-ink flex items-center gap-1.5">
+                          <CheckCircle2 className="h-4 w-4 text-brand-strong" /> Settle an open sales invoice
                         </span>
-                        <Badge variant="teal">{openInvoices.length} Open Invoices</Badge>
+                        <Badge variant="teal">{openInvoices.length} open</Badge>
                       </div>
-                      <p className="text-[11px] text-ink-muted">
-                        Directly match against an open customer invoice to clear receivables and update DSO balances.
+                      <p className="text-[12.5px] text-ink-muted">
+                        Match against an open customer invoice to clear the receivable.
                       </p>
                       {openInvoices.length > 0 ? (
-                        <div className="space-y-1.5">
-                          <select
-                            value={selectedInvoiceId}
-                            onChange={(e) => handleSelectInvoiceToSettle(e.target.value)}
-                            className="w-full bg-surface border border-line-strong rounded px-2 py-1 text-xs"
-                          >
-                            <option value="">— Choose Open Invoice to Settle —</option>
-                            {openInvoices.map((inv) => (
-                              <option key={inv.id || inv.invoice_number} value={inv.invoice_number}>
-                                {inv.invoice_number} • {customerNameOf(inv)} (Invoice total: ₹{inv.total_amount?.toLocaleString("en-IN")})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        <select
+                          value={selectedInvoiceId}
+                          onChange={(e) => handleSelectInvoiceToSettle(e.target.value)}
+                          className={`${CTL} w-full`}
+                        >
+                          <option value="">Choose an open invoice to settle</option>
+                          {openInvoices.map((inv) => (
+                            <option key={inv.id || inv.invoice_number} value={inv.invoice_number}>
+                              {inv.invoice_number} · {customerNameOf(inv)} (Invoice total: ₹{inv.total_amount?.toLocaleString("en-IN")})
+                            </option>
+                          ))}
+                        </select>
                       ) : (
-                        <div className="text-[11px] text-ink-subtle italic">No open customer invoices currently found.</div>
+                        <div className="text-[12.5px] text-ink-muted">No open customer invoices right now.</div>
                       )}
                     </div>
 
                     {/* Remittance Advice Upload */}
-                    <div className="p-3 bg-canvas border border-line rounded-lg space-y-2">
-                      <span className="font-bold text-ink text-xs flex items-center gap-1.5">
-                        <UploadCloud className="h-3.5 w-3.5 text-brand" /> Option 2: Upload Remittance Advice / Invoice Copy
+                    <div className={SUBPANEL}>
+                      <span className="text-[13.5px] font-medium text-ink flex items-center gap-1.5">
+                        <UploadCloud className="h-4 w-4 text-brand-strong" /> Upload remittance advice or invoice copy
                       </span>
-                      <p className="text-[11px] text-ink-muted">
-                        Attach invoice received from vendor or customer remittance slip.
+                      <p className="text-[12.5px] text-ink-muted">
+                        Attach the invoice or the customer&apos;s remittance slip.
                       </p>
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
                           value={proofRefInput}
                           onChange={(e) => setProofRefInput(e.target.value)}
-                          placeholder="Remittance Ref # (e.g. REMIT-8832)"
-                          className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                          placeholder="Remittance ref (e.g. REMIT-8832)"
+                          className={`${CTL} flex-1 min-w-0`}
                         />
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => proofFileInputRef.current?.click()}
-                          className="text-xs shrink-0"
+                          className="shrink-0"
                         >
-                          Upload Advice
+                          Upload advice
                         </Button>
                       </div>
                     </div>
@@ -1858,34 +1833,34 @@ export function VoucherWorkspace({
               {/* Mode: Journal (F7) */}
               {activeMode === "journal" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <FileSpreadsheet className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <FileSpreadsheet className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Journal Voucher Proof:</strong> Attach bill of purchase for adjustments, depreciation computation schedule, or amortization memo.
+                      <span className="font-medium text-ink">Journal voucher proof:</span> attach the bill of purchase for adjustments, the depreciation schedule, or the amortisation memo.
                     </span>
                   </div>
 
-                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                  <div className={SUBPANEL}>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="journalProofType"
                           checked={journalProofType === "adjustment"}
                           onChange={() => setJournalProofType("adjustment")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Bill of Purchase for Adjustment / Capitalization</span>
+                        <span>Bill of purchase for adjustment or capitalisation</span>
                       </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-xs text-ink">
+                      <label className={RADIO}>
                         <input
                           type="radio"
                           name="journalProofType"
                           checked={journalProofType === "depreciation"}
                           onChange={() => setJournalProofType("depreciation")}
-                          className="text-brand"
+                          className="accent-brand"
                         />
-                        <span>Depreciation / Amortization Computation Schedule</span>
+                        <span>Depreciation or amortisation schedule</span>
                       </label>
                     </div>
 
@@ -1896,19 +1871,19 @@ export function VoucherWorkspace({
                         onChange={(e) => setProofRefInput(e.target.value)}
                         placeholder={
                           journalProofType === "adjustment"
-                            ? "Purchase Bill / Docket # (e.g. PUR-ASSET-7721)"
-                            : "Schedule Ref # (e.g. DEP-SCHED-FY26-Q3)"
+                            ? "Purchase bill or docket no. (e.g. PUR-ASSET-7721)"
+                            : "Schedule ref (e.g. DEP-SCHED-FY26-Q3)"
                         }
-                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                        className={`${CTL} flex-1`}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => proofFileInputRef.current?.click()}
-                        className="text-xs shrink-0"
+                        className="shrink-0"
                       >
-                        Upload Supporting Document
+                        Upload supporting document
                       </Button>
                     </div>
                   </div>
@@ -1918,30 +1893,30 @@ export function VoucherWorkspace({
               {/* Mode: Purchase (F9) */}
               {activeMode === "purchase" && (
                 <div className="space-y-3">
-                  <div className="p-2.5 rounded bg-blue-50/70 border border-blue-200 text-blue-900 text-xs flex items-center gap-2">
-                    <ShoppingCart className="h-4 w-4 text-blue-600 shrink-0" />
+                  <div className={NOTE}>
+                    <ShoppingCart className="h-4 w-4 text-brand-strong shrink-0 mt-px" />
                     <span>
-                      <strong>Purchase Voucher Proof:</strong> Upload supplier's original vendor tax invoice or inward commercial bill.
+                      <span className="font-medium text-ink">Purchase voucher proof:</span> upload the supplier&apos;s tax invoice or inward bill.
                     </span>
                   </div>
 
-                  <div className="p-3 bg-canvas border border-line rounded-lg space-y-2.5">
+                  <div className={SUBPANEL}>
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
                         value={proofRefInput}
                         onChange={(e) => setProofRefInput(e.target.value)}
-                        placeholder="Vendor Tax Invoice No. (e.g. SUPP-INV-2026-904)"
-                        className="flex-1 bg-surface border border-line-strong rounded px-2 py-1 text-xs"
+                        placeholder="Supplier tax invoice no. (e.g. SUPP-INV-2026-904)"
+                        className={`${CTL} flex-1`}
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => proofFileInputRef.current?.click()}
-                        className="text-xs shrink-0"
+                        className="shrink-0"
                       >
-                        Upload Vendor Invoice
+                        Upload supplier invoice
                       </Button>
                     </div>
                   </div>
@@ -1949,54 +1924,55 @@ export function VoucherWorkspace({
               )}
             </div>
           )}
+          </div>
         </div>
 
-        {/* Narration Memo Field */}
-        <div className="bg-surface border border-line-strong rounded-lg p-3">
-          <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
-            Narration (Mandatory Accounting Memo)
+        {/* Narration */}
+        <div className="rounded-panel border border-line bg-surface p-5">
+          <label htmlFor="voucher-narration" className="block text-[13px] font-medium text-ink-soft mb-1.5">
+            Narration (required for the audit trail)
           </label>
           <textarea
+            id="voucher-narration"
             rows={2}
             value={narration}
             onChange={(e) => setNarration(e.target.value)}
-            placeholder="Detailed transaction memo and business purpose..."
-            className="w-full rounded border border-line-strong p-2 text-xs text-ink focus:border-brand focus:outline-none"
+            placeholder="What the transaction was and why"
+            className="w-full rounded-ctl border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
             required
           />
         </div>
 
         {/* Feedback Messages */}
         {apiError && (
-          <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+          <div className="px-3.5 py-3 rounded-ctl bg-bad-wash text-[13px] text-bad flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{apiError}</span>
           </div>
         )}
 
         {submissionSuccess && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="px-3.5 py-3 rounded-ctl bg-ok-wash text-[13px] text-ink flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 font-medium">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              <CheckCircle2 className="h-4 w-4 text-ok shrink-0" />
               <span>{submissionSuccess}</span>
             </div>
 
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => router.push("/day-book")}
-              className="text-xs h-7 px-2.5 font-bold border-emerald-400 bg-surface hover:bg-emerald-100 text-emerald-900 self-end sm:self-center shrink-0"
+              className="self-end sm:self-center shrink-0"
             >
-              Open in Day Book →
+              Open in Day Book
             </Button>
           </div>
         )}
 
         {/* Action Toolbar */}
-        <div data-tour="voucher-actions" className="flex items-center justify-between pt-2">
+        <div data-tour="voucher-actions" className="flex items-center justify-between gap-3 pt-1">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => router.push("/day-book")}
           >
             View Day Book
@@ -2005,29 +1981,25 @@ export function VoucherWorkspace({
           <div className="flex items-center gap-2">
             <Button
               variant="secondary"
-              size="sm"
               onClick={() => handleSaveAndPost(false)}
               isLoading={isSubmitting}
-              className="gap-1.5"
             >
-              <Save className="h-3.5 w-3.5" /> Save Draft
+              <Save className="h-4 w-4" /> Save draft
             </Button>
             <Button
               variant="tally"
-              size="sm"
               onClick={() => handleSaveAndPost(true)}
               isLoading={isSubmitting}
-              className="gap-1.5 font-bold"
               disabled={!isBalanced}
             >
               {loadedBuilderDraft ? (
                 <>
-                  <Check className="h-3.5 w-3.5" />{" "}
-                  {requireApproval ? "Confirm & Submit for Approval" : "Confirm & Post to Day Book & Ledger"}
+                  <Check className="h-4 w-4" />{" "}
+                  {requireApproval ? "Confirm and submit for approval" : "Confirm and post to Day Book and ledger"}
                 </>
               ) : (
                 <>
-                  <Send className="h-3.5 w-3.5" /> {requireApproval ? "Submit for Approval" : "Post & Validate Voucher"}
+                  <Send className="h-4 w-4" /> {requireApproval ? "Submit for approval" : "Post voucher"}
                 </>
               )}
             </Button>

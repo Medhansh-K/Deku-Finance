@@ -10,7 +10,7 @@ export default function SettingsPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Settings & Accounting Governance"
+        title="Settings"
         subtitle="Manage fiscal periods, ALERX chart parameters and operating preferences"
         badge={<Badge variant="teal">Governance</Badge>}
         breadcrumbs={[

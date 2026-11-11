@@ -59,9 +59,9 @@ const GST_RATES = ["0", "0.25", "3", "5", "12", "18", "28", "40"];
 const rs = (paise: number) => formatINR(paise / 100);
 
 const selectClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-2.5 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 const cellClass =
-  "w-full h-8 rounded border border-line-strong bg-surface px-2 text-xs text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
+  "w-full h-8 rounded-[7px] border border-line-strong bg-surface px-2 text-[13px] text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
 
 interface Props {
   orgId: string;
@@ -303,11 +303,11 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
 
   return (
     <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate className="space-y-4" aria-label="New sales invoice">
-      <div className="rounded-lg border border-line bg-surface p-5 shadow-card space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-2 border-b border-line pb-3">
+      <div className="rounded-panel border border-line bg-surface p-5 space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
           <div>
-            <h3 className="text-sm font-semibold text-ink">New {typeLabel.toLowerCase()}</h3>
-            <p className="text-xs text-ink-muted">Saved as a draft. Issuing it posts the journal to your ledger.</p>
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink">New {typeLabel.toLowerCase()}</h3>
+            <p className="mt-0.5 text-[13px] text-ink-muted">Saved as a draft. Issuing it posts the journal to your ledger.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {demo && (
@@ -333,23 +333,23 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                     },
                   ]);
                 }}
-                className="inline-flex items-center gap-1 rounded-lg bg-brand/20 hover:bg-brand/30 border border-brand/40 px-2.5 py-1 text-[11px] font-bold text-ink cursor-pointer"
+                className="inline-flex h-8 items-center gap-1.5 rounded-ctl border border-brand/30 bg-brand-wash px-3 text-[13px] font-medium text-brand-strong hover:bg-brand-wash-strong cursor-pointer"
               >
                 <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
-                <span>Autofill Sample Invoice</span>
+                <span>Autofill sample invoice</span>
               </button>
             )}
-            <p className="text-[11px] text-ink-muted" aria-label="Keyboard shortcuts">
-              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> next field ·{" "}
-              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Ctrl</kbd>+
-              <kbd className="rounded border border-line-strong bg-canvas px-1 font-mono">Enter</kbd> save draft
+            <p className="flex items-center gap-1 text-[12.5px] text-ink-muted" aria-label="Keyboard shortcuts">
+              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Enter</kbd> next field ·{" "}
+              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Ctrl</kbd>+
+              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Enter</kbd> save draft
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="space-y-1">
-            <label htmlFor="inv-type" className="block text-xs font-medium text-ink-soft">Invoice type</label>
+            <label htmlFor="inv-type" className="block text-[13px] font-medium text-ink-soft">Invoice type</label>
             <select id="inv-type" value={invoiceType} onChange={(e) => setInvoiceType(e.target.value as InvoiceType)} className={selectClass}>
               {INVOICE_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -369,7 +369,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             </>
           )}
           <div className="space-y-1">
-            <label htmlFor="inv-customer" className="block text-xs font-medium text-ink-soft">Customer</label>
+            <label htmlFor="inv-customer" className="block text-[13px] font-medium text-ink-soft">Customer</label>
             <select id="inv-customer" value={customerId} onChange={(e) => chooseCustomer(e.target.value)} className={selectClass}>
               <option value="">Select a customer</option>
               {customers.map((c) => (
@@ -378,7 +378,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                 </option>
               ))}
             </select>
-            {customers.length === 0 && <p className="text-xs text-ink-muted">Add customers under Parties first.</p>}
+            {customers.length === 0 && <p className="text-[12.5px] text-ink-muted">Add customers under Parties first.</p>}
           </div>
           <Input id="inv-number" label="Invoice number" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
@@ -386,7 +386,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             <Input id="inv-due" label="Due date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
           </div>
           <div className="space-y-1">
-            <label htmlFor="inv-pos" className="block text-xs font-medium text-ink-soft">Place of supply</label>
+            <label htmlFor="inv-pos" className="block text-[13px] font-medium text-ink-soft">Place of supply</label>
             <select id="inv-pos" value={isExport ? "" : posCode} onChange={(e) => setPosCode(e.target.value)} className={selectClass}
               disabled={isExport}>
               <option value="">{isExport ? "96 Other Countries (export)" : "Select a state"}</option>
@@ -398,7 +398,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             </select>
           </div>
           <div className="space-y-1">
-            <label htmlFor="inv-channel" className="block text-xs font-medium text-ink-soft">Sales channel</label>
+            <label htmlFor="inv-channel" className="block text-[13px] font-medium text-ink-soft">Sales channel</label>
             <select
               id="inv-channel"
               value={salesChannel}
@@ -411,20 +411,20 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             </select>
           </div>
           <div className="space-y-1">
-            <span className="block text-xs font-medium text-ink-soft">Company GSTIN</span>
-            <p className="h-9 flex items-center font-mono text-sm text-ink">{companyGstin || <span className="font-sans text-ink-muted">Not set</span>}</p>
+            <span className="block text-[13px] font-medium text-ink-soft">Company GSTIN</span>
+            <p className="h-9 flex items-center font-mono text-[13px] text-ink">{companyGstin || <span className="font-sans text-ink-muted">Not set</span>}</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
         <div className="space-y-4 min-w-0">
-          <div className="rounded-lg border border-line bg-surface shadow-card overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs">
+          <div className="rounded-panel border border-line bg-surface overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13.5px]">
               <caption className="sr-only">Invoice lines</caption>
-              <thead className="border-b border-line bg-canvas text-ink-muted">
+              <thead className="border-b border-line bg-[#fafbfa] text-[12.5px] text-ink-muted">
                 <tr>
-                  <th scope="col" className="w-8 px-2 py-2 font-medium">#</th>
+                  <th scope="col" className="w-8 px-3 py-2.5 font-medium">#</th>
                   <th scope="col" className="px-2 py-2 font-medium">Item or service</th>
                   <th scope="col" className="w-24 px-2 py-2 font-medium">HSN/SAC</th>
                   <th scope="col" className="w-20 px-2 py-2 text-right font-medium">Qty</th>
@@ -441,7 +441,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                   const t = summary.lines[idx];
                   return (
                     <tr key={idx}>
-                      <td className="px-2 py-1.5 font-mono text-ink-muted">{n}</td>
+                      <td className="px-3 py-2 text-ink-subtle">{n}</td>
                       <td className="space-y-1 px-2 py-1.5">
                         {catalogue.length > 0 && (
                           <select data-grid-field aria-label={`Line ${n} catalogue item`} value={line.item_id}
@@ -462,26 +462,26 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
                       </td>
                       <td className="px-2 py-1.5">
                         <input data-grid-field aria-label={`Line ${n} quantity`} type="number" min="0" step="any" value={line.quantity}
-                          onChange={(e) => updateLine(idx, "quantity", e.target.value)} className={`${cellClass} text-right font-mono`} />
+                          onChange={(e) => updateLine(idx, "quantity", e.target.value)} className={`${cellClass} text-right tabular-nums`} />
                       </td>
                       <td className="px-2 py-1.5">
                         <input data-grid-field aria-label={`Line ${n} rate in rupees`} type="number" min="0" step="0.01" value={line.unit_price}
-                          onChange={(e) => updateLine(idx, "unit_price", e.target.value)} className={`${cellClass} text-right font-mono`} />
+                          onChange={(e) => updateLine(idx, "unit_price", e.target.value)} className={`${cellClass} text-right tabular-nums`} />
                       </td>
                       <td className="px-2 py-1.5">
                         <select data-grid-field aria-label={`Line ${n} GST rate`} value={line.gst_rate}
-                          onChange={(e) => updateLine(idx, "gst_rate", e.target.value)} className={`${cellClass} text-right font-mono`}>
+                          onChange={(e) => updateLine(idx, "gst_rate", e.target.value)} className={`${cellClass} text-right tabular-nums`}>
                           {(GST_RATES.includes(line.gst_rate) ? GST_RATES : [...GST_RATES, line.gst_rate]).map((r) => (
                             <option key={r} value={r}>{r}%</option>
                           ))}
                         </select>
                       </td>
-                      <td className="px-2 py-1.5 text-right font-mono text-ink-soft">{rs(t.taxable)}</td>
-                      <td className="px-2 py-1.5 text-right font-mono font-semibold text-ink">{rs(t.total)}</td>
+                      <td className="px-2 py-1.5 text-right text-ink-soft">{rs(t.taxable)}</td>
+                      <td className="px-2 py-1.5 text-right font-medium text-ink">{rs(t.total)}</td>
                       <td className="px-2 py-1.5 text-center">
                         <button type="button" onClick={() => setLines((prev) => prev.filter((_, i) => i !== idx))}
                           disabled={lines.length === 1} aria-label={`Remove line ${n}`}
-                          className="rounded p-1 text-ink-subtle hover:text-rose-600 disabled:opacity-30">
+                          className="rounded-chip p-1 text-ink-subtle hover:text-bad hover:bg-bad-wash disabled:opacity-30">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </td>
@@ -497,23 +497,23 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             </div>
           </div>
 
-          <fieldset className="rounded-lg border border-line bg-surface p-4 shadow-card space-y-3">
-            <legend className="px-1 text-sm font-semibold text-ink">Bank and UPI details</legend>
-            <p className="text-xs text-ink-muted">
+          <fieldset className="rounded-panel border border-line bg-surface p-5 space-y-3">
+            <legend className="px-1 text-[15px] font-semibold tracking-tight text-ink">Bank and UPI details</legend>
+            <p className="text-[13px] text-ink-muted">
               Printed on the invoice from the company profile. Change them in{" "}
-              <Link href="/settings" className="font-medium text-brand underline">Settings</Link>.
+              <Link href="/settings" className="font-medium text-brand-strong underline">Settings</Link>.
             </p>
             <InvoiceSettlementBlock settlement={settlement} payee={payee} amountPaise={summary.grandTotal}
               invoiceNumber={invoiceNumber.trim()} />
           </fieldset>
         </div>
 
-        <aside aria-label="Tax summary" className="h-fit rounded-lg border border-line bg-surface p-4 shadow-card space-y-3 lg:sticky lg:top-4">
+        <aside aria-label="Tax summary" className="h-fit rounded-panel border border-line bg-surface p-5 space-y-4 lg:sticky lg:top-4">
           <div>
-            <h3 className="text-sm font-semibold text-ink">Tax summary</h3>
-            <p className="text-xs text-ink-muted">{supplyNote}</p>
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink">Tax summary</h3>
+            <p className="mt-0.5 text-[13px] text-ink-muted">{supplyNote}</p>
           </div>
-          <dl className="space-y-1.5 text-xs" aria-live="polite">
+          <dl className="space-y-2 text-[13.5px]" aria-live="polite">
             <SummaryRow label="Taxable value" paise={summary.taxable} />
             {interState ? (
               <SummaryRow label="IGST" paise={summary.igst} />
@@ -525,13 +525,13 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             )}
             <SummaryRow label="Cess" paise={summary.cess} />
             <SummaryRow label="Round off" paise={summary.roundOff} />
-            <div className="flex items-baseline justify-between border-t border-line pt-2">
-              <dt className="text-sm font-semibold text-ink">Grand total</dt>
-              <dd className="font-mono text-base font-semibold text-ink">{rs(summary.grandTotal)}</dd>
+            <div className="flex items-baseline justify-between border-t border-line pt-3">
+              <dt className="text-[14px] font-semibold text-ink">Grand total</dt>
+              <dd className="ledger-total tabular-nums text-[20px] font-semibold tracking-[-0.02em] text-ink">{rs(summary.grandTotal)}</dd>
             </div>
           </dl>
-          <p className="text-xs text-ink-soft">{numberToIndianWords(summary.grandTotal / 100)}</p>
-          <label className="flex items-center gap-2 text-xs text-ink-soft">
+          <p className="text-[12.5px] text-ink-muted">{numberToIndianWords(summary.grandTotal / 100)}</p>
+          <label className="flex items-center gap-2 text-[13px] text-ink-soft">
             <input type="checkbox" checked={roundToRupee} onChange={(e) => setRoundToRupee(e.target.checked)} className="accent-brand" />
             Round off to the nearest rupee
           </label>
@@ -539,7 +539,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
       </div>
 
       {errors.length > 0 && (
-        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+        <div role="alert" className="rounded-ctl border border-bad/25 bg-bad-wash p-3 text-[13px] text-bad">
           <p className="mb-1 flex items-center gap-1.5 font-semibold">
             <AlertTriangle className="h-3.5 w-3.5" /> Fix these before saving
           </p>
@@ -561,7 +561,7 @@ function SummaryRow({ label, paise }: { label: string; paise: number }) {
   return (
     <div className="flex items-baseline justify-between">
       <dt className="text-ink-muted">{label}</dt>
-      <dd className="font-mono text-ink">{rs(paise)}</dd>
+      <dd className="tabular-nums text-ink">{rs(paise)}</dd>
     </div>
   );
 }

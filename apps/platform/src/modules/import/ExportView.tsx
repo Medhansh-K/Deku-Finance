@@ -30,7 +30,7 @@ export function ExportView() {
     setStatementTo(range.to);
   }, []);
 
-  if (!orgId) return <p className="text-sm text-ink-muted">Select a company to export its data.</p>;
+  if (!orgId) return <p className="text-[13.5px] text-ink-muted">Select a company to export its data.</p>;
 
   const run = async (id: string, build: () => Promise<string>) => {
     setBusy(id);
@@ -78,12 +78,12 @@ export function ExportView() {
   return (
     <div className="space-y-6">
       {error && (
-        <p role="alert" className="rounded-lg border border-line bg-canvas p-3 text-sm text-ink">
+        <p role="alert" className="rounded-ctl bg-bad-wash px-4 py-3 text-[13px] text-bad">
           {error}
         </p>
       )}
-      <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-3">
-        <h2 className="text-sm font-semibold text-ink">Masters and reports</h2>
+      <section className="rounded-panel border border-line bg-surface p-5 space-y-3">
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Masters and reports</h2>
         <div data-tour="export-masters" className="flex flex-wrap gap-3">
           {exports.map((x) => (
             <Button key={x.id} variant="outline" isLoading={busy === x.id} onClick={() => run(x.id, x.build)}>
@@ -93,9 +93,9 @@ export function ExportView() {
           ))}
         </div>
       </section>
-      <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-3">
-        <h2 className="text-sm font-semibold text-ink">Financial statements</h2>
-        <p className="text-xs text-ink-muted">Posted entries between the two dates. The balance sheet is as of the To date.</p>
+      <section className="rounded-panel border border-line bg-surface p-5 space-y-3">
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Financial statements</h2>
+        <p className="text-[12.5px] text-ink-muted">Posted entries between the two dates. The balance sheet is as of the To date.</p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-44">
             <Input id="statement-from" label="From" type="date" value={statementFrom} onChange={(e) => setStatementFrom(e.target.value)} />
@@ -117,9 +117,9 @@ export function ExportView() {
           ))}
         </div>
       </section>
-      <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-3">
-        <h2 className="text-sm font-semibold text-ink">Journal day book</h2>
-        <p className="text-xs text-ink-muted">Every posted voucher line between the two dates.</p>
+      <section className="rounded-panel border border-line bg-surface p-5 space-y-3">
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Journal day book</h2>
+        <p className="text-[12.5px] text-ink-muted">Every posted voucher line between the two dates.</p>
         <div data-tour="export-day-book" className="flex flex-wrap items-end gap-3">
           <div className="w-44">
             <Input label="From" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -138,7 +138,7 @@ export function ExportView() {
           </Button>
         </div>
       </section>
-      <p className="text-xs text-ink-muted">Files are built in your browser from your own data. Tally XML export of vouchers is not available yet.</p>
+      <p className="text-[12.5px] text-ink-muted">Files are built in your browser from your own data. Tally XML export of vouchers is not available yet.</p>
     </div>
   );
 }

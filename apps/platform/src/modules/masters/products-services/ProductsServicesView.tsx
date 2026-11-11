@@ -142,21 +142,21 @@ export function ProductsServicesView() {
       header: "SKU",
       sortKey: (it) => it.sku,
       cell: (it) => (
-        <span className="font-mono font-bold text-ink">
+        <span className="font-mono text-[13px] font-medium text-ink">
           {it.sku}
         </span>
       ),
     },
     {
-      header: "Item / Service Name",
+      header: "Item or service",
       sortKey: (it) => it.name,
       cell: (it) => (
         <div>
-          <span className="font-bold text-ink block">
+          <span className="font-medium text-ink block">
             {it.name}
           </span>
           {it.description && (
-            <span className="text-[11px] text-ink-muted">
+            <span className="text-[12.5px] text-ink-muted">
               {it.description}
             </span>
           )}
@@ -167,32 +167,34 @@ export function ProductsServicesView() {
       header: "Type",
       sortKey: (it) => it.type,
       cell: (it) => (
-        <Badge variant={it.type === "services" ? "teal" : "default"}>
+        <Badge variant={it.type === "services" ? "teal" : "default"} className="capitalize">
           {it.type}
         </Badge>
       ),
     },
     {
-      header: "HSN / SAC",
+      header: "HSN/SAC",
       cell: (it) => (
-        <span className="font-mono text-ink-soft">
-          {it.hsn_sac_code || "—"}
+        <span className="font-mono text-[13px] text-ink-soft">
+          {it.hsn_sac_code || "–"}
         </span>
       ),
     },
     {
-      header: "Standard Price",
+      header: "Standard price",
+      align: "right",
       sortKey: (it) => it.default_unit_price,
       cell: (it) => (
-        <span className="font-mono font-bold text-ink">
+        <span className="font-medium text-ink">
           {formatINR(it.default_unit_price)}
         </span>
       ),
     },
     {
-      header: "Default GST Rate",
+      header: "Default GST rate",
+      align: "right",
       cell: (it) => (
-        <span className="font-mono font-semibold text-emerald-700">
+        <span className="text-ink-soft">
           {it.default_gst_rate}%
         </span>
       ),
@@ -200,7 +202,7 @@ export function ProductsServicesView() {
     {
       header: "Unit",
       cell: (it) => (
-        <span className="font-mono text-[11px] text-ink-muted">
+        <span className="font-mono text-[12.5px] text-ink-muted">
           {it.unit_code}
         </span>
       ),
@@ -218,7 +220,7 @@ export function ProductsServicesView() {
             className="h-4 w-4 accent-brand"
           />
         ) : (
-          <span className="text-ink-subtle">—</span>
+          <span className="text-ink-subtle">–</span>
         ),
     },
   ];
@@ -226,9 +228,9 @@ export function ProductsServicesView() {
   return (
     <div className="space-y-4">
       {/* Top Header */}
-      <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
-        <div className="text-xs font-semibold text-ink-soft">
-          Product SKU & GST SAC Catalogue
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[13.5px] text-ink-muted">
+          Product SKUs and GST SAC catalogue
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -245,18 +247,18 @@ export function ProductsServicesView() {
             data-tour="products-new" onClick={() => setIsCreateOpen(true)}
             className="gap-1.5"
           >
-            <Plus className="h-3.5 w-3.5" /> New Catalogue Item
+            <Plus className="h-3.5 w-3.5" /> New catalogue item
           </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
+        <div className="p-3 rounded-ctl bg-bad-wash border border-bad/25 text-[13px] text-bad flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
-          <button onClick={fetchItems} className="underline font-bold ml-2">
+          <button onClick={fetchItems} className="underline font-semibold ml-2">
             Retry
           </button>
         </div>
@@ -275,14 +277,14 @@ export function ProductsServicesView() {
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Add Catalogue Item"
+        title="Add catalogue item"
         description="Configure product or service with HSN/SAC tax classifications"
       >
-        <form onSubmit={handleCreate} className="space-y-3 font-sans text-xs">
+        <form onSubmit={handleCreate} className="space-y-3 font-sans text-[13.5px]">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-ink-muted mb-1">
-                Item Classification
+              <label className="block text-[13px] font-medium text-ink-soft mb-1.5">
+                Item classification
               </label>
               <select
                 value={formData.type}
@@ -292,14 +294,14 @@ export function ProductsServicesView() {
                     type: e.target.value as CatalogueItemType,
                   })
                 }
-                className="w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
+                className="w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
               >
-                <option value="services">Services (SAC Code)</option>
-                <option value="goods">Goods / Products (HSN Code)</option>
+                <option value="services">Services (SAC code)</option>
+                <option value="goods">Goods / products (HSN code)</option>
               </select>
             </div>
             <Input
-              label="SKU / Item Code"
+              label="SKU / item code"
               value={formData.sku}
               onChange={(e) =>
                 setFormData({ ...formData, sku: e.target.value.toUpperCase() })
@@ -310,7 +312,7 @@ export function ProductsServicesView() {
           </div>
 
           <Input
-            label="Name / Title"
+            label="Name / title"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="e.g. Cloud Security Audit Retainer"
@@ -328,10 +330,10 @@ export function ProductsServicesView() {
 
           <div className="grid grid-cols-3 gap-3">
             <HsnCombobox
-              label="HSN / SAC Code"
+              label="HSN / SAC code"
               value={formData.hsn_sac_code}
               onChange={(code) => setFormData({ ...formData, hsn_sac_code: code })}
-              inputClassName="w-full h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
+              inputClassName="w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink placeholder-ink-subtle focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20"
               inputProps={{ placeholder: "Code or description" }}
             />
             <Input
@@ -343,7 +345,7 @@ export function ProductsServicesView() {
               placeholder="OTH, NOS, HRS"
             />
             <Input
-              label="Default GST Rate (%)"
+              label="Default GST rate (%)"
               type="number"
               value={formData.default_gst_rate}
               onChange={(e) =>
@@ -357,7 +359,7 @@ export function ProductsServicesView() {
           </div>
 
           <Input
-            label="Default Unit Price (INR)"
+            label="Default unit price (INR)"
             type="number"
             value={formData.default_unit_price}
             onChange={(e) =>
@@ -379,7 +381,7 @@ export function ProductsServicesView() {
                 onChange={(e) => setFormData({ ...formData, track_inventory: e.target.checked })}
                 className="h-4 w-4 accent-brand"
               />
-              <span className="font-semibold">Track inventory</span>
+              <span className="font-medium">Track inventory</span>
               <span className="text-ink-muted">Issued invoices and purchase bills move its stock.</span>
             </label>
           )}
@@ -399,7 +401,7 @@ export function ProductsServicesView() {
               size="sm"
               isLoading={isSubmitting}
             >
-              Save Item
+              Save item
             </Button>
           </div>
         </form>

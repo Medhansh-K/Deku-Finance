@@ -137,6 +137,28 @@ function accId(orgId: string, code: string): string {
   return `${orgId}-acc-${code}`;
 }
 
+/**
+ * Maker-checker trail for the demo, using only the members defined below: the accountant
+ * (the owner for capital entries) makes and submits each voucher, and the CFO approves and
+ * posts it. Times sit on the voucher's own date, an hour and half an hour before posting.
+ */
+function withApprovalTrail(journals: JournalEntry[]): JournalEntry[] {
+  const before = (iso: string, minutes: number) => new Date(Date.parse(iso) - minutes * 60_000).toISOString();
+  return journals.map((j) => {
+    const at = j.posted_at ?? j.submitted_at;
+    if (!at) return j;
+    const maker = j.journal_entry_lines.some((l) => l.account_id.endsWith("-acc-3010")) ? "u-owner" : "u-acc";
+    return {
+      created_by: maker,
+      created_at: before(at, 60),
+      submitted_by: maker,
+      submitted_at: before(at, 30),
+      ...(j.status === "posted" ? { posted_by: "u-cfo" } : {}),
+      ...j,
+    };
+  });
+}
+
 export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
   const tmpl = getDemoCompany(slug) ?? getDemoCompany("aster-trading")!;
   const orgId = `demo-${tmpl.slug}`;
@@ -518,7 +540,7 @@ export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
       accounts,
       parties: [c1, c2, v1],
       catalogue: [i1, i2],
-      journals,
+      journals: withApprovalTrail(journals),
       invoices,
       notes: [],
       purchases,
@@ -646,7 +668,7 @@ export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
       accounts,
       parties: [c1, c2, v1],
       catalogue: [s1, s2],
-      journals,
+      journals: withApprovalTrail(journals),
       invoices: [
         {
           id: `${orgId}-inv-1`,
@@ -812,7 +834,7 @@ export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
         entry_date: "2026-10-31",
         status: "posted",
         narration: "Amazon ECO Sec 14 / Table 3.1.1 Settlement AMZ-OCT-B2 (Commission & TCS split)",
-        posted_at: "2026-10-31T19:00:00Z",
+        posted_at: "2026-10-31T12:30:00Z",
         journal_entry_lines: [
           { line_number: 1, account_id: accId(orgId, "1020"), debit: 984200, credit: 0, description: "Net payout credited" },
           { line_number: 2, account_id: accId(orgId, "5020"), debit: 180000, credit: 0, description: "Marketplace commission & shipping fee" },
@@ -843,7 +865,7 @@ export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
       accounts,
       parties: [c1, c2, v1],
       catalogue: [k1, k2],
-      journals,
+      journals: withApprovalTrail(journals),
       invoices: [
         {
           id: `${orgId}-inv-1`,
@@ -1046,7 +1068,7 @@ export function createInitialDemoDataset(slug: DemoCompanySlug): DemoDataset {
     accounts,
     parties: [c1, v1],
     catalogue: [m1, m2],
-    journals,
+    journals: withApprovalTrail(journals),
     invoices: [
       {
         id: `${orgId}-inv-1`,

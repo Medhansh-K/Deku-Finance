@@ -38,8 +38,8 @@ import {
 type Tab = "add" | "bulk" | "register";
 
 const fieldClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
-const labelClass = "block text-xs font-medium text-ink-soft";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+const labelClass = "block text-[13px] font-medium text-ink-soft";
 const rupees = (p: number) => formatINR(p / 100);
 
 interface FormState {
@@ -131,7 +131,7 @@ export function PurchasesView() {
   const existing = useMemo(() => new Set(bills.map((b) => billKey(b.supplier_gstin, b.bill_number))), [bills]);
   const totals = useMemo(() => itcTotals(bills, month), [bills, month]);
 
-  if (!orgId) return <p className="text-sm text-ink-muted">Select a company to see its purchase register.</p>;
+  if (!orgId) return <p className="text-[13.5px] text-ink-muted">Select a company to see its purchase register.</p>;
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "add", label: "Add purchase bill" },
@@ -145,7 +145,7 @@ export function PurchasesView() {
         <div className="w-44">
           <Input label="Period" type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
         </div>
-        <p className="text-xs text-ink-muted max-w-md">
+        <p className="text-[12.5px] text-ink-muted max-w-md">
           ITC is placed in the month of the bill date. GSTR-3B Table 4 is built from these bills once any exist for the
           month.
         </p>
@@ -163,23 +163,23 @@ export function PurchasesView() {
         <StatCard label="Bills in period" value={String(totals.count)} hint={month || "No period chosen"} />
       </div>
 
-      <div className="rounded-xl border border-line bg-surface shadow-card">
-        <div data-tour="purchases-tabs" role="tablist" className="flex gap-1 border-b border-line px-2">
+      <div className="rounded-panel border border-line bg-surface">
+        <div data-tour="purchases-tabs" role="tablist" className="flex gap-1 border-b border-line px-3">
           {tabs.map((t) => (
             <button
               key={t.id}
               role="tab"
               aria-selected={tab === t.id}
               onClick={() => setTab(t.id)}
-              className={`px-3 py-2.5 text-sm font-medium border-b-2 -mb-px ${
-                tab === t.id ? "border-brand text-ink" : "border-transparent text-ink-muted hover:text-ink"
+              className={`px-3 py-3 text-[13.5px] border-b-2 -mb-px transition-colors ${
+                tab === t.id ? "border-brand text-ink font-medium" : "border-transparent text-ink-muted hover:text-ink"
               }`}
             >
               {t.label}
             </button>
           ))}
         </div>
-        <div className="p-4">
+        <div className="p-5">
           {tab === "add" && (
             <AddBill
               key={companyGstin ?? ""} // remount so the place of supply defaults to the company's state once loaded
@@ -211,20 +211,20 @@ export function PurchasesView() {
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
-      <p className="text-xs font-medium text-ink-muted">{label}</p>
-      <p className="mt-1 font-mono text-xl font-semibold text-ink">{value}</p>
-      <p className="mt-0.5 text-xs text-ink-subtle">{hint}</p>
+    <div className="rounded-panel border border-line bg-surface p-5">
+      <p className="text-[13px] text-ink-muted">{label}</p>
+      <p className="mt-1.5 tabular-nums text-[26px] font-semibold tracking-[-0.035em] text-ink">{value}</p>
+      <p className="mt-0.5 text-[12.5px] text-ink-muted">{hint}</p>
     </div>
   );
 }
 
 function Notice({ tone, children }: { tone: "error" | "ok"; children: React.ReactNode }) {
   const cls =
-    tone === "error" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-800";
+    tone === "error" ? "border-bad/25 bg-bad-wash text-bad" : "border-ok/25 bg-ok-wash text-ok";
   const Icon = tone === "error" ? AlertTriangle : CheckCircle2;
   return (
-    <div role={tone === "error" ? "alert" : "status"} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${cls}`}>
+    <div role={tone === "error" ? "alert" : "status"} className={`flex items-start gap-2 rounded-ctl border p-3 text-[13.5px] ${cls}`}>
       <Icon className="h-4 w-4 shrink-0 mt-0.5" />
       <div>{children}</div>
     </div>
@@ -372,7 +372,7 @@ function AddBill({
     >
       {notice && <Notice tone="ok">{notice}</Notice>}
       {demo && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-brand/30 bg-brand/5 px-3 py-2 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-ctl border border-brand/30 bg-brand-wash px-3 py-2 text-[13px]">
           <span className="text-ink-soft">
             Need quick sample values? Autofill a realistic supplier bill, then click <strong>Save</strong> yourself.
           </span>
@@ -398,10 +398,10 @@ function AddBill({
                 payableAccountId: apAcc?.id || "",
               });
             }}
-            className="inline-flex items-center gap-1 rounded-lg bg-brand/20 hover:bg-brand/30 border border-brand/40 px-2.5 py-1 font-bold text-ink cursor-pointer"
+            className="inline-flex h-8 items-center gap-1.5 rounded-ctl border border-brand/30 bg-surface px-3 text-[13px] font-medium text-brand-strong hover:bg-brand-wash-strong cursor-pointer"
           >
             <Sparkles className="h-3.5 w-3.5 text-brand-strong" />
-            <span>Autofill Sample Bill</span>
+            <span>Autofill sample bill</span>
           </button>
         </div>
       )}
@@ -416,7 +416,7 @@ function AddBill({
       )}
 
       <fieldset className="grid gap-4 md:grid-cols-3">
-        <legend className="mb-2 text-sm font-semibold text-ink">Supplier and bill</legend>
+        <legend className="mb-2 text-[15px] font-semibold tracking-tight text-ink">Supplier and bill</legend>
         <label className="space-y-1">
           <span className={labelClass}>Supplier (from Parties)</span>
           <select className={fieldClass} value={f.partyId} onChange={(e) => pickSupplier(e.target.value)}>
@@ -451,7 +451,7 @@ function AddBill({
       </fieldset>
 
       <fieldset className="grid gap-4 md:grid-cols-6">
-        <legend className="mb-2 text-sm font-semibold text-ink">
+        <legend className="mb-2 text-[15px] font-semibold tracking-tight text-ink">
           Amounts{" "}
           {intra !== null && (
             <span className="font-normal text-ink-muted">({intra ? "intra-state: CGST + SGST" : "inter-state: IGST"})</span>
@@ -463,13 +463,13 @@ function AddBill({
         <Input label="SGST" isNumeric prefixSymbol="₹" value={f.sgst} onChange={(e) => update({ sgst: e.target.value })} />
         <Input label="IGST" isNumeric prefixSymbol="₹" value={f.igst} onChange={(e) => update({ igst: e.target.value })} />
         <Input label="Cess" isNumeric prefixSymbol="₹" value={f.cess} onChange={(e) => update({ cess: e.target.value })} />
-        <p className="md:col-span-6 text-sm text-ink-muted">
-          Bill total <span className="font-mono text-ink">{rupees(billTotal(draft))}</span>
+        <p className="md:col-span-6 text-[13.5px] text-ink-muted">
+          Bill total <span className="tabular-nums font-semibold text-ink">{rupees(billTotal(draft))}</span>
         </p>
       </fieldset>
 
       <fieldset className="grid gap-4 md:grid-cols-3">
-        <legend className="mb-2 text-sm font-semibold text-ink">Input tax credit</legend>
+        <legend className="mb-2 text-[15px] font-semibold tracking-tight text-ink">Input tax credit</legend>
         <label className="space-y-1">
           <span className={labelClass}>ITC eligibility</span>
           <select
@@ -496,8 +496,8 @@ function AddBill({
         )}
       </fieldset>
 
-      <fieldset data-tour="purchases-voucher" className="space-y-3 rounded-lg border border-line bg-canvas p-3">
-        <label className="flex items-center gap-2 text-sm text-ink">
+      <fieldset data-tour="purchases-voucher" className="space-y-3 rounded-ctl border border-line bg-canvas p-4">
+        <label className="flex items-center gap-2 text-[13.5px] text-ink">
           <input
             type="checkbox"
             checked={f.createVoucher}
@@ -530,7 +530,7 @@ function AddBill({
                 ))}
               </select>
             </label>
-            <p className="md:col-span-2 text-xs text-ink-muted">
+            <p className="md:col-span-2 text-[12.5px] text-ink-muted">
               Eligible tax is debited to the Input CGST/SGST/IGST ledgers; blocked or ineligible tax is added to the
               purchase cost.
             </p>
@@ -599,12 +599,12 @@ function BulkUpload({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-line-strong px-3 py-2 text-sm text-ink hover:bg-canvas">
+        <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-ctl border border-dashed border-line-strong px-3 text-[13.5px] text-ink hover:bg-canvas">
           <UploadCloud className="h-4 w-4 text-ink-muted" />
           {fileName || "Choose a CSV file"}
           <input type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => handleFile(e.target.files?.[0])} />
         </label>
-        <p className="max-w-xl text-xs text-ink-muted">
+        <p className="max-w-xl text-[12.5px] text-ink-muted">
           Columns: Supplier GSTIN, Supplier Name, Invoice No, Invoice Date, Taxable Value, CGST, SGST, IGST. Optional:
           Cess, Place of Supply, ITC Eligibility (eligible / blocked / ineligible), Reason. Without an ITC Eligibility
           column every row is imported as eligible. The file is read in your browser; only valid rows are sent to Deku.
@@ -639,7 +639,7 @@ function BulkUpload({
             <div className="ml-auto flex items-center gap-2">
               {confirming ? (
                 <>
-                  <span className="text-sm text-ink">
+                  <span className="text-[13.5px] text-ink">
                     Import {valid.length} bill{valid.length === 1 ? "" : "s"}? Rows with errors are skipped.
                   </span>
                   <Button variant="tally" size="sm" isLoading={busy} onClick={importRows}>
@@ -656,12 +656,12 @@ function BulkUpload({
               )}
             </div>
           </div>
-          <div className="overflow-x-auto rounded-lg border border-line">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead className="bg-canvas text-ink-muted">
+          <div className="overflow-x-auto rounded-panel border border-line bg-surface">
+            <table className="w-full border-collapse text-left text-[13.5px]">
+              <thead className="bg-[#fafbfa] text-[12.5px] text-ink-muted">
                 <tr>
                   {["Row", "Status", "Supplier", "GSTIN", "Bill no", "Date", "POS", "Taxable", "Tax", "ITC"].map((h) => (
-                    <th key={h} className="px-3 py-2 font-medium">
+                    <th key={h} className={`px-3 py-2.5 font-medium ${h === "Taxable" || h === "Tax" ? "text-right" : ""}`}>
                       {h}
                     </th>
                   ))}
@@ -673,10 +673,10 @@ function BulkUpload({
                   const tax = (d.cgst ?? 0) + (d.sgst ?? 0) + (d.igst ?? 0) + (d.cess ?? 0);
                   return (
                     <tr key={r.row} className="border-t border-line align-top">
-                      <td className="px-3 py-2 font-mono text-ink-muted">{r.row}</td>
+                      <td className="px-3 py-2 text-ink-muted">{r.row}</td>
                       <td className="px-3 py-2">
                         {r.errors.length ? (
-                          <div className="space-y-0.5 text-rose-700">
+                          <div className="space-y-0.5 text-[13px] text-bad">
                             {r.errors.map((e) => (
                               <p key={e}>{e}</p>
                             ))}
@@ -686,14 +686,14 @@ function BulkUpload({
                         )}
                       </td>
                       <td className="px-3 py-2 text-ink">{d.supplier_name}</td>
-                      <td className="px-3 py-2 font-mono text-ink">{d.supplier_gstin}</td>
+                      <td className="px-3 py-2 font-mono text-[13px] text-ink">{d.supplier_gstin}</td>
                       <td className="px-3 py-2 text-ink">{d.bill_number}</td>
                       <td className="px-3 py-2 text-ink">{d.bill_date && formatDateTally(d.bill_date)}</td>
-                      <td className="px-3 py-2 font-mono text-ink">{d.place_of_supply}</td>
-                      <td className="px-3 py-2 text-right font-mono text-ink">
+                      <td className="px-3 py-2 text-ink">{d.place_of_supply}</td>
+                      <td className="px-3 py-2 text-right text-ink">
                         {d.taxable === null || Number.isNaN(d.taxable) ? "–" : rupees(d.taxable)}
                       </td>
-                      <td className="px-3 py-2 text-right font-mono text-ink">{Number.isNaN(tax) ? "–" : rupees(tax)}</td>
+                      <td className="px-3 py-2 text-right text-ink">{Number.isNaN(tax) ? "–" : rupees(tax)}</td>
                       <td className="px-3 py-2 text-ink">{ITC_ELIGIBILITY_LABEL[d.itc_eligibility]}</td>
                     </tr>
                   );
@@ -753,19 +753,19 @@ function Register({
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <label className="flex items-center gap-2 pb-2 text-sm text-ink">
+        <label className="flex items-center gap-2 pb-2 text-[13.5px] text-ink">
           <input type="checkbox" checked={allPeriods} onChange={(e) => setAllPeriods(e.target.checked)} />
           All periods
         </label>
       </div>
       {error && <Notice tone="error">{error}</Notice>}
-      <div className="overflow-x-auto rounded-lg border border-line">
-        <table className="w-full border-collapse text-left text-xs">
-          <thead className="bg-canvas text-ink-muted">
+      <div className="overflow-x-auto rounded-panel border border-line bg-surface">
+        <table className="w-full border-collapse text-left text-[13.5px]">
+          <thead className="bg-[#fafbfa] text-[12.5px] text-ink-muted">
             <tr>
               {["Date", "Supplier", "GSTIN", "Bill no", "Taxable", "CGST", "SGST", "IGST", "Cess", "Total", "ITC", "Voucher", ""].map(
                 (h, i) => (
-                  <th key={i} className="px-3 py-2 font-medium">
+                  <th key={i} className={`px-3 py-2.5 font-medium ${i >= 4 && i <= 9 ? "text-right" : ""}`}>
                     {h}
                   </th>
                 )
@@ -783,12 +783,12 @@ function Register({
             )}
             {rows.map((b) => (
               <tr key={b.id} className="border-t border-line">
-                <td className="px-3 py-2 text-ink whitespace-nowrap">{formatDateTally(b.bill_date)}</td>
+                <td className="px-3 py-2 text-ink-soft whitespace-nowrap">{formatDateTally(b.bill_date)}</td>
                 <td className="px-3 py-2 text-ink">{b.supplier_name}</td>
-                <td className="px-3 py-2 font-mono text-ink">{b.supplier_gstin}</td>
+                <td className="px-3 py-2 font-mono text-[13px] text-ink">{b.supplier_gstin}</td>
                 <td className="px-3 py-2 text-ink">{b.bill_number}</td>
                 {[b.taxable_amount, b.cgst, b.sgst, b.igst, b.cess, b.total_amount].map((v, i) => (
-                  <td key={i} className="px-3 py-2 text-right font-mono text-ink whitespace-nowrap">
+                  <td key={i} className={`px-3 py-2 text-right text-ink whitespace-nowrap ${i === 5 ? "font-medium" : ""}`}>
                     {rupees(paise(v))}
                   </td>
                 ))}
@@ -796,7 +796,7 @@ function Register({
                   <Badge variant={b.itc_eligibility === "eligible" ? "success" : "warning"}>
                     {ITC_ELIGIBILITY_LABEL[b.itc_eligibility]}
                   </Badge>
-                  {b.blocked_reason && <p className="mt-0.5 text-ink-muted">{b.blocked_reason}</p>}
+                  {b.blocked_reason && <p className="mt-0.5 text-[12.5px] text-ink-muted">{b.blocked_reason}</p>}
                 </td>
                 <td className="px-3 py-2 text-ink-muted">{b.journal_entry_id ? "Linked" : "Not in books"}</td>
                 <td className="px-3 py-2">

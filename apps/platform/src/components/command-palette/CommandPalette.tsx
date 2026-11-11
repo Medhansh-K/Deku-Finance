@@ -436,37 +436,38 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   if (!isOpen) return null;
 
+  const kbd =
+    "font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted";
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-panel-deep/40 backdrop-blur-[2px] transition-opacity"
         onClick={onClose}
       />
 
       {/* Palette Container */}
       <div
-        className="relative z-10 w-full max-w-xl rounded-lg border border-edge bg-panel-deep text-white shadow-2xl overflow-hidden font-sans"
+        className="relative z-10 w-full max-w-xl rounded-panel border border-line bg-surface text-ink shadow-pop overflow-hidden font-sans"
         onKeyDown={handleKeyDown}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center border-b border-edge px-4 py-3 bg-panel">
-          <Search className="h-5 w-5 text-brand mr-3" />
+        <div className="flex items-center gap-3 border-b border-line px-4 h-14">
+          <Search className="h-[18px] w-[18px] text-ink-muted shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Go To: Type a report, voucher, master, or setting..."
-            className="w-full bg-transparent text-sm text-white placeholder-slate-400 focus:outline-none"
+            placeholder="Go to a report, voucher, master or setting"
+            className="w-full bg-transparent text-[15px] text-ink placeholder:text-ink-subtle focus:outline-none"
           />
-          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/40 border border-slate-600 text-slate-300">
-            Esc
-          </kbd>
+          <kbd className={kbd}>Esc</kbd>
         </div>
 
         {/* Results List */}
-        <div className="max-h-80 overflow-y-auto p-2 divide-y divide-slate-800/40">
+        <div className="max-h-80 overflow-y-auto p-1.5">
           {filteredCommands.length > 0 ? (
             filteredCommands.map((cmd, idx) => {
               const isSelected = selectedIndex === idx;
@@ -475,73 +476,53 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 <div
                   key={cmd.id}
                   onClick={() => handleSelect(cmd.route)}
-                  className={`flex items-center justify-between p-2.5 rounded cursor-pointer transition-colors ${
-                    isSelected
-                      ? "bg-brand text-ink"
-                      : "text-slate-200 hover:bg-slate-800/50"
+                  className={`flex items-center justify-between gap-3 px-2.5 py-2 rounded-[8px] cursor-pointer transition-colors ${
+                    isSelected ? "bg-brand-wash" : "hover:bg-canvas"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon
-                      className={`h-4 w-4 ${
-                        isSelected ? "text-ink" : "text-brand"
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`h-8 w-8 rounded-[8px] grid place-items-center shrink-0 ${
+                        isSelected ? "bg-surface text-brand-strong" : "bg-canvas-sunken text-ink-soft"
                       }`}
-                    />
-                    <div>
-                      <div className="text-xs font-bold leading-none">
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[14px] font-[550] text-ink truncate">
                         {cmd.title}
                       </div>
                       {cmd.subtitle && (
-                        <div
-                          className={`text-[11px] mt-1 ${
-                            isSelected ? "text-ink/80" : "text-slate-400"
-                          }`}
-                        >
+                        <div className="text-[12.5px] text-ink-muted truncate">
                           {cmd.subtitle}
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded ${
-                        isSelected
-                          ? "bg-black/20 text-ink"
-                          : "bg-slate-800 text-slate-400"
-                      }`}
-                    >
-                      {cmd.category}
-                    </span>
-                    {cmd.shortcut && (
-                      <kbd
-                        className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-                          isSelected
-                            ? "bg-black/10 border-black/30 text-ink"
-                            : "bg-slate-800 border-slate-700 text-brand-soft"
-                        }`}
-                      >
-                        {cmd.shortcut}
-                      </kbd>
-                    )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[12.5px] text-ink-subtle">{cmd.category}</span>
+                    {cmd.shortcut && <kbd className={kbd}>{cmd.shortcut}</kbd>}
                   </div>
                 </div>
               );
             })
           ) : (
-            <div className="py-8 text-center text-xs text-slate-400 font-mono">
-              No matching destinations found for &quot;{query}&quot;.
+            <div className="py-8 text-center text-[13.5px] text-ink-muted">
+              No matching destinations for &quot;{query}&quot;.
             </div>
           )}
         </div>
 
         {/* Footer Shortcut Hints */}
-        <div className="flex items-center justify-between border-t border-edge bg-panel px-4 py-2 text-[11px] text-slate-400 font-mono">
-          <div className="flex items-center gap-3">
-            <span>↑↓ Navigate</span>
-            <span>↵ Select</span>
-            <span>Esc Dismiss</span>
+        <div className="flex items-center justify-between border-t border-line bg-canvas px-4 h-10 text-[12.5px] text-ink-muted">
+          <div className="flex items-center gap-4">
+            <span className="inline-flex items-center gap-1.5"><kbd className={kbd}>↑</kbd><kbd className={kbd}>↓</kbd> Navigate</span>
+            <span className="inline-flex items-center gap-1.5"><kbd className={kbd}>↵</kbd> Select</span>
+            <span className="inline-flex items-center gap-1.5"><kbd className={kbd}>Esc</kbd> Close</span>
           </div>
-          <div className="text-brand-soft">Tally Go To: Alt+G / Ctrl+K</div>
+          <div className="inline-flex items-center gap-1.5">
+            Go to <kbd className={kbd}>Alt+G</kbd> <kbd className={kbd}>Ctrl+K</kbd>
+          </div>
         </div>
       </div>
     </div>

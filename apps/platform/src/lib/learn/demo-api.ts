@@ -36,6 +36,11 @@ function parseBody(options?: RequestOptions): DemoJsonPayload {
   }
 }
 
+/** The demo member who holds the acting role; null for roles the dataset has no member for. */
+function actorId(dataset: DemoDataset, role: OrgRole): string | null {
+  return dataset.members.find((m) => m.role === role)?.user_id ?? null;
+}
+
 function computeBalances(dataset: DemoDataset): Map<string, { debit: number; credit: number }> {
   const map = new Map<string, { debit: number; credit: number }>();
   for (const a of dataset.accounts) map.set(a.id, { debit: 0, credit: 0 });
@@ -314,6 +319,8 @@ export async function dispatchDemoApi(
         entry_number: body.entry_number || `JV-2627-${String(dataset.journals.length + 1).padStart(4, "0")}`,
         entry_date: body.entry_date || "2026-11-10",
         status: "draft",
+        created_at: new Date().toISOString(),
+        created_by: actorId(dataset, role),
         narration: body.narration || "Demo voucher draft",
         reference: body.reference || null,
         journal_entry_lines: (body.lines || []).map((l: Record<string, unknown>, idx: number) => ({
@@ -346,13 +353,16 @@ export async function dispatchDemoApi(
     ctx.updateDataset((prev) => {
       const next = prev.journals.map((j) => {
         if (j.id !== jeId) return j;
+        const now = new Date().toISOString();
+        const by = actorId(prev, role);
+        // Same field changes as the database functions in migration 20.
         if (act === "post") {
-          updatedEntry = { ...j, status: "posted", posted_at: new Date().toISOString() };
+          updatedEntry = { ...j, status: "posted", posted_at: now, posted_by: by };
         } else if (act === "submit") {
-          updatedEntry = { ...j, status: "draft", submitted_at: new Date().toISOString() };
+          updatedEntry = { ...j, status: "draft", submitted_at: now, submitted_by: by, rejected_at: null, rejected_by: null, rejection_reason: null };
         } else if (act === "reject") {
           const body = parseBody(options);
-          updatedEntry = { ...j, status: "draft", rejected_at: new Date().toISOString(), rejection_reason: body.reason || "Sent back for clarification" };
+          updatedEntry = { ...j, status: "draft", rejected_at: now, rejected_by: by, rejection_reason: body.reason || "Sent back for clarification", submitted_at: null, submitted_by: null };
         } else {
           updatedEntry = { ...j, status: "reversed" };
         }

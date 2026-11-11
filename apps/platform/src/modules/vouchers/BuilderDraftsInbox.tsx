@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { FileSpreadsheet, Clock, ArrowRight, Trash2 } from "lucide-react";
+import { Clock, ArrowRight, Trash2 } from "lucide-react";
 import { businessDocumentsApi } from "@/api/endpoints";
 import type { BusinessDocument } from "@/lib/builder/business-documents";
 import { formatINR } from "@/lib/formatters/currency";
@@ -55,8 +55,8 @@ export function BuilderDraftsInbox({ orgId, onSelectDraft, selectedDraftId, onCo
     <button
       type="button"
       onClick={() => setFilter(value)}
-      className={`flex-1 py-1 rounded transition-colors ${
-        filter === value ? "bg-surface text-ink font-bold shadow-2xs" : "text-ink-soft hover:text-ink"
+      className={`flex-1 h-7 rounded-[7px] transition-colors ${
+        filter === value ? "bg-surface text-ink shadow-[0_0_0_1px_var(--color-line)]" : "text-ink-muted hover:text-ink"
       }`}
     >
       {label}
@@ -64,38 +64,35 @@ export function BuilderDraftsInbox({ orgId, onSelectDraft, selectedDraftId, onCo
   );
 
   return (
-    <div className="bg-surface border border-line-strong rounded-lg p-3 shadow-xs space-y-3">
-      <div className="flex items-center justify-between pb-2 border-b border-line">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
-          <div>
-            <h3 className="text-xs font-bold text-ink leading-tight">Purchase orders</h3>
-            <p className="text-[10px] text-ink-muted font-mono">From the Document Builder</p>
-          </div>
+    <div className="rounded-panel border border-line bg-surface p-4 space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-[15px] font-semibold tracking-tight text-ink">Purchase orders</h3>
+          <p className="text-[13px] text-ink-muted">From the Document Builder</p>
         </div>
-        <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-canvas-sunken text-ink-soft border border-line shrink-0">
+        <span className="inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-canvas-sunken text-ink-soft shrink-0 tabular-nums">
           {draftCount} draft
         </span>
       </div>
 
-      <p className="text-[11px] text-ink-soft leading-tight">
+      <p className="text-[12.5px] text-ink-muted leading-snug">
         When the supplier&apos;s bill arrives, pick its PO to pre-fill the purchase voucher, then attach the bill. Quotations and
         proformas convert to sales invoices from the builder&apos;s Documents list.
       </p>
 
-      <div className="flex items-center bg-canvas-sunken p-0.5 rounded border border-line text-[10px] font-semibold">
+      <div className="flex items-center gap-0.5 bg-canvas-sunken p-0.5 rounded-ctl text-[13px] font-medium">
         {tab("all", `All (${docs.length})`)}
         {tab("draft", `Drafts (${draftCount})`)}
         {tab("sent", `Sent (${sentCount})`)}
       </div>
 
-      {error && <div className="p-2 rounded border border-rose-200 bg-rose-50 text-[11px] text-rose-700">{error}</div>}
+      {error && <div className="px-3 py-2 rounded-ctl bg-bad-wash text-[13px] text-bad">{error}</div>}
 
-      <div className="space-y-2 max-h-[380px] overflow-y-auto pr-0.5">
+      <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-0.5">
         {shown.length === 0 ? (
-          <div className="p-4 text-center border border-dashed border-line rounded-lg space-y-2">
-            <Clock className="h-6 w-6 text-ink-subtle mx-auto" />
-            <p className="text-xs text-ink-muted">No purchase orders here yet</p>
+          <div className="px-4 py-6 text-center border border-dashed border-line-strong rounded-ctl space-y-2">
+            <Clock className="h-5 w-5 text-ink-subtle mx-auto" />
+            <p className="text-[13px] text-ink-muted">No purchase orders here yet</p>
           </div>
         ) : (
           shown.map((doc) => {
@@ -107,37 +104,43 @@ export function BuilderDraftsInbox({ orgId, onSelectDraft, selectedDraftId, onCo
                 tabIndex={0}
                 onClick={() => onSelectDraft(doc)}
                 onKeyDown={(e) => e.key === "Enter" && onSelectDraft(doc)}
-                className={`p-2.5 rounded-lg border transition-all cursor-pointer relative group text-left ${
-                  isSelected ? "bg-panel text-white border-brand shadow-sm ring-1 ring-brand" : "bg-canvas/80 hover:bg-canvas-sunken border-line text-ink"
+                className={`px-3 py-2.5 rounded-ctl border transition-colors cursor-pointer relative group text-left ${
+                  isSelected
+                    ? "bg-brand-wash border-brand-wash-strong shadow-[inset_3px_0_0_var(--color-brand)]"
+                    : "bg-surface hover:bg-canvas border-line"
                 }`}
               >
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`font-mono font-bold text-xs ${isSelected ? "text-white" : "text-ink"}`}>{doc.doc_number}</span>
-                  <span className="text-[9px] font-mono px-1 rounded border border-line font-semibold">{doc.status.toUpperCase()}</span>
-                </div>
-                <p className={`text-[11px] font-semibold mt-1 truncate ${isSelected ? "text-white" : "text-ink"}`}>
-                  {doc.parties?.legal_name ?? doc.party_snapshot?.name ?? "–"}
-                </p>
-                <div className={`text-[10px] mt-0.5 flex items-center justify-between ${isSelected ? "text-ink-subtle" : "text-ink-muted"}`}>
-                  <span>Date: {doc.doc_date}</span>
-                  <span className={`font-mono font-bold text-xs ${isSelected ? "text-brand" : "text-ink"}`}>
-                    {formatINR(Number(doc.total_amount))}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[12.5px] font-medium text-ink">{doc.doc_number}</span>
+                  <span
+                    className={`inline-flex items-center h-5 px-1.5 rounded-chip text-xs font-medium capitalize ${
+                      doc.status === "draft" ? "bg-warn-wash text-warn" : "bg-canvas-sunken text-ink-soft"
+                    }`}
+                  >
+                    {doc.status}
                   </span>
                 </div>
-                <div className="mt-2 pt-1.5 border-t border-line/60 flex items-center justify-end gap-1 text-[10px]">
+                <p className="text-[14px] font-[550] text-ink mt-1 truncate">
+                  {doc.parties?.legal_name ?? doc.party_snapshot?.name ?? "–"}
+                </p>
+                <div className="text-[12.5px] mt-0.5 flex items-center justify-between text-ink-muted">
+                  <span>{doc.doc_date}</span>
+                  <span className="font-medium text-[13.5px] text-ink tabular-nums">{formatINR(Number(doc.total_amount))}</span>
+                </div>
+                <div className="mt-2 pt-1.5 border-t border-line flex items-center justify-end gap-1 text-[12.5px]">
                   {doc.status === "draft" && (
                     <button
                       type="button"
                       onClick={(e) => handleDelete(e, doc)}
-                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-ink-subtle hover:text-rose-700 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 rounded-chip text-ink-subtle hover:text-bad hover:bg-bad-wash transition-opacity"
                       title="Delete draft"
                       aria-label={`Delete ${doc.doc_number}`}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   )}
-                  <span className={`font-bold flex items-center gap-0.5 ${isSelected ? "text-brand" : "text-ink-soft group-hover:underline"}`}>
-                    {isSelected ? "Active in desk" : "Pre-fill voucher"} <ArrowRight className="h-2.5 w-2.5" />
+                  <span className={`font-medium flex items-center gap-1 ${isSelected ? "text-brand-strong" : "text-ink-soft group-hover:text-ink"}`}>
+                    {isSelected ? "Active in desk" : "Pre-fill voucher"} <ArrowRight className="h-3 w-3" />
                   </span>
                 </div>
               </div>

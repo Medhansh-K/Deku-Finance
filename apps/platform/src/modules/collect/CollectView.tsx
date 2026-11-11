@@ -145,17 +145,17 @@ export function CollectView() {
     downloadFile(`collect_${tab}_${books?.asOf ?? ""}.csv`, csv, "text/csv;charset=utf-8");
   };
 
-  if (!orgId) return <p className="text-sm text-ink-muted">Select a company to see what customers owe it.</p>;
+  if (!orgId) return <p className="text-[13.5px] text-ink-muted">Select a company to see what customers owe it.</p>;
   if (error)
     return (
-      <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+      <div role="alert" className="rounded-ctl border border-bad/25 bg-bad-wash p-3 text-[13.5px] text-bad">
         {error}. No figures are shown.
       </div>
     );
-  if (!books) return <p className="text-sm text-ink-muted">Loading invoices and ledgers…</p>;
+  if (!books) return <p className="text-[13.5px] text-ink-muted">Loading invoices and ledgers…</p>;
   if (!rows.length)
     return (
-      <p className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-muted shadow-card">
+      <p className="rounded-panel border border-line bg-surface p-6 text-[13.5px] text-ink-muted">
         No issued sales invoices yet, so there is nothing to collect. Issue one from{" "}
         <a className="font-medium text-brand-strong underline" href="/gst">Invoices</a>.
       </p>
@@ -166,14 +166,14 @@ export function CollectView() {
   return (
     <div className="space-y-5">
       {!hasControlAccount && (
-        <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+        <div role="alert" className="rounded-ctl border border-warn/30 bg-warn-wash p-3 text-[13px] text-warn">
           The chart of accounts has no trade debtors ledger (code 1030, or named Trade debtors / Accounts
           receivable), so payments can&apos;t be matched to invoices and amounts due show &ldquo;–&rdquo;. Add one in{" "}
-          <a className="font-semibold underline" href="/masters/chart-of-accounts">Chart of accounts</a>.
+          <a className="font-medium underline" href="/masters/chart-of-accounts">Chart of accounts</a>.
         </div>
       )}
       {hasControlAccount && stats.unposted > 0 && (
-        <p className="text-xs text-ink-muted">
+        <p className="text-[12.5px] text-ink-muted">
           {stats.unposted} issued invoice{stats.unposted === 1 ? " has" : "s have"} no posted journal entry, so
           {stats.unposted === 1 ? " its" : " their"} amount due is unknown (&ldquo;–&rdquo;) and left out of the totals.
         </p>
@@ -196,9 +196,9 @@ export function CollectView() {
         )}
       </div>
 
-      <div className="rounded-xl border border-line bg-surface shadow-card">
-        <div className="flex flex-col gap-3 border-b border-line p-3 lg:flex-row lg:items-end lg:justify-between">
-          <div role="tablist" aria-label="Invoice status" className="flex flex-wrap gap-1">
+      <div className="rounded-panel border border-line bg-surface">
+        <div className="flex flex-col gap-3 border-b border-line px-5 py-4 lg:flex-row lg:items-end lg:justify-between">
+          <div role="tablist" aria-label="Invoice status" className="inline-flex flex-wrap items-center gap-0.5 self-start rounded-ctl bg-canvas-sunken p-[3px]">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -207,11 +207,11 @@ export function CollectView() {
                 aria-selected={tab === t.id}
                 aria-controls="collect-panel"
                 onClick={() => setTab(t.id)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                  tab === t.id ? "bg-panel text-white" : "text-ink-muted hover:bg-canvas-sunken hover:text-ink"
+                className={`inline-flex h-[30px] items-center gap-1.5 rounded-[7px] px-3 text-[13.5px] transition-colors ${
+                  tab === t.id ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]" : "text-ink-muted hover:text-ink"
                 }`}
               >
-                {t.label} <span className="font-mono text-xs">{counts[t.id]}</span>
+                {t.label} <span className="tabular-nums text-[12.5px] text-ink-subtle">{counts[t.id]}</span>
               </button>
             ))}
           </div>
@@ -242,20 +242,20 @@ export function CollectView() {
 
         <div id="collect-panel" role="tabpanel" aria-labelledby={`collect-tab-${tab}`} className="overflow-x-auto">
           {visible.length === 0 ? (
-            <p className="p-6 text-sm text-ink-muted">
+            <p className="p-6 text-[13.5px] text-ink-muted">
               {query.trim() ? `No invoice in this view matches "${query.trim()}".` : TABS.find((t) => t.id === tab)!.empty}
             </p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-[13.5px]">
               <thead>
-                <tr className="border-b border-line text-left text-xs text-ink-muted">
-                  <th scope="col" className="px-3 py-2 font-semibold">Invoice</th>
-                  <th scope="col" className="px-3 py-2 font-semibold">Customer</th>
-                  <th scope="col" className="px-3 py-2 font-semibold">Due date</th>
-                  <th scope="col" className="px-3 py-2 text-right font-semibold">Invoice amount</th>
-                  <th scope="col" className="px-3 py-2 text-right font-semibold">Due now</th>
-                  <th scope="col" className="px-3 py-2 font-semibold">Status</th>
-                  <th scope="col" className="px-3 py-2 font-semibold"><span className="sr-only">Reminder</span></th>
+                <tr className="border-b border-line bg-[#fafbfa] text-left text-[12.5px] text-ink-muted">
+                  <th scope="col" className="px-3 py-2.5 font-medium">Invoice</th>
+                  <th scope="col" className="px-3 py-2.5 font-medium">Customer</th>
+                  <th scope="col" className="px-3 py-2.5 font-medium">Due date</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Invoice amount</th>
+                  <th scope="col" className="px-3 py-2.5 text-right font-medium">Due now</th>
+                  <th scope="col" className="px-3 py-2.5 font-medium">Status</th>
+                  <th scope="col" className="px-3 py-2.5 font-medium"><span className="sr-only">Reminder</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -280,10 +280,10 @@ export function CollectView() {
 
 function Stat({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
-      <div className="text-xs font-medium text-ink-muted">{label}</div>
-      <div className="mt-1 font-mono text-xl font-semibold text-ink">{value}</div>
-      <div className="mt-1 text-[11px] text-ink-subtle">{note}</div>
+    <div className="rounded-panel border border-line bg-surface p-5">
+      <div className="text-[13px] text-ink-muted">{label}</div>
+      <div className="mt-1.5 tabular-nums text-[26px] font-semibold tracking-[-0.035em] text-ink">{value}</div>
+      <div className="mt-1 text-[12.5px] text-ink-muted">{note}</div>
     </div>
   );
 }
@@ -308,14 +308,14 @@ function Row({
   return (
     <tr className="border-b border-line align-top last:border-0">
       <td className="px-3 py-2">
-        <div className="font-medium text-ink">{r.invoice.invoice_number}</div>
-        <div className="text-xs text-ink-muted">{formatDateTally(r.invoice.invoice_date)}</div>
+        <div className="font-mono text-[13px] font-medium text-ink">{r.invoice.invoice_number}</div>
+        <div className="text-[12.5px] text-ink-muted">{formatDateTally(r.invoice.invoice_date)}</div>
       </td>
       <td className="px-3 py-2">
         <div className="text-ink">{r.partyName}</div>
-        {r.invoice.parties?.gstin && <div className="font-mono text-xs text-ink-muted">{r.invoice.parties.gstin}</div>}
+        {r.invoice.parties?.gstin && <div className="font-mono text-[12.5px] text-ink-muted">{r.invoice.parties.gstin}</div>}
         {msme && (
-          <div className="mt-1 flex items-start gap-1 text-xs text-amber-800">
+          <div className="mt-1 flex items-start gap-1 text-[12.5px] text-warn">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             <span>
               Unpaid {r.invoiceAgeDays} days. If you are a Udyam-registered micro or small enterprise, Sec 43B(h):
@@ -327,8 +327,8 @@ function Row({
       <td className="px-3 py-2 text-ink-soft">
         {r.invoice.due_date ? formatDateTally(r.invoice.due_date) : <span title="No due date on this invoice">–</span>}
       </td>
-      <td className="px-3 py-2 text-right font-mono text-ink">{rupees(r.amountPaise)}</td>
-      <td className="px-3 py-2 text-right font-mono text-ink">
+      <td className="px-3 py-2 text-right text-ink">{rupees(r.amountPaise)}</td>
+      <td className="px-3 py-2 text-right font-medium text-ink">
         {r.openPaise === null ? <span title="Not posted to the ledger, so payments can't be matched">–</span> : rupees(r.openPaise)}
       </td>
       <td className="px-3 py-2">
@@ -345,10 +345,10 @@ function Row({
           (isDemo ? (
             <span
               title="External WhatsApp dispatch is blocked in public demo sessions"
-              className="inline-block rounded-md"
+              className="inline-block rounded-ctl"
             >
               <Button variant="secondary" size="sm" disabled>
-                <MessageCircle className="h-4 w-4" aria-hidden /> Simulated in Demo
+                <MessageCircle className="h-4 w-4" aria-hidden /> Simulated in demo
               </Button>
             </span>
           ) : phone.ok ? (
@@ -369,12 +369,12 @@ function Row({
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-line-strong bg-surface px-2.5 text-xs font-medium text-ink shadow-card hover:bg-canvas"
+              className="inline-flex h-8 items-center gap-1.5 rounded-ctl border border-line-strong bg-surface px-3 text-[13px] font-medium text-ink hover:bg-canvas"
             >
               <MessageCircle className="h-4 w-4" aria-hidden /> WhatsApp reminder
             </a>
           ) : (
-            <span title={phone.reason} tabIndex={0} aria-describedby={reasonId} className="inline-block rounded-md">
+            <span title={phone.reason} tabIndex={0} aria-describedby={reasonId} className="inline-block rounded-ctl">
               <Button variant="secondary" size="sm" disabled aria-describedby={reasonId}>
                 <MessageCircle className="h-4 w-4" aria-hidden /> WhatsApp reminder
               </Button>

@@ -2,25 +2,25 @@
  * Colours come from the semantic tokens in src/app/globals.css (@theme); keep these in step. */
 
 :root {
-  --deku-obsidian: #070b14;
-  --deku-charcoal: #0f172a;
-  --deku-slate: #2a3549;
-  --deku-teal: #2ab3a6;
-  --deku-teal-hover: #23a094;
-  --deku-teal-light: rgb(42 179 166 / 0.12);
+  --deku-obsidian: #0c1715;
+  --deku-charcoal: #13211f;
+  --deku-slate: #2c3c39;
+  --deku-teal: #05b8a5;
+  --deku-teal-hover: #04a594;
+  --deku-teal-light: rgb(5 184 165 / 0.12);
   --deku-aqua: #a5e9de;
   --deku-aqua-light: rgb(165 233 222 / 0.18);
 
-  --workspace-bg: #f6f7f9;
+  --workspace-bg: #f4f6f5;
   --workspace-surface: #ffffff;
-  --workspace-border: #e5e7eb;
-  --workspace-border-strong: #d1d5db;
-  --workspace-text-main: #0b1220;
-  --workspace-text-muted: #5f6e82;
-  --workspace-text-subtle: #94a3b8;
+  --workspace-border: #e3e9e6;
+  --workspace-border-strong: #d2dad7;
+  --workspace-text-main: #0e1b19;
+  --workspace-text-muted: #5e6e6a;
+  --workspace-text-subtle: #9aa7a3;
 
-  --deku-focus-ring: 0 0 0 2px rgb(42 179 166 / 0.85);
-  --deku-row-active: rgb(42 179 166 / 0.08);
+  --deku-focus-ring: 0 0 0 2px rgb(5 184 165 / 0.85);
+  --deku-row-active: rgb(5 184 165 / 0.08);
 }
 
 /* Keyboard-driven grid: the active cell stays visible while typing. */
@@ -31,21 +31,20 @@
 }
 
 .deku-table-th {
-  background-color: var(--color-canvas-sunken, #f3f5f8);
-  color: var(--color-ink-soft, #475569);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 9px 12px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-line, #e5e7eb);
+  background-color: #fafbfa;
+  color: var(--color-ink-muted, #5e6e6a);
+  font-size: 12.5px;
+  padding: 11px 14px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-line, #e3e9e6);
   text-align: left;
+  white-space: nowrap;
 }
 
 .deku-table-td {
-  padding: 8px 12px;
-  font-size: 13px;
-  color: var(--color-ink, #0b1220);
-  border-bottom: 1px solid var(--color-canvas-sunken, #eef1f5);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--color-ink, #0e1b19);
+  border-bottom: 1px solid var(--color-line, #e3e9e6);
   font-variant-numeric: tabular-nums;
 }

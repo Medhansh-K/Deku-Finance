@@ -19,6 +19,8 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { DekuLogo } from "@/components/ui/DekuLogo";
 
 function JoinWorkspaceContent() {
   const router = useRouter();
@@ -82,49 +84,42 @@ function JoinWorkspaceContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-[#0A1A1A] text-slate-100 flex flex-col justify-center items-center px-4 py-12">
+    <div className="min-h-screen bg-canvas text-ink flex flex-col justify-center items-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand to-emerald-400 text-slate-950 shadow-xl shadow-brand/20 mb-4 font-black text-2xl tracking-tight">
-            出
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center justify-center gap-2">
-            Deku Financial OS
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand/20 text-brand border border-brand/30 uppercase tracking-widest">
-              Workbench
-            </span>
+          <DekuLogo size={44} className="mx-auto mb-4" />
+          <h1 className="text-[24px] font-semibold tracking-[-0.03em] text-ink">
+            Join your team on Deku Finance
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Accept team invitation to enter collaborative accounting workspace
+          <p className="text-[14px] text-ink-muted mt-1">
+            Accept the invitation to open your team&apos;s accounting workspace
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl space-y-6">
+        <div className="bg-surface border border-line rounded-panel p-6 space-y-5">
           {successInfo ? (
             <div className="text-center space-y-4 py-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/40">
-                <CheckCircle2 className="w-7 h-7" />
+              <div className="w-12 h-12 rounded-full bg-ok-wash text-ok mx-auto grid place-items-center">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Welcome to the Workbench!</h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  You joined <strong className="text-slate-200">{successInfo.orgName}</strong> as{" "}
-                  <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-brand/20 text-brand uppercase">
-                    {successInfo.role}
-                  </span>
+                <h3 className="text-[17px] font-semibold tracking-tight text-ink">You&apos;re in</h3>
+                <p className="text-[13.5px] text-ink-muted mt-1.5">
+                  You joined <span className="font-medium text-ink">{successInfo.orgName}</span> as{" "}
+                  <Badge variant="teal" className="capitalize">{successInfo.role}</Badge>
                 </p>
               </div>
-              <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-brand" />
-                Redirecting to gateway executive dashboard...
+              <p className="text-[13px] text-ink-muted flex items-center justify-center gap-1.5">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-strong" />
+                Taking you to the Gateway…
               </p>
             </div>
           ) : (
             <>
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start gap-2.5">
+                <div className="px-4 py-3 rounded-ctl bg-bad-wash text-bad text-[13px] flex items-start gap-2.5">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{errorMsg}</span>
                 </div>
@@ -132,28 +127,28 @@ function JoinWorkspaceContent() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Invitation Security Token
+                  <label className="block text-[13px] text-ink-muted mb-1.5">
+                    Invitation token
                   </label>
                   <input
                     type="text"
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
                     placeholder="deku-inv-xxxxxxxxxxxxxxxxxxxxxxxx"
-                    className="w-full bg-slate-950/60 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono placeholder:text-slate-600 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                    className="w-full h-10 bg-surface border border-line-strong rounded-ctl px-3 text-[13px] text-ink font-mono placeholder:text-ink-subtle focus:outline-none focus:border-brand"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    Enter or paste the token received in your team invite link
+                  <p className="text-[12.5px] text-ink-muted mt-1.5">
+                    Paste the token from your invite link
                   </p>
                 </div>
 
                 {!user && (
-                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2">
-                    <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                  <div className="px-4 py-3 rounded-ctl bg-warn-wash text-warn text-[13px] flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold">Authentication Required</p>
-                      <p className="text-[11px] text-amber-200/80 mt-0.5">
-                        Please sign in or create an account to link your credentials with this organisation workbench.
+                      <p className="font-medium">Sign in first</p>
+                      <p className="mt-0.5">
+                        Sign in or create an account to link it with this organisation.
                       </p>
                     </div>
                   </div>
@@ -164,18 +159,19 @@ function JoinWorkspaceContent() {
                     type="button"
                     onClick={() => handleAcceptToken()}
                     disabled={isLoading || !tokenInput}
-                    className="w-full bg-brand hover:bg-brand-hover text-slate-950 font-bold text-xs py-3 rounded-xl shadow-lg shadow-brand/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    size="lg"
+                    className="w-full"
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Verifying Invitation...
+                        Checking the invitation…
                       </>
                     ) : (
                       <>
                         <Users className="w-4 h-4" />
-                        Accept Invitation &amp; Enter Workbench
-                        <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        Accept invitation
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </>
                     )}
                   </Button>
@@ -183,28 +179,28 @@ function JoinWorkspaceContent() {
                   <div className="grid grid-cols-2 gap-2.5">
                     <Link
                       href={`/login?redirect=/join?token=${encodeURIComponent(tokenInput)}`}
-                      className="w-full text-center px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition"
+                      className="w-full h-10 grid place-items-center rounded-ctl bg-surface hover:bg-canvas text-ink text-[13.5px] font-medium border border-line-strong transition-colors"
                     >
-                      Sign In
+                      Sign in
                     </Link>
                     <Link
                       href={`/signup?redirect=/join?token=${encodeURIComponent(tokenInput)}`}
-                      className="w-full text-center px-4 py-2.5 rounded-xl bg-brand hover:bg-brand-hover text-slate-950 text-xs font-bold transition shadow-md shadow-brand/10"
+                      className="w-full h-10 grid place-items-center rounded-ctl bg-ink hover:bg-ink-soft text-white text-[13.5px] font-medium transition-colors"
                     >
-                      Create Account
+                      Create account
                     </Link>
                   </div>
                 )}
               </div>
 
               {/* Roles Matrix Explainer */}
-              <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
-                <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand" />
-                  7-Tier Enterprise Multi-Tenant Security
+              <div className="pt-4 border-t border-line space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[13px] font-medium text-ink-soft">
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-strong" />
+                  Seven roles, kept separate
                 </div>
-                <p className="text-[10px] text-slate-500 leading-relaxed">
-                  Roles are strictly segregated into Owner, CFO, Admin, Accountant, Analyst, Auditor, and Viewer. 
+                <p className="text-[12.5px] text-ink-muted leading-relaxed">
+                  Roles are strictly segregated into Owner, CFO, Admin, Accountant, Analyst, Auditor, and Viewer.
                   Audit trails are cryptographically sealed under MCA Rule 3(1).
                 </p>
               </div>
@@ -214,8 +210,8 @@ function JoinWorkspaceContent() {
 
         {/* Back Link */}
         <div className="text-center mt-6">
-          <Link href="/login" className="text-xs text-slate-400 hover:text-white transition">
-            ← Return to Sign In
+          <Link href="/login" className="text-[13px] text-ink-muted hover:text-ink transition-colors">
+            Back to sign in
           </Link>
         </div>
       </div>
@@ -227,8 +223,8 @@ export default function JoinWorkspacePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs">
-          <Loader2 className="w-5 h-5 animate-spin text-brand" />
+        <div className="min-h-screen bg-canvas flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-brand-strong" />
         </div>
       }
     >

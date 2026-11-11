@@ -25,6 +25,7 @@ import {
   Database,
   UserCheck,
   Zap,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -263,30 +264,14 @@ export function AuditTrailView() {
   const renderCrudBadge = (crud: CrudOperation) => {
     switch (crud) {
       case "CREATE":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-            CREATE
-          </span>
-        );
+        return <Badge variant="success">Create</Badge>;
       case "UPDATE":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-300">
-            UPDATE
-          </span>
-        );
+        return <Badge variant="warning">Update</Badge>;
       case "DELETE":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-800 border border-rose-300">
-            DELETE
-          </span>
-        );
+        return <Badge variant="danger">Delete</Badge>;
       case "READ":
       default:
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-sky-100 text-sky-800 border border-sky-300">
-            READ
-          </span>
-        );
+        return <Badge variant="teal">Read</Badge>;
     }
   };
 
@@ -295,34 +280,34 @@ export function AuditTrailView() {
     switch (category) {
       case "VOUCHER":
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-            <Receipt className="h-2.5 w-2.5" /> VOUCHER
-          </span>
+          <Badge>
+            <Receipt className="h-3 w-3" /> Voucher
+          </Badge>
         );
       case "MASTER":
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-300">
-            <BookOpen className="h-2.5 w-2.5" /> MASTER
-          </span>
+          <Badge>
+            <BookOpen className="h-3 w-3" /> Master
+          </Badge>
         );
       case "DOCUMENT":
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-100 text-teal-800 border border-teal-300">
-            <FileText className="h-2.5 w-2.5" /> DOCUMENT
-          </span>
+          <Badge>
+            <FileText className="h-3 w-3" /> Document
+          </Badge>
         );
       case "DEPARTMENT":
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-100 text-indigo-800 border border-indigo-300">
-            <Users className="h-2.5 w-2.5" /> DEPARTMENT
-          </span>
+          <Badge>
+            <Users className="h-3 w-3" /> Department
+          </Badge>
         );
       case "SETTING":
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-canvas-sunken text-ink border border-line-strong">
-            <Settings className="h-2.5 w-2.5" /> SETTING
-          </span>
+          <Badge>
+            <Settings className="h-3 w-3" /> Setting
+          </Badge>
         );
     }
   };
@@ -331,42 +316,49 @@ export function AuditTrailView() {
   const renderStatusIcon = (status: ActivityStatus) => {
     switch (status) {
       case "success":
-        return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />;
+        return <CheckCircle2 className="h-4 w-4 text-ok shrink-0" />;
       case "warning":
-        return <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />;
+        return <AlertTriangle className="h-4 w-4 text-warn shrink-0" />;
       case "error":
-        return <AlertCircle className="h-3.5 w-3.5 text-rose-600 shrink-0" />;
+        return <AlertCircle className="h-4 w-4 text-bad shrink-0" />;
       case "info":
       default:
-        return <Info className="h-3.5 w-3.5 text-blue-500 shrink-0" />;
+        return <Info className="h-4 w-4 text-brand-strong shrink-0" />;
     }
   };
 
+  const segBtn = (on: boolean) =>
+    `h-7 px-2.5 rounded-[7px] text-[13px] font-medium transition-colors ${
+      on ? "bg-surface text-ink shadow-[0_0_0_1px_var(--color-line)]" : "text-ink-muted hover:text-ink"
+    }`;
+  const filterChip = (on: boolean) =>
+    `h-7 px-2.5 rounded-chip text-[13px] whitespace-nowrap transition-colors border ${
+      on
+        ? "bg-brand-wash text-brand-strong border-brand-wash-strong font-medium"
+        : "bg-surface text-ink-soft border-line hover:bg-canvas"
+    }`;
+
   return (
-    <div className="space-y-3 font-sans text-xs pb-10">
-      {/* ========================================================================= */}
-      {/* 1. Header Banner & Live Sync Status                                       */}
-      {/* ========================================================================= */}
-      <div className="bg-surface p-3 rounded-lg border border-line-strong shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div className="space-y-4 font-sans text-[13.5px] pb-10">
+      {/* 1. Header and live capture status */}
+      <div className="bg-surface px-5 py-4 rounded-panel border border-line flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-panel border border-edge flex items-center justify-center text-brand">
-            <ShieldCheck className="h-5 w-5" />
+          <div className="h-9 w-9 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center">
+            <ShieldCheck className="h-[18px] w-[18px]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-sm text-ink tracking-tight">
-                User Activity Logs &amp; Audit Trail
+              <h2 className="font-semibold text-[15px] text-ink tracking-tight">
+                Activity log and audit trail
               </h2>
-              <kbd className="font-mono text-[10px] font-bold text-brand bg-panel px-1.5 py-0.2 rounded border border-edge">
-                Shortcut: L
-              </kbd>
+              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">L</kbd>
             </div>
-            <p className="text-[11px] text-ink-muted flex items-center gap-1.5 mt-0.5">
-              <span>Organisation: <strong>{orgName}</strong></span>
-              <span>•</span>
-              <span className="flex items-center gap-1 text-emerald-700 font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                Live User Activity Capture Active
+            <p className="text-[13px] text-ink-muted flex items-center gap-1.5 mt-0.5">
+              <span>Organisation: <span className="text-ink-soft font-medium">{orgName}</span></span>
+              <span className="text-ink-subtle">·</span>
+              <span className="flex items-center gap-1.5 text-ok">
+                <span className="h-1.5 w-1.5 rounded-full bg-ok inline-block" />
+                Capturing activity live
               </span>
             </p>
           </div>
@@ -381,7 +373,7 @@ export function AuditTrailView() {
             isLoading={isLoadingDb}
             title="Refresh activity logs"
           >
-            <RefreshCw className="h-3 w-3" /> Refresh
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </Button>
 
           {/* Export Dropdown */}
@@ -390,30 +382,29 @@ export function AuditTrailView() {
               variant="outline"
               size="sm"
               onClick={() => setIsExportMenuOpen((prev) => !prev)}
-              className="text-xs"
             >
-              <Download className="h-3 w-3" /> Export Logs <ChevronDown className="h-3 w-3 ml-0.5" />
+              <Download className="h-3.5 w-3.5" /> Export logs <ChevronDown className="h-3.5 w-3.5 ml-0.5" />
             </Button>
             {isExportMenuOpen && (
               <div
-                className="absolute right-0 mt-1 w-44 bg-surface border border-line-strong rounded shadow-lg z-20 py-1 text-xs"
+                className="absolute right-0 mt-1 w-44 bg-surface border border-line rounded-ctl shadow-pop z-20 p-1 text-[13.5px]"
                 onClick={() => setIsExportMenuOpen(false)}
               >
                 <button
                   type="button"
                   onClick={() => downloadSecureAuditExport(orgId, "json", orgName)}
-                  className="w-full text-left px-3 py-1.5 hover:bg-canvas-sunken flex items-center justify-between text-ink-soft"
+                  className="w-full text-left px-2.5 py-1.5 rounded-[7px] hover:bg-brand-wash flex items-center justify-between text-ink"
                 >
                   <span>Export JSON</span>
-                  <span className="font-mono text-[9px] text-ink-subtle">.json</span>
+                  <span className="font-mono text-xs text-ink-subtle">.json</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => downloadSecureAuditExport(orgId, "csv", orgName)}
-                  className="w-full text-left px-3 py-1.5 hover:bg-canvas-sunken flex items-center justify-between text-ink-soft"
+                  className="w-full text-left px-2.5 py-1.5 rounded-[7px] hover:bg-brand-wash flex items-center justify-between text-ink"
                 >
                   <span>Export CSV</span>
-                  <span className="font-mono text-[9px] text-ink-subtle">.csv</span>
+                  <span className="font-mono text-xs text-ink-subtle">.csv</span>
                 </button>
               </div>
             )}
@@ -423,136 +414,67 @@ export function AuditTrailView() {
       </div>
 
       {dbError && (
-        <p role="alert" className="text-xs text-rose-700 flex items-center gap-1.5">
-          <AlertCircle className="h-3.5 w-3.5" /> {dbError}
+        <p role="alert" className="text-[13px] text-bad flex items-center gap-1.5">
+          <AlertCircle className="h-4 w-4" /> {dbError}
         </p>
       )}
 
-      {/* ========================================================================= */}
-      {/* 2. Top Statistics Cards (Pure CRUD Operations)                           */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <div className="bg-surface p-2.5 rounded-lg border border-line-strong shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-ink-muted uppercase font-semibold">
-              Total CRUD Operations
-            </span>
-            <Database className="h-3.5 w-3.5 text-ink-subtle" />
+      {/* 2. Summary counts by operation */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Total operations", value: stats.total, note: "Ledger and data changes", icon: Database, tone: "text-ink" },
+          { label: "Created", value: stats.createCount, note: "New vouchers, masters and records", icon: Sparkles, tone: "text-ok" },
+          { label: "Updated", value: stats.updateCount, note: "Status, permission and limit changes", icon: RefreshCw, tone: "text-warn" },
+          { label: "Deleted or purged", value: stats.deleteCount, note: "Archived accounts and catalogue items", icon: Trash2, tone: "text-bad" },
+        ].map((k) => (
+          <div key={k.label} className="bg-surface px-5 py-4 rounded-panel border border-line">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] text-ink-muted">{k.label}</span>
+              <k.icon className="h-4 w-4 text-ink-subtle" />
+            </div>
+            <div className={`text-[26px] font-semibold tracking-[-0.035em] tabular-nums mt-1 ${k.tone}`}>
+              {k.value}
+            </div>
+            <span className="text-[12.5px] text-ink-muted">{k.note}</span>
           </div>
-          <div className="text-xl font-bold font-mono text-ink mt-1">
-            {stats.total}
-          </div>
-          <span className="text-[10px] text-ink-subtle font-mono">
-            Pure ledger &amp; data modifications
-          </span>
-        </div>
-
-        <div className="bg-surface p-2.5 rounded-lg border border-line-strong shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-emerald-600 uppercase font-semibold">
-              Created (C)
-            </span>
-            <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
-          </div>
-          <div className="text-xl font-bold font-mono text-emerald-700 mt-1">
-            {stats.createCount}
-          </div>
-          <span className="text-[10px] text-ink-subtle font-mono">
-            New vouchers, masters &amp; records
-          </span>
-        </div>
-
-        <div className="bg-surface p-2.5 rounded-lg border border-line-strong shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-amber-600 uppercase font-semibold">
-              Updated (U)
-            </span>
-            <RefreshCw className="h-3.5 w-3.5 text-amber-500" />
-          </div>
-          <div className="text-xl font-bold font-mono text-amber-700 mt-1">
-            {stats.updateCount}
-          </div>
-          <span className="text-[10px] text-ink-subtle font-mono">
-            Status, permissions &amp; limit revisions
-          </span>
-        </div>
-
-        <div className="bg-surface p-2.5 rounded-lg border border-line-strong shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-rose-600 uppercase font-semibold">
-              Deleted / Purged (D)
-            </span>
-            <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-          </div>
-          <div className="text-xl font-bold font-mono text-rose-700 mt-1">
-            {stats.deleteCount}
-          </div>
-          <span className="text-[10px] text-ink-subtle font-mono">
-            Archived accounts &amp; catalog items
-          </span>
-        </div>
+        ))}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. Search Bar & Filter Categories                                         */}
-      {/* ========================================================================= */}
-      <div data-tour="audit-filters" className="bg-surface p-3 rounded-lg border border-line-strong shadow-2xs space-y-2.5">
+      {/* 3. Search and filters */}
+      <div data-tour="audit-filters" className="bg-surface p-4 rounded-panel border border-line space-y-3">
         <div className="flex flex-col md:flex-row items-center gap-2">
           {/* Live Search */}
           <div className="relative flex-1 w-full">
-            <Search className="h-4 w-4 text-ink-subtle absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="h-4 w-4 text-ink-subtle absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search CRUD events by action, description, actor, entity ID, or module..."
-              className="w-full bg-canvas border border-line-strong rounded pl-8 pr-3 py-1.5 text-xs text-ink focus:outline-none focus:border-brand focus:bg-surface transition-colors"
+              placeholder="Search by action, description, person, record ID or module"
+              className="w-full h-9 bg-surface border border-line-strong rounded-ctl pl-9 pr-8 text-[13.5px] text-ink placeholder:text-ink-subtle focus:outline-none focus:border-brand transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink-soft text-xs font-mono"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink-soft"
+                aria-label="Clear search"
               >
-                ✕
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
 
           {/* Time Filter Pill Selector */}
-          <div className="flex items-center gap-1 bg-canvas-sunken p-1 rounded border border-line text-xs shrink-0">
-            <button
-              type="button"
-              onClick={() => setTimeFilter("ALL")}
-              className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
-                timeFilter === "ALL"
-                  ? "bg-panel text-white shadow-2xs"
-                  : "text-ink-soft hover:text-ink"
-              }`}
-            >
-              All Time
+          <div className="flex items-center gap-0.5 bg-canvas-sunken p-0.5 rounded-ctl shrink-0">
+            <button type="button" onClick={() => setTimeFilter("ALL")} className={segBtn(timeFilter === "ALL")}>
+              All time
             </button>
-            <button
-              type="button"
-              onClick={() => setTimeFilter("TODAY")}
-              className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
-                timeFilter === "TODAY"
-                  ? "bg-panel text-white shadow-2xs"
-                  : "text-ink-soft hover:text-ink"
-              }`}
-            >
+            <button type="button" onClick={() => setTimeFilter("TODAY")} className={segBtn(timeFilter === "TODAY")}>
               Today
             </button>
-            <button
-              type="button"
-              onClick={() => setTimeFilter("7DAYS")}
-              className={`px-2 py-0.5 rounded font-mono text-[10px] font-semibold transition-colors ${
-                timeFilter === "7DAYS"
-                  ? "bg-panel text-white shadow-2xs"
-                  : "text-ink-soft hover:text-ink"
-              }`}
-            >
-              Last 7 Days
+            <button type="button" onClick={() => setTimeFilter("7DAYS")} className={segBtn(timeFilter === "7DAYS")}>
+              Last 7 days
             </button>
           </div>
 
@@ -560,10 +482,10 @@ export function AuditTrailView() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-canvas border border-line-strong text-ink-soft rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-brand shrink-0"
+            className="h-9 bg-surface border border-line-strong text-ink-soft rounded-ctl px-2.5 text-[13.5px] focus:outline-none focus:border-brand shrink-0"
             title="Filter by status"
           >
-            <option value="ALL">All Statuses</option>
+            <option value="ALL">All statuses</option>
             <option value="success">Success</option>
             <option value="info">Info</option>
             <option value="warning">Warning</option>
@@ -572,81 +494,58 @@ export function AuditTrailView() {
         </div>
 
         {/* CRUD Operation Filter Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs border-t border-line pt-2">
-          <span className="text-[10px] font-mono uppercase font-bold text-ink-subtle mr-1 shrink-0">
-            CRUD Op:
-          </span>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-t border-line pt-3">
+          <span className="text-[13px] text-ink-muted mr-1 shrink-0">Operation</span>
           {[
-            { id: "ALL", label: "All CRUD Operations" },
-            { id: "CREATE", label: "CREATE", color: "hover:border-emerald-300" },
-            { id: "UPDATE", label: "UPDATE", color: "hover:border-amber-300" },
-            { id: "DELETE", label: "DELETE", color: "hover:border-rose-300" },
-            { id: "READ", label: "READ", color: "hover:border-sky-300" },
-          ].map((op) => {
-            const isSelected = selectedCrud === op.id;
-            return (
-              <button
-                key={op.id}
-                type="button"
-                onClick={() => setSelectedCrud(op.id)}
-                className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold whitespace-nowrap transition-colors border ${
-                  isSelected
-                    ? "bg-panel text-brand-soft border-edge shadow-2xs"
-                    : "bg-canvas text-ink-soft border-line hover:bg-canvas-sunken"
-                }`}
-              >
-                {op.label}
-              </button>
-            );
-          })}
+            { id: "ALL", label: "All operations" },
+            { id: "CREATE", label: "Create" },
+            { id: "UPDATE", label: "Update" },
+            { id: "DELETE", label: "Delete" },
+            { id: "READ", label: "Read" },
+          ].map((op) => (
+            <button
+              key={op.id}
+              type="button"
+              onClick={() => setSelectedCrud(op.id)}
+              className={filterChip(selectedCrud === op.id)}
+            >
+              {op.label}
+            </button>
+          ))}
         </div>
 
         {/* Module Category Filter Tabs (Navigation removed) */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs border-t border-line pt-2">
-          <span className="text-[10px] font-mono uppercase font-bold text-ink-subtle mr-1 shrink-0">
-            Module:
-          </span>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-t border-line pt-3">
+          <span className="text-[13px] text-ink-muted mr-1 shrink-0">Module</span>
           {[
-            { id: "ALL", label: "All Modules" },
-            { id: "VOUCHER", label: "Vouchers & Journal" },
-            { id: "MASTER", label: "Chart of Accounts & Masters" },
-            { id: "DOCUMENT", label: "Document Builder" },
-            { id: "DEPARTMENT", label: "Departments & Payroll" },
-            { id: "SETTING", label: "Company & Settings" },
-          ].map((cat) => {
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-2.5 py-1 rounded text-[11px] font-medium whitespace-nowrap transition-colors border ${
-                  isSelected
-                    ? "bg-panel text-brand-soft border-edge font-bold shadow-2xs"
-                    : "bg-canvas text-ink-soft border-line hover:bg-canvas-sunken"
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
+            { id: "ALL", label: "All modules" },
+            { id: "VOUCHER", label: "Vouchers and journal" },
+            { id: "MASTER", label: "Chart of accounts and masters" },
+            { id: "DOCUMENT", label: "Document builder" },
+            { id: "DEPARTMENT", label: "Departments and payroll" },
+            { id: "SETTING", label: "Company and settings" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.id)}
+              className={filterChip(selectedCategory === cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 4. Activity Logs Feed / Table                                             */}
-      {/* ========================================================================= */}
-      <div className="bg-surface rounded-lg border border-line-strong shadow-2xs overflow-hidden">
-        {/* Table Header Bar */}
-        <div className="px-4 py-2.5 bg-canvas border-b border-line flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-brand" />
-            <span className="font-mono text-xs font-bold text-ink uppercase tracking-wide">
-              CRUD Activity Stream ({filteredLogs.length} events)
-            </span>
+      {/* 4. Activity feed */}
+      <div className="bg-surface rounded-panel border border-line overflow-hidden">
+        <div className="px-5 pt-4 pb-3 border-b border-line flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[15px] font-semibold tracking-tight text-ink">Activity stream</span>
+            <span className="text-[13px] text-ink-muted tabular-nums">{filteredLogs.length} events</span>
           </div>
-          <span className="text-[10px] font-mono text-ink-subtle">
-            Press <strong>L</strong> anywhere in Deku Finance to jump here
+          <span className="text-[12.5px] text-ink-muted inline-flex items-center gap-1.5">
+            Press <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">L</kbd> anywhere to jump here
           </span>
         </div>
 
@@ -660,39 +559,37 @@ export function AuditTrailView() {
               return (
                 <div
                   key={log.id}
-                  className={`p-3 transition-colors ${
-                    isExpanded ? "bg-canvas/80" : "hover:bg-canvas/50"
+                  className={`px-5 py-3.5 transition-colors ${
+                    isExpanded ? "bg-brand-wash/60" : "hover:bg-canvas"
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                     {/* Left: Icon, CRUD Op, Category, Action, Description */}
-                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
                       <div className="pt-0.5">{renderStatusIcon(log.status)}</div>
                       <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center flex-wrap gap-1.5">
                           {renderCrudBadge(log.crudType)}
                           {renderCategoryBadge(log.category)}
-                          <span className="font-bold text-ink text-xs">
+                          <span className="font-[550] text-ink text-[14px]">
                             {log.action}
                           </span>
                           {log.source === "database" && (
-                            <span className="px-1.5 py-0.2 rounded font-mono text-[9px] bg-canvas-sunken text-ink-soft border border-line-strong">
-                              PostgreSQL Trigger
-                            </span>
+                            <Badge variant="outline">Database trigger</Badge>
                           )}
                         </div>
 
-                        <p className="text-xs text-ink-soft leading-relaxed font-normal">
+                        <p className="text-[13.5px] text-ink-soft leading-relaxed">
                           {log.description}
                         </p>
 
-                        <div className="flex items-center flex-wrap gap-2 text-[10px] font-mono text-ink-muted pt-0.5">
-                          <span className="bg-canvas-sunken px-1.5 py-0.5 rounded border border-line">
-                            Target: <strong>{log.entityType}</strong> ({log.entityId})
+                        <div className="flex items-center flex-wrap gap-2 text-[12.5px] text-ink-muted pt-0.5">
+                          <span>
+                            {log.entityType} <span className="font-mono text-ink-subtle">{log.entityId}</span>
                           </span>
-                          <span className="text-ink-subtle">•</span>
-                          <span className="flex items-center gap-1 text-ink-soft">
-                            <UserCheck className="h-3 w-3 text-ink-subtle" />
+                          <span className="text-ink-subtle">·</span>
+                          <span className="flex items-center gap-1">
+                            <UserCheck className="h-3.5 w-3.5 text-ink-subtle" />
                             {log.actor} ({log.role})
                           </span>
                         </div>
@@ -700,14 +597,14 @@ export function AuditTrailView() {
                     </div>
 
                     {/* Right: Timestamp & Details toggle */}
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1 shrink-0 pt-0.5">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-0.5 shrink-0 pt-0.5">
                       <span
-                        className="font-mono text-[11px] font-semibold text-ink-soft cursor-default"
+                        className="text-[13px] font-medium text-ink-soft cursor-default tabular-nums"
                         title={new Date(log.timestamp).toLocaleString()}
                       >
                         {formatTimeAgo(log.timestamp)}
                       </span>
-                      <span className="text-[10px] font-mono text-ink-subtle hidden sm:inline">
+                      <span className="text-[12.5px] text-ink-subtle hidden sm:inline tabular-nums">
                         {new Date(log.timestamp).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -719,12 +616,12 @@ export function AuditTrailView() {
                         <button
                           type="button"
                           onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
-                          className="mt-1 text-[10px] font-mono text-brand-strong hover:text-brand flex items-center gap-0.5 font-semibold"
+                          className="mt-1 text-[12.5px] text-brand-strong hover:text-ink flex items-center gap-0.5 font-medium"
                         >
                           {isExpanded ? (
-                            <>Hide Payload <ChevronDown className="h-3 w-3" /></>
+                            <>Hide payload <ChevronDown className="h-3.5 w-3.5" /></>
                           ) : (
-                            <>Inspect Payload <ChevronRight className="h-3 w-3" /></>
+                            <>Inspect payload <ChevronRight className="h-3.5 w-3.5" /></>
                           )}
                         </button>
                       )}
@@ -733,12 +630,12 @@ export function AuditTrailView() {
 
                   {/* Expandable Metadata Payload */}
                   {isExpanded && hasMetadata && (
-                    <div className="mt-2.5 p-2.5 bg-panel text-emerald-400 rounded-md font-mono text-[10px] border border-slate-700 overflow-x-auto shadow-inner">
-                      <div className="flex items-center justify-between text-ink-subtle border-b border-slate-700 pb-1 mb-1.5">
-                        <span>Structured Audit Event Payload</span>
-                        <span>Log ID: {log.id}</span>
+                    <div className="mt-3 p-3 bg-canvas-sunken text-ink-soft rounded-ctl border border-line overflow-x-auto">
+                      <div className="flex items-center justify-between text-[12.5px] text-ink-muted border-b border-line pb-1.5 mb-2">
+                        <span>Event payload</span>
+                        <span>Log ID <span className="font-mono">{log.id}</span></span>
                       </div>
-                      <pre className="whitespace-pre-wrap leading-tight">
+                      <pre className="font-mono text-[12.5px] whitespace-pre-wrap leading-snug">
                         {JSON.stringify(log.metadata, null, 2)}
                       </pre>
                     </div>
@@ -747,13 +644,13 @@ export function AuditTrailView() {
               );
             })
           ) : (
-            <div className="py-12 text-center text-xs text-ink-muted space-y-2">
-              <Clock className="h-8 w-8 text-slate-300 mx-auto" />
-              <div className="font-semibold text-ink-soft">
-                No activity log records matched your query.
+            <div className="py-12 text-center text-[13.5px] text-ink-muted space-y-2">
+              <Clock className="h-8 w-8 text-ink-subtle mx-auto" />
+              <div className="font-[550] text-ink">
+                No activity matched your filters.
               </div>
-              <p className="text-[11px] text-ink-subtle max-w-sm mx-auto">
-                Try clearing your search query or switching categories. Every action you perform in Deku Finance is logged automatically.
+              <p className="text-[12.5px] text-ink-muted max-w-sm mx-auto">
+                Try clearing the search or switching categories. Every action in Deku Finance is logged automatically.
               </p>
               <Button
                 variant="outline"
@@ -764,23 +661,21 @@ export function AuditTrailView() {
                   setSelectedStatus("ALL");
                   setTimeFilter("ALL");
                 }}
-                className="mt-2 text-xs"
+                className="mt-2"
               >
-                Reset Filters
+                Reset filters
               </Button>
             </div>
           )}
         </div>
 
         {/* Footer Note */}
-        <div className="p-3 bg-canvas border-t border-line flex flex-col sm:flex-row items-center justify-between text-[11px] text-ink-muted gap-2 font-mono">
+        <div className="px-5 py-3 bg-canvas border-t border-line flex flex-col sm:flex-row items-center justify-between text-[12.5px] text-ink-muted gap-2">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5 text-brand" />
-            <span>Section 128(5) &amp; Rule 3(1) Companies (Accounts) Rules Compliance Verified</span>
+            <ShieldCheck className="h-3.5 w-3.5 text-brand-strong" />
+            <span>Kept for Section 128(5) and Rule 3(1), Companies (Accounts) Rules</span>
           </div>
-          <div className="text-ink-subtle">
-            Append-only • Non-repudiation audit trail
-          </div>
+          <div>Append-only, non-repudiable audit trail</div>
         </div>
       </div>
     </div>

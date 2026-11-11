@@ -24,8 +24,9 @@ import {
 const CHANNELS = SALES_CHANNELS.filter((c) => c.value !== "direct");
 const channelLabel = (v: string) => CHANNELS.find((c) => c.value === v)?.label ?? v;
 const fieldClass =
-  "w-full h-9 rounded-md border border-line-strong bg-surface px-3 text-sm text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
-const labelClass = "block text-xs font-medium text-ink-soft";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
+const labelClass = "block text-[13px] font-medium text-ink-soft";
+const th = "px-3.5 py-2.5 text-[12.5px] font-medium text-ink-muted bg-canvas-sunken/50 border-b border-line whitespace-nowrap";
 const rupees = (p: number) => formatINR(p / 100);
 const deductions = (s: MarketplaceSettlement) =>
   Number(s.refunds) + Number(s.commission) + Number(s.other_fees) + Number(s.gst_on_fees) + Number(s.tcs_amount) + Number(s.tds_amount);
@@ -59,7 +60,7 @@ export function MarketplaceView() {
     loadSettlements();
   }, [orgId, loadSettlements]);
 
-  if (!orgId) return <p className="text-sm text-ink-muted">Select a company to import marketplace settlements.</p>;
+  if (!orgId) return <p className="text-[13.5px] text-ink-muted">Select a company to import marketplace settlements.</p>;
 
   return (
     <div className="space-y-6">
@@ -157,8 +158,8 @@ function Importer({
   };
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-4">
-      <h2 className="text-sm font-semibold text-ink">Import a settlement</h2>
+    <section className="rounded-panel border border-line bg-surface p-5 space-y-4">
+      <h2 className="text-[15px] font-semibold tracking-tight text-ink">Import a settlement</h2>
       <div className="flex flex-wrap items-end gap-4">
         <div className="w-44">
           <label htmlFor="mkt-channel" className={labelClass}>
@@ -175,12 +176,12 @@ function Importer({
             ))}
           </select>
         </div>
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-line-strong px-3 py-2 text-sm text-ink hover:bg-canvas">
+        <label className="inline-flex cursor-pointer items-center gap-2 h-9 rounded-ctl border border-dashed border-line-strong px-3 text-[13.5px] text-ink-soft hover:bg-canvas">
           <UploadCloud className="h-4 w-4 text-ink-muted" />
           {fileName || "Choose the settlement report (CSV)"}
           <input type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => handleFile(e.target.files?.[0])} />
         </label>
-        <p className="max-w-md text-xs text-ink-muted">
+        <p className="max-w-md text-[12.5px] text-ink-muted">
           The file is read in your browser. Only the totals and the rows you save are sent to Deku.
         </p>
       </div>
@@ -190,8 +191,8 @@ function Importer({
       {text && (
         <>
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Map columns</h3>
-            <p className="mt-1 text-xs text-ink-muted">
+            <h3 className="text-[13px] font-semibold text-ink-soft">Map columns</h3>
+            <p className="mt-1 text-[12.5px] text-ink-muted">
               Match your file&apos;s columns once; the mapping is saved for {channelLabel(channel)} with the settlement.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -216,11 +217,12 @@ function Importer({
                 </div>
               ))}
             </div>
-            <label className="mt-3 inline-flex items-center gap-2 text-sm text-ink">
+            <label className="mt-3 inline-flex items-center gap-2 text-[13.5px] text-ink">
               <input
                 type="checkbox"
                 checked={map.deductions_negative}
                 onChange={(e) => setMap((m) => ({ ...m, deductions_negative: e.target.checked }))}
+                className="accent-brand"
               />
               The report shows refunds, fees and withheld taxes as negative numbers
             </label>
@@ -231,23 +233,23 @@ function Importer({
           ) : (
             parsed && (
               <div className="space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Preview</h3>
-                <table className="w-full max-w-lg text-sm">
+                <h3 className="text-[13px] font-semibold text-ink-soft">Preview</h3>
+                <table className="w-full max-w-lg text-[13.5px]">
                   <tbody>
                     {AMOUNT_FIELDS.map((f) => (
                       <tr key={f} className="border-b border-line">
-                        <td className="py-1.5 text-ink-soft">{FIELDS.find((x) => x.key === f)!.label}</td>
-                        <td className="py-1.5 text-right font-mono text-ink">{rupees(parsed.totals[f])}</td>
+                        <td className="py-2 text-ink-soft">{FIELDS.find((x) => x.key === f)!.label}</td>
+                        <td className="py-2 text-right tabular-nums text-ink">{rupees(parsed.totals[f])}</td>
                       </tr>
                     ))}
-                    <tr className="border-b border-line font-semibold">
-                      <td className="py-1.5 text-ink">Net payout (sales less deductions)</td>
-                      <td className="py-1.5 text-right font-mono text-ink">{rupees(netFrom(parsed.totals))}</td>
+                    <tr className="border-b border-line-strong font-semibold">
+                      <td className="py-2 text-ink">Net payout (sales less deductions)</td>
+                      <td className="py-2 text-right tabular-nums text-ink"><span className="ledger-total">{rupees(netFrom(parsed.totals))}</span></td>
                     </tr>
                     {parsed.fileNetPaise !== null && (
                       <tr>
-                        <td className="py-1.5 text-ink-soft">Net payout in the file</td>
-                        <td className="py-1.5 text-right font-mono text-ink">
+                        <td className="py-2 text-ink-soft">Net payout in the file</td>
+                        <td className="py-2 text-right tabular-nums text-ink">
                           {rupees(parsed.fileNetPaise)}{" "}
                           {parsed.fileNetPaise === parsed.computedNetPaise ? (
                             <Badge variant="success">matches</Badge>
@@ -300,7 +302,7 @@ function Importer({
                 </div>
 
                 {blockers.length > 0 && (
-                  <ul className="list-disc pl-4 text-sm text-ink-muted">
+                  <ul className="list-disc pl-4 text-[13.5px] text-ink-muted">
                     {blockers.map((b) => (
                       <li key={b}>{b}</li>
                     ))}
@@ -369,9 +371,9 @@ function Register({
   };
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-4 shadow-card space-y-4">
+    <section className="rounded-panel border border-line bg-surface p-5 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h2 className="text-sm font-semibold text-ink">Settlements register</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-ink">Settlements register</h2>
         <div className="w-72">
           <label htmlFor="mkt-bank" className={labelClass}>
             Payout received in
@@ -388,37 +390,37 @@ function Register({
       </div>
       {message && <Notice tone={message.tone}>{message.text}</Notice>}
       {settlements.length === 0 ? (
-        <p className="text-sm text-ink-muted">No settlements imported yet.</p>
+        <p className="text-[13.5px] text-ink-muted">No settlements imported yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-5 border-t border-line">
+          <table className="w-full text-left text-[13.5px]">
             <thead>
-              <tr className="border-b border-line text-left text-xs text-ink-muted">
-                <th className="py-2 pr-3 font-medium">Channel</th>
-                <th className="py-2 pr-3 font-medium">Settlement</th>
-                <th className="py-2 pr-3 font-medium">Period</th>
-                <th className="py-2 pr-3 text-right font-medium">Sales</th>
-                <th className="py-2 pr-3 text-right font-medium">Deductions</th>
-                <th className="py-2 pr-3 text-right font-medium">Net payout</th>
-                <th className="py-2 pr-3 font-medium">Voucher</th>
-                <th className="py-2 font-medium">
+              <tr>
+                <th className={th}>Channel</th>
+                <th className={th}>Settlement</th>
+                <th className={th}>Period</th>
+                <th className={`${th} text-right`}>Sales</th>
+                <th className={`${th} text-right`}>Deductions</th>
+                <th className={`${th} text-right`}>Net payout</th>
+                <th className={th}>Voucher</th>
+                <th className={th}>
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
             <tbody>
               {settlements.map((s) => (
-                <tr key={s.id} className="border-b border-line">
-                  <td className="py-2 pr-3 text-ink">{channelLabel(s.channel)}</td>
-                  <td className="py-2 pr-3 font-mono text-ink">{s.settlement_ref}</td>
-                  <td className="py-2 pr-3 text-ink-soft">
+                <tr key={s.id} className="border-b border-line last:border-b-0">
+                  <td className="px-3.5 py-2.5 text-ink">{channelLabel(s.channel)}</td>
+                  <td className="px-3.5 py-2.5 font-mono text-[12.5px] text-ink">{s.settlement_ref}</td>
+                  <td className="px-3.5 py-2.5 text-ink-soft whitespace-nowrap">
                     {s.period_from} to {s.period_to}
                   </td>
-                  <td className="py-2 pr-3 text-right font-mono text-ink">{formatINR(Number(s.gross_sales))}</td>
-                  <td className="py-2 pr-3 text-right font-mono text-ink">{formatINR(deductions(s))}</td>
-                  <td className="py-2 pr-3 text-right font-mono font-semibold text-ink">{formatINR(Number(s.net_payout))}</td>
-                  <td className="py-2 pr-3">{status(s)}</td>
-                  <td className="py-2 text-right whitespace-nowrap">
+                  <td className="px-3.5 py-2.5 text-right tabular-nums text-ink">{formatINR(Number(s.gross_sales))}</td>
+                  <td className="px-3.5 py-2.5 text-right tabular-nums text-ink">{formatINR(deductions(s))}</td>
+                  <td className="px-3.5 py-2.5 text-right tabular-nums font-semibold text-ink">{formatINR(Number(s.net_payout))}</td>
+                  <td className="px-3.5 py-2.5">{status(s)}</td>
+                  <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                     {!s.journal_entry_id && (
                       <>
                         <Button variant="tally" size="sm" isLoading={busyId === s.id} onClick={() => post(s)}>
@@ -429,7 +431,7 @@ function Register({
                           aria-label={`Delete settlement ${s.settlement_ref}`}
                           disabled={busyId === s.id}
                           onClick={() => remove(s)}
-                          className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-muted hover:bg-canvas hover:text-ink"
+                          className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-ctl text-ink-muted hover:bg-canvas-sunken hover:text-ink"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -448,10 +450,10 @@ function Register({
 
 function Notice({ tone, children }: { tone: "error" | "ok"; children: React.ReactNode }) {
   const cls =
-    tone === "error" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-800";
+    tone === "error" ? "border-bad/25 bg-bad-wash text-bad" : "border-ok/25 bg-ok-wash text-ok";
   const Icon = tone === "error" ? AlertTriangle : CheckCircle2;
   return (
-    <div role={tone === "error" ? "alert" : "status"} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${cls}`}>
+    <div role={tone === "error" ? "alert" : "status"} className={`flex items-start gap-2.5 rounded-ctl border px-4 py-3 text-[13.5px] ${cls}`}>
       <Icon className="h-4 w-4 shrink-0 mt-0.5" />
       <div>{children}</div>
     </div>

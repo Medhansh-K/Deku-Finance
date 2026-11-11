@@ -12,9 +12,9 @@ export default function ProductsServicesPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Stock & Services Catalogue"
-        subtitle="Manage Product SKUs, HSN/SAC Classifications and Default GST Rates"
-        badge={<Badge variant="teal">Goods & Services Master</Badge>}
+        title="Stock & services catalogue"
+        subtitle="Product SKUs, HSN/SAC classification and default GST rates"
+        badge={<Badge variant="teal">Goods & services master</Badge>}
         actions={
           <Link href="/inventory">
             <Button variant="outline" size="sm">

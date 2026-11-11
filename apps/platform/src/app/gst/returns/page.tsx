@@ -35,25 +35,25 @@ export default function ReturnsHubPage() {
     <div className="max-w-5xl mx-auto space-y-6 font-sans">
       {/* Section 22 Advisory if in Pure Accounting */}
       {isPure && (
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-300 p-5 flex items-start gap-3.5 text-xs text-emerald-900">
-          <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="rounded-panel bg-ok-wash border border-ok/25 p-5 flex items-start gap-3.5 text-[13px] text-ok">
+          <ShieldCheck className="h-5 w-5 text-ok shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <strong className="block text-emerald-950 text-sm font-bold">
+            <strong className="block text-ok text-[14px] font-semibold">
               Accounting-only mode, no GST registration
             </strong>
-            <p className="text-emerald-800 leading-relaxed">
+            <p className="text-ok leading-relaxed">
               This company is set to Pure Accounting, so Deku prepares no GST returns for it. That assumes it's under the Section 22 registration limit: ₹40 lakh for most goods suppliers, ₹20 lakh for services, and lower in some states. Check which limit applies to you.
             </p>
           </div>
         </div>
       )}
 
-      {!orgId && <p className="text-xs text-ink-muted">Select a company first.</p>}
-      {loading && <p className="text-xs text-ink-muted">Loading invoices and ledgers…</p>}
+      {!orgId && <p className="text-[13px] text-ink-muted">Select a company first.</p>}
+      {loading && <p className="text-[13px] text-ink-muted">Loading invoices and ledgers…</p>}
       {loadError && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-xs text-rose-900 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
-          <span className="font-semibold">{loadError}. Nothing can be exported.</span>
+        <div className="p-4 rounded-panel bg-bad-wash border border-bad/25 text-[13px] text-bad flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-bad shrink-0" />
+          <span className="font-medium">{loadError}. Nothing can be exported.</span>
         </div>
       )}
 

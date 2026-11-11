@@ -19,7 +19,7 @@ import {
 } from "@/lib/builder/business-documents";
 
 const selectClass =
-  "h-8 rounded-md border border-line-strong bg-surface px-2 text-xs text-ink focus:border-brand focus:outline-none";
+  "h-8 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
 const statusVariant = (s: BusinessDocStatus) =>
   s === "converted" || s === "accepted" ? "success" : s === "cancelled" || s === "rejected" ? "danger" : s === "sent" ? "teal" : "warning";
@@ -103,13 +103,13 @@ export function BusinessDocumentsRegister({ orgId, onOpen }: Props) {
     {
       header: "Number",
       sortKey: (d) => d.doc_number,
-      cell: (d) => <span className="font-mono font-bold text-ink">{d.doc_number}</span>,
+      cell: (d) => <span className="font-mono text-[12.5px] font-medium text-ink">{d.doc_number}</span>,
     },
     { header: "Type", sortKey: (d) => d.doc_type, cell: (d) => <span className="text-ink-soft">{typeLabel(d.doc_type)}</span> },
     {
       header: "Date",
       sortKey: (d) => d.doc_date,
-      cell: (d) => <span className="font-mono text-ink">{formatDateTally(d.doc_date)}</span>,
+      cell: (d) => <span className="text-ink tabular-nums">{formatDateTally(d.doc_date)}</span>,
     },
     {
       header: "Party",
@@ -120,12 +120,12 @@ export function BusinessDocumentsRegister({ orgId, onOpen }: Props) {
       header: "Total",
       align: "right",
       sortKey: (d) => Number(d.total_amount),
-      cell: (d) => <span className="font-mono font-bold text-ink">{formatINR(Number(d.total_amount))}</span>,
+      cell: (d) => <span className="font-medium text-ink tabular-nums">{formatINR(Number(d.total_amount))}</span>,
     },
     {
       header: "Status",
       sortKey: (d) => d.status,
-      cell: (d) => <Badge variant={statusVariant(d.status)}>{d.status}</Badge>,
+      cell: (d) => <Badge variant={statusVariant(d.status)} className="capitalize">{d.status}</Badge>,
     },
     {
       header: "Actions",
@@ -178,7 +178,7 @@ export function BusinessDocumentsRegister({ orgId, onOpen }: Props) {
             {d.status === "draft" && (
               <button
                 type="button"
-                className="p-1 text-ink-subtle hover:text-rose-700"
+                className="p-1.5 rounded-chip text-ink-subtle hover:text-bad hover:bg-bad-wash transition-colors"
                 title="Delete draft"
                 aria-label={`Delete ${d.doc_number}`}
                 onClick={() => {
@@ -217,7 +217,7 @@ export function BusinessDocumentsRegister({ orgId, onOpen }: Props) {
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </Button>
       </div>
-      {error && <div className="p-2.5 rounded border border-rose-200 bg-rose-50 text-xs text-rose-700">{error}</div>}
+      {error && <div className="px-3.5 py-3 rounded-ctl bg-bad-wash text-[13px] text-bad">{error}</div>}
       <DataTable
         columns={columns}
         data={docs}

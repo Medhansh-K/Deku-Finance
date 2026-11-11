@@ -13,14 +13,14 @@ export default function SalesVoucherPage() {
   return (
     <AppShell>
       <WorkspaceLayout
-        title="Sales Voucher"
+        title="Sales voucher"
         subtitle="Record outward sales transactions and credit customer receivables"
         badge={<Badge variant="teal">F8: Sales</Badge>}
         actions={
           <Link href="/gst">
             <Button variant="outline" size="sm" className="gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-brand" />
-              GST Invoicing Hub <ArrowRight className="h-3 w-3" />
+              <FileText className="h-3.5 w-3.5 text-brand-strong" />
+              GST invoicing hub <ArrowRight className="h-3 w-3" />
             </Button>
           </Link>
         }
@@ -32,7 +32,7 @@ export default function SalesVoucherPage() {
       >
         <Suspense
           fallback={
-            <div className="p-6 text-xs font-mono text-ink-muted">
+            <div className="p-6 text-[13px] text-ink-muted">
               Loading sales voucher desk...
             </div>
           }

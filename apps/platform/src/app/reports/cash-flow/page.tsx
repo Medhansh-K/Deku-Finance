@@ -11,8 +11,8 @@ export default function CashFlowPage() {
     <AppShell>
       <WorkspaceLayout
         title="Cash Flow Statement"
-        subtitle="Operating, investing, and financing liquid cash movements across all bank and treasury accounts"
-        badge={<Badge variant="teal">WCM Core Engine</Badge>}
+        subtitle="Operating, investing and financing cash movements across all bank and cash accounts"
+        badge={<Badge variant="teal">Cash and bank</Badge>}
         breadcrumbs={[
           { label: "Reports" },
           { label: "Cash Flow", href: "/reports/cash-flow" },

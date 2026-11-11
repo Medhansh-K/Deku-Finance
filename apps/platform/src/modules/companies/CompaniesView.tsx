@@ -112,9 +112,9 @@ export function CompaniesView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 font-sans text-xs">
-      <div className="flex items-center justify-between bg-surface p-3 rounded border border-line">
-        <div className="text-xs font-semibold text-ink-soft">
+    <div className="max-w-4xl mx-auto space-y-4 font-sans text-[13.5px]">
+      <div className="flex items-center justify-between bg-surface px-5 py-3.5 rounded-panel border border-line">
+        <div className="text-[14px] font-[550] text-ink">
           {canAddCompany ? "Register your company to start" : "Switch active company workspace"}
         </div>
         <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export function CompaniesView() {
       </div>
 
       {error && (
-        <div className="p-3 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+        <div className="px-4 py-3 rounded-panel bg-bad-wash text-[13px] text-bad flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
           <span>{error}</span>
         </div>
@@ -149,55 +149,55 @@ export function CompaniesView() {
             <div
               key={org.id}
               onClick={() => handleSelectOrg(org)}
-              className={`p-4 rounded-lg border cursor-pointer transition-all bg-surface shadow-xs hover:border-brand ${
+              className={`p-5 rounded-panel border cursor-pointer transition-colors ${
                 isActive
-                  ? "border-brand ring-2 ring-brand/20"
-                  : "border-line-strong hover:bg-canvas"
+                  ? "border-brand bg-brand-wash/40 shadow-[inset_3px_0_0_var(--color-brand)]"
+                  : "border-line bg-surface hover:border-line-strong hover:bg-canvas"
               }`}
             >
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <div
-                    className={`h-8 w-8 rounded flex items-center justify-center font-bold ${
-                      isActive ? "bg-brand text-panel-deep" : "bg-canvas-sunken text-ink-soft"
+                    className={`h-8 w-8 rounded-[8px] grid place-items-center ${
+                      isActive ? "bg-surface text-brand-strong" : "bg-canvas-sunken text-ink-soft"
                     }`}
                   >
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-ink">{org.name}</h3>
-                    <span className="font-mono text-[10px] text-ink-subtle">
-                      Slug: {org.slug}
+                    <h3 className="font-semibold text-[15px] tracking-tight text-ink">{org.name}</h3>
+                    <span className="text-[12.5px] text-ink-muted">
+                      Slug <span className="font-mono">{org.slug}</span>
                     </span>
                   </div>
                 </div>
                 {isActive && (
-                  <Badge variant="success">Active Company</Badge>
+                  <Badge variant="teal">Active company</Badge>
                 )}
               </div>
 
-              <div className="mt-3 pt-3 border-t border-line grid grid-cols-2 gap-2 text-[11px] text-ink-soft">
+              <div className="mt-4 pt-3 border-t border-line grid grid-cols-2 gap-3 text-[13.5px] text-ink">
                 <div>
-                  <span className="text-ink-subtle text-[10px] block">Regime / GSTIN</span>
+                  <span className="text-ink-muted text-[12.5px] block">GST registration</span>
                   {org.gstin ? (
-                    <span className="font-mono font-bold text-emerald-800 block">
-                      GST: {org.gstin}
+                    <span className="font-mono block">
+                      {org.gstin}
                     </span>
                   ) : (
-                    <span className="font-mono text-ink-soft block">
-                      Sec 22 Exempt
+                    <span className="text-ink-soft block">
+                      Not registered (Sec 22)
                     </span>
                   )}
                 </div>
                 <div>
-                  <span className="text-ink-subtle text-[10px] block">Currency</span>
-                  <span className="font-mono font-medium">{org.currency}</span>
+                  <span className="text-ink-muted text-[12.5px] block">Currency</span>
+                  <span className="font-mono">{org.currency}</span>
                 </div>
               </div>
 
               <div className="mt-3 pt-2 flex justify-end">
-                <span className="text-[11px] font-bold text-brand flex items-center gap-1">
-                  Select Workspace <ArrowRight className="h-3 w-3" />
+                <span className="text-[13px] font-medium text-brand-strong flex items-center gap-1">
+                  Select workspace <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </div>
             </div>
@@ -209,19 +209,19 @@ export function CompaniesView() {
       <Modal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Create New Organisation"
-        description="Provision a new accounting tenant in PostgreSQL"
+        title="Create a company"
+        description="Set up a new company to keep its books in Deku Finance"
       >
-        <form onSubmit={handleCreateOrg} className="space-y-3 font-sans text-xs">
+        <form onSubmit={handleCreateOrg} className="space-y-3 font-sans text-[13.5px]">
           <Input
-            label="Company / Business Name"
+            label="Company or business name"
             value={newOrgName}
             onChange={(e) => setNewOrgName(e.target.value)}
             placeholder="e.g. Acme Financials Pvt Ltd"
             required
           />
           <Input
-            label="Unique Identifier / Slug"
+            label="Short identifier (slug)"
             value={newOrgSlug}
             onChange={(e) => setNewOrgSlug(e.target.value.toLowerCase())}
             placeholder="e.g. acme-fin"
@@ -243,7 +243,7 @@ export function CompaniesView() {
             />
           </div>
 
-          <div className="pt-3 flex justify-end gap-2 border-t border-line">
+          <div className="pt-4 flex justify-end gap-2 border-t border-line">
             <Button
               type="button"
               variant="secondary"
@@ -258,7 +258,7 @@ export function CompaniesView() {
               size="sm"
               isLoading={isSubmitting}
             >
-              Create Organisation
+              Create company
             </Button>
           </div>
         </form>

@@ -24,12 +24,12 @@ type Tab = "stock" | "adjust" | "warehouses";
 // Called only in effects and handlers: prerendering refuses a clock read during render.
 const today = () => new Date().toISOString().slice(0, 10);
 const selectClass =
-  "w-full rounded border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none";
+  "w-full h-9 rounded-ctl border border-line-strong bg-surface px-2.5 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
 function Message({ msg }: { msg: { ok: boolean; text: string } | null }) {
   if (!msg) return null;
   return (
-    <p role={msg.ok ? "status" : "alert"} className={msg.ok ? "text-emerald-700" : "text-rose-700"}>
+    <p role={msg.ok ? "status" : "alert"} className={msg.ok ? "text-ok" : "text-bad"}>
       {msg.text}
     </p>
   );
@@ -57,8 +57,8 @@ export function InventoryView() {
   }, [orgId]);
 
   return (
-    <div className="space-y-4 font-sans text-xs">
-      <div role="tablist" className="flex gap-1 bg-surface p-1 rounded border border-line w-fit">
+    <div className="space-y-4 font-sans text-[13.5px]">
+      <div role="tablist" className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px] w-fit">
         {(
           [
             ["stock", "Stock summary"],
@@ -71,7 +71,7 @@ export function InventoryView() {
             role="tab"
             aria-selected={tab === key}
             onClick={() => setTab(key)}
-            className={`px-3 py-1.5 rounded font-semibold ${tab === key ? "bg-brand text-white" : "text-ink-soft hover:bg-canvas"}`}
+            className={`inline-flex h-[30px] items-center px-3 rounded-[7px] text-[13.5px] transition-colors ${tab === key ? "bg-surface text-ink font-medium shadow-[0_0_0_1px_var(--color-line),0_1px_2px_rgb(14_27_25/0.06)]" : "text-ink-muted hover:text-ink"}`}
           >
             {label}
           </button>
@@ -113,15 +113,15 @@ function StockTab({ orgId }: { orgId: string }) {
   }, [orgId, asOf]);
 
   const columns: ColumnDef<StockSummaryRow>[] = [
-    { header: "SKU", sortKey: (r) => r.sku ?? "", cell: (r) => <span className="font-mono font-bold text-ink">{r.sku ?? "–"}</span> },
-    { header: "Item", sortKey: (r) => r.item_name, cell: (r) => <span className="font-semibold text-ink">{r.item_name}</span> },
+    { header: "SKU", sortKey: (r) => r.sku ?? "", cell: (r) => <span className="font-mono text-[13px] font-medium text-ink">{r.sku ?? "–"}</span> },
+    { header: "Item", sortKey: (r) => r.item_name, cell: (r) => <span className="font-medium text-ink">{r.item_name}</span> },
     { header: "Warehouse", cell: (r) => <span className="text-ink-soft">{r.warehouse_name}</span> },
     {
       header: "Qty on hand",
       align: "right",
       sortKey: (r) => Number(r.qty_on_hand),
       cell: (r) => (
-        <span className={`font-mono font-bold ${Number(r.qty_on_hand) < 0 ? "text-rose-700" : "text-ink"}`}>
+        <span className={`font-medium ${Number(r.qty_on_hand) < 0 ? "text-bad" : "text-ink"}`}>
           {Number(r.qty_on_hand)} {r.unit_code}
         </span>
       ),
@@ -130,19 +130,19 @@ function StockTab({ orgId }: { orgId: string }) {
       header: "FIFO value",
       align: "right",
       sortKey: (r) => Number(r.fifo_value),
-      cell: (r) => <span className="font-mono font-bold text-ink">{formatINR(r.fifo_value)}</span>,
+      cell: (r) => <span className="font-medium text-ink">{formatINR(r.fifo_value)}</span>,
     },
   ];
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="w-44">
           <Input label="As of" type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-ink-muted">
-            Total <span className="font-mono font-bold text-ink">{formatINR(totalValuePaise(rows) / 100)}</span>
+            Total <span className="ledger-total tabular-nums text-[15px] font-semibold text-ink">{formatINR(totalValuePaise(rows) / 100)}</span>
           </span>
           <Button variant="outline" size="sm" onClick={load} isLoading={isLoading}>
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
@@ -180,11 +180,11 @@ function LedgerPanel({ orgId, row, asOf, onClose }: { orgId: string; row: StockS
   }, [orgId, row.item_id, from, asOf]);
 
   return (
-    <section className="bg-surface border border-line rounded-lg p-4 space-y-3" aria-label={`Stock ledger for ${row.item_name}`}>
+    <section className="bg-surface border border-line rounded-panel p-5 space-y-3" aria-label={`Stock ledger for ${row.item_name}`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-ink">
-            {row.item_name} <span className="font-mono text-ink-muted">{row.sku}</span>
+          <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+            {row.item_name} <span className="font-mono text-[13px] font-normal text-ink-muted">{row.sku}</span>
           </h3>
           <p className="text-ink-muted">All warehouses, up to {asOf}. Outward values are the FIFO cost of goods issued.</p>
         </div>
@@ -199,36 +199,36 @@ function LedgerPanel({ orgId, row, asOf, onClose }: { orgId: string; row: StockS
       </div>
       {error && <Message msg={{ ok: false, text: error }} />}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead className="text-[10px] uppercase text-ink-muted border-b border-line">
+        <table className="w-full text-left border-collapse text-[13.5px]">
+          <thead className="text-[12.5px] text-ink-muted border-b border-line">
             <tr>
-              <th className="py-2 px-2">Date</th>
-              <th className="py-2 px-2">Source</th>
-              <th className="py-2 px-2">Warehouse</th>
-              <th className="py-2 px-2 text-right">In</th>
-              <th className="py-2 px-2 text-right">Out</th>
-              <th className="py-2 px-2 text-right">Unit cost</th>
-              <th className="py-2 px-2 text-right">Value</th>
-              <th className="py-2 px-2 text-right">Balance qty</th>
-              <th className="py-2 px-2 text-right">Balance value</th>
+              <th className="py-2.5 px-2 font-medium">Date</th>
+              <th className="py-2.5 px-2 font-medium">Source</th>
+              <th className="py-2.5 px-2 font-medium">Warehouse</th>
+              <th className="py-2.5 px-2 font-medium text-right">In</th>
+              <th className="py-2.5 px-2 font-medium text-right">Out</th>
+              <th className="py-2.5 px-2 font-medium text-right">Unit cost</th>
+              <th className="py-2.5 px-2 font-medium text-right">Value</th>
+              <th className="py-2.5 px-2 font-medium text-right">Balance qty</th>
+              <th className="py-2.5 px-2 font-medium text-right">Balance value</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             {rows.map((m) => (
               <tr key={m.movement_id}>
-                <td className="py-1.5 px-2 font-mono">{m.movement_date}</td>
-                <td className="py-1.5 px-2">
+                <td className="py-2 px-2 text-ink-soft">{m.movement_date}</td>
+                <td className="py-2 px-2">
                   {SOURCE_LABEL[m.source_type]}
-                  {m.reversal_of && <Badge variant="outline" className="ml-1">reversal</Badge>}
-                  {m.narration && <span className="block text-[11px] text-ink-muted">{m.narration}</span>}
+                  {m.reversal_of && <Badge variant="outline" className="ml-1">Reversal</Badge>}
+                  {m.narration && <span className="block text-[12.5px] text-ink-muted">{m.narration}</span>}
                 </td>
-                <td className="py-1.5 px-2 text-ink-soft">{m.warehouse_name}</td>
-                <td className="py-1.5 px-2 text-right font-mono">{m.direction === "in" ? Number(m.qty) : ""}</td>
-                <td className="py-1.5 px-2 text-right font-mono">{m.direction === "out" ? Number(m.qty) : ""}</td>
-                <td className="py-1.5 px-2 text-right font-mono">{m.unit_cost == null ? "–" : formatINR(m.unit_cost, { showCurrencySymbol: false })}</td>
-                <td className="py-1.5 px-2 text-right font-mono">{formatINR(m.value, { showCurrencySymbol: false })}</td>
-                <td className="py-1.5 px-2 text-right font-mono font-bold">{Number(m.balance_qty)}</td>
-                <td className="py-1.5 px-2 text-right font-mono font-bold">{formatINR(m.balance_value, { showCurrencySymbol: false })}</td>
+                <td className="py-2 px-2 text-ink-soft">{m.warehouse_name}</td>
+                <td className="py-2 px-2 text-right">{m.direction === "in" ? Number(m.qty) : ""}</td>
+                <td className="py-2 px-2 text-right">{m.direction === "out" ? Number(m.qty) : ""}</td>
+                <td className="py-2 px-2 text-right">{m.unit_cost == null ? "–" : formatINR(m.unit_cost, { showCurrencySymbol: false })}</td>
+                <td className="py-2 px-2 text-right">{formatINR(m.value, { showCurrencySymbol: false })}</td>
+                <td className="py-2 px-2 text-right font-medium">{Number(m.balance_qty)}</td>
+                <td className="py-2 px-2 text-right font-medium">{formatINR(m.balance_value, { showCurrencySymbol: false })}</td>
               </tr>
             ))}
             {rows.length === 0 && (
@@ -295,17 +295,17 @@ function AdjustTab({ orgId, items, warehouses }: { orgId: string; items: Catalog
 
   if (items.length === 0) {
     return (
-      <p className="bg-surface border border-line rounded p-4 text-ink-muted">
+      <p className="bg-surface border border-line rounded-panel p-5 text-ink-muted">
         No product tracks inventory yet. Turn on Track inventory for goods in Masters → Catalogue.
       </p>
     );
   }
 
   return (
-    <form onSubmit={submit} className="bg-surface border border-line rounded-lg p-4 space-y-3 max-w-2xl">
+    <form onSubmit={submit} className="bg-surface border border-line rounded-panel p-5 space-y-3 max-w-2xl">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-[10px] font-bold uppercase text-ink-muted mb-1">Item</span>
+          <span className="block text-[13px] font-medium text-ink-soft mb-1.5">Item</span>
           <select value={form.item_id} onChange={(e) => set({ item_id: e.target.value })} className={selectClass} required>
             <option value="">Choose…</option>
             {items.map((i) => (
@@ -316,7 +316,7 @@ function AdjustTab({ orgId, items, warehouses }: { orgId: string; items: Catalog
           </select>
         </label>
         <label className="block">
-          <span className="block text-[10px] font-bold uppercase text-ink-muted mb-1">Warehouse</span>
+          <span className="block text-[13px] font-medium text-ink-soft mb-1.5">Warehouse</span>
           <select value={form.warehouse_id} onChange={(e) => set({ warehouse_id: e.target.value })} className={selectClass}>
             <option value="">Default</option>
             {warehouses.map((w) => (
@@ -327,7 +327,7 @@ function AdjustTab({ orgId, items, warehouses }: { orgId: string; items: Catalog
           </select>
         </label>
         <label className="block">
-          <span className="block text-[10px] font-bold uppercase text-ink-muted mb-1">Type</span>
+          <span className="block text-[13px] font-medium text-ink-soft mb-1.5">Type</span>
           <select
             value={form.kind}
             onChange={(e) => set({ kind: e.target.value as AdjustmentForm["kind"] })}
@@ -338,7 +338,7 @@ function AdjustTab({ orgId, items, warehouses }: { orgId: string; items: Catalog
           </select>
         </label>
         <label className="block">
-          <span className="block text-[10px] font-bold uppercase text-ink-muted mb-1">Direction</span>
+          <span className="block text-[13px] font-medium text-ink-soft mb-1.5">Direction</span>
           <select
             value={direction}
             disabled={form.kind === "opening"}
@@ -413,12 +413,12 @@ function WarehousesTab({ orgId, warehouses, reload }: { orgId: string; warehouse
 
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="bg-surface border border-line rounded-lg divide-y divide-line">
+      <div className="bg-surface border border-line rounded-panel divide-y divide-line">
         {warehouses.map((w) => (
-          <div key={w.id} className="flex items-center justify-between gap-3 p-3">
+          <div key={w.id} className="flex items-center justify-between gap-3 px-5 py-3">
             <div>
-              <span className="font-semibold text-ink">{w.name}</span>{" "}
-              <span className="font-mono text-ink-muted">{w.code}</span>
+              <span className="font-medium text-ink">{w.name}</span>{" "}
+              <span className="font-mono text-[12.5px] text-ink-muted">{w.code}</span>
               {w.is_default && <Badge variant="teal" className="ml-2">Default</Badge>}
             </div>
             {!w.is_default && (
@@ -452,7 +452,7 @@ function WarehousesTab({ orgId, warehouses, reload }: { orgId: string; warehouse
             setCode("");
           });
         }}
-        className="bg-surface border border-line rounded-lg p-4 grid grid-cols-1 sm:grid-cols-[1fr_8rem_auto] gap-3 items-end"
+        className="bg-surface border border-line rounded-panel p-5 grid grid-cols-1 sm:grid-cols-[1fr_8rem_auto] gap-3 items-end"
       >
         <Input label="Warehouse name" value={name} onChange={(e) => setName(e.target.value)} required />
         <Input label="Code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} required />
@@ -460,7 +460,7 @@ function WarehousesTab({ orgId, warehouses, reload }: { orgId: string; warehouse
           <Plus className="h-3.5 w-3.5" /> Add
         </Button>
       </form>
-      <label className="flex items-start gap-2 bg-surface border border-line rounded-lg p-4">
+      <label className="flex items-start gap-2 bg-surface border border-line rounded-panel p-5">
         <input
           type="checkbox"
           role="switch"
@@ -470,7 +470,7 @@ function WarehousesTab({ orgId, warehouses, reload }: { orgId: string; warehouse
           className="mt-0.5 h-4 w-4 accent-brand"
         />
         <span>
-          <span className="font-semibold text-ink">Allow negative stock</span>
+          <span className="font-medium text-ink">Allow negative stock</span>
           <span className="block text-ink-muted">
             Off: an invoice that would take a tracked item below zero is refused. Owners and admins can change this.
           </span>

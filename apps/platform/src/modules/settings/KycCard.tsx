@@ -26,11 +26,11 @@ export function KycCard({ orgId }: { orgId: string }) {
   const level = status?.trust?.trust_level ?? 0;
 
   return (
-    <section aria-labelledby="kyc-card-title" className="bg-surface border border-line-strong rounded-lg p-5 shadow-xs space-y-3">
+    <section aria-labelledby="kyc-card-title" className="bg-surface border border-line rounded-panel p-5 space-y-3">
       <div className="flex items-center justify-between gap-2 border-b border-line pb-3">
         <div className="flex items-center gap-2">
           <BadgeCheck className="h-4 w-4 text-ink-soft" aria-hidden />
-          <h3 id="kyc-card-title" className="text-sm font-bold uppercase text-ink font-mono">Identity (KYC)</h3>
+          <h3 id="kyc-card-title" className="text-[15px] font-semibold tracking-tight text-ink">Identity (KYC)</h3>
         </div>
         <Badge variant={status?.configured ? (level > 0 ? "success" : "default") : "outline"}>
           {status?.configured ? TRUST_LABELS[level].label : "Not available"}
@@ -39,12 +39,12 @@ export function KycCard({ orgId }: { orgId: string }) {
       {status?.sandbox && <SandboxBanner what="KYC" />}
       <p className="text-ink-muted">Optional. {KYC_SHARED_TEXT}</p>
       {status && !status.configured && (
-        <p className="rounded border border-line bg-canvas p-3 text-ink-soft">
+        <p className="rounded-ctl bg-canvas px-4 py-3 text-ink-soft">
           No KYC provider is configured on this server (KYC_PROVIDER is unset), so no checks can run.
         </p>
       )}
-      {error && <p role="alert" className="text-rose-700">{error}</p>}
-      <Link href="/kyc" className="inline-block text-xs font-semibold text-brand-strong underline">
+      {error && <p role="alert" className="text-bad">{error}</p>}
+      <Link href="/kyc" className="inline-block text-[13px] font-medium text-brand-strong hover:text-ink">
         Open the KYC hub
       </Link>
     </section>

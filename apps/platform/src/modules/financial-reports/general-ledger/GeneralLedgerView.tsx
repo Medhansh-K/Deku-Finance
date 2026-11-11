@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Download, Printer, RefreshCw } from "lucide-react";
+import { Download, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { accountingApi, reportsApi } from "@/api/endpoints";
 import { downloadFile } from "@/lib/download";
@@ -9,6 +9,7 @@ import { formatINR } from "@/lib/formatters/currency";
 import { generalLedgerCsv } from "@/lib/import/export";
 import { buildLedger } from "@/lib/reports/general-ledger";
 import { ReportDateRange } from "@/modules/financial-reports/ReportDateRange";
+import { ReportError, ui } from "@/modules/financial-reports/report-ui";
 import type { Account, GeneralLedgerRow } from "@/types/accounting";
 
 const amount = (v: number) => (v > 0 ? formatINR(v, { showCurrencySymbol: false }) : "—");
@@ -75,18 +76,18 @@ export function GeneralLedgerView() {
   const account = accounts.find((a) => a.id === accountId);
 
   return (
-    <div className="space-y-4 font-sans text-xs">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 bg-surface p-3 rounded border border-line">
+    <div className={ui.page}>
+      <div className={ui.toolbar}>
         <div className="flex flex-wrap items-end gap-2">
           <div className="space-y-1">
-            <label htmlFor="ledger-account" className="block text-xs font-medium text-ink-soft">
+            <label htmlFor="ledger-account" className="block text-[13px] font-medium text-ink-soft">
               Account
             </label>
             <select
               id="ledger-account"
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              className="h-9 min-w-64 max-w-full rounded-md border border-line-strong bg-surface px-2 text-sm text-ink focus:border-brand focus:outline-none"
+              className={`${ui.select} min-w-64 max-w-full`}
             >
               <option value="">Choose an account</option>
               {accounts.map((a) => (
@@ -101,81 +102,64 @@ export function GeneralLedgerView() {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={() =>
               ledger && downloadFile(`general-ledger-${account?.code ?? "account"}.csv`, generalLedgerCsv(ledger, from), "text/csv;charset=utf-8")
             }
             disabled={!ledger}
-            className="gap-1.5"
           >
-            <Download className="h-3.5 w-3.5" /> Export CSV
+            <Download className="h-4 w-4" /> Export CSV
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
-            <Printer className="h-3.5 w-3.5" /> Print Statement
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" /> Print statement
           </Button>
-          <Button variant="outline" size="sm" onClick={fetchLedger} isLoading={isLoading} disabled={!accountId} className="gap-1.5">
-            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          <Button variant="secondary" onClick={fetchLedger} isLoading={isLoading} disabled={!accountId}>
+            <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div className="p-4 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-bold">General Ledger Unavailable</p>
-              <p>{error}</p>
-            </div>
-          </div>
-          {accountId && (
-            <button onClick={fetchLedger} className="font-bold underline">
-              Retry
-            </button>
-          )}
-        </div>
-      )}
+      {error && <ReportError title="General Ledger unavailable" message={error} onRetry={accountId ? fetchLedger : undefined} />}
 
-      <div className="bg-surface border border-edge rounded-lg shadow-sm overflow-hidden">
+      <div className={ui.panel}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-canvas-sunken border-b border-line-strong font-mono text-[11px] text-ink-soft">
-                <th className="py-2 px-4 w-24">Date</th>
-                <th className="py-2 px-4 w-36">Voucher No.</th>
-                <th className="py-2 px-4">Narration</th>
-                <th className="py-2 px-4">Party</th>
-                <th className="py-2 px-4 text-right w-32">Debit (₹)</th>
-                <th className="py-2 px-4 text-right w-32">Credit (₹)</th>
-                <th className="py-2 px-4 text-right w-40">Balance (₹)</th>
+              <tr>
+                <th className={`${ui.th} w-24`}>Date</th>
+                <th className={`${ui.th} w-36`}>Voucher no.</th>
+                <th className={ui.th}>Narration</th>
+                <th className={ui.th}>Party</th>
+                <th className={`${ui.th} text-right w-32`}>Debit (₹)</th>
+                <th className={`${ui.th} text-right w-32`}>Credit (₹)</th>
+                <th className={`${ui.th} text-right w-40`}>Balance (₹)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {ledger && ledger.opening !== null && (
-                <tr className="bg-canvas font-medium text-ink">
-                  <td className="py-2 px-4 font-mono">{from}</td>
-                  <td className="py-2 px-4" />
-                  <td className="py-2 px-4" colSpan={4}>
+                <tr className="bg-canvas-sunken/50 font-semibold">
+                  <td className={`${ui.td} whitespace-nowrap`}>{from}</td>
+                  <td className={ui.td} />
+                  <td className={ui.td} colSpan={4}>
                     Opening balance
                   </td>
-                  <td className="py-2 px-4 text-right font-mono font-bold">{balance(ledger.opening)}</td>
+                  <td className={`${ui.td} text-right tabular-nums`}>{balance(ledger.opening)}</td>
                 </tr>
               )}
               {ledger?.lines.map((l) => (
-                <tr key={l.line_id} className="text-ink">
-                  <td className="py-2 px-4 font-mono">{l.entry_date}</td>
-                  <td className="py-2 px-4 font-mono font-bold">{l.entry_number}</td>
-                  <td className="py-2 px-4">{l.text}</td>
-                  <td className="py-2 px-4">{l.party_name}</td>
-                  <td className="py-2 px-4 text-right font-mono">{amount(l.debit)}</td>
-                  <td className="py-2 px-4 text-right font-mono">{amount(l.credit)}</td>
-                  <td className="py-2 px-4 text-right font-mono font-bold">{balance(l.balance)}</td>
+                <tr key={l.line_id}>
+                  <td className={`${ui.td} whitespace-nowrap`}>{l.entry_date}</td>
+                  <td className={`${ui.td} ${ui.code}`}>{l.entry_number}</td>
+                  <td className={ui.td}>{l.text}</td>
+                  <td className={ui.td}>{l.party_name}</td>
+                  <td className={`${ui.td} text-right tabular-nums`}>{amount(l.debit)}</td>
+                  <td className={`${ui.td} text-right tabular-nums`}>{amount(l.credit)}</td>
+                  <td className={`${ui.td} text-right tabular-nums font-medium`}>{balance(l.balance)}</td>
                 </tr>
               ))}
               {!ledger?.lines.length && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-ink-muted font-mono">
+                  <td colSpan={7} className="py-8 text-center text-ink-muted">
                     {!accountId
                       ? "Choose an account to see its ledger."
                       : isLoading

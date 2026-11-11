@@ -87,9 +87,9 @@ export function ApprovalsView() {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,22rem)_1fr]">
       <section data-tour="approvals-queue" aria-label="Approval queue" className="space-y-4">
         {requireApproval === false && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+          <div className="rounded-panel bg-warn-wash px-4 py-3 text-[13px] text-warn">
             Approvals are off for this company, so vouchers post directly. An owner or admin can turn on
-            maker-checker in <a className="font-semibold underline" href="/settings">Settings</a>.
+            maker-checker in <a className="font-medium underline" href="/settings">Settings</a>.
           </div>
         )}
 
@@ -111,54 +111,54 @@ export function ApprovalsView() {
         />
       </section>
 
-      <section aria-label="Voucher detail" className="rounded-xl border border-line bg-surface p-4 shadow-sm">
+      <section aria-label="Voucher detail" className="rounded-panel border border-line bg-surface p-5">
         {notice && (
-          <div role="status" className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 text-xs text-emerald-900">
+          <div role="status" className="mb-4 rounded-ctl bg-ok-wash px-3 py-2.5 text-[13px] text-ok">
             {notice}
           </div>
         )}
         {error && (
-          <div role="alert" className="mb-3 rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-800">
+          <div role="alert" className="mb-4 rounded-ctl bg-bad-wash px-3 py-2.5 text-[13px] text-bad">
             {error}
           </div>
         )}
 
         {!selected ? (
-          <div className="py-16 text-center text-sm text-ink-muted">
-            <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+          <div className="py-16 text-center text-[13.5px] text-ink-muted">
+            <ShieldCheck className="mx-auto mb-2 h-8 w-8 text-ink-subtle" />
             Select a voucher to review it.
           </div>
         ) : (
           <div className="space-y-4">
             <header className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-bold text-ink">{selected.entry_number}</h2>
-                <p className="text-xs text-ink-muted">
+                <h2 className="font-mono text-[17px] font-semibold tracking-tight text-ink">{selected.entry_number}</h2>
+                <p className="text-[12.5px] text-ink-muted">
                   {formatDateTally(selected.entry_date)}
                   {selected.reference ? ` · Ref ${selected.reference}` : ""}
                 </p>
-                <p className="mt-1 text-sm text-ink-soft">{selected.narration}</p>
+                <p className="mt-1.5 text-[13.5px] text-ink-soft">{selected.narration}</p>
               </div>
               <div className="text-right">
-                <div className="text-xs uppercase tracking-wider text-ink-muted">Voucher total</div>
-                <div className="font-mono text-xl font-bold text-ink">{formatINR(entryTotal(selected))}</div>
+                <div className="text-[13px] text-ink-muted">Voucher total</div>
+                <div className="mt-1 inline-block text-[26px] font-semibold tracking-[-0.035em] tabular-nums text-ink ledger-total">{formatINR(entryTotal(selected))}</div>
               </div>
             </header>
 
             {selected.rejection_reason && !selected.submitted_at && (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-800">
-                <span className="font-semibold">Sent back:</span> {selected.rejection_reason}
+              <div className="rounded-ctl bg-bad-wash px-3 py-2.5 text-[13px] text-bad">
+                <span className="font-medium">Sent back:</span> {selected.rejection_reason}
               </div>
             )}
 
-            <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-ctl border border-line">
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-ink-muted">
-                  <th className="py-2 font-semibold">Account</th>
-                  <th className="py-2 font-semibold">Description</th>
-                  <th className="py-2 text-right font-semibold">Debit</th>
-                  <th className="py-2 text-right font-semibold">Credit</th>
+                <tr>
+                  <th className="deku-table-th">Account</th>
+                  <th className="deku-table-th">Description</th>
+                  <th className="deku-table-th !text-right">Debit</th>
+                  <th className="deku-table-th !text-right">Credit</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,14 +166,14 @@ export function ApprovalsView() {
                   .slice()
                   .sort((a, b) => a.line_number - b.line_number)
                   .map((l) => (
-                    <tr key={l.id ?? l.line_number} className="border-b border-line">
-                      <td className="py-2 font-medium text-ink">
+                    <tr key={l.id ?? l.line_number} className="[&:last-child>td]:!border-b-0">
+                      <td className="deku-table-td font-medium">
                         {accounts[l.account_id]?.name ?? "Unknown account"}
-                        <span className="ml-1 font-mono text-xs text-ink-subtle">{accounts[l.account_id]?.code}</span>
+                        <span className="ml-1.5 font-mono text-xs text-ink-subtle">{accounts[l.account_id]?.code}</span>
                       </td>
-                      <td className="py-2 text-ink-soft">{l.description || "–"}</td>
-                      <td className="py-2 text-right font-mono">{Number(l.debit) ? formatINR(Number(l.debit)) : "–"}</td>
-                      <td className="py-2 text-right font-mono">{Number(l.credit) ? formatINR(Number(l.credit)) : "–"}</td>
+                      <td className="deku-table-td !text-ink-soft">{l.description || "–"}</td>
+                      <td className="deku-table-td text-right">{Number(l.debit) ? formatINR(Number(l.debit)) : "–"}</td>
+                      <td className="deku-table-td text-right">{Number(l.credit) ? formatINR(Number(l.credit)) : "–"}</td>
                     </tr>
                   ))}
               </tbody>
@@ -181,8 +181,8 @@ export function ApprovalsView() {
             </div>
 
             {selected.submitted_at && (
-              <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
-                <p className="text-xs text-ink-muted">
+              <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+                <p className="max-w-md text-[12.5px] text-ink-muted">
                   {canApprove(selected, user?.id)
                     ? "Approving posts this voucher to the ledger. Posted vouchers can only be reversed, not edited."
                     : "You made or submitted this voucher, so another approver must review it."}
@@ -204,7 +204,7 @@ export function ApprovalsView() {
               title={`Send back ${selected.entry_number}`}
               description="The maker sees this reason. They can edit the voucher from the Day Book and resubmit it."
             >
-              <label className="block text-xs font-semibold text-ink-soft" htmlFor="reject-reason">
+              <label className="block text-[13px] text-ink-muted" htmlFor="reject-reason">
                 Reason
               </label>
               <textarea
@@ -212,7 +212,7 @@ export function ApprovalsView() {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                className="mt-1 w-full rounded-md border border-line-strong p-2 text-sm"
+                className="mt-1.5 w-full rounded-ctl border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink focus:border-brand focus:outline-none"
                 placeholder="e.g. GST should be IGST, the supplier is in Karnataka"
               />
               <div className="mt-3 flex justify-end gap-2">
@@ -247,31 +247,31 @@ function QueueList({
   empty: string;
 }) {
   return (
-    <div className="rounded-xl border border-line bg-surface shadow-sm">
-      <h2 className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm font-semibold text-ink">
+    <div className="rounded-panel border border-line bg-surface">
+      <h2 className="flex items-center gap-2 px-5 pt-4 pb-3 text-[15px] font-semibold tracking-tight text-ink">
         {icon} {title}
         <Badge variant={entries.length ? "warning" : "default"} className="ml-auto">
           {entries.length}
         </Badge>
       </h2>
       {entries.length === 0 ? (
-        <p className="px-3 py-4 text-xs text-ink-muted">{empty}</p>
+        <p className="border-t border-line px-5 py-4 text-[13px] text-ink-muted">{empty}</p>
       ) : (
-        <ul>
+        <ul className="border-t border-line">
           {entries.map((e) => (
             <li key={e.id}>
               <button
                 onClick={() => onSelect(e.id)}
                 aria-current={e.id === selectedId}
-                className={`flex w-full items-center justify-between gap-2 border-b border-line px-3 py-2 text-left text-sm last:border-0 hover:bg-canvas ${
-                  e.id === selectedId ? "bg-canvas-sunken" : ""
+                className={`flex w-full items-center justify-between gap-2 border-b border-line px-5 py-2.5 text-left last:border-0 ${
+                  e.id === selectedId ? "bg-brand-wash shadow-[inset_3px_0_0_var(--color-brand)]" : "hover:bg-canvas"
                 }`}
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-medium text-ink">{e.entry_number}</span>
-                  <span className="block truncate text-xs text-ink-muted">{e.narration}</span>
+                  <span className="block truncate font-mono text-[13px] font-medium text-ink">{e.entry_number}</span>
+                  <span className="block truncate text-[12.5px] text-ink-muted">{e.narration}</span>
                 </span>
-                <span className="shrink-0 font-mono text-xs text-ink-soft">{formatINR(entryTotal(e))}</span>
+                <span className="shrink-0 text-[13px] tabular-nums text-ink-soft">{formatINR(entryTotal(e))}</span>
               </button>
             </li>
           ))}

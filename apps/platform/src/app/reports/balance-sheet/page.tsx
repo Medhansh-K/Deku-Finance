@@ -11,8 +11,8 @@ export default function BalanceSheetPage() {
     <AppShell>
       <WorkspaceLayout
         title="Balance Sheet"
-        subtitle="Statement of Financial Position: Assets, Liabilities, and Equity Capital Parity"
-        badge={<Badge variant="teal">Authoritative Statement</Badge>}
+        subtitle="Statement of financial position: assets, liabilities and equity"
+        badge={<Badge variant="teal">Authoritative statement</Badge>}
         breadcrumbs={[
           { label: "Reports" },
           { label: "Balance Sheet", href: "/reports/balance-sheet" },

@@ -9,7 +9,8 @@ import {
   getQuickKpiKeys,
   saveQuickKpiKeys,
 } from "@/lib/kpi/kpi-service";
-import { Sparkles, RotateCcw, Check } from "lucide-react";
+import { RotateCcw, Check } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface CustomizeKpiModalProps {
   isOpen: boolean;
@@ -67,63 +68,37 @@ export function CustomizeKpiModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Customize Business KPIs"
+      title="Customize KPIs"
       description={`Choose which Quick KPIs to list for ${activeOrgName}`}
       maxWidth="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
-        {/* Info Banner */}
-        <div className="p-3 bg-canvas border border-line rounded-lg flex items-center justify-between">
+      <form onSubmit={handleSubmit} className="space-y-4 text-[13.5px]">
+        <div className="p-3.5 bg-canvas rounded-[10px] flex items-center justify-between gap-3">
           <div>
-            <span className="font-bold text-ink block text-xs">
-              KPI values come from your posted entries
-            </span>
-            <span className="text-[11px] text-ink-muted">
-              Pick which ones the Gateway lists. Values can&apos;t be edited here.
-            </span>
+            <span className="font-semibold text-ink block">KPI values come from your posted entries</span>
+            <span className="text-[12.5px] text-ink-muted">Pick which ones the Gateway lists. Values can&apos;t be edited here.</span>
           </div>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="text-[11px] font-mono font-medium text-ink-soft hover:text-brand-strong flex items-center gap-1 px-2.5 py-1 rounded bg-surface border border-line-strong hover:border-brand transition-colors cursor-pointer"
-            title="Show the default KPI list"
-          >
-            <RotateCcw className="h-3 w-3" />
-            <span>Reset Defaults</span>
-          </button>
+          <Button type="button" variant="secondary" size="sm" onClick={handleReset} title="Show the default KPI list">
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset defaults
+          </Button>
         </div>
 
-        {/* Section 2: Quick KPIs Selection for Column 3 */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="font-mono font-bold uppercase tracking-wider text-[10px] text-ink-soft">
-              Quick KPIs Selection (Listed in Gateway Column 3)
-            </span>
-            <span className="text-[10px] text-ink-muted font-mono">
-              Click individual KPI to open detail page
-            </span>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 mb-2">
+            <span className="text-[13px] font-medium text-ink-soft">Quick KPIs on the Gateway</span>
+            <span className="text-[12.5px] text-ink-muted">Each opens its detail page</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-canvas p-2.5 rounded-lg border border-line">
-            {(
-              [
-                "billed",
-                "liquid",
-                "debtors",
-                "creditors",
-                "expenses",
-                "gst",
-              ] as KpiKey[]
-            ).map((kpiKey) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(["billed", "liquid", "debtors", "creditors", "expenses", "gst"] as KpiKey[]).map((kpiKey) => {
               const meta = KPI_META[kpiKey];
               const isChecked = keys.includes(kpiKey);
               return (
                 <label
                   key={kpiKey}
-                  className={`flex items-center gap-2 p-2 rounded border cursor-pointer transition-colors ${
-                    isChecked
-                      ? "bg-surface border-brand text-ink shadow-2xs"
-                      : "bg-canvas-sunken/60 border-line text-ink-muted"
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-ctl border cursor-pointer transition-colors ${
+                    isChecked ? "bg-brand-wash border-brand text-ink" : "bg-surface border-line text-ink-soft hover:bg-canvas"
                   }`}
                 >
                   <input
@@ -132,24 +107,21 @@ export function CustomizeKpiModal({
                     onChange={() => handleToggleKpi(kpiKey)}
                     className="accent-brand-strong rounded cursor-pointer"
                   />
-                  <div className="truncate">
-                    <span className="font-bold text-[11px] block truncate">{meta.label}</span>
-                    <span className="text-[9px] text-ink-subtle font-mono block truncate">
-                      ➔ {meta.detailRoute}
-                    </span>
-                  </div>
+                  <span className="min-w-0">
+                    <span className="font-medium block truncate">{meta.label}</span>
+                    <span className="text-[12.5px] text-ink-muted font-mono block truncate">{meta.detailRoute}</span>
+                  </span>
                 </label>
               );
             })}
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="pt-3 border-t border-line flex items-center justify-between">
-          <span className="text-[10px] font-mono text-ink-subtle">
+        <div className="pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[12.5px] text-ink-muted">
             {saveSuccess ? (
-              <span className="text-emerald-700 font-bold flex items-center gap-1">
-                <Check className="h-3 w-3" /> Saved &amp; Synced!
+              <span className="text-ok font-medium flex items-center gap-1">
+                <Check className="h-3.5 w-3.5" /> Saved
               </span>
             ) : (
               "Saved in this browser"
@@ -157,20 +129,12 @@ export function CustomizeKpiModal({
           </span>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-canvas-sunken hover:bg-line text-ink-soft font-bold text-xs transition-colors cursor-pointer"
-            >
+            <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-1.5 rounded-lg bg-panel hover:bg-panel-deep text-brand-soft hover:text-white font-bold text-xs border border-edge transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-brand" />
-              <span>Save KPI List</span>
-            </button>
+            </Button>
+            <Button type="submit" variant="primary">
+              Save KPI list
+            </Button>
           </div>
         </div>
       </form>
