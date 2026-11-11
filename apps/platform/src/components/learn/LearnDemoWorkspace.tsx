@@ -240,7 +240,11 @@ function DemoScreenDispatcher() {
     return wrap("Audit log", "Postings, approvals and reversals, in order", <AuditTrailView key={`aud-${datasetVersion}`} />);
   }
   if (basePath === "/consultant") {
-    return wrap("Deku Consultant", "Questions answered from the ledger", <DekuConsultantView key={`con-${datasetVersion}`} />);
+    return (
+      <div className="w-full h-full overflow-hidden flex flex-col flex-1 bg-canvas text-ink">
+        <DekuConsultantView key={`con-${datasetVersion}`} />
+      </div>
+    );
   }
   if (basePath === "/settings") {
     return wrap("Settings", "Fiscal periods, approval controls and connections", <SettingsView key={`set-${datasetVersion}`} />);

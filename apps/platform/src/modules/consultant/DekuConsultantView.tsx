@@ -579,22 +579,22 @@ export function DekuConsultantView() {
     : messages;
 
   return (
-    <div className="flex h-full w-full bg-canvas text-ink font-sans select-none overflow-hidden">
+    <div className="flex h-full min-h-0 w-full bg-canvas text-ink font-sans overflow-hidden">
       {/* Left panel: workbenches, ledger snapshot, account */}
-      <aside className="w-64 xl:w-72 bg-surface border-r border-line flex flex-col justify-between shrink-0">
-        <div className="p-4 space-y-5 overflow-y-auto">
+      <aside className="hidden md:flex w-60 lg:w-64 bg-surface border-r border-line flex-col justify-between shrink-0 min-h-0 select-none">
+        <div className="p-3 space-y-4 overflow-y-auto min-h-0">
           <button
             onClick={handleStartNewChat}
-            className="w-full h-9 bg-ink hover:bg-ink-soft text-white font-medium text-[13.5px] px-3.5 rounded-ctl flex items-center gap-2 transition-colors cursor-pointer"
+            className="w-full h-8 bg-ink hover:bg-ink-soft text-white font-medium text-[13px] px-3 rounded-ctl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             <span>New chat</span>
           </button>
 
           {/* Workbenches / Organisation Tenants */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 px-2 text-[12.5px] font-medium text-ink-muted">
-              <Building2 className="h-3.5 w-3.5" />
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-subtle">
+              <Building2 className="h-3 w-3" />
               Workbenches
             </div>
 
@@ -605,7 +605,7 @@ export function DekuConsultantView() {
                   <button
                     key={org.id}
                     onClick={() => handleSelectOrg(org)}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-[8px] text-[13.5px] flex items-center justify-between transition-colors cursor-pointer ${
+                    className={`w-full text-left px-2.5 py-1.5 rounded-[8px] text-[13px] flex items-center justify-between transition-colors cursor-pointer ${
                       isActive
                         ? "bg-brand-wash text-ink font-medium shadow-[inset_3px_0_0_var(--color-brand)]"
                         : "text-ink-soft hover:text-ink hover:bg-canvas-sunken"
@@ -613,7 +613,7 @@ export function DekuConsultantView() {
                   >
                     <span className="truncate">{org.name}</span>
                     {isActive && (
-                      <span className="text-xs font-medium text-brand-strong shrink-0 ml-2">
+                      <span className="text-[11px] font-medium text-brand-strong shrink-0 ml-2">
                         Active
                       </span>
                     )}
@@ -623,54 +623,62 @@ export function DekuConsultantView() {
 
               <Link
                 href="/companies"
-                className="w-full text-left px-2.5 py-1.5 text-[13px] font-medium text-brand-strong hover:text-ink flex items-center gap-1 transition-colors"
+                className="w-full text-left px-2.5 py-1 text-[12.5px] font-medium text-brand-strong hover:text-ink flex items-center gap-1 transition-colors"
               >
                 <span>View all companies</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
           </div>
 
           {/* Ledger snapshot */}
-          <div className="bg-canvas border border-line rounded-panel p-3.5 space-y-2.5">
-            <div className="flex items-center justify-between text-[12.5px] font-medium text-ink-muted">
-              <span>Ledger snapshot</span>
-              {contextFailed && <span className="text-bad">Couldn&apos;t load</span>}
+          <div className="bg-canvas/70 border border-line rounded-panel p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-subtle">
+                Ledger snapshot
+              </span>
+              {contextFailed ? (
+                <span className="text-[11px] text-bad">Couldn&apos;t load</span>
+              ) : isLoadingContext ? (
+                <span className="text-[11px] text-ink-subtle">Syncing…</span>
+              ) : null}
             </div>
-            <div className="space-y-1.5 text-[13px] tabular-nums">
-              <div className="flex justify-between">
+            <div className="divide-y divide-line/60 text-[12.5px] tabular-nums">
+              <div className="flex justify-between py-1 first:pt-0">
                 <span className="text-ink-muted">Turnover</span>
-                <span className="font-medium text-ink">{prof.total_revenue == null ? "–" : formatINR(prof.total_revenue)}</span>
+                <span className="font-semibold text-ink">{prof.total_revenue == null ? "–" : formatINR(prof.total_revenue)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between py-1">
                 <span className="text-ink-muted">Net margin</span>
-                <span className="font-medium text-ink">{prof.net_margin_pct == null ? "–" : `${prof.net_margin_pct}%`}</span>
+                <span className="font-semibold text-ink">{prof.net_margin_pct == null ? "–" : `${prof.net_margin_pct}%`}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between py-1">
                 <span className="text-ink-muted">Runway</span>
-                <span className="font-medium text-ink">{runway.cash_runway_months == null ? "–" : `${runway.cash_runway_months} mo`}</span>
+                <span className="font-semibold text-ink">{runway.cash_runway_months == null ? "–" : `${runway.cash_runway_months} mo`}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between py-1 last:pb-0">
                 <span className="text-ink-muted">Debtors DSO</span>
-                <span className="font-medium text-ink">{dso == null ? "–" : `${dso} days`}</span>
+                <span className="font-semibold text-ink">{dso == null ? "–" : `${dso} days`}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Left panel footer: account and settings */}
-        <div className="p-3 space-y-2 border-t border-line">
-          <div className="flex items-center gap-2.5 px-2 py-1.5">
-            <div className="h-7 w-7 rounded-full bg-brand-wash-strong flex items-center justify-center font-semibold text-xs text-brand-strong shrink-0">
-              {userName.charAt(0)}
+        <div className="p-2.5 space-y-1.5 border-t border-line shrink-0">
+          {userName && (
+            <div className="flex items-center gap-2 px-1.5 py-1">
+              <div className="h-6 w-6 rounded-full bg-brand-wash-strong flex items-center justify-center font-semibold text-[11px] text-brand-strong shrink-0">
+                {userName.charAt(0)}
+              </div>
+              <div className="truncate text-left leading-tight">
+                <div className="text-[12.5px] font-medium text-ink truncate">{userName}</div>
+                {user?.email && <div className="text-[11px] text-ink-muted truncate">{user.email}</div>}
+              </div>
             </div>
-            <div className="truncate text-left leading-tight">
-              <div className="text-[13px] font-medium text-ink truncate">{userName}</div>
-              <div className="text-xs text-ink-muted truncate">{user?.email}</div>
-            </div>
-          </div>
+          )}
 
-          <div className="flex items-center justify-between px-2 text-[13px] text-ink-muted">
+          <div className="flex items-center justify-between px-1.5 pt-0.5 text-[12px] text-ink-muted">
             <Link
               href="/settings"
               className="flex items-center gap-1.5 hover:text-ink transition-colors"
@@ -683,64 +691,81 @@ export function DekuConsultantView() {
               className="flex items-center gap-1.5 hover:text-ink transition-colors"
             >
               <span>Gateway</span>
-              <kbd className="font-mono text-[11px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Esc</kbd>
+              <kbd className="font-mono text-[10.5px] leading-none px-1.5 pt-[3px] pb-[2px] rounded-[5px] border border-line-strong border-b-2 bg-surface text-ink-muted">Esc</kbd>
             </Link>
           </div>
         </div>
       </aside>
 
       {/* Main column: empty state or conversation */}
-      <main className="flex-1 flex flex-col justify-between overflow-hidden relative bg-canvas">
-        <header className="h-14 px-6 flex items-center justify-between shrink-0 bg-surface border-b border-line z-10">
-          <div className="flex items-center gap-2.5">
-            <DekuLogo size={24} />
-            <span className="font-semibold text-[15px] tracking-tight text-ink">Deku Consultant</span>
+      <main className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden relative bg-canvas">
+        <header className="h-11 px-4 sm:px-6 flex items-center justify-between shrink-0 bg-surface border-b border-line z-10 select-none">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <DekuLogo size={20} />
+            <span className="font-semibold text-[14px] tracking-tight text-ink">Deku Consultant</span>
+            {activeOrgName && (
+              <span className="hidden sm:inline-flex items-center text-[11.5px] text-ink-muted border-l border-line pl-2.5 truncate">
+                {activeOrgName}
+              </span>
+            )}
           </div>
 
-          <div className="inline-flex items-center gap-2 h-8 px-3 rounded-ctl text-[13px] bg-brand-wash text-brand-strong border border-brand-wash-strong">
-            <span className="h-[7px] w-[7px] rounded-full bg-brand inline-block" />
-            <span>Ledger analyst · on-premise</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleStartNewChat}
+              className="md:hidden inline-flex items-center gap-1 h-7 px-2.5 rounded-ctl border border-line-strong bg-surface text-[12px] font-medium text-ink"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>New</span>
+            </button>
+            <div className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-ctl text-[12px] bg-brand-wash text-brand-strong border border-brand-wash-strong">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand inline-block" />
+              <span>Ledger analyst · on-premise</span>
+            </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 flex flex-col items-center">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 sm:px-6 flex flex-col items-center">
           {messages.length === 0 ? (
-            <div className="w-full max-w-4xl flex flex-col items-center space-y-7 my-auto">
-              <div className="flex flex-col items-center text-center space-y-2">
-                <DekuLogo size={56} className="mb-2" />
-                <h1 className="text-[28px] font-semibold text-ink tracking-[-0.03em]">
-                  Welcome back, {userName}
-                </h1>
-                <p className="text-[14px] text-ink-muted max-w-lg">
-                  Ask Deku Consultant about your books. Answers are grounded in your ledger.
+            <div className="w-full max-w-4xl flex flex-col items-center space-y-4 my-auto py-1">
+              <div className="flex flex-col items-center text-center space-y-1">
+                <div className="flex items-center gap-2">
+                  <DekuLogo size={32} />
+                  <h1 className="text-[20px] sm:text-[22px] font-semibold text-ink tracking-[-0.025em]">
+                    {userName ? `Welcome back, ${userName}` : "Welcome to Deku Consultant"}
+                  </h1>
+                </div>
+                <p className="text-[13px] text-ink-muted max-w-lg">
+                  Ask Deku Consultant about your books. Answers are grounded directly in your ledger.
                 </p>
               </div>
 
-              <div data-tour="consultant-prompts" className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div data-tour="consultant-prompts" className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {promptCards.map((card, idx) => {
                   const Icon = card.icon;
                   return (
                     <button
                       key={idx}
                       onClick={() => handleSendMessage(card.prompt)}
-                      className="bg-surface border border-line hover:border-line-strong hover:bg-canvas rounded-panel p-4 text-left transition-colors group flex flex-col justify-between min-h-[120px] cursor-pointer"
+                      className="bg-surface border border-line hover:border-line-strong hover:bg-surface/90 hover:shadow-xs rounded-panel p-3 text-left transition-all group flex flex-col justify-between gap-2 cursor-pointer"
                     >
-                      <div className="flex items-center justify-between w-full mb-3">
+                      <div className="flex items-center justify-between w-full">
                         <span
-                          className={`inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium ${card.categoryBadge}`}
+                          className={`inline-flex items-center h-5 px-2 rounded-chip text-[11px] font-medium ${card.categoryBadge}`}
                         >
                           {card.category}
                         </span>
-                        <div className="h-8 w-8 rounded-[8px] bg-canvas-sunken text-ink-soft grid place-items-center group-hover:text-brand-strong transition-colors">
-                          <Icon className="h-4 w-4" />
+                        <div className="h-6 w-6 rounded-[6px] bg-canvas-sunken text-ink-soft grid place-items-center group-hover:text-brand-strong transition-colors">
+                          <Icon className="h-3.5 w-3.5" />
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <h4 className="text-[14px] font-[550] text-ink">
+                      <div className="space-y-0.5">
+                        <h4 className="text-[13px] font-semibold text-ink leading-snug">
                           {card.title}
                         </h4>
-                        <p className="text-[12.5px] text-ink-muted line-clamp-2 leading-relaxed">
+                        <p className="text-[11.5px] text-ink-muted line-clamp-2 leading-snug">
                           {card.description}
                         </p>
                       </div>
@@ -750,25 +775,25 @@ export function DekuConsultantView() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-4xl space-y-5 pb-6">
-              <div className="flex items-center justify-between border-b border-line pb-3 mb-2">
+            <div className="w-full max-w-4xl space-y-4 pb-4">
+              <div className="flex items-center justify-between border-b border-line pb-2.5 mb-1">
                 <div>
-                  <h2 className="text-[15px] font-semibold text-ink tracking-tight">
+                  <h2 className="text-[14px] font-semibold text-ink tracking-tight">
                     Chat
                   </h2>
-                  <p className="text-[13px] text-ink-muted">
+                  <p className="text-[12px] text-ink-muted">
                     Early preview, grounded in the Universal Ledger. Double-check critical outputs.
                   </p>
                 </div>
 
-                <div className="relative w-48 sm:w-64">
+                <div className="relative w-44 sm:w-60">
                   <Search className="h-3.5 w-3.5 text-ink-subtle absolute left-2.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchFilter}
                     onChange={(e) => setSearchFilter(e.target.value)}
                     placeholder="Search messages"
-                    className="w-full h-8 pl-8 pr-3 bg-surface border border-line-strong rounded-ctl text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none focus:border-brand"
+                    className="w-full h-8 pl-8 pr-3 bg-surface border border-line-strong rounded-ctl text-[12.5px] text-ink placeholder:text-ink-subtle focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
@@ -787,11 +812,11 @@ export function DekuConsultantView() {
                         <User className="h-4 w-4" />
                       </div>
                     ) : (
-                      <DekuLogo size={30} className="shrink-0 mt-0.5" />
+                      <DekuLogo size={28} className="shrink-0 mt-0.5" />
                     )}
 
                     <div
-                      className={`max-w-[95%] sm:max-w-[90%] px-4 py-3 text-[13.5px] leading-relaxed ${
+                      className={`max-w-[95%] sm:max-w-[90%] px-4 py-2.5 text-[13.5px] leading-relaxed ${
                         isUser
                           ? "bg-ink text-white rounded-[14px]"
                           : "bg-surface text-ink rounded-panel border border-line"
@@ -804,7 +829,7 @@ export function DekuConsultantView() {
                       )}
 
                       <div
-                        className={`flex items-center justify-between gap-4 mt-2.5 pt-2 text-xs border-t ${
+                        className={`flex items-center justify-between gap-4 mt-2 pt-1.5 text-[11px] border-t ${
                           isUser ? "border-white/15 text-white/60" : "border-line text-ink-muted"
                         }`}
                       >
@@ -818,8 +843,8 @@ export function DekuConsultantView() {
 
               {isSending && (
                 <div className="flex items-start gap-3">
-                  <DekuLogo size={30} className="shrink-0 mt-0.5" />
-                  <div className="rounded-panel px-4 py-3 text-[13.5px] text-ink-muted flex items-center gap-2 bg-surface border border-line">
+                  <DekuLogo size={28} className="shrink-0 mt-0.5" />
+                  <div className="rounded-panel px-4 py-2.5 text-[13px] text-ink-muted flex items-center gap-2 bg-surface border border-line">
                     <Sparkles className="h-3.5 w-3.5 animate-spin text-brand-strong" />
                     <span>Reading the ledger and preparing an answer…</span>
                   </div>
@@ -831,59 +856,57 @@ export function DekuConsultantView() {
         </div>
 
         {/* Prompt bar */}
-        <div className="px-4 pb-4 pt-2 lg:px-6 lg:pb-5 w-full flex flex-col items-center shrink-0 bg-canvas">
-          <div data-tour="consultant-composer" className="w-full max-w-3xl bg-surface border border-line-strong rounded-panel p-2 shadow-pop flex flex-col gap-2 focus-within:border-brand transition-colors">
-            <div className="flex items-center gap-1 px-1">
-              <button
-                type="button"
-                onClick={() => router.push("/vouchers")}
-                className="h-8 w-8 grid place-items-center rounded-ctl text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer"
-                title="Upload a bill: it is read on this device, never uploaded"
-              >
-                <Paperclip className="h-4 w-4" />
-              </button>
+        <div className="px-4 py-2.5 sm:px-6 w-full flex flex-col items-center shrink-0 border-t border-line/70 bg-surface/60">
+          <div data-tour="consultant-composer" className="w-full max-w-3xl bg-surface border border-line-strong rounded-panel px-2 py-1.5 shadow-sm flex items-center gap-1 focus-within:border-brand transition-colors">
+            <button
+              type="button"
+              onClick={() => router.push("/vouchers")}
+              className="h-8 w-8 grid place-items-center rounded-ctl text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors cursor-pointer shrink-0"
+              title="Upload a bill: it is read on this device, never uploaded"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
 
-              <button
-                type="button"
-                onClick={() => loadContext(activeOrgId)}
-                className="h-8 w-8 grid place-items-center rounded-ctl text-brand-strong hover:bg-canvas-sunken transition-colors cursor-pointer"
-                title="Reload ledger context"
-              >
-                <Database className="h-4 w-4" />
-              </button>
+            <button
+              type="button"
+              onClick={() => loadContext(activeOrgId)}
+              className="h-8 w-8 grid place-items-center rounded-ctl text-brand-strong hover:bg-canvas-sunken transition-colors cursor-pointer shrink-0"
+              title="Reload ledger context"
+            >
+              <Database className="h-4 w-4" />
+            </button>
 
-              <input
-                type="text"
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder="Ask Deku Consultant anything, or upload a bill to begin"
-                className="flex-1 h-9 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle focus:outline-none px-2"
-                disabled={isSending}
-              />
+            <input
+              type="text"
+              value={inputQuery}
+              onChange={(e) => setInputQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              placeholder="Ask Deku Consultant anything, or upload a bill to begin"
+              className="flex-1 h-8 bg-transparent text-[13.5px] text-ink placeholder:text-ink-subtle focus:outline-none px-2 min-w-0"
+              disabled={isSending}
+            />
 
-              <button
-                type="button"
-                onClick={() => handleSendMessage()}
-                disabled={isSending || !inputQuery.trim()}
-                className={`h-8 w-8 rounded-ctl flex items-center justify-center transition-colors shrink-0 ${
-                  inputQuery.trim()
-                    ? "bg-ink hover:bg-ink-soft text-white cursor-pointer"
-                    : "bg-canvas-sunken text-ink-subtle cursor-not-allowed"
-                }`}
-                aria-label="Send"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => handleSendMessage()}
+              disabled={isSending || !inputQuery.trim()}
+              className={`h-8 w-8 rounded-ctl flex items-center justify-center transition-colors shrink-0 ${
+                inputQuery.trim()
+                  ? "bg-ink hover:bg-ink-soft text-white cursor-pointer"
+                  : "bg-canvas-sunken text-ink-subtle cursor-not-allowed"
+              }`}
+              aria-label="Send"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
           </div>
 
-          <div className="w-full max-w-3xl flex items-center justify-between mt-2 px-2 text-xs text-ink-subtle">
+          <div className="w-full max-w-3xl flex items-center justify-between mt-1.5 px-1 text-[11px] text-ink-subtle">
             <span>
               Answers are grounded in the active ledger. Double-check critical statutory filings.
             </span>
