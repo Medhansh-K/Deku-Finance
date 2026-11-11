@@ -123,7 +123,7 @@ export default function AlerxLedgerSection() {
 
   return (
     <section id="alerx" aria-labelledby="alerx-title" className="scroll-mt-20 bg-surface">
-      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
         <Reveal className="max-w-[720px]">
           <h2 id="alerx-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
             A clear chart of accounts for any kind of business

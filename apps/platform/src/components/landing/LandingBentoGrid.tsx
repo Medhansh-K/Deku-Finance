@@ -110,7 +110,7 @@ const TRAIL = [
 export default function LandingBentoGrid() {
   return (
     <section id="features" aria-labelledby="features-title" className="scroll-mt-20 bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
         <Reveal className="max-w-[680px]">
           <h2 id="features-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
             From the first bill to the balance sheet

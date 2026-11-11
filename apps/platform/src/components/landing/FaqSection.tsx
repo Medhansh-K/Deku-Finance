@@ -56,7 +56,7 @@ export default function FaqSection() {
 
   return (
     <section id="faq" aria-labelledby="faq-title" className="scroll-mt-20 bg-canvas">
-      <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-16 lg:py-36">
+      <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-16 lg:py-24">
         <Reveal>
           <h2 id="faq-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
             Questions, answered

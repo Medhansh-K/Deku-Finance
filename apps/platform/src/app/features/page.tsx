@@ -67,7 +67,7 @@ export default function FeaturesPage() {
       <LandingNavbar />
 
       <main className="flex-1">
-        <section className={`${container} pb-20 pt-20 sm:pt-28 lg:pb-28`}>
+        <section className={`${container} pb-20 pt-20 sm:pt-20 lg:pb-20`}>
           <Reveal>
             <p className="text-[15px] font-medium text-brand-strong">Feature matrix</p>
             <h1 className={`mt-4 max-w-[22ch] ${h1}`}>Built for Indian businesses, on a proper double-entry ledger.</h1>
@@ -89,7 +89,7 @@ export default function FeaturesPage() {
         <FeatureTabs />
 
         <section aria-labelledby="more-title" className="border-t border-line bg-canvas">
-          <div className={`${container} py-20 lg:py-28`}>
+          <div className={`${container} py-16 lg:py-20`}>
             <Reveal>
               <h2 id="more-title" className={h2}>
                 Also in Deku
@@ -119,7 +119,7 @@ export default function FeaturesPage() {
         </section>
 
         <section aria-labelledby="learn-title" className="bg-panel-deep text-white">
-          <div className={`${container} py-24 lg:py-32`}>
+          <div className={`${container} py-16 lg:py-24`}>
             <Reveal>
               <p className="text-[15px] font-medium text-brand">Public sandbox, no registration</p>
               <h2 id="learn-title" className={`mt-4 max-w-[22ch] ${h2} text-white`}>

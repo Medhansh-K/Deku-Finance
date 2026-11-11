@@ -37,7 +37,7 @@ const ROWS: { capability: string; deku: string; desktop: string; invoicing: stri
 export default function ComparisonSection() {
   return (
     <section aria-labelledby="compare-title" className="bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
         <Reveal className="max-w-[680px]">
           <h2 id="compare-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
             Why Indian businesses choose Deku Finance

@@ -69,7 +69,7 @@ export default function InteractiveModePreview() {
 
   return (
     <section id="modes" aria-labelledby="modes-title" className="scroll-mt-20 bg-panel-deep text-white">
-      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-32">
+      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
           {/* Left: the story for each stage */}
           <div>

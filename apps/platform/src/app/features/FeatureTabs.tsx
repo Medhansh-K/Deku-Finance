@@ -444,7 +444,7 @@ export function FeatureTabs() {
         role="tabpanel"
         id={`panel-${active}`}
         aria-labelledby={`tab-${active}`}
-        className={`${container} min-h-[640px] py-20 lg:py-28`}
+        className={`${container} min-h-[640px] py-16 lg:py-20`}
       >
         <Reveal key={active}>
           <Panel />

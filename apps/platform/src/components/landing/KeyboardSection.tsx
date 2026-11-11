@@ -113,7 +113,7 @@ export default function KeyboardSection() {
 
   return (
     <section ref={ref} id="keyboard" aria-labelledby="keyboard-title" className="scroll-mt-20 bg-panel-deep text-white">
-      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
         <Reveal className="max-w-[720px]">
           <h2 id="keyboard-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[44px]">
             Keep your hands on the keyboard

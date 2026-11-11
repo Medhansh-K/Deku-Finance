@@ -49,7 +49,7 @@ export default function Home() {
       <main>
         {/* Hero */}
         <section aria-labelledby="hero-title" className="bg-canvas">
-          <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-16 sm:px-8 sm:pt-24 lg:pb-20 lg:pt-28">
+          <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-16 sm:px-8 sm:pt-16 lg:pb-20 lg:pt-20">
             <h1
               id="hero-title"
               className="max-w-[16ch] text-[44px] font-semibold leading-[1.02] tracking-[-0.04em] text-ink motion-safe:animate-[dekuFade_.6s_ease-out_both] sm:text-[60px] lg:text-[68px]"
@@ -107,7 +107,7 @@ export default function Home() {
 
         {/* Real screens */}
         <section aria-labelledby="screens-title" className="bg-surface">
-          <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+          <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
             <h2 id="screens-title" className="sr-only">
               The product, screen by screen
             </h2>
@@ -133,7 +133,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <div className="mt-28 grid items-center gap-12 lg:mt-40 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-16">
+            <div className="mt-16 grid items-center gap-12 lg:mt-40 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-16">
               <Reveal className="lg:order-2">
                 <h3 className={h2}>GSTR-1 and GSTR-3B, prepared from your invoices</h3>
                 <p className={lead}>
@@ -154,7 +154,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <div className="mt-28 lg:mt-40">
+            <div className="mt-16 lg:mt-40">
               <Reveal className="max-w-[680px]">
                 <h3 className={h2}>Statements that tie out to the rupee</h3>
                 <p className={lead}>
@@ -191,7 +191,7 @@ export default function Home() {
 
         {/* Learn Centre invitation */}
         <section aria-labelledby="learn-title" className="bg-panel-deep text-white">
-          <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-20 lg:py-32">
+          <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-20 lg:py-24">
             <Reveal>
               <h2 id="learn-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[44px]">
                 Try it on sample books

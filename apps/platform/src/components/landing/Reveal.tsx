@@ -31,7 +31,7 @@ export default function Reveal({
         setHidden(false);
         io.disconnect();
       },
-      { rootMargin: "0px 0px -8% 0px" }
+      { rootMargin: "0px" } // trigger at the screen edge, so blocks at the very end of the page still appear
     );
     io.observe(el);
     return () => io.disconnect();

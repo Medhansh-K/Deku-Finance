@@ -115,7 +115,7 @@ function Section({
       aria-labelledby={`${id}-title`}
       className={`scroll-mt-20 border-t border-line ${tone === "surface" ? "bg-surface" : "bg-canvas"}`}
     >
-      <div className={`${container} py-20 lg:py-28`}>
+      <div className={`${container} py-16 lg:py-20`}>
         <Reveal>
           {label && <p className="mb-3 text-[15px] font-medium text-brand-strong">{label}</p>}
           <h2 id={`${id}-title`} className={`${h2} max-w-[30ch]`}>
@@ -135,7 +135,7 @@ export default function GstCompliancePage() {
       <LandingNavbar />
 
       <main className="flex-1">
-        <section className={`${container} pb-20 pt-20 sm:pt-28 lg:pb-28`}>
+        <section className={`${container} pb-20 pt-20 sm:pt-20 lg:pb-20`}>
           <Reveal>
             <p className="text-[15px] font-medium text-brand-strong">GST engine and GSP roadmap</p>
             <h1 className={`mt-4 max-w-[24ch] ${h1}`}>GST built into every invoice, and a clear path to the portal.</h1>
@@ -275,7 +275,7 @@ export default function GstCompliancePage() {
         </Section>
 
         <section id="gsp" aria-labelledby="gsp-title" className="scroll-mt-20 bg-panel-deep text-white">
-          <div className={`${container} py-20 lg:py-28`}>
+          <div className={`${container} py-16 lg:py-20`}>
             <Reveal>
               <p className="text-[15px] font-medium text-brand">GST Suvidha Provider</p>
               <h2 id="gsp-title" className={`mt-4 max-w-[26ch] ${h2} text-white`}>
@@ -400,7 +400,7 @@ export default function GstCompliancePage() {
         </Section>
 
         <section className="border-t border-line bg-canvas">
-          <div className={`${container} py-24 lg:py-32`}>
+          <div className={`${container} py-16 lg:py-24`}>
             <Reveal>
               <h2 className={`${h2} max-w-[24ch]`}>Ready to explore GST invoicing in Deku?</h2>
               <p className={`mt-4 ${lead}`}>
