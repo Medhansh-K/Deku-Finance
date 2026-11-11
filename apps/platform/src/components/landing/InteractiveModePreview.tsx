@@ -1,495 +1,347 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  CheckCircle2,
-  ShieldCheck,
-  Building2,
-  UserCheck,
-  ArrowRight,
-  QrCode,
-  Zap,
-  TrendingUp,
-  FileSpreadsheet,
-  Sliders,
-} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Check, QrCode } from "lucide-react";
+
+type Mode = "lean" | "gst";
+
+const TAXABLE = 50000;
+const inr = (n: number) => n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Tweens a figure to its new value; jumps straight there for reduced motion. */
+function useTween(target: number, ms = 520) {
+  const [value, setValue] = useState(target);
+  const from = useRef(target);
+  useEffect(() => {
+    const start = from.current;
+    if (start === target) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      from.current = target;
+      setValue(target);
+      return;
+    }
+    const t0 = performance.now();
+    let raf = 0;
+    const step = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const v = Math.round(start + (target - start) * eased);
+      from.current = v;
+      setValue(v);
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
+}
+
+/** Height-animated block: rows open and close instead of popping. */
+function Collapse({ open, children }: { open: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${
+        open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+      }`}
+      aria-hidden={!open}
+    >
+      <div className="overflow-hidden">{children}</div>
+    </div>
+  );
+}
+
+const FIELDS = [
+  { key: "po", label: "PO number" },
+  { key: "vehicle", label: "Vehicle number" },
+  { key: "terms", label: "Due date and terms" },
+  { key: "qr", label: "UPI QR" },
+] as const;
+type FieldKey = (typeof FIELDS)[number]["key"];
 
 export default function InteractiveModePreview() {
-  const [activeMode, setActiveMode] = useState<"pure" | "gst">("pure");
-  const [customFields, setCustomFields] = useState({
-    showPoNumber: true,
-    showEwayBill: false,
-    showPaymentTerms: true,
-    showPaymentQr: true,
-  });
+  const [mode, setMode] = useState<Mode>("lean");
+  const [fields, setFields] = useState<Record<FieldKey, boolean>>({ po: true, vehicle: false, terms: true, qr: true });
+  const gst = mode === "gst";
+  const tax = gst ? TAXABLE * 0.09 : 0;
+  const total = useTween(TAXABLE + tax * 2);
+  const cgst = useTween(tax);
+  const meta = fields.po || fields.vehicle || fields.terms;
 
   return (
-    <div className="w-full bg-panel rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-8 border border-edge shadow-2xl text-white relative overflow-hidden font-sans">
-      {/* Background Subtle Ambient Glow */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-brand/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+    <section id="modes" aria-labelledby="modes-title" className="scroll-mt-20 bg-panel-deep text-white">
+      <div className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-32">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          {/* Left: the story for each stage */}
+          <div>
+            <h2 id="modes-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[40px]">
+              Start without GST. Switch it on when you register.
+            </h2>
+            <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.55] text-white/70">
+              A small studio and a growing distributor need different paperwork. Deku keeps the same books underneath
+              and changes what each bill carries.
+            </p>
 
-      {/* Header and Mode Selector Buttons */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-edge">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-brand/15 px-2.5 py-0.5 text-[11px] sm:text-xs font-mono font-semibold text-brand-soft border border-brand/30">
-              <Zap className="h-3 w-3 text-brand" />
-              Interactive Workspace Preview
-            </span>
-            <span className="text-[11px] sm:text-xs text-slate-400">Switch stage to preview how Deku adapts</span>
-          </div>
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            Start Lean. Scale Effortlessly.
-          </h3>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
-            Solo studio keeping things fast, or high-growth B2B company? Deku Finance adapts your invoicing, payment links, and reporting seamlessly as you grow.
-          </p>
-        </div>
-
-        {/* The 2 Mode Toggles */}
-        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center bg-panel-deep p-1 rounded-xl sm:rounded-2xl border border-edge self-start lg:self-auto gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveMode("pure")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-              activeMode === "pure"
-                ? "bg-brand text-ink shadow-md font-bold"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>Lean Business (Non-GST)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveMode("gst")}
-            className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-              activeMode === "gst"
-                ? "bg-brand text-ink shadow-md font-bold"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>Scale &amp; Enterprise (GST)</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Dynamic Content Grid */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Mode Explanation & Status Metrics (5 cols) */}
-        <div className="lg:col-span-5 space-y-5">
-          {activeMode === "pure" ? (
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
-                    Early-Stage Simplicity
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Zero Tax Clutter
-                  </span>
-                </div>
-                <h4 className="text-base font-bold text-white">
-                  Fast Commercial Billing Without Overhead
-                </h4>
-                <p className="text-xs leading-relaxed text-slate-400">
-                  Built for freelancers, studios &amp; early startups below ₹20L/₹40L. Send clean <strong>Bills of Supply &amp; Commercial Invoices</strong> in seconds with zero monthly filing distractions.
-                </p>
-              </div>
-
-              {/* Turnover Tracker Box */}
-              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Revenue Milestone Tracker</span>
-                  <span className="text-brand-soft font-mono font-bold">16% of ₹40L Milestone</span>
-                </div>
-                <div className="w-full bg-panel h-2.5 rounded-full overflow-hidden border border-edge">
-                  <div className="bg-brand h-full rounded-full w-[16%] transition-all duration-500" />
-                </div>
-                <div className="flex justify-between text-[11px] font-mono text-slate-400">
-                  <span>Current FY: ₹6,40,000</span>
-                  <span>Next Stage: ₹40,00,000</span>
-                </div>
-                <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Focus 100% on revenue; upgrade when ready.</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand">
-                    Growth Operations
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/20">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Full Scale Ready
-                  </span>
-                </div>
-                <h4 className="text-base font-bold text-white">
-                  Automated Multi-Channel &amp; B2B Operations
-                </h4>
-                <p className="text-xs leading-relaxed text-slate-400">
-                  Built for scaling SMEs, B2B vendors, and marketplace brands on Amazon, Flipkart &amp; Blinkit. Auto-handles tax splits, marketplace payouts, and team permissions without slowing down sales.
-                </p>
-              </div>
-
-              {/* Returns Readiness Box */}
-              <div className="rounded-2xl bg-panel-deep border border-edge p-5 space-y-3">
-                <span className="text-xs text-slate-400 font-medium">Background Automation</span>
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="bg-panel-deep rounded-xl p-3 border border-edge">
-                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Monthly Sales Summary</span>
-                    <span className="text-sm font-bold text-emerald-400">1-Click Export Ready</span>
-                  </div>
-                  <div className="bg-panel-deep rounded-xl p-3 border border-edge">
-                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Credit &amp; Tax Match</span>
-                    <span className="text-sm font-bold text-brand-soft">Auto-Computed</span>
-                  </div>
-                </div>
-                <div className="pt-2 border-t border-edge/80 flex items-center gap-2 text-xs text-slate-400">
-                  <FileSpreadsheet className="h-4 w-4 text-brand shrink-0" />
-                  <span>Close your monthly books in minutes instead of days.</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Instant UPI Scan-To-Pay Feature Callout */}
-          <div className="rounded-2xl bg-gradient-to-r from-brand/15 to-brand/5 border border-edge p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-brand text-ink flex items-center justify-center font-bold shrink-0">
-              <QrCode className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-white block">
-                Instant Scan-to-Pay Bharat UPI
-              </span>
-              <span className="text-[11px] text-slate-400">
-                Every generated bill prints your verified UPI VPA for zero-delay payment settlement.
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Live Document & Invoice Simulation (7 cols) */}
-        <div className="lg:col-span-7 bg-white text-slate-900 rounded-2xl p-6 shadow-xl border border-slate-200 space-y-4">
-          {/* Interactive Invoice Customization Bar */}
-          <div className="bg-canvas rounded-xl p-3 border border-slate-200">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <Sliders className="h-3.5 w-3.5 text-brand-strong" />
-                Live Invoice Field Customizer (Interactive)
-              </span>
-              <span className="text-[10px] text-slate-500 font-medium">Click to toggle fields</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setCustomFields((prev) => ({ ...prev, showPoNumber: !prev.showPoNumber }))
-                }
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
-                  customFields.showPoNumber
-                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
-                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                <span>{customFields.showPoNumber ? "✓" : "+"} PO Number</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setCustomFields((prev) => ({ ...prev, showEwayBill: !prev.showEwayBill }))
-                }
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
-                  customFields.showEwayBill
-                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
-                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                <span>{customFields.showEwayBill ? "✓" : "+"} E-Way / Vehicle No</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setCustomFields((prev) => ({ ...prev, showPaymentTerms: !prev.showPaymentTerms }))
-                }
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
-                  customFields.showPaymentTerms
-                    ? "bg-brand text-ink border-brand font-bold shadow-xs"
-                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                <span>{customFields.showPaymentTerms ? "✓" : "+"} Due Date & Terms</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setCustomFields((prev) => ({ ...prev, showPaymentQr: !prev.showPaymentQr }))
-                }
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
-                  customFields.showPaymentQr
-                    ? "bg-emerald-600 text-white border-emerald-700 font-bold shadow-xs"
-                    : "bg-white text-slate-600 border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                <QrCode className="h-3 w-3" />
-                <span>{customFields.showPaymentQr ? "✓ Bharat UPI QR Active" : "+ Add UPI QR"}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Invoice Document Box */}
-          <div className="border border-slate-200 rounded-xl p-5 bg-white shadow-xs space-y-4">
-            {/* Invoice Header Mock */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-              <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-soft">
-                  {activeMode === "pure" ? "Pure Accounting Bill" : "Standard Tax Document"}
-                </span>
-                <h4 className="text-lg font-black text-slate-950">
-                  {activeMode === "pure" ? "Bill of Supply (Exempt / Nil)" : "GST TAX INVOICE"}
-                </h4>
-                <span className="text-xs font-mono text-slate-500">
-                  {activeMode === "pure" ? "BOS/2026-27/0014" : "INV/2026-27/0088"}
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="inline-block px-2.5 py-1 rounded-md text-[11px] font-mono font-extrabold uppercase tracking-wide bg-slate-100 text-slate-800 border border-slate-300">
-                  {activeMode === "pure" ? "Sec 22 CGST Exempt" : "GST & E-Way Ready"}
-                </span>
-                <span className="text-xs font-mono text-slate-500 block mt-1">Date: 19-10-2026</span>
-              </div>
+            <div role="radiogroup" aria-label="Business stage" className="mt-8 inline-flex rounded-ctl border border-edge bg-panel p-1">
+              {(
+                [
+                  ["lean", "Not registered for GST"],
+                  ["gst", "GST registered"],
+                ] as [Mode, string][]
+              ).map(([m, label]) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={mode === m}
+                  onClick={() => setMode(m)}
+                  className={`rounded-[7px] px-3.5 py-2 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                    mode === m ? "bg-white text-ink" : "text-white/65 hover:text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
-            {/* Party details */}
-            <div className="grid grid-cols-2 gap-4 py-2 border-b border-slate-100 text-xs">
-              <div>
-                <span className="font-semibold text-slate-400 block text-[10px] uppercase font-mono">Billed From</span>
-                <span className="font-bold text-slate-900 block">Datalis Infoedge Pvt Ltd</span>
-                <span className="text-slate-600 block font-mono text-[11px]">
-                  {activeMode === "pure" ? "GSTIN: Unregistered / Exempt" : "GSTIN: 27AABCD1234F1Z5"}
-                </span>
-                <span className="text-slate-500 block">Mumbai, Maharashtra (27)</span>
-              </div>
-              <div>
-                <span className="font-semibold text-slate-400 block text-[10px] uppercase font-mono">Billed To</span>
-                <span className="font-bold text-slate-900 block">Apex Growth Solutions LLP</span>
-                <span className="text-slate-600 block font-mono text-[11px]">
-                  {activeMode === "pure" ? "PAN: AADCA4502K" : "GSTIN: 27XYZAB9876C1Z3"}
-                </span>
-                <span className="text-slate-500 block">Pune, Maharashtra (27)</span>
-              </div>
-            </div>
-
-            {/* Dynamic Custom Fields Metadata Strip (When Activated) */}
-            {(customFields.showPoNumber || customFields.showEwayBill || customFields.showPaymentTerms) && (
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                {customFields.showPoNumber && (
-                  <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-mono font-semibold">
-                      PO / Order Ref #
-                    </span>
-                    <span className="font-mono font-bold text-slate-900">PO-2026-OCT-892</span>
-                  </div>
-                )}
-                {customFields.showEwayBill && (
-                  <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-mono font-semibold">
-                      E-Way / Vehicle No
-                    </span>
-                    <span className="font-mono font-bold text-slate-900">2819-4820-9182 (MH-02-EE-4501)</span>
-                  </div>
-                )}
-                {customFields.showPaymentTerms && (
-                  <div>
-                    <span className="text-slate-500 block text-[10px] uppercase font-mono font-semibold">
-                      Payment Terms & Due
-                    </span>
-                    <span className="font-bold text-slate-900">Net 15 Days (Due: 03-Nov-2026)</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Line Item Table */}
-            <div className="overflow-x-auto -mx-1 sm:mx-0">
-              <table className="w-full text-xs min-w-[380px]">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 text-left font-medium">
-                    <th className="pb-2">Item / SAC</th>
-                    <th className="pb-2 text-right">Qty</th>
-                    <th className="pb-2 text-right">Rate</th>
-                    <th className="pb-2 text-right">GST Rate</th>
-                    <th className="pb-2 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <tr>
-                    <td className="py-2.5">
-                      <span className="font-semibold text-slate-900 block">Enterprise Software License</span>
-                      <span className="text-[10px] text-slate-500 font-mono">SAC: 997331</span>
-                    </td>
-                    <td className="py-2.5 text-right font-mono">1</td>
-                    <td className="py-2.5 text-right font-mono">₹50,000</td>
-                    <td className="py-2.5 text-right">
-                      <span
-                        className={`font-semibold px-2 py-0.5 rounded text-[10px] ${
-                          activeMode === "pure"
-                            ? "bg-slate-100 text-slate-600"
-                            : "bg-brand/15 text-ink font-bold"
-                        }`}
-                      >
-                        {activeMode === "pure" ? "0% (Exempt)" : "18% (9+9%)"}
-                      </span>
-                    </td>
-                    <td className="py-2.5 text-right font-bold font-mono">₹50,000</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Tax Computation Summary */}
-            <div className="bg-canvas rounded-xl p-4 border border-slate-200 text-xs space-y-1.5">
-              <div className="flex justify-between text-slate-600">
-                <span>Taxable Amount</span>
-                <span className="font-mono">₹50,000.00</span>
-              </div>
-              {activeMode === "gst" ? (
+            <div key={mode} className="mt-8 space-y-6 motion-safe:animate-[dekuFade_.4s_ease-out]">
+              {gst ? (
                 <>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Central GST (CGST 9%)</span>
-                    <span className="font-mono font-medium text-brand-strong">+₹4,500.00</span>
+                  <div>
+                    <h3 className="text-[17px] font-medium">Tax invoices, purchases and returns</h3>
+                    <p className="mt-2 text-[15px] leading-[1.6] text-white/65">
+                      For B2B suppliers and marketplace sellers. CGST and SGST or IGST are split by place of supply,
+                      marketplace settlement sheets can be imported, and roles decide who can post.
+                    </p>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>State GST (SGST 9%)</span>
-                    <span className="font-mono font-medium text-brand-strong">+₹4,500.00</span>
-                  </div>
+                  <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-edge bg-edge">
+                    <div className="bg-panel p-4">
+                      <dt className="text-[13px] text-white/55">Monthly sales summary</dt>
+                      <dd className="mt-1 text-[15px] font-medium">GSTR-1 prepared from invoices</dd>
+                    </div>
+                    <div className="bg-panel p-4">
+                      <dt className="text-[13px] text-white/55">Credit and tax</dt>
+                      <dd className="mt-1 text-[15px] font-medium">ITC from your purchase register</dd>
+                    </div>
+                  </dl>
+                  <p className="text-[14px] text-white/55">Month-end starts from books that already balance.</p>
                 </>
               ) : (
-                <div className="flex justify-between text-slate-500 italic">
-                  <span>Taxes Charged</span>
-                  <span>₹0.00 (Exempt under Sec 22)</span>
-                </div>
+                <>
+                  <div>
+                    <h3 className="text-[17px] font-medium">Bills without tax clutter</h3>
+                    <p className="mt-2 text-[15px] leading-[1.6] text-white/65">
+                      For freelancers, studios and young businesses below the ₹20 lakh or ₹40 lakh registration limit.
+                      Send bills of supply with no monthly return to file.
+                    </p>
+                  </div>
+                  <div className="rounded-panel border border-edge bg-panel p-5">
+                    <div className="flex items-baseline justify-between gap-3 text-[14px]">
+                      <span className="text-white/65">Registration limit tracker</span>
+                      <span className="tabular-nums text-brand-soft">32% of ₹20 lakh</span>
+                    </div>
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-panel-raised">
+                      <div className="h-full w-[32%] origin-left rounded-full bg-brand motion-safe:animate-[dekuGrow_.9s_.1s_cubic-bezier(.2,.7,.2,1)_both]" />
+                    </div>
+                    <div className="mt-3 flex justify-between text-[13px] tabular-nums text-white/50">
+                      <span>This year ₹6,40,000</span>
+                      <span>Limit ₹20,00,000</span>
+                    </div>
+                  </div>
+                  <p className="text-[14px] text-white/55">Sample figures for a services business. Limits shown are general guidance.</p>
+                </>
               )}
-              <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-950">
-                <span>Grand Total</span>
-                <span className="font-mono text-base text-ink">
-                  {activeMode === "pure" ? "₹50,000.00" : "₹59,000.00"}
-                </span>
-              </div>
             </div>
 
-            {/* Direct Bharat UPI Payment QR Block Embedded on Invoice */}
-            {customFields.showPaymentQr && (
-              <div className="p-3.5 bg-gradient-to-r from-slate-50 via-slate-50/80 to-brand/10 rounded-xl border border-line-strong flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  {/* High Contrast Rendered QR Visual */}
-                  <div className="bg-white p-2 rounded-lg border border-slate-300 shadow-xs shrink-0">
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="w-16 h-16 text-slate-950"
-                      fill="currentColor"
-                      aria-label="Bharat UPI Payment QR Code"
-                    >
-                      {/* Outer Position Detection Boxes */}
-                      <rect x="0" y="0" width="30" height="30" rx="3" />
-                      <rect x="6" y="6" width="18" height="18" fill="white" />
-                      <rect x="10" y="10" width="10" height="10" />
-
-                      <rect x="70" y="0" width="30" height="30" rx="3" />
-                      <rect x="76" y="6" width="18" height="18" fill="white" />
-                      <rect x="80" y="10" width="10" height="10" />
-
-                      <rect x="0" y="70" width="30" height="30" rx="3" />
-                      <rect x="6" y="76" width="18" height="18" fill="white" />
-                      <rect x="10" y="80" width="10" height="10" />
-
-                      {/* Mock QR Data Matrix Dots */}
-                      <rect x="36" y="10" width="6" height="6" />
-                      <rect x="46" y="10" width="6" height="6" />
-                      <rect x="56" y="10" width="6" height="6" />
-                      <rect x="36" y="24" width="6" height="6" />
-                      <rect x="46" y="24" width="6" height="6" />
-                      <rect x="56" y="36" width="6" height="6" />
-                      <rect x="10" y="36" width="6" height="6" />
-                      <rect x="24" y="46" width="6" height="6" />
-                      <rect x="36" y="46" width="6" height="6" />
-                      <rect x="46" y="46" width="6" height="6" />
-                      <rect x="66" y="46" width="6" height="6" />
-                      <rect x="80" y="36" width="6" height="6" />
-                      <rect x="36" y="60" width="6" height="6" />
-                      <rect x="46" y="60" width="6" height="6" />
-                      <rect x="66" y="60" width="6" height="6" />
-                      <rect x="80" y="60" width="6" height="6" />
-                      <rect x="36" y="76" width="6" height="6" />
-                      <rect x="56" y="76" width="6" height="6" />
-                      <rect x="76" y="76" width="6" height="6" />
-                      <rect x="46" y="86" width="6" height="6" />
-                      <rect x="66" y="86" width="6" height="6" />
-                      <rect x="86" y="86" width="6" height="6" />
-                    </svg>
-                  </div>
-                  <div className="space-y-1 text-left">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded">
-                        Bharat UPI Scan-to-Pay
-                      </span>
-                      <span className="text-[10px] text-slate-500 font-medium">Instant 0% MDR</span>
-                    </div>
-                    <div className="font-mono text-xs font-bold text-slate-900">
-                      VPA: 7506461004@paytm
-                    </div>
-                    <div className="text-[10px] text-slate-500">
-                      Amount pre-encoded:{" "}
-                      <strong className="text-slate-900 font-mono">
-                        {activeMode === "pure" ? "₹50,000.00" : "₹59,000.00"}
-                      </strong>
-                    </div>
-                    <div className="text-[9px] text-slate-500 flex items-center gap-1">
-                      <span>Supported:</span>
-                      <span className="font-semibold text-slate-700">
-                        GPay • PhonePe • Paytm • BHIM • Cred
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="text-[10px] text-slate-500 block">Bank A/C Verified</span>
-                  <span className="text-xs font-mono font-bold text-slate-800 block">
-                    HDFC Bank • ••••5678
-                  </span>
-                  <span className="text-[10px] text-emerald-700 font-semibold block">
-                    Auto-reconciles to Ledger
-                  </span>
-                </div>
-              </div>
-            )}
+            <div className="mt-8 flex gap-4 border-t border-edge pt-6">
+              <QrCode aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+              <p className="text-[15px] leading-[1.55] text-white/70">
+                <span className="font-medium text-white">UPI QR on every bill.</span> Your UPI ID and the bill amount,
+                ready for the customer to scan with any UPI app.
+              </p>
+            </div>
           </div>
 
-          {/* Bottom Live Ledger State Reflection */}
-          <div className="p-3 bg-panel-deep border border-edge text-slate-300 rounded-xl text-[11px] font-mono flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-brand animate-ping" />
-              <span>ALERX Ledger Posting:</span>
+          {/* Right: a sample bill that reacts to the stage and the field toggles */}
+          <div className="min-w-0">
+            <fieldset className="mb-4 flex flex-wrap items-center gap-2">
+              <legend className="mb-3 text-[14px] text-white/60">Fields on the bill</legend>
+              {FIELDS.map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  aria-pressed={fields[f.key]}
+                  onClick={() => setFields((p) => ({ ...p, [f.key]: !p[f.key] }))}
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] transition-colors active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                    fields[f.key]
+                      ? "border-brand/60 bg-brand/15 text-brand-soft"
+                      : "border-edge text-white/60 hover:border-white/30 hover:text-white"
+                  }`}
+                >
+                  <Check aria-hidden="true" className={`h-3.5 w-3.5 transition-opacity ${fields[f.key] ? "opacity-100" : "opacity-0 -ml-5"}`} />
+                  {f.label}
+                </button>
+              ))}
+            </fieldset>
+
+            <div className="rounded-panel bg-surface p-6 text-ink shadow-[0_30px_80px_-20px_rgb(0_0_0/0.55)] sm:p-8">
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-5">
+                <div>
+                  <p className="text-[13px] text-ink-muted">{gst ? "Tax invoice" : "Bill of supply"}</p>
+                  <p className="mt-1 font-mono text-[14px] text-ink">{gst ? "KDS/26-27/0088" : "KDS/26-27/0014"}</p>
+                </div>
+                <span
+                  className={`inline-flex h-[24px] items-center rounded-chip px-2 text-xs font-medium transition-colors ${
+                    gst ? "bg-brand-wash text-brand-strong" : "bg-canvas-sunken text-ink-soft"
+                  }`}
+                >
+                  {gst ? "Intra-state, CGST + SGST" : "Not registered (section 22)"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 py-5 text-[13.5px]">
+                <div>
+                  <p className="text-ink-muted">From</p>
+                  <p className="mt-1 font-medium">Kavya Design Studio</p>
+                  <p className="mt-0.5 text-ink-muted">{gst ? "GST registered" : "Not registered for GST"}</p>
+                  <p className="text-ink-muted">Mumbai, Maharashtra</p>
+                </div>
+                <div>
+                  <p className="text-ink-muted">To</p>
+                  <p className="mt-1 font-medium">Apex Growth Solutions LLP</p>
+                  <p className="mt-0.5 text-ink-muted">{gst ? "GST registered" : "Customer"}</p>
+                  <p className="text-ink-muted">Pune, Maharashtra</p>
+                </div>
+              </div>
+
+              <Collapse open={meta}>
+                <dl className="mb-5 grid grid-cols-2 gap-4 rounded-ctl bg-canvas p-3.5 text-[13px] sm:grid-cols-3">
+                  {fields.po && (
+                    <div>
+                      <dt className="text-ink-muted">PO number</dt>
+                      <dd className="mt-0.5 font-mono">PO-2610-892</dd>
+                    </div>
+                  )}
+                  {fields.vehicle && (
+                    <div>
+                      <dt className="text-ink-muted">Vehicle number</dt>
+                      <dd className="mt-0.5 font-mono">MH-04-AB-1234</dd>
+                    </div>
+                  )}
+                  {fields.terms && (
+                    <div>
+                      <dt className="text-ink-muted">Terms</dt>
+                      <dd className="mt-0.5">Net 15, due 3 Nov 2026</dd>
+                    </div>
+                  )}
+                </dl>
+              </Collapse>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[380px] text-[13.5px]">
+                  <thead>
+                    <tr className="border-b border-line text-left text-[12.5px] text-ink-muted">
+                      <th className="pb-2 font-medium">Item</th>
+                      <th className="pb-2 text-right font-medium">Qty</th>
+                      <th className="pb-2 text-right font-medium">GST</th>
+                      <th className="pb-2 text-right font-medium">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-line">
+                      <td className="py-3">
+                        Brand identity design
+                        <span className="block font-mono text-[12px] text-ink-muted">SAC 998391</span>
+                      </td>
+                      <td className="py-3 text-right">1</td>
+                      <td className="py-3 text-right text-ink-soft">{gst ? "18%" : "–"}</td>
+                      <td className="py-3 text-right">{inr(TAXABLE)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="ml-auto mt-4 max-w-[300px] space-y-1.5 text-[13.5px] tabular-nums">
+                <div className="flex justify-between text-ink-soft">
+                  <span>Taxable value</span>
+                  <span>{inr(TAXABLE)}</span>
+                </div>
+                <Collapse open={gst}>
+                  <div className="space-y-1.5 text-ink-soft">
+                    <div className="flex justify-between">
+                      <span>CGST 9%</span>
+                      <span>{inr(cgst)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SGST 9%</span>
+                      <span>{inr(cgst)}</span>
+                    </div>
+                  </div>
+                </Collapse>
+                <div className="flex justify-between border-t border-line pt-2 text-[15px] font-semibold">
+                  <span>Total</span>
+                  <span className="ledger-total">₹{inr(total)}</span>
+                </div>
+              </div>
+
+              <Collapse open={fields.qr}>
+                <div className="mt-6 flex items-center gap-4 rounded-ctl border border-line p-3.5">
+                  <SampleQr />
+                  <div className="min-w-0 text-[13px]">
+                    <p className="font-medium">Scan to pay with any UPI app</p>
+                    <p className="mt-0.5 font-mono text-[12.5px] text-ink-soft">kavya.studio@bank</p>
+                    <p className="mt-0.5 text-ink-muted">Amount filled in: ₹{inr(TAXABLE + tax * 2)}</p>
+                  </div>
+                </div>
+              </Collapse>
             </div>
-            <span className="text-brand-soft truncate max-w-xs font-bold">
-              {activeMode === "pure"
-                ? "Dr Trade Debtors ₹50k ⇄ Cr Revenue ₹50k"
-                : "Dr AR ₹59k ⇄ Cr Revenue ₹50k + Output GST ₹9k"}
-            </span>
+
+            <div className="mt-4 rounded-panel border border-edge bg-panel p-4 text-[13px] tabular-nums">
+              <p className="mb-2 text-white/55">Posted to the ledger</p>
+              <div className="flex justify-between text-white/85">
+                <span>Dr Trade debtors</span>
+                <span>{inr(total)}</span>
+              </div>
+              <div className="flex justify-between text-white/85">
+                <span>Cr Sales</span>
+                <span>{inr(TAXABLE)}</span>
+              </div>
+              <Collapse open={gst}>
+                <div className="flex justify-between text-white/85">
+                  <span>Cr Output CGST and SGST</span>
+                  <span>{inr(cgst * 2)}</span>
+                </div>
+              </Collapse>
+            </div>
+            <p className="mt-3 text-[13px] text-white/45">A sample bill from a fictional business.</p>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+/** A decorative QR-like mark: the sample bill is fictional, so it deliberately encodes nothing. */
+export function SampleQr({ className = "h-16 w-16" }: { className?: string }) {
+  const cells = [
+    [36, 10], [46, 10], [56, 10], [36, 24], [46, 24], [56, 36], [10, 36], [24, 46], [36, 46], [46, 46], [66, 46],
+    [80, 36], [36, 60], [46, 60], [66, 60], [80, 60], [36, 76], [56, 76], [76, 76], [46, 86], [66, 86], [86, 86],
+  ];
+  return (
+    <svg viewBox="0 0 100 100" className={`${className} shrink-0 text-ink`} fill="currentColor" aria-hidden="true">
+      {[
+        [0, 0],
+        [70, 0],
+        [0, 70],
+      ].map(([x, y]) => (
+        <g key={`${x}-${y}`}>
+          <rect x={x} y={y} width="30" height="30" rx="4" />
+          <rect x={x + 6} y={y + 6} width="18" height="18" rx="2" fill="white" />
+          <rect x={x + 10} y={y + 10} width="10" height="10" rx="1.5" />
+        </g>
+      ))}
+      {cells.map(([x, y]) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width="6" height="6" rx="1" />
+      ))}
+    </svg>
   );
 }

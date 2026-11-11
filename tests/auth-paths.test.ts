@@ -3,7 +3,7 @@ import { isPublicPath, safeNextPath } from "@/lib/auth/session";
 
 describe("isPublicPath", () => {
   it("lets anyone see landing and auth pages but guards the app", () => {
-    expect(["/", "/login", "/signup", "/join", "/reset-password", "/api/auth/login"].every(isPublicPath)).toBe(true);
+    expect(["/", "/login", "/signup", "/join", "/reset-password", "/api/auth/login", "/api/ecosystem/onboarding-request"].every(isPublicPath)).toBe(true);
     expect(["/gateway", "/vouchers/sales", "/reports/balance-sheet", "/loginx", "/api/backend/api/v1/organisations", "/api/authx"].some(isPublicPath)).toBe(false);
   });
 });

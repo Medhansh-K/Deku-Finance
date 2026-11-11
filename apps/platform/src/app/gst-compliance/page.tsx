@@ -1,391 +1,426 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { Check, FileBadge, Truck } from "lucide-react";
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import LandingFooter from "@/components/landing/LandingFooter";
-import {
-  ShieldCheck,
-  Zap,
-  ArrowRight,
-  CheckCircle2,
-  Receipt,
-  FileCode,
-  Server,
-  KeyRound,
-  Lock,
-} from "lucide-react";
+import { Reveal } from "@/components/marketing/Reveal";
+import { card, chip, container, h1, h2, lead, primaryCta, secondaryCta, table } from "@/components/marketing/styles";
+import { Shot } from "@/components/marketing/Shot";
+import { ItcClassifier } from "./ItcClassifier";
+import { TaxSplit } from "./TaxSplit";
+
+export const metadata: Metadata = {
+  title: "GST compliance | Deku Finance",
+  description:
+    "How Deku Finance handles GST: section 22 thresholds, place of supply, input tax credit, GSTR-1 and GSTR-3B prepared as offline JSON, and the GST Suvidha Provider connection.",
+};
+
+const body = "max-w-[64ch] text-[16px] leading-[1.6] text-ink-soft";
+
+const IN_DEKU = [
+  "Tax invoices and bills of supply",
+  "CGST and SGST, or IGST, from the place of supply",
+  "Input tax credit marked eligible, blocked or ineligible",
+  "GSTR-1 and GSTR-3B summaries with offline JSON",
+];
+const NEEDS_GSP = ["Filing returns directly on the portal", "E-invoice IRN and signed QR", "E-way bills"];
+
+const THRESHOLDS = [
+  {
+    who: "Service providers",
+    limit: "₹20 lakh",
+    applies: "Professionals, consultants, designers, software and other service businesses in most states.",
+  },
+  {
+    who: "Goods suppliers",
+    limit: "₹40 lakh",
+    applies: "Traders and manufacturers of goods in states that adopted the higher limit (Notification 10/2019-Central Tax).",
+  },
+  {
+    who: "Special category states",
+    limit: "₹10 lakh",
+    applies: "Manipur, Mizoram, Nagaland and Tripura, under the proviso to section 22.",
+  },
+];
+
+
+const GSP_STEPS = [
+  {
+    title: "Connect your GST portal",
+    body: "Once the server is set up with a licensed GSP, you add your GST portal username in Settings and verify it with an OTP. Your portal password is never asked for.",
+  },
+  {
+    title: "E-invoice (IRN)",
+    body: "From an issued invoice, Deku sends the invoice to the GSP and keeps the IRN, acknowledgement number and signed QR code with it.",
+  },
+  {
+    title: "E-way bill from the same invoice",
+    body: "Add the vehicle number, transporter ID and distance. The invoice details aren't typed again on another portal.",
+  },
+];
+
+const GSTR1 = [
+  "Table 4: B2B invoices, by the buyer's GSTIN and place of supply",
+  "Table 7: B2C small supplies, by place of supply and rate",
+  "Table 8: exempt supplies",
+  "Table 12: HSN summary, split into B2B and B2C",
+  "Table 13: documents issued, by invoice series",
+];
+const GSTR3B = [
+  "3.1: outward supplies and the tax on them",
+  "3.2: inter-state supplies to unregistered persons",
+  "4: input tax credit from posted purchase bills, with 17(5) credit reversed",
+  "6: set-off of this period's credit, shown for reference while you pay on the portal",
+];
+
+const STEPS = [
+  { title: "Period", body: "Pick the month." },
+  { title: "Readiness", body: "See anything that blocks the return, with a link to fix it." },
+  { title: "Review", body: "Check the summary, and what the return doesn't cover yet." },
+  { title: "Download", body: "Save the JSON and upload it on the GST portal." },
+];
+
+function CheckList({ items }: { items: string[] }) {
+  return (
+    <ul className="space-y-3">
+      {items.map((t) => (
+        <li key={t} className="flex gap-3 text-[15.5px] leading-[1.5] text-ink-soft">
+          <Check className="mt-[3px] h-4 w-4 shrink-0 text-brand-strong" strokeWidth={2.25} aria-hidden />
+          <span>{t}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Section({
+  id,
+  title,
+  intro,
+  label,
+  children,
+  tone = "surface",
+}: {
+  id: string;
+  title: string;
+  intro?: React.ReactNode;
+  label?: string;
+  children: React.ReactNode;
+  tone?: "surface" | "canvas";
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className={`scroll-mt-20 border-t border-line ${tone === "surface" ? "bg-surface" : "bg-canvas"}`}
+    >
+      <div className={`${container} py-20 lg:py-28`}>
+        <Reveal>
+          {label && <p className="mb-3 text-[15px] font-medium text-brand-strong">{label}</p>}
+          <h2 id={`${id}-title`} className={`${h2} max-w-[30ch]`}>
+            {title}
+          </h2>
+          {intro && <p className={`mt-4 ${lead}`}>{intro}</p>}
+        </Reveal>
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export default function GstCompliancePage() {
-  const [selectedScenario, setSelectedScenario] = useState<"intra" | "inter" | "exempt">("intra");
-
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-brand/30 selection:text-ink">
+    <div className="flex min-h-screen flex-col bg-canvas font-sans text-ink">
       <LandingNavbar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-24 border-b border-line-strong bg-gradient-to-b from-emerald-500/10 via-canvas to-white">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
+      <main className="flex-1">
+        <section className={`${container} pb-20 pt-20 sm:pt-28 lg:pb-28`}>
+          <Reveal>
+            <p className="text-[15px] font-medium text-brand-strong">GST engine and GSP roadmap</p>
+            <h1 className={`mt-4 max-w-[24ch] ${h1}`}>GST built into every invoice, and a clear path to the portal.</h1>
+            <p className={`mt-6 ${lead} sm:text-[18px]`}>
+              From section 22 turnover exemptions to CGST, SGST and IGST splits, Deku prepares GSTR-1 and GSTR-3B as
+              offline JSON for you to upload. Direct filing, e-invoices and e-way bills go through a GST Suvidha
+              Provider; that connection is built, but none is connected yet.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/learn/demo" className={primaryCta}>
+                Try the demo
+              </Link>
+              <Link href="/learn" className={secondaryCta}>
+                Learn the GST workflows
+              </Link>
+            </div>
+          </Reveal>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-950 px-4 py-1.5 text-xs font-mono font-bold text-emerald-300 border border-emerald-800 shadow-sm">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-            <span>Statutory India GST Engine &amp; GSP Roadmap</span>
+          <Reveal delay={120}>
+            <div className="mt-16 grid gap-px overflow-hidden rounded-panel border border-line bg-line md:grid-cols-2">
+              {[
+                { title: "Done in Deku", status: "Available", tone: "bg-ok-wash text-ok", items: IN_DEKU },
+                { title: "Needs a GST Suvidha Provider", status: "Not connected", tone: "bg-warn-wash text-warn", items: NEEDS_GSP },
+              ].map((col) => (
+                <div key={col.title} className="bg-surface p-6 sm:p-8">
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-[17px] font-semibold tracking-[-0.01em]">{col.title}</h2>
+                    <span className={`${chip} ${col.tone}`}>{col.status}</span>
+                  </div>
+                  <ul className="mt-5 space-y-3 text-[15.5px] leading-[1.5] text-ink-soft">
+                    {col.items.map((t) => (
+                      <li key={t} className="border-t border-line pt-3 first:border-t-0 first:pt-0">
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </section>
+
+        <Section
+          id="registration"
+          label="Statutory thresholds"
+          title="Section 22 of the CGST Act: know when to register"
+          intro="Below the turnover limit, a business doesn't have to register for GST. Deku lets it work in pure accounting mode, issuing bills of supply, without a GSTIN."
+        >
+          <Reveal>
+            <div className={`mt-12 ${table.wrap}`}>
+              <table className="w-full min-w-[560px]">
+                <thead className={table.head}>
+                  <tr>
+                    <th scope="col" className={table.th}>Supplier</th>
+                    <th scope="col" className={`${table.th} whitespace-nowrap text-right`}>Annual turnover limit</th>
+                    <th scope="col" className={table.th}>Applies to</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {THRESHOLDS.map((t) => (
+                    <tr key={t.who} className="transition-colors hover:bg-brand-wash/50">
+                      <th scope="row" className={`${table.td} text-left font-medium text-ink`}>
+                        {t.who}
+                      </th>
+                      <td className={`${table.td} whitespace-nowrap text-right text-[17px] font-semibold tracking-[-0.01em] text-ink`}>
+                        {t.limit}
+                      </td>
+                      <td className={table.td}>{t.applies}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-5 max-w-[70ch] text-[14px] leading-[1.55] text-ink-muted">
+              General guidance only. The limit depends on what you supply and where, and Deku doesn&apos;t work out your
+              own position; check it with your tax adviser.
+            </p>
+          </Reveal>
+        </Section>
+
+        <Section id="place-of-supply" label="Tax engine" title="Place of supply decides the tax: intra-state or inter-state" tone="canvas">
+          <div className="mt-8 grid gap-12 lg:grid-cols-[6fr_5fr] lg:gap-20">
+            <Reveal className="space-y-5">
+              <p className={body}>
+                When you sell within your own state, the tax is split in half: CGST to the centre and SGST to the state.
+                When the buyer&apos;s place of supply is another state, the whole rate is charged as IGST. The total the
+                buyer pays is the same either way.
+              </p>
+              <p className={body}>
+                Deku reads the state code from the place of supply and compares it with your company&apos;s registered
+                state, so each line gets the right split. If an invoice&apos;s tax type and place of supply disagree,
+                the returns flag it before anything is exported.
+              </p>
+              <p className={body}>In pure accounting mode, the same sale is a bill of supply with no tax lines.</p>
+            </Reveal>
+            <Reveal delay={120} className="self-start">
+              <TaxSplit />
+            </Reveal>
+          </div>
+          <Reveal>
+            <div className="mt-16">
+              <Shot
+                src="/landing/gst-invoice-register.webp"
+                alt="Sales and GST invoice register in the demo, each invoice showing its supply type, intra-state CGST and SGST"
+                width={2880}
+                height={940}
+              />
+              <p className="mt-4 text-[14px] text-ink-muted">
+                The invoice register on the demo&apos;s sample books: every invoice carries its supply type.
+              </p>
+            </div>
+          </Reveal>
+        </Section>
+
+        <Section id="itc" label="Input tax credit" title="Input tax credit, and credit you can't claim">
+          <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:gap-20">
+            <Reveal className="space-y-5">
+              <p className={body}>
+                The GST you pay on purchases can usually be set off against the GST you collect on sales. That is input
+                tax credit. Some credit is blocked by section 17(5) of the CGST Act, for example on food and beverages
+                or on goods for personal use, and some is ineligible for other reasons, such as a late claim.
+              </p>
+              <p className={body}>
+                In Deku each purchase bill is marked eligible, blocked under 17(5) or ineligible. Blocked and ineligible
+                credit needs a reason and is added to the cost of the purchase, and GSTR-3B reports each kind in its own
+                table.
+              </p>
+              <p className={body}>
+                Nothing in Deku matches your credit against GSTR-2B yet; it comes from your purchase register, so check
+                it against the portal before you file.
+              </p>
+            </Reveal>
+            <Reveal delay={120} className="self-start">
+              <ItcClassifier />
+            </Reveal>
+          </div>
+        </Section>
+
+        <section id="gsp" aria-labelledby="gsp-title" className="scroll-mt-20 bg-panel-deep text-white">
+          <div className={`${container} py-20 lg:py-28`}>
+            <Reveal>
+              <p className="text-[15px] font-medium text-brand">GST Suvidha Provider</p>
+              <h2 id="gsp-title" className={`mt-4 max-w-[26ch] ${h2} text-white`}>
+                Direct filing and e-invoicing go through a licensed GSP.
+              </h2>
+              <p className="mt-4 max-w-[64ch] text-[17px] leading-[1.55] text-white/70">
+                Deku doesn&apos;t file on the government portal with scrapers or shared passwords. Filing, e-invoices
+                and e-way bills go through a GST Suvidha Provider. The connection is built into Deku, but no GSP is
+                connected in this deployment and it hasn&apos;t yet been run against a real provider, so those buttons
+                stay disabled and say why.
+              </p>
+            </Reveal>
+
+            <ol className="mt-12 grid gap-5 md:grid-cols-3">
+              {GSP_STEPS.map((s, i) => (
+                <li key={s.title} className="h-full">
+                  <Reveal delay={i * 80} className="h-full">
+                    <div className="h-full rounded-panel border border-white/10 bg-white/[0.03] p-6 transition-colors duration-200 hover:border-white/25 sm:p-7">
+                      <span className="grid h-8 w-8 place-items-center rounded-full border border-white/20 font-mono text-[13px] text-white/70">
+                        {i + 1}
+                      </span>
+                      <h3 className="mt-5 text-[17px] font-semibold tracking-[-0.01em] text-white">{s.title}</h3>
+                      <p className="mt-2"><span className={`${chip} bg-white/10 text-white/80`}>Built, not connected</span></p>
+                      <p className="mt-1.5 text-[15px] leading-[1.55] text-white/65">{s.body}</p>
+                    </div>
+                  </Reveal>
+                </li>
+              ))}
+            </ol>
+
+            <Reveal>
+              <div className="mt-12 grid items-center gap-8 lg:grid-cols-[6fr_5fr] lg:gap-14">
+                <section aria-label="E-invoice and e-way bill, as on an issued invoice" className="rounded-panel border border-line bg-surface p-5 text-ink sm:p-6">
+                  <p className="text-[13px] text-ink-muted">On an issued invoice</p>
+                  <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em]">E-invoice and e-way bill</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span aria-disabled="true" className="inline-flex h-8 cursor-not-allowed items-center gap-1.5 rounded-ctl border border-line-strong bg-surface px-3 text-[13px] font-medium text-ink opacity-50">
+                      <FileBadge className="h-3.5 w-3.5" aria-hidden /> Generate IRN
+                    </span>
+                    <span aria-disabled="true" className="inline-flex h-8 cursor-not-allowed items-center gap-1.5 rounded-ctl border border-line-strong bg-surface px-3 text-[13px] font-medium text-ink opacity-50">
+                      <Truck className="h-3.5 w-3.5" aria-hidden /> Generate e-way bill
+                    </span>
+                  </div>
+                  <p className="mt-3 text-[12.5px] text-ink-muted">No GST Suvidha Provider is configured on this server.</p>
+                </section>
+                <p className="text-[16px] leading-[1.6] text-white/70">
+                  This is what an issued invoice shows today: the buttons are there, disabled, with the reason beside
+                  them. Once a GSP is configured and your portal is connected, the same block shows the IRN,
+                  acknowledgement number, signed QR code and e-way bill number.
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal>
+              <div className="mt-8 flex flex-col gap-3 rounded-panel border border-white/10 px-5 py-4 text-[14.5px] text-white/70 sm:flex-row sm:items-center sm:justify-between">
+                <p>Your portal username and GSP session are stored encrypted with AES-256-GCM.</p>
+                <p className="flex flex-wrap gap-2">
+                  <span className={`${chip} bg-white/10 text-white`}>Offline JSON available</span>
+                  <span className={`${chip} bg-warn-wash text-warn`}>GSP not connected</span>
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        <Section
+          id="returns"
+          label="Return exports"
+          title="GSTR-1 and GSTR-3B, prepared from your books"
+          intro="If you file on the GST portal yourself, Deku builds both returns from posted invoices and purchase bills for the month, in the portal's offline JSON format. You review them, download the JSON and upload it."
+        >
+          <Reveal>
+            <Shot
+              className="mt-12"
+              src="/landing/gst-returns.webp"
+              alt="GSTR-1 and GSTR-3B summaries in Deku for a sample company, each marked validated with a JSON download"
+              width={2120}
+              height={1340}
+            />
+          </Reveal>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {[
+              { name: "GSTR-1", sub: "Outward supplies: invoices you issued", items: GSTR1 },
+              { name: "GSTR-3B", sub: "Monthly summary of tax and credit", items: GSTR3B },
+            ].map((r, i) => (
+              <Reveal key={r.name} delay={i * 80} className="h-full">
+                <article className={`${card} h-full p-6 sm:p-8`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-[21px] font-semibold tracking-[-0.02em]">{r.name}</h3>
+                      <p className="mt-1 text-[14px] text-ink-muted">{r.sub}</p>
+                    </div>
+                    <span className={`${chip} bg-ok-wash text-ok`}>Available</span>
+                  </div>
+                  <div className="mt-6 border-t border-line pt-6">
+                    <CheckList items={r.items} />
+                  </div>
+                </article>
+              </Reveal>
+            ))}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-ink max-w-4xl mx-auto leading-tight">
-            Native GST Architecture &amp;{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-800 via-teal-700 to-brand">
-              Direct GSP Connectivity
-            </span>
-          </h1>
+          <ol className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((s, i) => (
+              <li key={s.title}>
+                <Reveal delay={i * 60}>
+                  <div className="border-t border-line-strong pt-4">
+                    <p className="font-mono text-[13px] text-ink-muted">{i + 1}</p>
+                    <h3 className="mt-2 text-[17px] font-semibold tracking-[-0.01em]">{s.title}</h3>
+                    <p className="mt-1.5 text-[15px] leading-[1.55] text-ink-soft">{s.body}</p>
+                  </div>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
 
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            From Section 22 CGST Act turnover exemptions to automated CGST/SGST/IGST splits, GSTR-1/3B offline JSON exports, and upcoming GSP API integration for live e-Invoicing.
+          <p className="mt-12 max-w-[64ch] text-[15px] leading-[1.6] text-ink-muted">
+            Each return also lists what it doesn&apos;t cover yet, such as B2C large invoices, amendments, advances and
+            reverse-charge inward supplies, so you know what to add on the portal.
           </p>
+        </Section>
 
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/gateway"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand hover:bg-brand-soft px-6 py-3 text-sm font-bold text-ink shadow-md shadow-brand/20 transition-all hover:scale-105 active:scale-95"
-            >
-              <Receipt className="h-4 w-4" />
-              <span>Launch Invoicing Desk</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/learn"
-              className="inline-flex items-center gap-2 rounded-xl bg-panel hover:bg-panel-deep border border-edge px-6 py-3 text-sm font-semibold text-white transition-all shadow-md"
-            >
-              <Zap className="h-4 w-4 text-brand" />
-              <span>Learn GST Workflows in Public Tour</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
-        {/* ========================================================================= */}
-        {/* Section 1: Section 22 Exemption & Turnover Thresholds                    */}
-        {/* ========================================================================= */}
-        <section className="space-y-8">
-          <div className="max-w-3xl">
-            <span className="text-xs font-mono font-bold text-brand-strong uppercase tracking-wider">
-              Statutory Thresholds
-            </span>
-            <h2 className="text-3xl font-black text-ink tracking-tight mt-1">
-              Section 22 CGST Act: Know When to Register
-            </h2>
-            <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-              Under Indian GST law, businesses with annual aggregate turnover below statutory limits are legally exempt from registration. Deku lets you operate in Pure Accounting Mode without demanding a 15-digit GSTIN.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl border border-line-strong bg-surface space-y-3">
-              <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
-                Service Providers
-              </span>
-              <div className="text-3xl font-black text-ink">₹20 Lakhs</div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Threshold across standard states for professionals, consultants, software engineers, designers, and service businesses.
+        <section className="border-t border-line bg-canvas">
+          <div className={`${container} py-24 lg:py-32`}>
+            <Reveal>
+              <h2 className={`${h2} max-w-[24ch]`}>Ready to explore GST invoicing in Deku?</h2>
+              <p className={`mt-4 ${lead}`}>
+                Raise a sample GST invoice, record a purchase bill and find both in the returns, in the demo. No account
+                or login needed.
               </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-line-strong bg-surface space-y-3">
-              <span className="text-xs font-mono font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded border border-blue-200">
-                Goods Suppliers
-              </span>
-              <div className="text-3xl font-black text-ink">₹40 Lakhs</div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Standard threshold for physical goods traders and manufacturers in general category states (Notification No. 10/2019-Central Tax).
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-line-strong bg-surface space-y-3">
-              <span className="text-xs font-mono font-bold text-purple-800 bg-purple-50 px-2.5 py-1 rounded border border-purple-200">
-                Special Category States
-              </span>
-              <div className="text-3xl font-black text-ink">₹10 Lakhs</div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Applicable in special category states including Manipur, Mizoram, Nagaland, and Tripura under Section 22 proviso.
-              </p>
-            </div>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="/learn/demo" className={primaryCta}>
+                  Try the demo
+                </Link>
+                <Link href="/learn" className={secondaryCta}>
+                  Explore the Learn Centre
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
-
-        {/* ========================================================================= */}
-        {/* Section 2: Real-Time Tax Determination Matrix                            */}
-        {/* ========================================================================= */}
-        <section className="space-y-8">
-          <div className="max-w-3xl">
-            <span className="text-xs font-mono font-bold text-brand-strong uppercase tracking-wider">
-              Real-Time Tax Engine
-            </span>
-            <h2 className="text-3xl font-black text-ink tracking-tight mt-1">
-              Automated Intra-State vs. Inter-State Determination
-            </h2>
-            <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-              Deku compares your organization&apos;s registered state code with the customer&apos;s Place of Supply (POS) to split taxes with 100% mathematical accuracy.
-            </p>
-          </div>
-
-          {/* Interactive Split Simulator */}
-          <div className="p-6 rounded-2xl border border-line-strong bg-surface shadow-sm space-y-6">
-            <div className="flex flex-wrap items-center gap-2 border-b border-line pb-4">
-              <button
-                onClick={() => setSelectedScenario("intra")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedScenario === "intra"
-                    ? "bg-panel text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:text-ink"
-                }`}
-              >
-                Intra-State Supply (e.g. MH ➔ MH)
-              </button>
-              <button
-                onClick={() => setSelectedScenario("inter")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedScenario === "inter"
-                    ? "bg-panel text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:text-ink"
-                }`}
-              >
-                Inter-State Supply (e.g. MH ➔ KA)
-              </button>
-              <button
-                onClick={() => setSelectedScenario("exempt")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedScenario === "exempt"
-                    ? "bg-panel text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:text-ink"
-                }`}
-              >
-                Pure Accounting (Sec 22 Exempt)
-              </button>
-            </div>
-
-            {selectedScenario === "intra" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-canvas-sunken border border-line space-y-1">
-                  <div className="text-ink-muted font-mono uppercase text-[10px]">Taxable Value</div>
-                  <div className="text-xl font-black text-ink">₹1,00,000</div>
-                  <div className="text-slate-500">HSN/SAC 9983 @ 18%</div>
-                </div>
-                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
-                  <div className="text-emerald-800 font-mono uppercase text-[10px]">CGST (9%) + SGST (9%)</div>
-                  <div className="text-xl font-black text-emerald-900">₹9,000 + ₹9,000</div>
-                  <div className="text-emerald-700 font-mono">Central Tax + State Tax</div>
-                </div>
-                <div className="p-4 rounded-xl bg-panel text-white space-y-1">
-                  <div className="text-brand font-mono uppercase text-[10px]">Total Invoice Value</div>
-                  <div className="text-xl font-black text-white">₹1,18,000</div>
-                  <div className="text-slate-400 font-mono">Ledger AR: ₹1,18,000</div>
-                </div>
-              </div>
-            )}
-
-            {selectedScenario === "inter" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-canvas-sunken border border-line space-y-1">
-                  <div className="text-ink-muted font-mono uppercase text-[10px]">Taxable Value</div>
-                  <div className="text-xl font-black text-ink">₹1,00,000</div>
-                  <div className="text-slate-500">HSN/SAC 9983 @ 18%</div>
-                </div>
-                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
-                  <div className="text-blue-800 font-mono uppercase text-[10px]">IGST (18%)</div>
-                  <div className="text-xl font-black text-blue-900">₹18,000</div>
-                  <div className="text-blue-700 font-mono">Integrated Goods &amp; Services Tax</div>
-                </div>
-                <div className="p-4 rounded-xl bg-panel text-white space-y-1">
-                  <div className="text-brand font-mono uppercase text-[10px]">Total Invoice Value</div>
-                  <div className="text-xl font-black text-white">₹1,18,000</div>
-                  <div className="text-slate-400 font-mono">Ledger AR: ₹1,18,000</div>
-                </div>
-              </div>
-            )}
-
-            {selectedScenario === "exempt" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl bg-canvas-sunken border border-line space-y-1">
-                  <div className="text-ink-muted font-mono uppercase text-[10px]">Commercial Value</div>
-                  <div className="text-xl font-black text-ink">₹1,00,000</div>
-                  <div className="text-slate-500">Bill of Supply Format</div>
-                </div>
-                <div className="p-4 rounded-xl bg-slate-100 border border-slate-300 space-y-1">
-                  <div className="text-slate-700 font-mono uppercase text-[10px]">Taxes Applied</div>
-                  <div className="text-xl font-black text-slate-800">₹0.00</div>
-                  <div className="text-slate-600 font-mono">Section 22 Exemption Active</div>
-                </div>
-                <div className="p-4 rounded-xl bg-panel text-white space-y-1">
-                  <div className="text-brand font-mono uppercase text-[10px]">Total Bill Amount</div>
-                  <div className="text-xl font-black text-white">₹1,00,000</div>
-                  <div className="text-slate-400 font-mono">Zero GST Lines Generated</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* Section 3: GSP (GST Suvidha Provider) Service Provider API Integration  */}
-        {/* ========================================================================= */}
-        <section className="space-y-8 bg-panel text-white p-8 rounded-3xl border border-edge">
-          <div className="max-w-3xl space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 px-3 py-1 text-xs font-mono font-bold text-brand">
-              <Server className="h-3.5 w-3.5" />
-              <span>GSP SERVICE PROVIDER SETUP</span>
-            </div>
-            <h2 className="text-3xl font-black text-white tracking-tight">
-              Connect Your GSP Service Provider API to Deku
-            </h2>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              We cannot file live GST returns directly onto the government portal using scrapers or insecure password sharing. Instead, Deku integrates with licensed <strong>GST Suvidha Providers (GSPs)</strong>. You simply connect your GSP account, and Deku handles the rest.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-            <div className="p-5 rounded-2xl bg-panel-raised border border-edge space-y-3">
-              <div className="h-8 w-8 rounded-lg bg-brand/20 text-brand flex items-center justify-center font-bold">
-                <KeyRound className="h-4 w-4" />
-              </div>
-              <h4 className="font-bold text-white text-sm">1. Bring Your Own GSP Credentials</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connect API keys from authorized providers such as <strong>NIC e-Way Bill</strong>, <strong>Cygnet</strong>, <strong>Masters India</strong>, <strong>Clear</strong>, or <strong>IRIS</strong>.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-panel-raised border border-edge space-y-3">
-              <div className="h-8 w-8 rounded-lg bg-brand/20 text-brand flex items-center justify-center font-bold">
-                <FileCode className="h-4 w-4" />
-              </div>
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-white text-sm">2. Live e-Invoicing (IRN) Flow</h4>
-                <span className="text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30">
-                  Target Architecture
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Once your GSP provider credentials are configured, posting an F8 Sales Voucher will transmit the compliant JSON to your GSP, retrieve the 64-character Invoice Reference Number (IRN), and print the government-signed QR code.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-panel-raised border border-edge space-y-3">
-              <div className="h-8 w-8 rounded-lg bg-brand/20 text-brand flex items-center justify-center font-bold">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <h4 className="font-bold text-white text-sm">3. Zero Double Data Entry</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                e-Way Bills Part-A and Part-B are created simultaneously from the same voucher without having to log in to external government portals.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-panel-deep border border-edge flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-400">
-            <span className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-emerald-400 shrink-0" />
-              <span>GSP API tokens will be stored encrypted in PostgreSQL using AES-256 GCM authenticated encryption.</span>
-            </span>
-            <span className="font-mono text-[11px] text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800 shrink-0">
-              Current Status: Offline JSON Active • Live GSP Seam in Development
-            </span>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* Section 4: Returns Exporters (GSTR-1, GSTR-3B)                            */}
-        {/* ========================================================================= */}
-        <section className="space-y-8">
-          <div className="max-w-3xl">
-            <span className="text-xs font-mono font-bold text-brand-strong uppercase tracking-wider">
-              Statutory Exporters
-            </span>
-            <h2 className="text-3xl font-black text-ink tracking-tight mt-1">
-              GSTR-1 &amp; GSTR-3B Offline JSON Generators
-            </h2>
-            <p className="text-slate-600 text-sm mt-2 leading-relaxed">
-              If you prefer filing manually on the official government portal, Deku generates 100% compliant JSON files that match the exact offline schema required by gst.gov.in.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-2xl border border-line-strong bg-surface space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-ink text-lg">GSTR-1: Outward Supplies</h4>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Ready
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Compiles all issued sales invoices, credit notes, debit notes, and export supplies into the government offline JSON format:
-              </p>
-              <ul className="space-y-2 text-xs text-slate-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Table 4: B2B Invoices with recipient GSTIN and POS.</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Table 5 &amp; 7: B2C Large &amp; B2C Small supplies.</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Table 12: HSN/SAC summary with unique quantities &amp; tax rates.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-line-strong bg-surface space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-ink text-lg">GSTR-3B: Monthly Summary</h4>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Ready
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Aggregates taxable turnover, tax liability, and Input Tax Credit (ITC) from posted purchase bills:
-              </p>
-              <ul className="space-y-2 text-xs text-slate-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Table 3.1: Tax on outward and reverse charge inward supplies.</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Table 4: Eligible Input Tax Credit (ITC) breakdown.</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>Net tax payable computation with instant CSV/JSON download.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* CTA Footer */}
-      <section className="bg-canvas-sunken border-t border-line-strong py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-          <h3 className="text-2xl font-bold text-ink">Ready to explore Deku’s GST Invoicing?</h3>
-          <p className="text-slate-600 text-xs max-w-lg mx-auto">
-            Test creating sample GST invoices in the public learn sandbox without an account or login.
-          </p>
-          <div className="pt-2 flex justify-center gap-3">
-            <Link
-              href="/learn"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand hover:bg-brand-soft px-6 py-2.5 text-xs font-bold text-ink shadow-sm transition-all"
-            >
-              <span>Explore Public Learn Centre</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      </main>
 
       <LandingFooter />
     </div>
   );
 }
-

@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
       pincode,
     } = body;
 
+    // Public endpoint: cap every field so a bad actor can't fill the lead store with huge strings.
+    const fields = [clientName, clientPhone, clientEmail, companyName, gstinOrPan, stateCode, stateName, city, pincode];
+    if (fields.some((f) => f != null && (typeof f !== "string" || f.length > 200))) {
+      return NextResponse.json({ success: false, error: "One of the fields is too long or not text." }, { status: 400 });
+    }
+
     if (!clientName || !clientPhone || !clientEmail || !companyName || !stateName || !pincode) {
       return NextResponse.json(
         {
