@@ -136,7 +136,7 @@ export function DebtorsDsoView() {
       </div>
 
       {/* DSO KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div data-tour="debtors-summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
           <div className="flex items-center justify-between text-[13px] text-ink-muted">
             <span>Days sales outstanding</span>

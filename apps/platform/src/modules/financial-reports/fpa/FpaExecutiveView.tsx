@@ -108,7 +108,7 @@ export function FpaExecutiveView() {
       </div>
 
       {/* KPI Section 1: Margins & Profitability */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
+      <div data-tour="fpa-margins" className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
         {/* Topline Revenue */}
         <div className={ui.kpi}>
           <div className={ui.kpiLabel}>
@@ -154,7 +154,7 @@ export function FpaExecutiveView() {
       </div>
 
       {/* KPI Section 2: Liquidity, Working Capital & Runway */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+      <div data-tour="fpa-working-capital" className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         {/* Working Capital Box */}
         <div className={`${ui.kpi} px-5`}>
           <div className="flex items-center justify-between mb-2">
@@ -229,7 +229,7 @@ export function FpaExecutiveView() {
       </div>
 
       {/* Section 3: Departmental Budget vs. Actual Variance Rollup */}
-      <div className={ui.panel}>
+      <div data-tour="fpa-budgets" className={ui.panel}>
         <div className={`${ui.panelHead} flex-col sm:flex-row sm:items-center`}>
           <h4 className={ui.panelTitle}>Department budget against actual</h4>
           <div className="flex items-center gap-4 text-[13px]">

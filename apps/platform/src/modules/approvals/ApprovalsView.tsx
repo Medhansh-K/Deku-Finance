@@ -111,7 +111,7 @@ export function ApprovalsView() {
         />
       </section>
 
-      <section aria-label="Voucher detail" className="rounded-panel border border-line bg-surface p-5">
+      <section data-tour="approvals-detail" aria-label="Voucher detail" className="rounded-panel border border-line bg-surface p-5">
         {notice && (
           <div role="status" className="mb-4 rounded-ctl bg-ok-wash px-3 py-2.5 text-[13px] text-ok">
             {notice}
@@ -191,7 +191,7 @@ export function ApprovalsView() {
                   <Button variant="outline" size="sm" disabled={busy} onClick={() => setRejecting(true)}>
                     <XCircle className="h-4 w-4" /> Send back
                   </Button>
-                  <Button size="sm" disabled={busy || !canApprove(selected, user?.id)} onClick={() => approve(selected)}>
+                  <Button data-tour="approvals-approve" size="sm" disabled={busy || !canApprove(selected, user?.id)} onClick={() => approve(selected)}>
                     <CheckCircle2 className="h-4 w-4" /> Approve &amp; post
                   </Button>
                 </div>

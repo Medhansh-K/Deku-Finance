@@ -293,7 +293,7 @@ export function DepartmentsMembersView() {
       {tab === "invitations" && (
         <Panel title="Invitations">
           {canInvite(myRole) ? (
-            <form onSubmit={sendInvite} className="grid sm:grid-cols-5 gap-2 items-end">
+            <form data-tour="members-invite-form" onSubmit={sendInvite} className="grid sm:grid-cols-5 gap-2 items-end">
               <Input label="Email" type="email" required value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} />
               <label className="space-y-1">
                 <span className="block text-[13px] text-ink-muted">Role</span>
@@ -374,7 +374,7 @@ export function DepartmentsMembersView() {
       {tab === "departments" && (
         <Panel title="Departments">
           {canManageDepartments(myRole) && (
-            <form onSubmit={createDepartment} className="grid sm:grid-cols-5 gap-2 items-end">
+            <form data-tour="departments-form" onSubmit={createDepartment} className="grid sm:grid-cols-5 gap-2 items-end">
               <Input label="Name" required value={dept.name} onChange={(e) => setDept({ ...dept, name: e.target.value })} />
               <Input label="Code" required maxLength={10} value={dept.code} onChange={(e) => setDept({ ...dept, code: e.target.value })} />
               <Input label="Description" value={dept.description} onChange={(e) => setDept({ ...dept, description: e.target.value })} />

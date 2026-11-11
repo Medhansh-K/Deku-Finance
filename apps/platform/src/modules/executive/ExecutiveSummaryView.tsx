@@ -102,7 +102,7 @@ function BalanceHealth({ ledger, kpi }: { ledger: LedgerKpis | null; kpi: Format
   );
 
   return (
-    <section className="rounded-panel border border-line bg-surface min-w-0">
+    <section data-tour="executive-balance-health" className="rounded-panel border border-line bg-surface min-w-0">
       <div className="px-5 pt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 className="text-[15px] font-semibold tracking-tight text-ink">Balance health</h2>
         <p className="text-[13px] text-ink-muted">Computed from posted journal entries</p>
@@ -439,7 +439,7 @@ export function ExecutiveSummaryView() {
     >
       <div className="space-y-[18px] pb-4">
         {/* KPI tiles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+        <div data-tour="executive-kpis" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
           <KpiTile href="/gst" title="Open Sales Invoices Register & Billed Turnover Tracker" label="Turnover, FY to date" value={kpiProfile.turnover}>
             {kpiProfile.sec22Sub}
             <div className="mt-2.5 h-1.5 rounded-[3px] bg-canvas-sunken overflow-hidden">

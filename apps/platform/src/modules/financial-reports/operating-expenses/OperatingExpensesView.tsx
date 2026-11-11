@@ -201,7 +201,7 @@ export function OperatingExpensesView() {
       </div>
 
       {/* Top High-Level OPEX Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div data-tour="opex-summary" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div className="rounded-panel border border-line bg-surface px-[18px] py-4">
           <div className="flex items-center justify-between text-[13px] text-ink-muted">
             <span>Total operating expenses</span>

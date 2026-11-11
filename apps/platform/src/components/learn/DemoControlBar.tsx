@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
+  Info,
   BookOpen,
   Building2,
   Compass,
@@ -15,15 +16,19 @@ import {
 } from "lucide-react";
 import { DEMO_COMPANIES, type DemoCompanySlug } from "@/lib/learn/companies";
 import { DEMO_PLANS, type DemoPlanId } from "@/lib/learn/demo-plans";
-import { DEMO_ROLES } from "@/lib/learn/demo-roles";
-import { WORKFLOW_TUTORIAL_PATHS } from "@/lib/tutorials/workflows";
-import { TUTORIAL_PATHS } from "@/lib/tutorials/paths";
-import { loadProgress, saveProgress, startPath } from "@/lib/tutorials/progress";
+import { DEMO_ROLES, getDemoRoleConfig } from "@/lib/learn/demo-roles";
+import { LEARN_WORKFLOWS } from "@/lib/learn/workflows/catalogue";
+import { openWorkflow, workflowStatus } from "@/lib/learn/workflows/runner";
+import type { LearnWorkflow } from "@/lib/learn/workflows/types";
 import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
 import type { OrgRole } from "@/modules/departments-members/team";
+import { WorkflowStatusChip, startLabel } from "./workflow-ui";
+
+const PLAN_RANK: Record<DemoPlanId, number> = { go: 0, pro: 1, enterprise: 2 };
 
 export function DemoControlBar() {
   const demo = useOptionalLearnDemo();
+  const [tab, setTab] = useState<"workflows" | "activity">("workflows");
   if (!demo) return null;
 
   const {
@@ -38,15 +43,22 @@ export function DemoControlBar() {
     switchCompany,
     switchRole,
     switchPlan,
-    navigateTo,
     resetDemo,
+    workflowState,
+    updateWorkflows,
+    activity,
+    dataset,
   } = demo;
 
-  const launchTutorial = (pathId: string, route?: string) => {
-    const current = loadProgress("public-learn-demo");
-    saveProgress("public-learn-demo", startPath(current, pathId));
-    if (route) navigateTo(route);
+  // The coach opens the step's screen and switches role; the plan only ever goes up to what the workflow needs.
+  const launchWorkflow = (wf: LearnWorkflow) => {
+    if (PLAN_RANK[plan] < PLAN_RANK[wf.minPlan]) switchPlan(wf.minPlan);
+    updateWorkflows((s, log) => openWorkflow(s, wf, log));
     setWorkflowDrawerOpen(false);
+  };
+
+  const confirmReset = () => {
+    if (window.confirm(`Reset ${dataset.org.name}'s books, activity and workflow progress to the starting sample data?`)) resetDemo();
   };
 
   return (
@@ -128,20 +140,11 @@ export function DemoControlBar() {
 
             <button
               type="button"
-              onClick={() => launchTutorial("product-walkthrough", "/gateway")}
-              className="inline-flex items-center gap-1.5 rounded-ctl bg-ink text-white hover:bg-panel-raised h-8 px-3 text-[13px] font-medium transition-colors cursor-pointer"
-            >
-              <Compass className="h-3.5 w-3.5 text-brand" />
-              <span>Guided Tour</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setWorkflowDrawerOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-ctl border border-brand-wash-strong bg-brand-wash hover:bg-brand-wash-strong h-8 px-3 text-[13px] font-medium text-brand-strong transition-colors cursor-pointer"
             >
               <Compass className="h-3.5 w-3.5 text-brand-strong" />
-              <span>8 Workflows</span>
+              <span>Workflows</span>
             </button>
 
             <Link
@@ -154,9 +157,9 @@ export function DemoControlBar() {
 
             <button
               type="button"
-              onClick={resetDemo}
+              onClick={confirmReset}
               className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface hover:bg-canvas h-8 px-3 text-[13px] font-medium text-ink transition-colors"
-              title="Restore initial sample books for this company"
+              title="Restore this company's starting sample books and clear its workflow progress"
             >
               <RotateCcw className="h-3.5 w-3.5 text-ink-soft" />
               <span>Reset</span>
@@ -167,7 +170,7 @@ export function DemoControlBar() {
               className="inline-flex items-center gap-1.5 rounded-ctl border border-line bg-surface hover:bg-bad-wash h-8 px-3 text-[13px] font-medium text-bad transition-colors"
             >
               <XCircle className="h-3.5 w-3.5" />
-              <span>Exit Demo</span>
+              <span>Exit demo</span>
             </Link>
           </div>
         </div>
@@ -176,17 +179,21 @@ export function DemoControlBar() {
         {actionNotice && (
           <div
             role="status"
-            className={`mt-2 flex items-start justify-between gap-2 rounded-lg border px-3 py-1.5 text-[11px] ${actionNotice.tone === "blocked"
-                ? "border-rose-300 bg-rose-50 text-rose-900"
+            className={`mt-2 flex items-start justify-between gap-2 rounded-ctl px-3 py-1.5 text-[13px] ${actionNotice.tone === "blocked"
+                ? "bg-bad-wash text-bad"
                 : actionNotice.tone === "warning"
-                  ? "border-amber-300 bg-amber-50 text-amber-950"
-                  : "border-brand/30 bg-surface text-ink"
+                  ? "bg-warn-wash text-warn"
+                  : "bg-brand-wash text-ink"
               }`}
           >
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              {actionNotice.tone === "info" ? (
+                <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-brand-strong" />
+              ) : (
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              )}
               <div>
-                <strong className="font-bold">{actionNotice.title}: </strong>
+                <strong className="font-semibold">{actionNotice.title}. </strong>
                 <span className="text-ink-soft">{actionNotice.body}</span>
               </div>
             </div>
@@ -202,83 +209,110 @@ export function DemoControlBar() {
         )}
       </div>
 
-      {/* Interactive Workflows & Role/Plan Explorer Drawer */}
       {workflowDrawerOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Workflows and Guided Tours"
-          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs"
+          aria-label="Workflows and activity"
+          className="fixed inset-0 z-50 flex justify-end bg-black/40"
+          onClick={(e) => e.target === e.currentTarget && setWorkflowDrawerOpen(false)}
         >
-          <div className="w-full max-w-lg bg-surface h-full overflow-y-auto border-l border-line-strong p-5 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-line pb-3">
-              <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand-strong">
-                  Guided Interactive Tours
-                </span>
-                <h2 className="text-base font-bold text-ink">
-                  8 End-to-End Business Workflows
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setWorkflowDrawerOpen(false)}
-                aria-label="Close workflows drawer"
-                className="p-1.5 rounded-lg border border-line hover:bg-canvas text-ink-soft"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2.5">
-              {WORKFLOW_TUTORIAL_PATHS.map((wf) => (
-                <div
-                  key={wf.id}
-                  className="rounded-xl border border-line bg-canvas p-3.5 space-y-2 hover:border-brand/40 transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded bg-brand/15 px-1.5 py-0.5 text-[10px] font-mono font-bold text-brand-strong">
-                        {wf.badge}
-                      </span>
-                      <h3 className="text-sm font-bold text-ink">{wf.title}</h3>
-                    </div>
-                    <span className="text-[10px] font-mono uppercase text-ink-muted">
-                      {wf.steps.length} steps &middot; {wf.recommendedPlan}
-                    </span>
-                  </div>
-                  <p className="text-xs text-ink-soft leading-relaxed">{wf.summary}</p>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[10px] text-ink-muted">{wf.roleGuidance}</span>
-                    <button
-                      type="button"
-                      onClick={() => launchTutorial(wf.id, wf.steps[0]?.route)}
-                      className="shrink-0 rounded-lg bg-brand text-white hover:bg-brand-strong px-3 py-1.5 text-xs font-bold transition-colors"
-                    >
-                      Start Tour &rarr;
-                    </button>
-                  </div>
+          <div className="w-full max-w-lg bg-surface h-full overflow-y-auto border-l border-line shadow-pop">
+            <div className="sticky top-0 z-10 bg-surface border-b border-line px-5 pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-[15px] font-semibold tracking-tight text-ink">{dataset.org.name}</h2>
+                  <p className="text-[13px] text-ink-muted">Progress and activity are kept for this company, in this browser.</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="border-t border-line pt-4 space-y-2">
-              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-ink-muted">
-                Core Module Tutorials
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {TUTORIAL_PATHS.filter((p) => p.audience !== "implementer").map((p) => (
+                <button
+                  type="button"
+                  onClick={() => setWorkflowDrawerOpen(false)}
+                  aria-label="Close"
+                  className="p-1.5 rounded-ctl border border-line hover:bg-canvas text-ink-soft"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div role="tablist" className="mt-3 flex gap-4 text-[13.5px]">
+                {(["workflows", "activity"] as const).map((t) => (
                   <button
-                    key={p.id}
+                    key={t}
                     type="button"
-                    onClick={() => launchTutorial(p.id, p.steps[0]?.route)}
-                    className="text-left rounded-lg border border-line bg-canvas hover:border-brand/40 p-2.5 transition-colors"
+                    role="tab"
+                    aria-selected={tab === t}
+                    onClick={() => setTab(t)}
+                    className={`pb-2 border-b-2 font-medium ${tab === t ? "border-brand text-ink" : "border-transparent text-ink-muted hover:text-ink"}`}
                   >
-                    <div className="text-xs font-bold text-ink">{p.title}</div>
-                    <div className="text-[11px] text-ink-muted truncate">{p.summary}</div>
+                    {t === "workflows" ? `Workflows (${LEARN_WORKFLOWS.length})` : `Activity (${activity.length})`}
                   </button>
                 ))}
               </div>
+            </div>
+
+            {tab === "workflows" ? (
+              <ul className="divide-y divide-line">
+                {LEARN_WORKFLOWS.map((wf) => {
+                  const status = workflowStatus(wf, workflowState.progress[wf.id]);
+                  const running = workflowState.active === wf.id;
+                  return (
+                    <li key={wf.id} className={`px-5 py-3 flex items-start gap-3 ${running ? "bg-brand-wash" : ""}`}>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-mono text-[12.5px] text-brand-strong">{wf.code}</span>
+                          <h3 className="text-[14px] font-[550] text-ink truncate">{wf.name}</h3>
+                        </div>
+                        <p className="text-[12.5px] text-ink-muted">
+                          {getDemoRoleConfig(wf.primaryRole).label} · {wf.steps.length} steps · about {wf.estimatedMinutes} min
+                        </p>
+                        <WorkflowStatusChip status={status} />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => launchWorkflow(wf)}
+                        className="shrink-0 h-8 px-3 rounded-ctl bg-brand text-panel-deep hover:bg-brand-hover text-[13px] font-semibold"
+                      >
+                        {running ? "Continue" : startLabel(status)}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div>
+                <p className="px-5 pt-3 text-[13px] text-ink-muted">
+                  Everything you did in this company, newest first. Workflow steps complete from this log.
+                </p>
+                {activity.length === 0 ? (
+                  <p className="px-5 py-6 text-[13.5px] text-ink-muted">Nothing yet. Open a screen or start a workflow.</p>
+                ) : (
+                  <ol className="divide-y divide-line mt-2" data-testid="demo-activity-log">
+                    {[...activity].reverse().map((a) => (
+                      <li key={a.id} className="px-5 py-2.5 flex items-start gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13.5px] text-ink">{a.summary}</p>
+                          <p className="text-[12.5px] text-ink-muted tabular-nums">
+                            {new Date(a.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                        <span className="shrink-0 inline-flex items-center h-[22px] px-2 rounded-chip text-xs font-medium bg-canvas-sunken text-ink-soft">
+                          {getDemoRoleConfig(a.role).label}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            )}
+
+            <div className="border-t border-line px-5 py-4">
+              <button
+                type="button"
+                onClick={confirmReset}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-ctl border border-line-strong text-[13px] font-medium text-ink hover:bg-canvas"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset books and progress
+              </button>
             </div>
           </div>
         </div>

@@ -58,7 +58,7 @@ export function InventoryView() {
 
   return (
     <div className="space-y-4 font-sans text-[13.5px]">
-      <div role="tablist" className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px] w-fit">
+      <div data-tour="inventory-tabs" role="tablist" className="inline-flex items-center gap-0.5 rounded-ctl bg-canvas-sunken p-[3px] w-fit">
         {(
           [
             ["stock", "Stock summary"],
@@ -180,7 +180,7 @@ function LedgerPanel({ orgId, row, asOf, onClose }: { orgId: string; row: StockS
   }, [orgId, row.item_id, from, asOf]);
 
   return (
-    <section className="bg-surface border border-line rounded-panel p-5 space-y-3" aria-label={`Stock ledger for ${row.item_name}`}>
+    <section data-tour="inventory-stock-ledger" className="bg-surface border border-line rounded-panel p-5 space-y-3" aria-label={`Stock ledger for ${row.item_name}`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h3 className="text-[15px] font-semibold tracking-tight text-ink">
@@ -302,7 +302,7 @@ function AdjustTab({ orgId, items, warehouses }: { orgId: string; items: Catalog
   }
 
   return (
-    <form onSubmit={submit} className="bg-surface border border-line rounded-panel p-5 space-y-3 max-w-2xl">
+    <form data-tour="inventory-adjust-form" onSubmit={submit} className="bg-surface border border-line rounded-panel p-5 space-y-3 max-w-2xl">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="block">
           <span className="block text-[13px] font-medium text-ink-soft mb-1.5">Item</span>

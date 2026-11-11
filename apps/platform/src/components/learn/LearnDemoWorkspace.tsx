@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
+// Internal but stable: what useRouter() reads. Lets the demo keep module screens' router.push inside the workspace.
+import { AppRouterContext, type AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Download } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { AppShell } from "@/layouts/AppShell";
 import { GatewayLayout } from "@/layouts/GatewayLayout";
 import { WorkspaceLayout } from "@/layouts/WorkspaceLayout";
@@ -43,10 +48,10 @@ import { Table6Card } from "@/modules/gst/Table6Card";
 import { GSTR1_NOT_COVERED, GSTR3B_NOT_COVERED } from "@/lib/gst/returns";
 import { useReturnPeriod } from "@/lib/gst/period";
 import { useReturnBooks } from "@/lib/gst/useReturnBooks";
-import { downloadJson } from "@/lib/download";
+import { downloadFile, downloadJson } from "@/lib/download";
+import { demoStatementCsv } from "@/lib/learn/sample-data";
 import { ExecutiveSummaryView } from "@/modules/executive/ExecutiveSummaryView";
 import { loadProgress, saveProgress, startPath } from "@/lib/tutorials/progress";
-import { PRODUCT_WALKTHROUGH_PATH } from "@/lib/tutorials/workflows";
 import type { DemoCompanySlug } from "@/lib/learn/companies";
 import type { DemoPlanId } from "@/lib/learn/demo-plans";
 import type { OrgRole } from "@/modules/departments-members/team";
@@ -159,7 +164,29 @@ function DemoScreenDispatcher() {
     return wrap("Inventory & stock", "Items, warehouses and FIFO valuation", <InventoryView key={`inv-${datasetVersion}`} />);
   }
   if (basePath === "/banking/reconciliation") {
-    return wrap("Bank reconciliation", "Match a bank statement against the bank ledger", <ReconciliationView key={`br-${datasetVersion}`} />);
+    const statement = dataset.bankStatements[0];
+    return (
+      <WorkspaceLayout
+        title="Bank reconciliation"
+        subtitle="Match a bank statement against the bank ledger"
+        actions={
+          statement ? (
+            <button
+              type="button"
+              data-tour="demo-statement-download"
+              onClick={() => downloadFile(`demo-bank-statement-${dataset.org.slug}.csv`, demoStatementCsv(statement), "text/csv")}
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-ctl border border-line-strong bg-surface hover:bg-canvas text-[13.5px] font-medium text-ink"
+              title="A sample statement for this demo company, made in your browser"
+            >
+              <Download className="h-4 w-4 text-ink-soft" />
+              Download demo statement
+            </button>
+          ) : undefined
+        }
+      >
+        <ReconciliationView key={`br-${datasetVersion}`} />
+      </WorkspaceLayout>
+    );
   }
   if (basePath === "/reconciliation") {
     return wrap("Marketplace settlements", "Gross sales, fees and TCS from marketplace payouts", <MarketplaceView key={`mkt-${datasetVersion}`} />);
@@ -198,7 +225,7 @@ function DemoScreenDispatcher() {
     return wrap("Creditors & DPO", "Supplier payables by age and payment days", <CreditorsDpoView key={`dpo-${datasetVersion}`} />);
   }
   if (basePath === "/reports/fpa") {
-    return wrap("FP&A", "Margins, DSO and DPO, runway and department budgets", <FpaExecutiveView key={`fpa-${datasetVersion}`} />);
+    return wrap("FP&A", "Margins, working capital, runway and department budgets", <FpaExecutiveView key={`fpa-${datasetVersion}`} />);
   }
   if (basePath === "/reports/operating-expenses") {
     return wrap("Operating expenses", "Operating costs by ledger", <OperatingExpensesView key={`opex-${datasetVersion}`} />);
@@ -241,21 +268,38 @@ function DemoScreenDispatcher() {
   );
 }
 
-function TourAutoStarter({ initialTour }: { initialTour?: string | null }) {
-  const { navigateTo } = useLearnDemo();
+/** `?tour=<core path id>` starts a Help Centre tutorial. `?workflow=` is applied by the provider; both are dropped from the URL once used. */
+function TourAutoStarter({ initialTour, initialWorkflow }: { initialTour?: string | null; initialWorkflow?: string | null }) {
+  const { user } = useAuth();
+  const done = useRef(false);
   useEffect(() => {
-    const progress = loadProgress("public-learn-demo");
-    if (initialTour) {
-      saveProgress("public-learn-demo", startPath(progress, initialTour));
-      return;
-    }
-    // Automatically guide first-time demo visitors from Gateway -> Action -> Business Value
-    if (!progress.active && !progress.welcomed) {
-      saveProgress("public-learn-demo", startPath(progress, PRODUCT_WALKTHROUGH_PATH.id));
-    }
-    void navigateTo;
-  }, [initialTour, navigateTo]);
+    if (done.current) return;
+    done.current = true;
+    if (initialTour && user) saveProgress(user.id, startPath(loadProgress(user.id), initialTour));
+    // Consumed: a reload resumes from saved progress instead of starting again.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("tour");
+    url.searchParams.delete("workflow");
+    window.history.replaceState(null, "", url.toString());
+  }, [initialTour, initialWorkflow, user]);
   return null;
+}
+
+const LEAVES_DEMO = /^\/(learn|login|signup|request-setup)(\/|\?|$)/;
+
+/** Screens call router.push for in-app pages (a report row opening the ledger, say); in the demo those stay in the workspace. */
+function DemoRouterShim({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { navigateTo } = useLearnDemo();
+  const value = useMemo<AppRouterInstance>(() => {
+    const stays = (href: string) => href.startsWith("/") && !LEAVES_DEMO.test(href);
+    return {
+      ...router,
+      push: (href, opts) => (stays(href) ? navigateTo(href) : router.push(href, opts)),
+      replace: (href, opts) => (stays(href) ? navigateTo(href) : router.replace(href, opts)),
+    };
+  }, [router, navigateTo]);
+  return <AppRouterContext.Provider value={value}>{children}</AppRouterContext.Provider>;
 }
 
 export function LearnDemoWorkspace({
@@ -264,12 +308,14 @@ export function LearnDemoWorkspace({
   initialPlan,
   initialRoute,
   initialTour,
+  initialWorkflow,
 }: {
   initialCompany?: DemoCompanySlug;
   initialRole?: OrgRole;
   initialPlan?: DemoPlanId;
   initialRoute?: string;
   initialTour?: string | null;
+  initialWorkflow?: string | null;
 }) {
   return (
     <LearnDemoProvider
@@ -277,11 +323,14 @@ export function LearnDemoWorkspace({
       initialRole={initialRole}
       initialPlan={initialPlan}
       initialRoute={initialRoute}
+      initialWorkflow={initialWorkflow}
     >
-      <TourAutoStarter initialTour={initialTour} />
-      <AppShell>
-        <DemoScreenDispatcher />
-      </AppShell>
+      <TourAutoStarter initialTour={initialTour} initialWorkflow={initialWorkflow} />
+      <DemoRouterShim>
+        <AppShell>
+          <DemoScreenDispatcher />
+        </AppShell>
+      </DemoRouterShim>
     </LearnDemoProvider>
   );
 }

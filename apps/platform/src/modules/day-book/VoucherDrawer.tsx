@@ -215,7 +215,7 @@ export function VoucherDrawer({
         )}
       </div>
 
-      <section className="px-5 pt-3.5 pb-1.5">
+      <section data-tour="voucher-drawer-lines" className="px-5 pt-3.5 pb-1.5">
         <h4 className="mb-1.5 text-[13px] font-semibold text-ink-soft">Journal lines</h4>
         <table className="w-full border-collapse text-[13.5px] tabular-nums">
           <thead className="sr-only">
@@ -261,7 +261,7 @@ export function VoucherDrawer({
         </table>
       </section>
 
-      <section className="px-5 pt-3">
+      <section data-tour="voucher-drawer-trail" className="px-5 pt-3">
         <h4 className="mb-1.5 text-[13px] font-semibold text-ink-soft">Approval trail</h4>
         {trail.length === 0 ? (
           <p className="text-[13px] text-ink-muted">Approval details were not returned for this voucher.</p>
@@ -314,7 +314,7 @@ export function VoucherDrawer({
 
       <div className="flex flex-wrap gap-2.5 px-5 pt-4 pb-5 [&>*]:flex-1">
         {invoice && (
-          <Link
+          <Link data-tour="voucher-drawer-invoice"
             href={`/gst?invoice=${invoice.id}`}
             className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-ctl border border-line-strong bg-surface px-3.5 text-[13.5px] font-medium text-ink hover:bg-canvas"
           >

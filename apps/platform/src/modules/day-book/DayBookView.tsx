@@ -535,7 +535,7 @@ export function DayBookView() {
 
       <div className={`grid items-start gap-[18px] ${drawerOpen ? "lg:grid-cols-[minmax(0,1fr)_420px]" : ""}`}>
         {/* Day Book register */}
-        <div className="overflow-hidden rounded-panel border border-line bg-surface">
+        <div data-tour="day-book-register" className="overflow-hidden rounded-panel border border-line bg-surface">
           <div className="overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-brand" tabIndex={0} onKeyDown={handleTableKey} aria-label="Day Book register">
             <table className="w-full min-w-[720px] border-collapse text-left text-[13.5px] tabular-nums">
               <thead>

@@ -127,7 +127,7 @@ export function BalanceSheetView() {
           <div className="flex items-center gap-2">
             {loaded ? (
               <Badge variant={isBalanced ? "success" : "warning"}>
-                {isBalanced ? "Balance Sheet Equated" : `Difference: ${formatINR(difference)}`}
+                {isBalanced ? "Balance sheet balances" : `Difference: ${formatINR(difference)}`}
               </Badge>
             ) : (
               <Badge variant="warning">Difference: –</Badge>

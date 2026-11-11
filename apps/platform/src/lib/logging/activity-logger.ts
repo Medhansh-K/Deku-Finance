@@ -5,6 +5,7 @@
  * Page navigations and UI routing events are excluded.
  */
 
+import { apiClient } from "@/api/client";
 import { auditApi } from "@/api/endpoints";
 
 export type CrudOperation = "CREATE" | "READ" | "UPDATE" | "DELETE";
@@ -145,11 +146,11 @@ export async function downloadSecureAuditExport(
   if (typeof window === "undefined") return;
 
   try {
-    const url = auditApi.exportUrl(orgId, format);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
-
-    const blob = await res.blob();
+    // Through apiClient (not raw fetch) so the Learn demo's interceptor answers it and no request leaves the browser there.
+    const body = await apiClient<unknown>(`/api/v1/organisations/${orgId}/audit-events/export?format=${format}`);
+    const blob = new Blob([typeof body === "string" ? body : JSON.stringify(body, null, 2)], {
+      type: format === "csv" ? "text/csv" : "application/json",
+    });
     const objectUrl = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = objectUrl;

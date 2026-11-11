@@ -7,7 +7,7 @@ import { DEMO_ROLES, canDemoRolePerform, getDemoRoleConfig } from "@/lib/learn/d
 import { DEMO_PLANS, buildDemoSubscription } from "@/lib/learn/demo-plans";
 import { createInitialDemoDataset } from "@/lib/learn/sample-data";
 import { dispatchDemoApi } from "@/lib/learn/demo-api";
-import { PRODUCT_WALKTHROUGH_PATH, WORKFLOW_TUTORIAL_PATHS } from "@/lib/tutorials/workflows";
+import { LEARN_WORKFLOWS, getLearnWorkflow } from "@/lib/learn/workflows/catalogue";
 import {
   DOC_ARTICLES,
   DOC_CATEGORIES,
@@ -90,6 +90,7 @@ describe("Learn Centre 4 demo companies & frontend sample ledger parity", () => 
           getRole: () => "owner",
           getPlan: () => c.recommendedPlan,
           notifyAction: () => {},
+          record: () => {},
         },
         `/api/v1/organisations/${ds.org.id}/reports/trial-balance`
       )) as { data: { total_debit: number; total_credit: number }[] };
@@ -108,6 +109,7 @@ describe("Learn Centre 4 demo companies & frontend sample ledger parity", () => 
           getRole: () => "owner",
           getPlan: () => "pro",
           notifyAction: () => {},
+          record: () => {},
         },
         `/api/v1/organisations/${ds.org.id}/gst/102026/gstr1`
       )) as { data: { errors: string[]; json: unknown } };
@@ -123,6 +125,7 @@ describe("Learn Centre 4 demo companies & frontend sample ledger parity", () => 
           getRole: () => "owner",
           getPlan: () => c.recommendedPlan,
           notifyAction: () => {},
+          record: () => {},
         },
         `/api/v1/organisations/${ds.org.id}/reports/kpis`
       )) as { data: { has_entries: boolean; turnover: number; liquid: number; balanced: boolean } };
@@ -175,29 +178,19 @@ describe("Learn Centre 7 roles & 3 commercial plans", () => {
   });
 });
 
-describe("Learn Centre 8 guided workflows & 8 doc categories", () => {
-  it("validates all 8 business workflows point to real pages and data-tour attributes", () => {
-    expect(WORKFLOW_TUTORIAL_PATHS.map((w) => w.id)).toEqual([
-      "purchase-to-payment",
-      "order-to-collection",
-      "financial-close",
-      "gst-compliance",
-      "bank-reconciliation",
-      "team-governance",
-      "marketplace-settlement",
-      "financial-intelligence",
-    ]);
+describe("Learn Centre 18 workflows & 8 doc categories", () => {
+  it("defines WF-01 to WF-18 on real pages and data-tour attributes", () => {
+    expect(LEARN_WORKFLOWS.map((w) => w.code)).toEqual(Array.from({ length: 18 }, (_, i) => `WF-${String(i + 1).padStart(2, "0")}`));
+    expect(new Set(LEARN_WORKFLOWS.map((w) => w.id)).size).toBe(18);
 
     const source = walkFiles("apps/platform/src").map((f) => readFileSync(f, "utf8")).join("\n");
-    for (const wf of [PRODUCT_WALKTHROUGH_PATH, ...WORKFLOW_TUTORIAL_PATHS]) {
+    for (const wf of LEARN_WORKFLOWS) {
+      expect(getLearnWorkflow(wf.id)).toBe(wf);
       expect(wf.steps.length).toBeGreaterThan(2);
+      expect(existsSync(join("apps/platform/src/app", wf.startRoute.split("?")[0], "page.tsx"))).toBe(true);
       for (const step of wf.steps) {
-        if (step.route) {
-          expect(existsSync(join("apps/platform/src/app", step.route, "page.tsx"))).toBe(true);
-        }
-        if (step.target) {
-          expect(source).toContain(`data-tour="${step.target}"`);
-        }
+        expect(existsSync(join("apps/platform/src/app", step.route.split("?")[0], "page.tsx"))).toBe(true);
+        if (step.target) expect(source).toContain(`data-tour="${step.target}"`);
       }
     }
   });

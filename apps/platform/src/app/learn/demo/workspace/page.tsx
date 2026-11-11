@@ -25,6 +25,7 @@ function WorkspaceRunner() {
 
   const route = params.get("route") ?? "/gateway";
   const tour = params.get("tour");
+  const workflow = params.get("workflow");
 
   return (
     <LearnDemoWorkspace
@@ -33,6 +34,7 @@ function WorkspaceRunner() {
       initialPlan={plan}
       initialRoute={route}
       initialTour={tour}
+      initialWorkflow={workflow}
     />
   );
 }
@@ -41,8 +43,8 @@ export default function LearnDemoWorkspacePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-canvas text-xs font-mono text-ink-muted">
-          Loading Deku Interactive Demo Workspace…
+        <div className="min-h-screen flex items-center justify-center bg-canvas text-[13.5px] text-ink-muted">
+          Loading the demo workspace…
         </div>
       }
     >

@@ -1771,7 +1771,7 @@ export function VoucherWorkspace({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Bill-wise Matching */}
-                    <div className={SUBPANEL}>
+                    <div data-tour="voucher-settle-invoice" className={SUBPANEL}>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[13.5px] font-medium text-ink flex items-center gap-1.5">
                           <CheckCircle2 className="h-4 w-4 text-brand-strong" /> Settle an open sales invoice

@@ -83,7 +83,7 @@ export function GeneralLedgerView() {
             <label htmlFor="ledger-account" className="block text-[13px] font-medium text-ink-soft">
               Account
             </label>
-            <select
+            <select data-tour="general-ledger-account"
               id="ledger-account"
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}

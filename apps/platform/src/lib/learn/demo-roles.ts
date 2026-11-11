@@ -130,19 +130,13 @@ export const DEMO_ROLES: DemoRoleConfig[] = [
       "consultant",
       "settings",
     ],
-    allowedActions: [
-      "post_voucher",
-      "approve_voucher",
-      "reverse_voucher",
-      "create_draft",
-      "issue_invoice",
-      "reconcile_bank",
-      "invite_members",
-      "run_payroll",
-      "view_salary",
-      "export_gstn",
-    ],
+    // Matches the database (lib/learn/engine/rbac.ts): the CFO approves and posts but doesn't make drafts,
+    // issue invoices (issue_sales_invoice) or reverse entries (reverse_journal_entry).
+    allowedActions: ["post_voucher", "approve_voucher", "reconcile_bank", "invite_members", "run_payroll", "view_salary", "export_gstn"],
     restrictedExplanations: {
+      create_draft: "Drafting vouchers and invoices is done by the Owner, Admin or Accountant (journal_entries insert policy, migration 005).",
+      issue_invoice: "Issuing or cancelling an invoice posts its journal; the database allows Owner or Admin only (issue_sales_invoice, migration 041).",
+      reverse_voucher: "Reversals post a contra entry; the database allows Owner or Admin only (reverse_journal_entry, migration 006).",
       manage_members: "Promoting/removing existing organisation members requires Owner or Admin role (migration 002/041).",
       manage_departments: "Department schema & budget creation is restricted to Owner and Admin roles (migration 013).",
       edit_settings: "Core GSTIN regime & commercial licence ownership changes require Owner.",
@@ -221,13 +215,15 @@ export const DEMO_ROLES: DemoRoleConfig[] = [
       "approvals",
       "marketplace",
     ],
-    allowedActions: ["create_draft", "issue_invoice", "reconcile_bank", "export_gstn"],
+    // issue_invoice is excluded: issuing posts the invoice's journal, which post_journal_entry allows only to Owner, CFO or Admin.
+    allowedActions: ["create_draft", "reconcile_bank", "export_gstn"],
     restrictedExplanations: {
       post_voucher:
         "Accountants save & submit vouchers for Maker-Checker review. Direct ledger posting requires Owner, CFO, or Admin.",
       approve_voucher:
         "Separation of duties: only an independent Checker (Owner, CFO, or Admin) may Approve & Post queued vouchers.",
-      reverse_voucher: "Reversing a posted immutable voucher requires Owner, CFO, or Admin approval.",
+      reverse_voucher: "Reversing a posted voucher requires Owner or Admin (reverse_journal_entry).",
+      issue_invoice: "Accountants save draft invoices; issuing posts the journal, so the database needs Owner or Admin to issue or cancel.",
       invite_members: "Inviting team members requires Owner, CFO, or Admin.",
       manage_members: "Member role administration requires Owner or Admin.",
       manage_departments: "Department management requires Owner or Admin.",

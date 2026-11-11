@@ -198,7 +198,7 @@ export function CollectView() {
 
       <div className="rounded-panel border border-line bg-surface">
         <div className="flex flex-col gap-3 border-b border-line px-5 py-4 lg:flex-row lg:items-end lg:justify-between">
-          <div role="tablist" aria-label="Invoice status" className="inline-flex flex-wrap items-center gap-0.5 self-start rounded-ctl bg-canvas-sunken p-[3px]">
+          <div data-tour="collect-status-tabs" role="tablist" aria-label="Invoice status" className="inline-flex flex-wrap items-center gap-0.5 self-start rounded-ctl bg-canvas-sunken p-[3px]">
             {TABS.map((t) => (
               <button
                 key={t.id}

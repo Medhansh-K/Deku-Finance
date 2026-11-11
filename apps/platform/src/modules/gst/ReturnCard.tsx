@@ -19,7 +19,7 @@ export function ReturnCard({
 }) {
   const cols = ["txval", "camt", "samt", "iamt", "csamt"] as const;
   return (
-    <div className="rounded-panel border border-line bg-surface p-5 space-y-4">
+    <div data-tour="gst-return-card" className="rounded-panel border border-line bg-surface p-5 space-y-4">
       <div className="flex items-center justify-between border-b border-line pb-3">
         <h2 className="text-[15px] font-semibold tracking-tight text-ink">{title}</h2>
         {result.errors.length ? (

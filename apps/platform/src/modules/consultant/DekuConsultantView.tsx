@@ -716,7 +716,7 @@ export function DekuConsultantView() {
                 </p>
               </div>
 
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div data-tour="consultant-prompts" className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {promptCards.map((card, idx) => {
                   const Icon = card.icon;
                   return (
@@ -832,7 +832,7 @@ export function DekuConsultantView() {
 
         {/* Prompt bar */}
         <div className="px-4 pb-4 pt-2 lg:px-6 lg:pb-5 w-full flex flex-col items-center shrink-0 bg-canvas">
-          <div className="w-full max-w-3xl bg-surface border border-line-strong rounded-panel p-2 shadow-pop flex flex-col gap-2 focus-within:border-brand transition-colors">
+          <div data-tour="consultant-composer" className="w-full max-w-3xl bg-surface border border-line-strong rounded-panel p-2 shadow-pop flex flex-col gap-2 focus-within:border-brand transition-colors">
             <div className="flex items-center gap-1 px-1">
               <button
                 type="button"

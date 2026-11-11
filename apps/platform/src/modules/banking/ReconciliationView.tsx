@@ -355,7 +355,7 @@ export function ReconciliationView() {
 
       {statement && (
         <div className="rounded-panel border border-line bg-surface overflow-hidden">
-          <div className="flex flex-wrap items-center gap-1 border-b border-line px-3">
+          <div data-tour="recon-tabs" className="flex flex-wrap items-center gap-1 border-b border-line px-3">
             {tabs.map((t) => (
               <button
                 key={t.id}
@@ -454,7 +454,7 @@ export function ReconciliationView() {
       )}
 
       {accountId && (
-        <div className="rounded-panel border border-line bg-surface p-5 space-y-4">
+        <div data-tour="recon-complete" className="rounded-panel border border-line bg-surface p-5 space-y-4">
           <h2 className="text-[15px] font-semibold tracking-tight text-ink">Finish this statement</h2>
           <div className="flex flex-col md:flex-row md:items-end gap-3">
             <label className="flex flex-col gap-1">
@@ -532,7 +532,7 @@ export function ReconciliationView() {
         </div>
       )}
 
-      <div className="rounded-panel border border-line bg-surface overflow-hidden">
+      <div data-tour="recon-history" className="rounded-panel border border-line bg-surface overflow-hidden">
         <h2 className="text-[15px] font-semibold tracking-tight text-ink px-5 pt-4 pb-3">Completed reconciliations</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

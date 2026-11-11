@@ -382,7 +382,7 @@ export const TUTORIAL_PATHS: TutorialPath[] = [
       {
         id: "balance-sheet",
         title: "Read the Balance Sheet",
-        body: "The Balance Sheet shows assets on one side and capital and liabilities on the other. The label here reads Balance Sheet Equated when they agree and shows the difference when they don't. Ask your accountant to look into any difference before relying on the figures.",
+        body: "The Balance Sheet shows assets on one side and capital and liabilities on the other. The label here reads Balance sheet balances when they agree and shows the difference when they don't. Ask your accountant to look into any difference before relying on the figures.",
         route: "/reports/balance-sheet",
         target: "balance-sheet-status",
       },

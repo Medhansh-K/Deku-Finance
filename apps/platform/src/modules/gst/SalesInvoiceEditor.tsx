@@ -370,7 +370,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
           )}
           <div className="space-y-1">
             <label htmlFor="inv-customer" className="block text-[13px] font-medium text-ink-soft">Customer</label>
-            <select id="inv-customer" value={customerId} onChange={(e) => chooseCustomer(e.target.value)} className={selectClass}>
+            <select data-tour="invoice-customer" id="inv-customer" value={customerId} onChange={(e) => chooseCustomer(e.target.value)} className={selectClass}>
               <option value="">Select a customer</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -419,7 +419,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
         <div className="space-y-4 min-w-0">
-          <div className="rounded-panel border border-line bg-surface overflow-x-auto">
+          <div data-tour="invoice-lines" className="rounded-panel border border-line bg-surface overflow-x-auto">
             <table className="w-full border-collapse text-left text-[13.5px]">
               <caption className="sr-only">Invoice lines</caption>
               <thead className="border-b border-line bg-[#fafbfa] text-[12.5px] text-ink-muted">
@@ -508,7 +508,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
           </fieldset>
         </div>
 
-        <aside aria-label="Tax summary" className="h-fit rounded-panel border border-line bg-surface p-5 space-y-4 lg:sticky lg:top-4">
+        <aside data-tour="invoice-tax-summary" aria-label="Tax summary" className="h-fit rounded-panel border border-line bg-surface p-5 space-y-4 lg:sticky lg:top-4">
           <div>
             <h3 className="text-[15px] font-semibold tracking-tight text-ink">Tax summary</h3>
             <p className="mt-0.5 text-[13px] text-ink-muted">{supplyNote}</p>
@@ -551,7 +551,7 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="secondary" size="sm" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" variant="primary" size="sm" isLoading={isSaving}>Save draft invoice</Button>
+        <Button data-tour="invoice-save" type="submit" variant="primary" size="sm" isLoading={isSaving}>Save draft invoice</Button>
       </div>
     </form>
   );

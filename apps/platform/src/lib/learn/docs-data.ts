@@ -5,6 +5,8 @@
  */
 
 import type { DemoCompanySlug } from "./companies";
+import { roleLabel } from "@/modules/departments-members/team";
+import { LEARN_WORKFLOWS } from "./workflows/catalogue";
 
 export type DocCategorySlug =
   | "getting-started"
@@ -35,6 +37,7 @@ export interface DocDemoLink {
   label: string;
   companySlug: DemoCompanySlug;
   targetRoute: string;
+  /** Learn workflow id (`wf-01-sales-invoice` …) the link starts, when it starts one. */
   workflowHint?: string;
 }
 
@@ -49,6 +52,8 @@ export interface DocArticle {
   readMinutes: number;
   demoLink?: DocDemoLink;
   relatedSlugs?: { category: DocCategorySlug; slug: string }[];
+  /** Learn workflows this article documents (lib/learn/workflows/catalogue.ts). */
+  workflowIds?: string[];
   sections: DocSection[];
 }
 
@@ -528,7 +533,178 @@ export const DOC_ARTICLES: DocArticle[] = [
       },
     ],
   },
+
+  // Learn workflows (WF-01 to WF-18), one article per role group
+  ...workflowArticles(),
 ];
+
+interface WorkflowGroupDoc {
+  slug: string;
+  category: DocCategorySlug;
+  title: string;
+  summary: string;
+  tags: string[];
+  workflowIds: string[];
+  intro: DocSection;
+}
+
+/**
+ * One article per workflow group. The per-workflow sections are built from the workflow
+ * definitions themselves, so the article and the tour can't drift apart.
+ */
+function workflowArticles(): DocArticle[] {
+  const groups: WorkflowGroupDoc[] = [
+    {
+      slug: "accountant-workflows",
+      category: "operations",
+      title: "Accountant workflows: invoices, bills, vouchers, stock and bank",
+      summary: "WF-01 to WF-06: the daily work of an accountant, each step done on the real screens and checked against what actually changed in the books.",
+      tags: ["workflows", "accountant", "sales", "purchases", "vouchers", "inventory", "bank-reconciliation"],
+      workflowIds: ["wf-01-sales-invoice", "wf-02-purchase-invoice", "wf-03-receipts-payments", "wf-04-vouchers", "wf-05-inventory", "wf-06-bank-reconciliation"],
+      intro: {
+        id: "how-they-connect",
+        heading: "How these workflows connect",
+        paragraphs: [
+          "They share one set of books per demo company. The invoice you issue in WF-01 is the one you settle in WF-03 and trace in WF-16; if you skip WF-01, WF-03 uses Aster Trading's seeded open invoice AST/26-27/002.",
+          "Maker-checker approval is on in every demo company. An accountant submits vouchers; a CFO, Admin or Owner approves them in Approvals, and nobody can approve a voucher they made. Issuing a sales invoice is different: it posts its journal straight away, so although an accountant prepares the invoice, only the Owner or an Admin can issue it (the CFO may post journals but not issue invoices).",
+        ],
+        callout: {
+          tone: "info",
+          title: "What the demo does not do",
+          body: "Purchase bills carry totals, not item lines, so they move the Inventory ledger but not item quantities; quantities come in through stock adjustments. Vouchers need a proof document: attach any file, which stays in your browser.",
+        },
+      },
+    },
+    {
+      slug: "admin-workflows",
+      category: "getting-started",
+      title: "Admin workflows: set up a company and its team",
+      summary: "WF-07 and WF-08: company and GST details, financial year, approval controls, first masters, and inviting members with one of the 7 roles.",
+      tags: ["workflows", "admin", "settings", "masters", "team", "roles"],
+      workflowIds: ["wf-07-onboard-company", "wf-08-team"],
+      intro: {
+        id: "who-can",
+        heading: "Who can do this",
+        paragraphs: [
+          "Company settings and member roles are changed by the Owner or an Admin; invitations can also be sent by the CFO. Only the Owner can grant the Owner role.",
+          "Invitations in the demo are never emailed. Seats count members plus pending invitations: each demo company already has 7 members and a pending invitation, more than PRO's 5 seats, so inviting someone new needs Enterprise.",
+        ],
+      },
+    },
+    {
+      slug: "cfo-workflows",
+      category: "financial-intelligence",
+      title: "CFO workflows: performance, working capital and budgets",
+      summary: "WF-09 to WF-11: the four statements, receivables and payables with DSO and DPO, and department budgets against actual.",
+      tags: ["workflows", "cfo", "reports", "working-capital", "dso", "dpo", "budgets"],
+      workflowIds: ["wf-09-financial-performance", "wf-10-working-capital", "wf-11-budgets"],
+      intro: {
+        id: "from-posted-books",
+        heading: "Every figure comes from posted vouchers",
+        paragraphs: [
+          "Reports read posted journal lines only; drafts and vouchers waiting for approval are left out. Anything you posted in an earlier workflow is included.",
+          "Department budgets are kept on each department: the amount used is maintained there, because vouchers do not carry a department. Only the Owner or an Admin can add or change departments.",
+        ],
+      },
+    },
+    {
+      slug: "owner-workflows",
+      category: "financial-intelligence",
+      title: "Owner workflows: business health and transactions",
+      summary: "WF-12 and WF-13: the company's position, revenue, receivables, cash and pending items, and how sales, purchases and collections become accounting records.",
+      tags: ["workflows", "owner", "executive", "health"],
+      workflowIds: ["wf-12-business-health", "wf-13-business-transactions"],
+      intro: {
+        id: "read-only",
+        heading: "Read-only reviews",
+        paragraphs: [
+          "Both workflows only read the books. Pending vouchers are shown as exceptions: they are not in the figures until a checker approves them.",
+        ],
+      },
+    },
+    {
+      slug: "analyst-workflows",
+      category: "financial-intelligence",
+      title: "Analyst workflows: revenue, expenses and Deku Consultant",
+      summary: "WF-14 and WF-15: break down and compare revenue and expenses, and check Deku Consultant's answers against the ledger.",
+      tags: ["workflows", "analyst", "revenue", "expenses", "deku-consultant"],
+      workflowIds: ["wf-14-revenue-expense", "wf-15-consultant"],
+      intro: {
+        id: "grounded",
+        heading: "Answers grounded in the books",
+        paragraphs: [
+          "Analysts read reports and never post. In the demo, Deku Consultant computes its answers from the demo company's posted ledger in your browser; no external AI service is called.",
+        ],
+      },
+    },
+    {
+      slug: "auditor-workflows",
+      category: "roles-and-governance",
+      title: "Auditor workflows: trace a transaction, check integrity",
+      summary: "WF-16 and WF-17: follow an invoice to its voucher, approval trail, ledger and audit history, and review the books without changing them.",
+      tags: ["workflows", "auditor", "audit-trail", "integrity", "day-book"],
+      workflowIds: ["wf-16-trace-transaction", "wf-17-accounting-integrity"],
+      intro: {
+        id: "independence",
+        heading: "Read-only by design",
+        paragraphs: [
+          "Auditors cannot create, approve or reverse anything. Posted vouchers are never edited: a correction is a reversal, and both entries stay in Day Book and the audit log.",
+        ],
+      },
+    },
+    {
+      slug: "business-to-close-cycle",
+      category: "getting-started",
+      title: "The business-to-close cycle across all roles",
+      summary: "WF-18: one invoice in one company, from Admin's setup through the Accountant, CFO, Analyst and Auditor to the Owner's summary.",
+      tags: ["workflows", "flagship", "roles", "maker-checker", "close"],
+      workflowIds: ["wf-18-close-cycle"],
+      intro: {
+        id: "one-record",
+        heading: "One record, six roles",
+        paragraphs: [
+          "Each step tells you which role to switch to. The same customer, invoice and receipt appear on every screen, so you can see who did what and what each role can and cannot do.",
+        ],
+      },
+    },
+  ];
+
+  return groups.map((g) => {
+    const workflows = g.workflowIds.map((id) => LEARN_WORKFLOWS.find((w) => w.id === id)!);
+    const first = workflows[0];
+    return {
+      slug: g.slug,
+      category: g.category,
+      title: g.title,
+      summary: g.summary,
+      tags: g.tags,
+      version: "2.0",
+      lastUpdated: "2026-11-11",
+      readMinutes: 3 + workflows.length,
+      demoLink: {
+        label: `Start ${first.code} ${first.name.toLowerCase()} in the demo`,
+        companySlug: first.recommendedCompany,
+        targetRoute: first.startRoute,
+        workflowHint: first.id,
+      },
+      workflowIds: g.workflowIds,
+      sections: [
+        g.intro,
+        ...workflows.map((w) => ({
+          id: w.id,
+          heading: `${w.code} ${w.name}`,
+          paragraphs: [
+            w.description,
+            `Starts with: ${w.startingData}`,
+            `Done when: ${w.completion}`,
+            ...(w.industryNote ? [w.industryNote] : []),
+          ],
+          bullets: w.steps.map((s) => `${s.title}${s.role ? ` (as ${roleLabel(s.role)})` : ""}${s.impact ? `: ${s.impact}` : ""}`),
+        })),
+      ],
+    };
+  });
+}
 
 export function getDocCategory(slug: string): DocCategory | undefined {
   return DOC_CATEGORIES.find((c) => c.slug === slug);

@@ -550,7 +550,7 @@ export function GstTaxHubView() {
 
               <div className="flex items-center gap-2">
                 {selectedInvoice.status === "draft" && (
-                  <Button
+                  <Button data-tour="invoice-issue"
                     variant="tally"
                     size="sm"
                     onClick={() => handleIssueInvoice(selectedInvoice.id)}

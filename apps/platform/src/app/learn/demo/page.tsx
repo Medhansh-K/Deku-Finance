@@ -3,72 +3,60 @@ import Link from "next/link";
 import { LearnShell } from "@/components/learn/LearnShell";
 import { DemoCompanyGrid } from "@/components/learn/DemoCompanyGrid";
 import { WorkflowDemoExplorer } from "@/components/learn/WorkflowDemoExplorer";
-import { BookOpen, Layers, ShieldAlert, Sliders, Users } from "lucide-react";
+import { DEMO_COMPANIES } from "@/lib/learn/companies";
+import { DEMO_ROLES } from "@/lib/learn/demo-roles";
+import { LEARN_WORKFLOWS } from "@/lib/learn/workflows/catalogue";
+import { BookOpen } from "lucide-react";
 
 export default function LearnDemoPage() {
+  const facts = [
+    { value: LEARN_WORKFLOWS.length, label: "Guided workflows", note: "Each step checks that you really did it." },
+    { value: DEMO_COMPANIES.length, label: "Demo companies", note: "Fictional books that reconcile, one per industry." },
+    { value: DEMO_ROLES.length, label: "Roles", note: "The same access rules as the real app." },
+    { value: 0, label: "Real transactions", note: "Filing, payments and messages stay simulated." },
+  ];
   return (
     <LearnShell>
-      <section className="border-b border-line-strong bg-surface py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="max-w-3xl space-y-3">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-panel text-brand-soft font-mono text-[11px] font-bold border border-edge">
-              INTERACTIVE DEMO CENTRE · ZERO LOGIN
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tight">
-              Explore Deku Finance Instantly. No Login, No Hassle.
-            </h1>
-            <p className="text-sm sm:text-base text-ink-soft leading-relaxed">
-              Launch any of our four fictional companies or eight guided workflow tours directly in your browser. Switch across all seven RBAC roles, compare GO / PRO / Enterprise plans live, and reset sample books anytime.
+      <section className="border-b border-line bg-surface">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-6">
+          <div className="max-w-3xl space-y-2">
+            <h1 className="text-[28px] sm:text-[34px] font-semibold tracking-[-0.03em] text-ink">Try Deku Finance on sample books</h1>
+            <p className="text-[14px] sm:text-[15px] text-ink-soft leading-relaxed">
+              No login. Everything runs in your browser: each demo company keeps its own books and activity log here, so an invoice you
+              raise in one workflow is the one you collect, trace and report on in the next. Reset any time.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 text-xs">
-            <div className="rounded-xl border border-line bg-canvas p-4 space-y-1">
-              <Users className="h-4 w-4 text-brand-strong" />
-              <div className="font-bold text-ink">7 RBAC Roles</div>
-              <p className="text-ink-soft">Owner, CFO, Admin, Accountant, Analyst, Auditor &amp; Viewer governance previews.</p>
-            </div>
-            <div className="rounded-xl border border-line bg-canvas p-4 space-y-1">
-              <Sliders className="h-4 w-4 text-brand-strong" />
-              <div className="font-bold text-ink">3 Commercial Tiers</div>
-              <p className="text-ink-soft">Switch between GO, PRO, and Enterprise to inspect seat, volume &amp; feature gates.</p>
-            </div>
-            <div className="rounded-xl border border-line bg-canvas p-4 space-y-1">
-              <Layers className="h-4 w-4 text-brand-strong" />
-              <div className="font-bold text-ink">Reconciled Sample Books</div>
-              <p className="text-ink-soft">Four industry datasets powered by the real Deku UI with in-browser double-entry parity.</p>
-            </div>
-            <div className="rounded-xl border border-line bg-canvas p-4 space-y-1">
-              <ShieldAlert className="h-4 w-4 text-amber-600" />
-              <div className="font-bold text-ink">No Real Transactions</div>
-              <p className="text-ink-soft">Nothing writes to a live company database, and external GSTN/payment/WhatsApp calls stay simulated.</p>
-            </div>
-          </div>
+          <dl className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {facts.map((f) => (
+              <div key={f.label} className="rounded-panel border border-line bg-canvas p-4">
+                <dt className="text-[13px] text-ink-muted">{f.label}</dt>
+                <dd className="text-[26px] font-semibold tracking-[-0.035em] text-ink tabular-nums">{f.value}</dd>
+                <dd className="text-[12.5px] text-ink-muted">{f.note}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-14">
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-14">
+        <WorkflowDemoExplorer />
+
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black text-ink">Select an Industry Company</h2>
-              <p className="text-xs text-ink-soft mt-0.5">
-                Every company opens immediately in your browser with fresh, resettable sample books.
-              </p>
+              <h2 className="text-[17px] font-semibold tracking-tight text-ink">Or open a company and look around</h2>
+              <p className="text-[13.5px] text-ink-muted">Each opens straight away with its own sample books.</p>
             </div>
             <Link
               href="/learn/docs"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-line-strong bg-surface text-xs font-semibold text-ink hover:bg-canvas-sunken"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-ctl border border-line-strong bg-surface text-[13px] font-medium text-ink hover:bg-canvas"
             >
-              <BookOpen className="h-3.5 w-3.5 text-brand-strong" />
-              <span>Read Manuals First</span>
+              <BookOpen className="h-3.5 w-3.5 text-ink-soft" />
+              Read the manuals
             </Link>
           </div>
-
           <DemoCompanyGrid />
         </div>
-
-        <WorkflowDemoExplorer />
       </section>
     </LearnShell>
   );

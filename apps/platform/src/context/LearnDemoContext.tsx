@@ -20,6 +20,17 @@ import { dispatchDemoApi } from "@/lib/learn/demo-api";
 import { buildDemoSubscription, getDemoPlanConfig, type DemoPlanId } from "@/lib/learn/demo-plans";
 import { getDemoRoleConfig, type DemoRoleConfig } from "@/lib/learn/demo-roles";
 import { createInitialDemoDataset, type DemoDataset } from "@/lib/learn/sample-data";
+import { DEMO_ACTIVITY_EVENT, nextActivity, screenName, type DemoActivity, type DemoActivityRefs, type DemoActivityType } from "@/lib/learn/activity";
+import { clearStoredDataset, loadStoredDataset, saveStoredDataset } from "@/lib/learn/demo-store";
+import { getLearnWorkflow } from "@/lib/learn/workflows/catalogue";
+import {
+  EMPTY_WORKFLOW_STATE,
+  openWorkflow,
+  clearWorkflowState,
+  loadWorkflowState,
+  saveWorkflowState,
+  type CompanyWorkflowState,
+} from "@/lib/learn/workflows/runner";
 import type { OrgRole } from "@/modules/departments-members/team";
 import type { Organisation, UserProfile } from "@/types";
 
@@ -42,6 +53,12 @@ export interface LearnDemoContextValue {
   setWorkflowDrawerOpen: (open: boolean) => void;
   actionNotice: DemoActionNotice | null;
   dismissActionNotice: () => void;
+  /** Everything the visitor did in this company, oldest first. */
+  activity: DemoActivity[];
+  record: (type: DemoActivityType, summary: string, refs?: DemoActivityRefs) => void;
+  /** This company's workflow runs (lib/learn/workflows/runner.ts); saved per company. */
+  workflowState: CompanyWorkflowState;
+  updateWorkflows: (fn: (state: CompanyWorkflowState, activity: DemoActivity[]) => CompanyWorkflowState) => void;
   notifyAction: (title: string, body: string, tone?: "info" | "warning" | "blocked") => void;
   switchCompany: (slug: DemoCompanySlug) => void;
   switchRole: (role: OrgRole) => void;
@@ -63,12 +80,15 @@ export function LearnDemoProvider({
   initialRole = "owner",
   initialPlan,
   initialRoute = "/gateway",
+  initialWorkflow,
   children,
 }: {
   initialCompany?: DemoCompanySlug;
   initialRole?: OrgRole;
   initialPlan?: DemoPlanId;
   initialRoute?: string;
+  /** Workflow to start or resume on arrival (catalogue Start/Resume). Applied before any screen renders. */
+  initialWorkflow?: string | null;
   children: React.ReactNode;
 }) {
   const validCompany = getDemoCompany(initialCompany) ?? DEMO_COMPANIES[0];
@@ -81,6 +101,8 @@ export function LearnDemoProvider({
   const [workflowDrawerOpen, setWorkflowDrawerOpen] = useState(false);
   const [actionNotice, setActionNotice] = useState<DemoActionNotice | null>(null);
   const [interceptorReady, setInterceptorReady] = useState(false);
+  const [workflowState, setWorkflowState] = useState<CompanyWorkflowState>(EMPTY_WORKFLOW_STATE);
+  const workflowRef = useRef(workflowState);
 
   const router = useRouter();
   const prevOrgRef = useRef<{ id: string | null; name: string | null } | null>(null);
@@ -99,6 +121,53 @@ export function LearnDemoProvider({
   useEffect(() => {
     planRef.current = plan;
   }, [plan]);
+
+  /** Append to the activity log and tell any open tour. The log lives inside the dataset, so it saves with it. */
+  const record = useCallback((type: DemoActivityType, summary: string, refs?: DemoActivityRefs) => {
+    const prev = datasetRef.current;
+    const activity = nextActivity(prev.activity, type, roleRef.current, summary, refs);
+    const next = { ...prev, activity: [...prev.activity, activity] };
+    datasetRef.current = next;
+    setDataset(next);
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent<DemoActivity>(DEMO_ACTIVITY_EVENT, { detail: activity }));
+  }, []);
+
+  // Restore this company's saved books after mount (never during render, so hydration matches).
+  const companyRef = useRef(companySlug);
+  const initialWorkflowRef = useRef(initialWorkflow);
+  useLayoutEffect(() => {
+    const saved = loadStoredDataset(companyRef.current);
+    if (saved) {
+      datasetRef.current = saved;
+      setDataset(saved);
+      setDatasetVersion((v) => v + 1);
+    }
+    const wf = getLearnWorkflow(initialWorkflowRef.current ?? "");
+    const stored = loadWorkflowState(companyRef.current);
+    workflowRef.current = wf ? openWorkflow(stored, wf, datasetRef.current.activity) : stored;
+    if (wf) saveWorkflowState(companyRef.current, workflowRef.current);
+    setWorkflowState(workflowRef.current);
+  }, []);
+
+  // Save after every change; each company keeps its own copy. The untouched first-render seed is never
+  // saved: under StrictMode the restore above runs twice, and saving the seed in between wiped the visitor's books.
+  const initialDatasetRef = useRef(dataset);
+  useEffect(() => {
+    companyRef.current = companySlug;
+    if (dataset === initialDatasetRef.current) return;
+    saveStoredDataset(companySlug, dataset);
+  }, [companySlug, dataset]);
+
+  const updateWorkflows = useCallback(
+    (fn: (state: CompanyWorkflowState, activity: DemoActivity[]) => CompanyWorkflowState) => {
+      const next = fn(workflowRef.current, datasetRef.current.activity);
+      if (next === workflowRef.current) return;
+      workflowRef.current = next;
+      setWorkflowState(next);
+      saveWorkflowState(companyRef.current, next);
+    },
+    []
+  );
 
   const notifyAction = useCallback(
     (title: string, body: string, tone: "info" | "warning" | "blocked" = "info") => {
@@ -143,6 +212,7 @@ export function LearnDemoProvider({
           getRole: () => roleRef.current,
           getPlan: () => planRef.current,
           notifyAction,
+          record,
         },
         path,
         opts
@@ -152,12 +222,18 @@ export function LearnDemoProvider({
     return () => {
       setDemoApiInterceptor(null);
     };
-  }, [notifyAction]);
+  }, [notifyAction, record]);
 
   const syncUrl = useCallback(
     (nextCompany: DemoCompanySlug, nextRole: OrgRole, nextPlan: DemoPlanId, nextRoute: string) => {
       if (typeof window === "undefined") return;
-      const url = `/learn/demo/workspace?company=${encodeURIComponent(nextCompany)}&role=${encodeURIComponent(nextRole)}&plan=${encodeURIComponent(nextPlan)}&route=${encodeURIComponent(nextRoute)}`;
+      const url = new URL("/learn/demo/workspace", window.location.origin);
+      // The screen's own query (?invoice=…, ?amount=…) goes on the page URL too: the reused screens read it from there.
+      new URLSearchParams(nextRoute.split("?")[1] ?? "").forEach((v, k) => url.searchParams.set(k, v));
+      url.searchParams.set("company", nextCompany);
+      url.searchParams.set("role", nextRole);
+      url.searchParams.set("plan", nextPlan);
+      url.searchParams.set("route", nextRoute);
       window.history.replaceState(null, "", url);
     },
     []
@@ -168,14 +244,18 @@ export function LearnDemoProvider({
       const next = normalizeDemoRoute(route);
       setActiveRoute(next);
       syncUrl(companySlug, role, plan, next);
+      record("route.visited", `Opened ${screenName(next)}`, { path: next });
     },
-    [companySlug, role, plan, syncUrl]
+    [companySlug, role, plan, syncUrl, record]
   );
 
   const switchCompany = useCallback(
     (slug: DemoCompanySlug) => {
-      const fresh = createInitialDemoDataset(slug);
+      const fresh = loadStoredDataset(slug) ?? createInitialDemoDataset(slug);
       datasetRef.current = fresh;
+      companyRef.current = slug;
+      workflowRef.current = loadWorkflowState(slug);
+      setWorkflowState(workflowRef.current);
       setCompanySlug(slug);
       setDataset(fresh);
       setDatasetVersion((v) => v + 1);
@@ -192,16 +272,18 @@ export function LearnDemoProvider({
   const switchRole = useCallback(
     (nextRole: OrgRole) => {
       const cfg = getDemoRoleConfig(nextRole);
+      roleRef.current = nextRole;
       setRole(nextRole);
+      record("role.switched", `Switched to ${cfg.label}`, { role: nextRole });
       setDatasetVersion((v) => v + 1);
       setActionNotice({
-        title: `Role Preview: ${cfg.label}`,
+        title: `Now previewing as ${cfg.label}`,
         body: cfg.governanceSummary,
         tone: cfg.readOnly ? "warning" : "info",
       });
       syncUrl(companySlug, nextRole, plan, activeRoute);
     },
-    [companySlug, plan, activeRoute, syncUrl]
+    [companySlug, plan, activeRoute, syncUrl, record]
   );
 
   const switchPlan = useCallback(
@@ -210,7 +292,7 @@ export function LearnDemoProvider({
       setPlan(nextPlan);
       setDatasetVersion((v) => v + 1);
       setActionNotice({
-        title: `Plan Preview: ${cfg.name} (${cfg.priceLabel})`,
+        title: `Previewing the ${cfg.name} plan (${cfg.priceLabel})`,
         body: cfg.upgradeNote,
         tone: "info",
       });
@@ -220,16 +302,21 @@ export function LearnDemoProvider({
   );
 
   const resetDemo = useCallback(() => {
-    const fresh = createInitialDemoDataset(companySlug);
+    clearStoredDataset(companySlug);
+    clearWorkflowState(companySlug);
+    workflowRef.current = EMPTY_WORKFLOW_STATE;
+    setWorkflowState(EMPTY_WORKFLOW_STATE);
+    const seeded = createInitialDemoDataset(companySlug);
+    const fresh = { ...seeded, activity: [nextActivity([], "demo.reset", roleRef.current, "Reset the demo books", { company: companySlug })] };
     datasetRef.current = fresh;
     setDataset(fresh);
     setDatasetVersion((v) => v + 1);
     if (typeof window !== "undefined") {
-      localStorage.removeItem("deku_tutorial_progress_public-learn-demo");
+      for (const m of seeded.members) localStorage.removeItem(`deku_tutorial_progress_${m.user_id}`);
     }
     setActionNotice({
-      title: "Demo Environment Reset",
-      body: `Restored fresh sample books for ${fresh.org.name} and cleared local tutorial progress.`,
+      title: "Demo reset",
+      body: `Restored fresh sample books for ${fresh.org.name} and cleared its workflow progress.`,
       tone: "info",
     });
   }, [companySlug]);
@@ -238,10 +325,12 @@ export function LearnDemoProvider({
 
   const demoAuthValue = useMemo<AuthContextType>(() => {
     const orgRow = dataset.org;
+    // The seeded member holding this role, so screens (maker-checker, Help Centre) see a distinct person per role.
+    const member = dataset.members.find((m) => m.role === role);
     const demoUser: UserProfile = {
-      id: "public-learn-demo",
-      email: `${role}@${companySlug}.demo`,
-      full_name: `${roleConfig.label} Preview`,
+      id: member?.user_id ?? `public-learn-demo-${role}`,
+      email: member?.profiles?.email ?? `${role}@${companySlug}.demo`,
+      full_name: member?.profiles?.full_name ?? `${roleConfig.label} preview`,
       is_demo: true,
     };
     const demoOrg: Organisation = {
@@ -286,7 +375,7 @@ export function LearnDemoProvider({
         router.push("/learn");
       },
     };
-  }, [dataset.org, dataset.invoices.length, dataset.members.length, dataset.invitations.length, companySlug, role, roleConfig.label, plan, router]);
+  }, [dataset.org, dataset.invoices.length, dataset.members, dataset.members.length, dataset.invitations.length, companySlug, role, roleConfig.label, plan, router]);
 
   const ctxValue = useMemo<LearnDemoContextValue>(
     () => ({
@@ -303,6 +392,10 @@ export function LearnDemoProvider({
       actionNotice,
       dismissActionNotice: () => setActionNotice(null),
       notifyAction,
+      record,
+      activity: dataset.activity,
+      workflowState,
+      updateWorkflows,
       switchCompany,
       switchRole,
       switchPlan,
@@ -320,6 +413,9 @@ export function LearnDemoProvider({
       workflowDrawerOpen,
       actionNotice,
       notifyAction,
+      record,
+      workflowState,
+      updateWorkflows,
       switchCompany,
       switchRole,
       switchPlan,
