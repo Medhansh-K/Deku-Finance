@@ -4,7 +4,7 @@
 import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
-import { TUTORIAL_PATHS } from "../../src/lib/tutorials/paths.ts";
+import { TUTORIAL_PATHS } from "../../apps/platform/src/lib/tutorials/paths.ts";
 
 const { chromium } = createRequire(`${process.env.PW_HOME}/`)("playwright");
 const BASE = process.env.E2E_BASE ?? "http://localhost:3000";
@@ -20,7 +20,7 @@ function check(id, name, ok, detail = "") {
 }
 
 // All signed-in pages. Pages needing a token or an id aren't reachable on their own.
-function routes(dir = "src/app", prefix = "") {
+function routes(dir = "apps/platform/src/app", prefix = "") {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
     if (!statSync(full).isDirectory()) return name === "page.tsx" && prefix ? [prefix] : [];

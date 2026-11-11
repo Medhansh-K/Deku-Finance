@@ -7,7 +7,7 @@ for _ in $(seq 1 90); do
   case "$migrate" in
     *exited*) [ "${migrate##* }" = 0 ] || { echo "migrate failed: $migrate"; exit 1; } ;;
   esac
-  if docker compose ps --format '{{.Service}} {{.Health}}' | grep -q '^frontend healthy$'; then
+  if docker compose ps --format '{{.Service}} {{.Health}}' | grep -qE '^frontend(-platform)? healthy$'; then
     docker compose ps -a
     exit 0
   fi

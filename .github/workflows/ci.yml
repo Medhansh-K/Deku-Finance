@@ -15,8 +15,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx vitest run
-      - run: npx tsc --noEmit -p .
-      - run: npx next build
+      - run: |
+          npx tsc --noEmit -p apps/platform/tsconfig.json
+          npx tsc --noEmit -p apps/admin/tsconfig.json
+          npx tsc --noEmit -p apps/distributor/tsconfig.json
+      - run: npm run build
         env:
           BACKEND_URL: http://localhost:8080
           JWT_SECRET: ci-only-dummy-secret-0123456789abcdef0123456789
@@ -53,6 +56,8 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
+    env:
+      COMPOSE_PROJECT_NAME: deku-finance
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -65,7 +70,7 @@ jobs:
         run: |
           mkdir -p image-reports
           docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep -E 'deku-finance|postgres|postgrest' | tee image-reports/sizes.txt
-          for image in deku-finance-frontend deku-finance-backend deku-finance-migrate; do
+          for image in deku-finance-frontend-platform deku-finance-backend-platform deku-finance-migrate; do
             trivy="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD/image-reports:/out aquasec/trivy:0.57.0 image --quiet"
             $trivy --format cyclonedx --output "/out/$image.sbom.json" "$image:latest"
             $trivy --severity HIGH,CRITICAL --ignore-unfixed --output "/out/$image.txt" "$image:latest"
@@ -124,9 +129,9 @@ jobs:
         run: |
           docker compose -p deku-demo down
           # 124 would mean it was still running when the timeout hit.
-          code=0; timeout 30 docker run --rm deku-finance-frontend || code=$?
+          code=0; timeout 30 docker run --rm deku-finance-frontend-platform || code=$?
           if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::frontend started without JWT_SECRET (exit $code)"; exit 1; fi
-          code=0; timeout 30 docker run --rm -e DEKU_ENV=production -e POSTGREST_URL=http://x -e JWT_SECRET=dev-only-jwt-secret-change-me-0123456789abcdef deku-finance-backend || code=$?
+          code=0; timeout 30 docker run --rm -e DEKU_ENV=production -e POSTGREST_URL=http://x -e JWT_SECRET=dev-only-jwt-secret-change-me-0123456789abcdef deku-finance-backend-platform || code=$?
           if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::backend started in production with a dev secret (exit $code)"; exit 1; fi
       - name: Publish container state on failure
         if: failure()
