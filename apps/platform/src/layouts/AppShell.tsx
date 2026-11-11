@@ -1,0 +1,566 @@
+"use client";
+
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  ChevronsUpDown,
+  Search,
+  Keyboard,
+  HelpCircle,
+  BookOpen,
+  Upload,
+  Download,
+  LogOut,
+  Building2,
+  Calendar,
+  Sparkles,
+  Check,
+  X,
+  ArrowRight,
+  Menu,
+  LayoutGrid,
+  Receipt,
+  FileText,
+  Wallet,
+  Landmark,
+  Layers,
+  FileSpreadsheet,
+  Settings,
+  ShieldCheck,
+} from "lucide-react";
+import { DekuLogo } from "@/components/ui/DekuLogo";
+import { useAuth } from "@/context/AuthContext";
+import { useOptionalLearnDemo } from "@/context/LearnDemoContext";
+import { DemoControlBar } from "@/components/learn/DemoControlBar";
+import { useKeyboardNav } from "@/context/KeyboardNavContext";
+import { CommandPalette } from "@/components/command-palette/CommandPalette";
+import { KeyboardHelpModal } from "@/components/keyboard/KeyboardHelpModal";
+import { TutorialCoach } from "@/components/tutorial/TutorialCoach";
+import { NotificationBell } from "@/modules/notifications/NotificationBell";
+import { ShortcutBar } from "@/components/keyboard/ShortcutBar";
+import { GLOBAL_FUNCTION_KEY_MAP, isPlainKey, isTargetInteractive } from "@/lib/keyboard/shortcuts";
+
+// Create React Query client once
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+export interface AppShellProps {
+  children: React.ReactNode;
+}
+
+/** Helper: detect if a modal, drawer, or dialog is currently open in the DOM */
+function isModalOrDrawerOpen(): boolean {
+  if (typeof document === "undefined") return false;
+  // Only visible ones: Next keeps earlier pages mounted but hidden, along with anything open on them.
+  const dialogs = document.querySelectorAll(
+    '[role="dialog"], [aria-modal="true"], .modal-overlay, [data-modal="true"]'
+  );
+  return [...dialogs].some((d) => d.getClientRects().length > 0);
+}
+
+/** Pages whose forms lose work on navigation; report filters elsewhere aren't worth a prompt. */
+const EDITING_PATHS = ["/vouchers", "/builder", "/gst", "/purchases", "/banking", "/inventory", "/import", "/reconciliation", "/masters", "/settings", "/consultant"];
+
+export function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
+  const demo = useOptionalLearnDemo();
+  const rawPathname = usePathname() || "";
+  const pathname = demo?.activeRoute ?? rawPathname;
+  const { user, logout } = useAuth();
+  const { keyboardNavEnabled, toggleKeyboardNav } = useKeyboardNav();
+  const navigateTo = useCallback(
+    (dest: string) => {
+      if (demo) demo.navigateTo(dest);
+      else router.push(dest);
+    },
+    [demo, router]
+  );
+
+  // Set by what the user types, because forms start out prefilled and a field's value proves nothing.
+  const dirtyRef = useRef(false);
+  const hasActiveUnsavedEntries = useCallback(
+    (path: string) => dirtyRef.current && EDITING_PATHS.some((p) => path.startsWith(p)),
+    []
+  );
+
+  useEffect(() => {
+    dirtyRef.current = false;
+    const markDirty = (e: Event) => {
+      const el = e.target as HTMLElement;
+      if (el.closest?.("main") && el.getAttribute?.("type") !== "search") dirtyRef.current = true;
+    };
+    const markSaved = () => {
+      dirtyRef.current = false;
+    };
+    document.addEventListener("input", markDirty);
+    document.addEventListener("change", markDirty);
+    window.addEventListener("deku_ledger_updated", markSaved);
+    return () => {
+      document.removeEventListener("input", markDirty);
+      document.removeEventListener("change", markDirty);
+      window.removeEventListener("deku_ledger_updated", markSaved);
+    };
+  }, [pathname]);
+
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Active company context
+  const [activeCompany, setActiveCompany] = useState<{ id: string; name: string }>({ id: "", name: "" });
+  const [financialYear, setFinancialYear] = useState<string>("");
+
+  useEffect(() => {
+    const today = new Date();
+    const y = today.getMonth() + 1 >= 4 ? today.getFullYear() : today.getFullYear() - 1;
+    setFinancialYear(`${y}-${String((y + 1) % 100).padStart(2, "0")}`);
+  }, []);
+
+  // Sync active company from localStorage upon shift
+  useEffect(() => {
+    const syncActiveCompany = () => {
+      if (typeof window !== "undefined") {
+        const savedOrgId = localStorage.getItem("deku_active_org_id");
+        const savedOrgName = localStorage.getItem("deku_active_org_name");
+        if (savedOrgId && savedOrgName) {
+          setActiveCompany({ id: savedOrgId, name: savedOrgName });
+        }
+      }
+    };
+
+    syncActiveCompany();
+    window.addEventListener("deku_active_org_changed", syncActiveCompany);
+    return () => window.removeEventListener("deku_active_org_changed", syncActiveCompany);
+  }, []);
+
+  // Global Keyboard Shortcuts Handler
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = isTargetInteractive(target);
+      const isDialogActive = isModalOrDrawerOpen() || isCommandPaletteOpen || isHelpOpen;
+
+      // 1. Omnibox / Command Palette: Ctrl+K or Cmd+K or Alt+G (Always active regardless of preference)
+      if (
+        ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) ||
+        (e.altKey && (e.key === "g" || e.key === "G"))
+      ) {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      // 2. If Keyboard Navigation is toggled OFF by user preference, skip all F1-F11 and ESC jumps
+      if (!keyboardNavEnabled) {
+        return;
+      }
+
+      // 3. ESC -> Return to Gateway or close modals/drawers
+      if (e.key === "Escape") {
+        if (isCommandPaletteOpen) {
+          e.preventDefault();
+          setIsCommandPaletteOpen(false);
+          return;
+        }
+        if (isHelpOpen) {
+          e.preventDefault();
+          setIsHelpOpen(false);
+          return;
+        }
+
+        if (isDialogActive) {
+          return;
+        }
+
+        if (isInput) {
+          (target as HTMLElement).blur();
+          e.preventDefault();
+          return;
+        }
+
+        if (hasActiveUnsavedEntries(pathname)) {
+          const confirmLeave = window.confirm(
+            "You have an active entry in progress. Discard unsaved changes and return to Gateway?"
+          );
+          if (!confirmLeave) {
+            e.preventDefault();
+            return;
+          }
+        }
+
+        if (pathname !== "/gateway") {
+          e.preventDefault();
+          navigateTo("/gateway");
+        }
+        return;
+      }
+
+      // 4. Function Key Navigation: F1 - F11
+      const destination = GLOBAL_FUNCTION_KEY_MAP[e.key];
+      if (destination && isPlainKey(e)) {
+        // Even when not navigating: F5 would reload the page and lose what's been typed.
+        e.preventDefault();
+        if (e.repeat || isInput || isDialogActive) {
+          return;
+        }
+
+        const isVoucherDesk = pathname.startsWith("/vouchers");
+        const isLocalVoucherKey = ["F4", "F5", "F6", "F7", "F8", "F9"].includes(e.key);
+
+        if (isVoucherDesk && isLocalVoucherKey) {
+          return;
+        }
+
+        if (hasActiveUnsavedEntries(pathname) && pathname !== destination) {
+          const confirmLeave = window.confirm(
+            `You have unsaved changes in progress. Discard and navigate to ${destination}?`
+          );
+          if (!confirmLeave) {
+            e.preventDefault();
+            return;
+          }
+        }
+
+        e.preventDefault();
+        navigateTo(destination);
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [navigateTo, pathname, isCommandPaletteOpen, isHelpOpen, keyboardNavEnabled]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div className="app-shell-root flex flex-col h-screen w-screen overflow-hidden bg-canvas text-ink font-sans print:h-auto print:w-auto print:overflow-visible print:bg-white">
+        {/* Persistent Unified Navigation Header */}
+        <header className="flex h-14 sm:h-16 shrink-0 items-center justify-between border-b border-line bg-surface px-3 sm:px-6 text-ink z-30 no-print select-none">
+          {/* Left: Brand Logo & Company Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Mobile Hamburger Drawer Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-1.5 rounded-lg text-ink-soft hover:text-ink hover:bg-canvas-sunken transition-colors border border-line shrink-0"
+              aria-label="Open mobile navigation drawer"
+            >
+              {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+
+            {/* Logo / Home Link (Landing page in Demo, Gateway in authenticated app) */}
+            <Link
+              href={demo ? "/" : "/gateway"}
+              className="flex items-center gap-2 rounded-lg py-1 px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand hover:opacity-90 transition-opacity shrink-0"
+              title={demo ? "Go to Deku Finance Landing Page" : "Return to Gateway (Esc)"}
+            >
+              <div className="grid h-8 w-8 place-items-center">
+                <DekuLogo size={28} />
+              </div>
+              <span className="hidden sm:inline text-[16px] font-semibold tracking-[-0.02em] text-ink">
+                Deku <span className="font-normal text-ink-muted">Finance</span>
+              </span>
+            </Link>
+
+            <div className="hidden sm:block h-6 w-px bg-line shrink-0" />
+
+            {/* Company Switcher Header Control */}
+            <Link
+              href="/companies"
+              className="flex items-center gap-1.5 sm:gap-2 rounded-ctl border border-line bg-surface hover:bg-canvas px-2 sm:px-2.5 py-1 sm:py-1.5 transition-colors text-left max-w-[150px] sm:max-w-[240px] md:max-w-[320px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              title="Switch company"
+            >
+              <span className="grid h-5 w-5 sm:h-6 sm:w-6 shrink-0 place-items-center rounded-[6px] bg-ink text-[9px] sm:text-[10px] font-semibold text-white">
+                {(activeCompany.name || "D").slice(0, 2).toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block truncate text-[12px] sm:text-[13px] font-semibold text-ink leading-tight">
+                  {demo ? demo.dataset.org.name : (activeCompany.name || "Select Company")}
+                </span>
+                <span className="hidden sm:block text-[11px] text-ink-muted leading-tight">
+                  {financialYear ? `FY ${financialYear}` : "Active Workspace"}
+                </span>
+              </div>
+              <ChevronsUpDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-ink-subtle ml-0.5" />
+            </Link>
+          </div>
+
+          {/* Right: Quick Tools & User Controls */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Omnibox / Command Palette trigger */}
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="hidden md:flex items-center gap-2 rounded-ctl border border-transparent bg-canvas-sunken hover:border-line px-3 py-2 text-[13px] text-ink-muted hover:text-ink transition-colors"
+              title="Search or jump to module (Ctrl+K)"
+            >
+              <Search className="h-4 w-4 text-ink-muted" />
+              <span className="text-[13px] text-ink-muted pr-8">Jump to…</span>
+              <kbd className="rounded-[5px] border border-line-strong border-b-2 bg-surface px-1.5 py-0.5 font-mono text-[10.5px] text-ink-muted">
+                Ctrl K
+              </kbd>
+            </button>
+
+            {/* Keyboard Navigation Quick Toggle Button */}
+            <button
+              onClick={toggleKeyboardNav}
+              className={`hidden sm:flex items-center gap-1.5 rounded-ctl border px-2 sm:px-3 py-2 text-[13px] font-medium transition-all ${
+                keyboardNavEnabled
+                  ? "border-brand-wash-strong bg-brand-wash text-brand-strong hover:bg-brand-wash-strong"
+                  : "border-line bg-surface text-ink-muted hover:bg-canvas hover:text-ink"
+              }`}
+              title={
+                keyboardNavEnabled
+                  ? "Keyboard Shortcuts (F1–F11): ON (Click to disable)"
+                  : "Keyboard Shortcuts (F1–F11): OFF (Click to enable)"
+              }
+              aria-label="Toggle keyboard shortcuts"
+            >
+              <Keyboard className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline text-[13px]">
+                {keyboardNavEnabled ? "F-keys on" : "F-keys off"}
+              </span>
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  keyboardNavEnabled ? "bg-brand" : "bg-ink-subtle"
+                }`}
+              />
+            </button>
+
+            <Link href="/import" className="hidden md:inline-flex rounded-ctl p-2 text-ink-muted hover:bg-canvas-sunken hover:text-ink transition-colors" title="Import from Tally or CSV" aria-label="Import data">
+              <Upload className="h-4 w-4" />
+            </Link>
+            <Link href="/export" className="hidden md:inline-flex rounded-ctl p-2 text-ink-muted hover:bg-canvas-sunken hover:text-ink transition-colors" title="Export to CSV" aria-label="Export data">
+              <Download className="h-4 w-4" />
+            </Link>
+
+            {/* Notification Bell */}
+            <NotificationBell />
+
+            <Link
+              href={`/help?route=${encodeURIComponent(pathname)}`}
+              className="hidden sm:inline-flex rounded-ctl p-2 text-ink-muted hover:bg-canvas-sunken hover:text-ink transition-colors"
+              title="Help & Tutorials"
+              aria-label="Help and tutorials"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Link>
+
+            {/* Keyboard Help Modal Trigger */}
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="hidden sm:inline-flex rounded-ctl p-2 text-ink-muted hover:bg-canvas-sunken hover:text-ink transition-colors"
+              title="Keyboard Shortcuts Cheatsheet"
+              aria-label="Keyboard Shortcuts"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+
+            {/* User Profile / Logout */}
+            <div className="flex items-center gap-1 sm:gap-1.5 border-l border-line pl-2 sm:pl-3 ml-1 sm:ml-2">
+              <span
+                className="grid h-6 w-6 sm:h-7 sm:w-7 place-items-center rounded-full bg-brand-wash-strong text-[11px] sm:text-[12px] font-semibold text-brand-strong"
+                title={user?.email || "User profile"}
+              >
+                {(user?.full_name || user?.email || "U").slice(0, 1).toUpperCase()}
+              </span>
+
+              <button
+                onClick={() => logout().then(() => (window.location.href = "/login"))}
+                className="rounded-lg p-1 sm:p-1.5 text-ink-muted hover:bg-bad-wash hover:text-bad transition-colors"
+                title="Sign out"
+                aria-label="Sign out"
+              >
+                <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile Navigation Drawer Sheet (for Phone & Tablet Viewports) */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex animate-in fade-in duration-200">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-panel-deep/40 backdrop-blur-[2px] transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Slide-out Drawer Panel */}
+            <div className="relative w-4/5 max-w-xs bg-surface border-r border-line text-ink h-full flex flex-col p-4 shadow-pop z-10 animate-in slide-in-from-left duration-200">
+              <div className="flex items-center justify-between pb-3 border-b border-line">
+                <div className="flex items-center gap-2">
+                  <div className="grid h-8 w-8 place-items-center">
+                    <DekuLogo size={26} />
+                  </div>
+                  <span className="font-semibold text-[15px] tracking-[-0.02em] text-ink">Deku <span className="font-normal text-ink-muted">Finance</span></span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 rounded-ctl text-ink-muted hover:text-ink hover:bg-canvas-sunken transition-colors"
+                  aria-label="Close navigation"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 text-[14px]">
+                <Link
+                  href="/gateway"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl bg-brand-wash font-medium text-ink transition-colors"
+                >
+                  <LayoutGrid className="h-4 w-4 text-brand-strong shrink-0" />
+                  <span>Gateway of Deku</span>
+                </Link>
+                <Link
+                  href="/vouchers"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Receipt className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Vouchers (F4–F9)</span>
+                </Link>
+                <Link
+                  href="/gst"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <FileText className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Sales &amp; GST invoices</span>
+                </Link>
+                <Link
+                  href="/purchases"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Wallet className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Purchases &amp; ITC</span>
+                </Link>
+                <Link
+                  href="/collect"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Landmark className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Collections</span>
+                </Link>
+                <Link
+                  href="/day-book"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <FileSpreadsheet className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Day Book</span>
+                </Link>
+                <Link
+                  href="/masters/chart-of-accounts"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Layers className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Chart of accounts</span>
+                </Link>
+                <Link
+                  href="/gst/returns"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <ShieldCheck className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>GST returns</span>
+                </Link>
+                <Link
+                  href="/learn"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <BookOpen className="h-4 w-4 text-brand-strong shrink-0" />
+                  <span>Learn Centre</span>
+                </Link>
+                <Link
+                  href="/settings"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Settings &amp; licence</span>
+                </Link>
+              </nav>
+
+              <div className="pt-3 border-t border-line flex items-center justify-between text-[13px] text-ink-muted">
+                <span className="truncate max-w-[150px]">{user?.email}</span>
+                <button
+                  type="button"
+                  onClick={() => logout().then(() => (window.location.href = "/login"))}
+                  className="p-1.5 rounded-ctl text-bad hover:bg-bad-wash transition-colors flex items-center gap-1"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Interactive Demo Mode Control Bar / Legacy Guide Banner */}
+        {demo ? (
+          <DemoControlBar />
+        ) : (
+          user?.is_demo && (
+            <div className="bg-brand-wash border-b border-brand-wash-strong px-4 sm:px-6 py-2 text-[13px] flex flex-wrap items-center justify-between text-ink shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-brand" />
+                <span className="text-ink-soft font-medium">
+                  Exploring Demo Sandbox: <strong className="text-ink font-bold">{activeCompany.name || "Demo Company"}</strong>
+                </span>
+              </div>
+              <Link
+                href="/request-setup"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-strong hover:text-ink transition-colors underline underline-offset-2"
+              >
+                <span>Activate Full License</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          )
+        )}
+
+        {/* Central Content Area (Full screen width, no permanent sidebar) */}
+        <div className="relative flex flex-1 flex-col overflow-hidden print:overflow-visible print:h-auto print:flex-none">
+          {children}
+        </div>
+
+        {/* Persistent Bottom Keyboard Shortcut Strip */}
+        <ShortcutBar
+          onOpenHelp={() => setIsHelpOpen(true)}
+          onOpenGoTo={() => setIsCommandPaletteOpen(true)}
+        />
+
+        <TutorialCoach />
+
+        {/* Global Dialogs */}
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+        />
+        <KeyboardHelpModal
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+        />
+      </div>
+    </QueryClientProvider>
+  );
+}

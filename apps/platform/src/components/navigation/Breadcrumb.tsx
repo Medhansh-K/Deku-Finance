@@ -1,0 +1,47 @@
+import React from "react";
+import Link from "next/link";
+import { ChevronRight, Home } from "lucide-react";
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface BreadcrumbProps {
+  items: BreadcrumbItem[];
+}
+
+export function Breadcrumb({ items }: BreadcrumbProps) {
+  return (
+    <nav className="flex items-center gap-1.5 text-[13px] text-ink-muted font-sans select-none">
+      <Link
+        href="/gateway"
+        className="flex items-center gap-1 text-ink-soft hover:text-brand transition-colors"
+      >
+        <Home className="h-3.5 w-3.5" />
+        <span>Gateway</span>
+      </Link>
+
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        return (
+          <React.Fragment key={index}>
+            <ChevronRight className="h-3 w-3 text-ink-subtle shrink-0" />
+            {isLast || !item.href ? (
+              <span className="font-medium text-ink truncate">
+                {item.label}
+              </span>
+            ) : (
+              <Link
+                href={item.href}
+                className="text-ink-soft hover:text-brand transition-colors truncate"
+              >
+                {item.label}
+              </Link>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </nav>
+  );
+}

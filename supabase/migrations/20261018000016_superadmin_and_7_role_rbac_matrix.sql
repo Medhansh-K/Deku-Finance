@@ -243,7 +243,7 @@ BEGIN
   END IF;
 
   -- Validate email structure
-  IF p_email NOT ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+  IF p_email !~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
     RAISE EXCEPTION 'Invalid email address: %', p_email;
   END IF;
 

@@ -1,155 +1,147 @@
-# Branch Comparison: `main` vs `fix/data-integrity-privacy-demo`
+# Branch Comparison: `main` vs. `fix/data-integrity-privacy-demo`
 
-| Property | `main` | `fix/data-integrity-privacy-demo` |
+*Generated on November 1, 2026*
+
+This document provides a comprehensive structural, architectural, and functional comparison between **`main`** and **`fix/data-integrity-privacy-demo`** in Deku Finance.
+
+---
+
+## 1. Executive Summary
+
+| Dimension | `main` | `fix/data-integrity-privacy-demo` |
 | :--- | :--- | :--- |
-| **Branch Author** | — | Parth Parmar (`parthparmar4105@gmail.com`) |
-| **Commits Ahead** | Baseline | 16 commits |
-| **Net Changes** | — | 146 files changed (+12,629 / -8,088 lines) |
-| **Test Suite** | Basic tests | 15 test suites, 122 tests (100% passing) |
-| **Core Themes** | Prototype with mock data & external AI stub | Real ledger accounting, data privacy, maker-checker, tax compliance |
+| **Commit Delta** | Base tracking branch + UI dark theme commit (`71acf61`) | **Ahead by 50+ commits** (+42,177 lines, -18,036 lines across 327 files) |
+| **Primary Focus** | UI dark mode, horizontal Tally-style TopBar, Gateway dashboard | **Production-grade ERP platform overhaul**, data integrity, self-hosted auth, enterprise compliance, and business workflows |
+| **Auth Architecture** | Direct client-side Supabase JS (`@supabase/supabase-js`) | **Self-hosted cookie sessions via Rust backend proxy**; dropped raw client-side Supabase tokens |
+| **Database Migrations** | 17 base migrations | **44 total migrations** (+27 production migrations including FIFO, approvals, business docs, GSP/KYC) |
+| **Navigation Shell** | Horizontal Tally-style `TopBar` | Persistent left `AppSidebar` with category trees + Notification Bell + Shortcut strip |
+| **Data Integrity** | Reports mixed real ledger data with mock fallback metrics | **100% authoritative PostgreSQL ledger functions**; zero fabricated data; closed tenant-isolation holes |
+| **Deployment / CI** | Standard dev server | **Docker multi-stage builds**, `docker-compose.yml`, GCP Cloud Build pipeline, and SQL test suites |
 
 ---
 
-## 1. Executive Summary of What Changed
+## 2. Architecture & Security Differences
 
-The `fix/data-integrity-privacy-demo` branch represents a foundational shift from a prototype application with simulated metrics to an enterprise-grade, privacy-first accounting and GST platform. 
+```mermaid
+graph TD
+  subgraph "Main Branch (Client-Direct)"
+    A[Browser Client] -->|Anon Key / Bearer JWT| B[Supabase Cloud]
+    A -->|Client Requests| C[Next.js App]
+  end
 
-Key pillars of this update:
-1. **Elimination of Fabricated Data & Mock Screens**: All hardcoded sample figures across executive dashboards, creditors/debtors ageing, day book, and reports have been replaced with real ledger aggregations.
-2. **Strict Data Privacy (Zero Third-Party AI Data Leakage)**: Removed external AI services (`sarvam-client.ts`) and fake staging endpoints. Document extraction (PDF text and OCR) now executes entirely on-device in the browser using `pdfjs-dist` and `tesseract.js`.
-3. **Multi-Tenant Security & Privilege Lockdown**: Closed cross-tenant access holes in database functions, enforced user JWT authentication without service-role fallbacks, pinned function `search_path`s, and revoked public execute permissions.
-4. **End-to-End Indian Tax & Accounting Compliance**: Real GSTR-1 and GSTR-3B JSON exports, purchase bill register with ITC eligibility rules (CBIC Notification 14/2022), professional sales invoice editor with QR payment generation and paise-accurate round-off journals.
-5. **Maker-Checker Voucher Approval Workflow**: Configurable per-organization dual-control approval system for journal vouchers.
-6. **Bank Reconciliation & MSME Collect**: Automated in-browser statement parsing (HDFC, ICICI, SBI, Axis, Kotak) with fuzzy transaction matching, and an MSME receivables settlement module with WhatsApp reminder links.
-7. **Design System & UI Modernization**: Unified semantic design tokens (`ink`, `canvas`, `line`, `teal`), replaced the fragmented top-bar/sidebar with a cohesive `AppSidebar`, and polished core UI primitives.
+  subgraph "fix/data-integrity-privacy-demo (Enterprise Proxy)"
+    D[Browser Client] -->|HttpOnly Cookie Session| E[Next.js App Route Proxy]
+    E -->|Internal Proxy| F[Rust Axum Backend Engine]
+    F -->|Secure PostgREST / Connection Pool| G[(PostgreSQL / Supabase)]
+    F -->|AES-256 Encrypted Adapters| H[External GSP / KYC / Razorpay APIs]
+  end
+```
+
+### Authentication & Sessions
+- **`main`**: The browser talks directly to Supabase using public API keys. Auth state is stored in localStorage/client cookies, exposing session tokens to XSS risks.
+- **`fix/data-integrity-privacy-demo`**: Replaced client-side token access with **HTTP-only secure cookies**. All requests pass through a same-origin proxy (`/api/backend/*`) handled by the Rust backend (`backend/src/auth.rs`), eliminating credential leaks.
+
+### Data Privacy & Tenant Boundaries
+- **`main`**: Basic row-level security (RLS) on core tables, but cross-company reporting gaps existed in custom views.
+- **`fix/data-integrity-privacy-demo`**: Hardened multi-tenant boundaries (`20261028000018` & `20261028000022`). Enforced strict RLS across licenses, payroll, inventory, and ledger functions with automated tenant leakage verification tests.
 
 ---
 
-## 2. Newly Created Migrations (Supabase / Postgres)
+## 3. Database & Migrations Comparison
 
-Eight new SQL migrations were added under `supabase/migrations/`:
+The `fix/data-integrity-privacy-demo` branch introduces **27 new database migrations** that expand Deku Finance from a ledger prototype into a full accounting ERP:
 
-| Migration File | Name / Purpose | Key Changes |
+| Migration Range | File / Module | Core Functionality Added |
 | :--- | :--- | :--- |
-| `20261028000018_lock_down_function_access.sql` | Lock Down Function Access | • Revoked `EXECUTE` privileges on security-definer functions from `anon` and `PUBLIC`.<br>• Superadmin role check strictly verifies user ID instead of spoofable email claims. |
-| `20261028000019_bank_reconciliation.sql` | Bank Reconciliation Schema | • Created `bank_reconciliations` table linking external bank transaction lines to posted journal lines.<br>• Added tenant RLS and status tracking (`matched`, `unmatched`). |
-| `20261028000020_journal_approvals.sql` | Maker-Checker Approval System | • Added `require_journal_approval` setting on organizations.<br>• Added `approval_status`, `submitted_by`, `approved_by`, `rejected_reason` to journals.<br>• Created `submit_journal_for_approval` and `review_journal_approval` RPCs.<br>• Restored draft-only, fiscal period, and positive balance checks in `post_journal_entry`.<br>• Added GSTIN checksum and regex format validation. |
-| `20261028000021_reports_include_reversed_entries.sql` | Reversed Entries & Report Security | • Fixed ledger aggregation logic so reversed entries and their original counterparts cancel out properly without vanishing.<br>• Enforced tenant membership checks on financial reporting RPCs. |
-| `20261028000022_guard_payroll_and_licenses.sql` | Guard Payroll & License Issuance | • Restriced `run_monthly_payroll` to Owner, Admin, and CFO roles.<br>• Restricted self-serve license generation to one 14-day trial per company; paid tiers restricted to superadmin.<br>• Pinned `search_path = public` across functions to eliminate search-path hijacking. |
-| `20261028000023_honest_wcm_fpa_metrics.sql` | Honest WCM, FP&A & Cash Flow SQL | • Rebuilt `get_ar_ap_aging_analysis`, `get_fpa_corporate_metrics`, and `get_cash_flow_statement` from actual journal balances.<br>• Removed fabricated DPO/DSO calculations, nonexistent account codes, and synthetic benchmark ratios.<br>• Returns `NULL` when data is unavailable rather than generating placeholders. |
-| `20261028000024_purchase_bills.sql` | Purchase Bills & ITC Register | • Added `purchase_bills` table (supplier GSTIN, invoice number, place of supply, tax splits, total check constraints).<br>• Added `itc_eligibility` enum (`eligible`, `ineligible_17_5`, `ineligible_other`) and blocked reason tracking.<br>• Enforced RLS; prevents deletion or alteration of bills linked to posted vouchers. |
-| `20261028000025_sales_invoice_channel.sql` | Sales Invoice Channel & Round-Off | • Added `sales_channel` column (`b2b`, `b2c_large`, `b2c_small`, `export_with_tax`, etc.).<br>• Fixed round-off journal posting to account `4090` so issued invoices balance to the exact rupee. |
+| **M18 – M20** | `20261028000018` – `20` | **Security lockdown**, **Bank Reconciliation** schema, and **Maker-Checker Voucher Approvals** |
+| **M21 – M23** | `20261028000021` – `23` | **Reversed entry handling** in reports; authoritative Working Capital (WCM) & FP&A SQL |
+| **M24 – M25** | `20261028000024` – `25` | **Purchase Bill Register** with ITC eligibility tracking + Sales invoice channel classification |
+| **M26 – M29** | `20261031000026` – `29` | Journal reversal guards, GST return filing tracking, and real-time ledger aggregate functions |
+| **M30 – M33** | `20261031000030` – `33` | Company profile onboarding, **Credit/Debit Notes (GSTR-1 9B)**, Invoice types, and **HSN/SAC master** |
+| **M34 – M36** | `20261031000034` – `36` | **In-app notifications**, **Marketplace settlements** (Amazon/Flipkart), and **Razorpay OAuth payment links** |
+| **M37 – M40** | `20261031000037` – `40` | GSP API adapters, automated KYC verification, subscriptions/seat limiting, and invoice status guards |
+| **M41** | `20261031000041` | **Membership bootstrap fix** (resolves org creation permissions) + Marketplace clearing accounts |
+| **M42** | `20261031000042` | **FIFO Inventory Valuation**: Real-time stock ledgers computed directly inside Postgres |
+| **M43** | `20261031000043` | **Tally XML / CSV Import Engine**: Background job processing with error rollups |
+| **M44** | `20261031000044` | **Business Document Builder**: Quotes, POs, Delivery Challans saved in DB with invoice conversion |
 
 ---
 
-## 3. Newly Created Modules and Frontend Views
+## 4. Feature & Functional Matrix
 
-| Component / View Path | Route / Context | Feature Description |
-| :--- | :--- | :--- |
-| `src/modules/purchases/PurchasesView.tsx` | `/purchases` | Complete purchase bill register with GSTIN checks, tax calculations, optional voucher generation with maker-checker support, and CSV batch import. |
-| `src/modules/gst/SalesInvoiceEditor.tsx` | `/gst` (Sales Invoice) | Professional invoice editor replacing mock screens. Zero prefilled dummy numbers; real GSTIN state vs. POS validation, channel selection, live paise tax calculator, and amount in Indian words. |
-| `src/modules/gst/InvoiceSettlementBlock.tsx` | Invoice Editor Component | Bank settlement details and UPI QR code generator using `qrcode` for on-invoice instant payment collection. |
-| `src/modules/gst/ReturnCard.tsx` | `/gst/file`, `/dashboard/returns` | Modular GST return card displaying readiness checklist, discrepancy warnings, and JSON download actions. |
-| `src/modules/collect/CollectView.tsx` | `/collect` | MSME debt collection dashboard: aged receivables breakdown, FIFO settlement against debtor accounts, and pre-formatted WhatsApp reminder links. |
-| `src/modules/approvals/ApprovalsView.tsx` | `/approvals` | Maker-checker voucher inbox for CFOs and admins to inspect, approve, or reject draft journal vouchers with mandatory reason logging. |
-| `src/modules/banking/ReconciliationView.tsx` | `/banking/reconciliation` | Client-side bank statement parser supporting HDFC, ICICI, SBI, Axis, and Kotak formats, with fuzzy heuristic matching against ledger entries. |
-| `src/modules/settings/CompanyControlsCard.tsx` | `/settings` | Organization configuration card for toggling maker-checker rules and updating official GSTIN. |
-| `src/components/navigation/AppSidebar.tsx` | Global Navigation | Consolidated, accessible application sidebar with company switcher, FY period indicator, mobile drawer, and verified route links. |
-
----
-
-## 4. Newly Created App Routes (Pages)
-
-| Route | Page File | Purpose |
-| :--- | :--- | :--- |
-| `/purchases` | `src/app/purchases/page.tsx` | Purchase bills entry, ITC tracking, and CSV import view |
-| `/approvals` | `src/app/approvals/page.tsx` | Journal voucher maker-checker approvals inbox |
-| `/collect` | `src/app/collect/page.tsx` | MSME overdue receivables & WhatsApp payment collection |
-| `/gst/file` | `src/app/gst/file/page.tsx` | Step-by-step GST filing wizard (Period -> Readiness -> JSON Review) |
-| `/gst/guide` | `src/app/gst/guide/page.tsx` | Official GST portal navigation and upload guide |
-| `/banking/reconciliation` | `src/app/banking/reconciliation/page.tsx` | Bank statement reconciliation workspace |
+| Feature | `main` | `fix/data-integrity-privacy-demo` |
+| :--- | :---: | :---: |
+| **Double-Entry Journal & Day Book** | Yes | Yes (enhanced with approval states) |
+| **Maker-Checker Voucher Approvals** | No | **Yes** (`/approvals` workflow) |
+| **Bank Reconciliation & Statement Parser** | Mock / Prototype | **Yes** (In-browser CSV/MT940 parser + auto-matcher) |
+| **Purchase Bill Register & ITC (GSTR-3B T4)** | Basic | **Yes** (Eligible vs. Ineligible ITC classification) |
+| **Sales Invoicing & E-Invoicing Prep** | Basic Editor | **Yes** (IRN/QR prep, custom invoice types, notes) |
+| **Credit / Debit Notes Engine** | No | **Yes** (Linked to GSTR-1 Table 9B) |
+| **Business Document Builder** | Client-only drafts | **Yes** (Postgres-stored quotes, POs, and challans) |
+| **Quote-to-Invoice Conversion** | No | **Yes** (1-click draft invoice generation) |
+| **FIFO Stock & Inventory Valuation** | No | **Yes** (Document-driven movements in SQL) |
+| **Tally XML / CSV Importer** | No | **Yes** (Import masters and vouchers from Tally) |
+| **Marketplace Settlement Reconciliation** | No | **Yes** (Amazon/Flipkart clearing account journals) |
+| **Payment Links (Razorpay)** | No | **Yes** (Company-owned Razorpay account links) |
+| **In-App Notification Bell** | No | **Yes** (Background event scheduler + bell UI) |
+| **GSP & KYC Adapter Hub** | No | **Yes** (Pluggable adapters for GST and PAN/Bank KYC) |
+| **Legacy `/dashboard/*` Routes** | Partially active | **Fully cleaned and redirected** to modern routes |
 
 ---
 
-## 5. Newly Created Libraries and Helper Utilities
+## 5. UI, Design System & Theming
 
-| File Path | Domain | Description |
-| :--- | :--- | :--- |
-| `src/lib/purchases/bills.ts` | Purchases | Purchase bills CRUD, line validation, and CSV parsing logic. |
-| `src/lib/gst/returns.ts` | GST Compliance | Builds compliant GSTR-1 and GSTR-3B JSON structures from ledger books and purchase bills (Notification 14/2022). |
-| `src/lib/gst/period.ts` | GST | Financial year & monthly period utilities with localStorage persistence. |
-| `src/lib/gst/useReturnBooks.ts` | GST | Shared hook for loading sales invoices and purchase bills for GST returns. |
-| `src/lib/invoices/tax-summary.ts` | Invoicing | Integer (paise) math for CGST/SGST vs IGST calculation, cess, and round-offs. |
-| `src/lib/invoices/settlement.ts` | Invoicing | Validation for IFSC codes, UPI IDs, and bank account numbers with local defaults. |
-| `src/lib/collect/receivables.ts` | Collections | Receivables aging analysis, party ledger aggregation, and FIFO invoice settlement. |
-| `src/lib/collect/whatsapp.ts` | Collections | Generates personalized `wa.me` links with invoice balances and payment instructions. |
-| `src/lib/bank/statement-parser.ts` | Banking | Multi-format CSV parser for HDFC, ICICI, SBI, Axis, and Kotak bank statements. |
-| `src/lib/bank/matcher.ts` | Banking | Auto-match algorithm matching statement dates, amounts, and reference codes to journal lines. |
-| `src/lib/vouchers/approvals.ts` | Approvals | Client-side API caller for submitting and approving/rejecting vouchers. |
-| `src/lib/vouchers/invoice-text-parser.ts` | Document Extraction | Offline parser using regexes and check-digit validation for PDF text layers and images. |
-| `src/lib/reports/ledger.ts` | Financial Reports | Accurate paise ledger balances, trial balance, and profit/loss calculation routines. |
-| `src/lib/reports/expenses.ts` | Financial Reports | Real operating expense categorization from account groups. |
-| `src/lib/reports/kpis.ts` | Financial Reports | Calculates real liquidity, debt, and profitability ratios from posted transactions. |
-| `src/lib/reports/vouchers.ts` | Financial Reports | Day book and recent voucher aggregations from actual journal lines. |
-| `src/lib/download.ts` | Utility | Browser file-download helper for JSON returns and exports. |
+### `main`
+- Uses horizontal top navigation bar (`TopBar.tsx`).
+- Centered on a 3-column Tally-like gateway layout.
+- Features the **Deku Dark Theme** with custom dark tokens (`#101820`, `#162521`, `#202D35`) and an interactive dark/light toggle in user settings.
+
+### `fix/data-integrity-privacy-demo`
+- Uses modern SaaS vertical navigation (`AppSidebar.tsx`) with collapsible sections and global shortcut footer (`ShortcutBar.tsx`).
+- Uses semantic design tokens defined in `globals.css` (`--color-canvas`, `--color-surface`, `--color-ink`, `--color-brand`, `--color-panel`).
+- Includes narrow-screen table scrolling, responsive cards, and clean typography.
+- Retired old mock `/dashboard/*` pages and replaced them with unified `/gst/returns`, `/gst/file`, `/gateway`, and `/settings` pages.
 
 ---
 
-## 6. Newly Created Backend Endpoints & Files (Rust)
+## 6. Testing, CI/CD & Infrastructure
 
-| File Path | Description |
-| :--- | :--- |
-| `backend/src/routes/purchases.rs` | REST endpoints for purchase bills: `GET /organisations/:org_id/purchases`, `POST /organisations/:org_id/purchases`, `POST /.../purchases/:id/link-journal`, `DELETE /.../purchases/:id`. |
-| `backend/src/routes/banking.rs` | Bank reconciliation backend endpoints. |
-| `backend/src/models/invoice.rs` | Extended with `sales_channel` and `round_off_paise`. |
+```
+                      +---------------------------------------+
+                      |               Test Harness            |
+                      +---------------------------------------+
+                      |  main: 4 unit test files              |
+                      |  fix:  30+ Vitest files + pgTAP tests |
+                      +---------------------------------------+
+                                          |
+                                          v
+                      +---------------------------------------+
+                      |           Docker & Deployment         |
+                      +---------------------------------------+
+                      |  main: No Docker / Compose config     |
+                      |  fix:  Multi-stage Next + Rust backend|
+                      |        Docker-compose + GCP CloudBuild|
+                      +---------------------------------------+
+```
 
----
-
-## 7. What Was Fixed or Removed
-
-### A. Fabricated Data & Mock Screens Removed
-- **Deleted `src/modules/invoices/InvoicesView.tsx`**: Removed the prototype invoice generator that stored mock data in `localStorage`.
-- **Redirects on Mock Routes**: `/invoices`, `/dashboard/invoices`, and `/dashboard/invoices/new` now redirect straight to the production-ready editor at `/gst`.
-- **Mock Constants Eliminated**: Deleted hardcoded mock datasets in `DayBookView.tsx`, `CreditorsDpoView.tsx`, `DebtorsDsoView.tsx`, `OperatingExpensesView.tsx`, `GatewayLanding.tsx`, and `CustomizeKpiModal.tsx`.
-- **Honest Dash (`-`) Display**: When ledger data is absent, UI components display `-` or an empty state rather than inventing zero or default amounts.
-
-### B. Security & Multi-Tenant Isolation
-- **Closed Cross-Tenant Query Leaks**: Secured report RPCs (`get_ar_ap_aging_analysis`, `get_cash_flow_statement`, etc.) with SQL-level organization verification.
-- **Removed Service-Role Fallback**: The backend now strictly requires a valid user JWT bearer token.
-- **Safe Authentication Redirects**: Redirects after login are strictly restricted to local relative paths to prevent open-redirect vulnerabilities.
-- **Trial Guard**: Fixed license generation so tenants cannot grant themselves indefinite enterprise subscriptions for free.
-
-### C. Zero Third-Party AI Data Leakage
-- **Removed `src/lib/ai/sarvam-client.ts`**: Financial documents and invoice images are no longer transmitted over the wire to external AI APIs.
-- **On-Device OCR & Text Extraction**: Extraction runs locally in the browser utilizing `pdfjs-dist` and `tesseract.js`.
-
-### D. Financial Math & Accounting Precision
-- **Indian Number-to-Words (`number-to-words.ts`)**: Fixed floating-point errors on paise, added support for sub-rupee figures, and expanded support past 1,000 crore.
-- **Round-Off Balancing**: Invoices with fractional paise are adjusted against ledger account `4090` so debits and credits balance to the integer rupee.
-- **Reversal Ledger Parity**: Reversed journal entries now correctly offset original postings rather than deleting rows and unbalancing reports.
+1. **Unit & Integration Tests**:
+   - `main`: 4 basic frontend unit tests.
+   - `fix/data-integrity-privacy-demo`: Comprehensive testing suite covering financial calculations, GST returns, HSN search, inventory movements, session expiration, and tenant security.
+2. **Database Test Suite**:
+   - Includes `supabase/tests/run_local.sh` and 15 SQL test files verifying migrations, triggers, and accounting constraints.
+3. **Containerization & GCP Cloud Build**:
+   - Production multi-stage `Dockerfile` (Rust binary + standalone Next.js 16 build).
+   - `docker-compose.yml` defining PostgreSQL, PostgREST, Rust backend, and Next.js frontend.
+   - Ready-to-deploy Google Cloud Platform deployment scripts (`deploy/gcp/cloudbuild.yaml`).
 
 ---
 
-## 8. Test Harness & Quality Assurance
+## 7. Recommendation: Merging Strategy
 
-11 new test suites were added to `tests/`:
+Because `fix/data-integrity-privacy-demo` represents a generational platform leap (+42,000 lines, self-hosted backend, 27 migrations, and full ERP functionality) while `main` contains the refined dark theme styling (`71acf61`), the recommended approach is:
 
-| Test Suite | Coverage Area |
-| :--- | :--- |
-| `tests/purchases.test.ts` | Purchase bill validation, tax split, and CSV parsing |
-| `tests/sales-invoice.test.ts` | Sales channel tax summaries, round-offs, and words conversion |
-| `tests/gst-returns.test.ts` | GSTR-1 and GSTR-3B JSON generation and Notification 14/2022 rules |
-| `tests/bank-matcher.test.ts` | Bank reconciliation auto-matching heuristics |
-| `tests/bank-statement.test.ts` | Multi-bank CSV format parsing |
-| `tests/collect.test.ts` | Receivables aging, FIFO payment allocation, WhatsApp links |
-| `tests/approvals.test.ts` | Maker-checker state transitions |
-| `tests/reports.test.ts` | Real ledger sums, expense buckets, and KPI calculations |
-| `tests/invoice-text-parser.test.ts` | Regex & GSTIN check-digit parsing from document text |
-| `tests/auth-paths.test.ts` | Auth redirect safety and tenant guard tests |
-| `tests/financial-year.test.ts` | FY date ranges and quarter bounds |
+1. **Keep `fix/data-integrity-privacy-demo` as the core operational codebase** for backend, database, and feature development.
+2. When ready to merge into `main`:
+   - Fast-forward or merge `fix/data-integrity-privacy-demo` into `main`.
+   - Port any remaining dark-palette aesthetic preferences from `main` into the semantic tokens of the new design system.
 
-Also added `supabase/tests/run_local.sh` and `supabase/tests/local_supabase_stub.sql` to execute automated SQL tests against local Postgres.
-
-**Current Test Results:**
-- **15 test files passed** (15 total)
-- **122 tests passed** (122 total)

@@ -40,7 +40,20 @@ pub struct CreateJournalRequest {
     pub lines: Vec<CreateJournalLineRequest>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct UpdateJournalRequest {
+    pub entry_date: String,
+    pub narration: String,
+    pub reference: Option<String>,
+    pub lines: Vec<CreateJournalLineRequest>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
+pub struct RejectJournalRequest {
+    pub reason: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct ReverseJournalRequest {
     pub reversal_date: String,
     pub narration: Option<String>,

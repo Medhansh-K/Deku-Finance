@@ -43,3 +43,6 @@ next-env.d.ts
 
 # rust
 /backend/target
+
+# local agent worktrees
+.claude/

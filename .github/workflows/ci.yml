@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run
+      - run: npx tsc --noEmit -p .
+      - run: npx next build
+        env:
+          BACKEND_URL: http://localhost:8080
+          JWT_SECRET: ci-only-dummy-secret-0123456789abcdef0123456789
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('backend/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+      # Errors are also published as annotations: run logs need a GitHub login, annotations don't.
+      - run: |
+          set -o pipefail
+          cargo test --color never 2>&1 | tee cargo.log || {
+            grep -E '^(error|warning: unused)|^ *--> |panicked at|^---- .* stdout ----|assertion' cargo.log \
+              | head -60 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }
+
+  sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash supabase/tests/run_local.sh
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: docker compose build
+      # Plan section 13. Reported rather than blocking: base images pick up new findings on their own.
+      - name: Image sizes, SBOM and vulnerability scan
+        continue-on-error: true
+        run: |
+          mkdir -p image-reports
+          docker image ls --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep -E 'deku-finance|postgres|postgrest' | tee image-reports/sizes.txt
+          for image in deku-finance-frontend deku-finance-backend deku-finance-migrate; do
+            trivy="docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD/image-reports:/out aquasec/trivy:0.57.0 image --quiet"
+            $trivy --format cyclonedx --output "/out/$image.sbom.json" "$image:latest"
+            $trivy --severity HIGH,CRITICAL --ignore-unfixed --output "/out/$image.txt" "$image:latest"
+            echo "::notice::$image packages: $(awk -F'│' '/HIGH|CRITICAL/ {print $2}' "image-reports/$image.txt" | tr -d ' ' | sort -u | grep -v '^$' | tr '\n' ' ')"
+            echo "::notice::$image: $(grep -hE '^Total:' "image-reports/$image.txt" | tr '\n' ' ')"
+          done
+          echo "::notice::image sizes: $(tr '\n' ';' < image-reports/sizes.txt)"
+      # Plan D-01 to D-16. Failures are published as annotations: run logs need a GitHub login.
+      - name: Full stack, clean install
+        run: |
+          docker compose config -q
+          docker compose up -d
+          bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs fresh
+      # Installed outside the repo: only CI needs a browser, and the app's lockfile stays as it is.
+      - name: Real browser, every page and tutorial
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pw" playwright@1.49.1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          PW_HOME="$RUNNER_TEMP/pw" node --experimental-strip-types tests/e2e/browser.mjs
+      - name: Keep the browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-screenshots-and-image-reports
+          path: |
+            browser-screenshots
+            image-reports
+          if-no-files-found: ignore
+      - name: Data survives container recreation
+        run: |
+          docker compose down
+          docker compose up -d
+          bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs persisted
+      # Plan D-17: the same commands as docs/runtime/BACKUP_AND_RESTORE.md, into an empty database.
+      - name: Backup restores into a new database
+        run: |
+          docker compose exec -T postgres pg_dumpall -U postgres --roles-only > roles.sql
+          docker compose exec -T postgres pg_dump -U postgres -Fc deku > deku.dump
+          docker compose down
+          docker compose -p deku-restore up -d postgres
+          until docker compose -p deku-restore exec -T postgres pg_isready -h 127.0.0.1 -U postgres -d deku; do sleep 2; done
+          docker compose -p deku-restore exec -T postgres psql -U postgres -d postgres -q < roles.sql
+          docker compose -p deku-restore exec -T postgres pg_restore -U postgres -d deku --exit-on-error < deku.dump
+          docker compose -p deku-restore up -d
+          COMPOSE_PROJECT_NAME=deku-restore bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs persisted
+          docker compose -p deku-restore down
+      - name: Demo mode, separate project and volume
+        run: |
+          DEKU_SEED_DEMO=true docker compose -p deku-demo up -d
+          COMPOSE_PROJECT_NAME=deku-demo bash tests/e2e/wait.sh
+          node tests/e2e/stack.mjs demo
+      - name: Misconfigured services refuse to start
+        run: |
+          docker compose -p deku-demo down
+          # 124 would mean it was still running when the timeout hit.
+          code=0; timeout 30 docker run --rm deku-finance-frontend || code=$?
+          if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::frontend started without JWT_SECRET (exit $code)"; exit 1; fi
+          code=0; timeout 30 docker run --rm -e DEKU_ENV=production -e POSTGREST_URL=http://x -e JWT_SECRET=dev-only-jwt-secret-change-me-0123456789abcdef deku-finance-backend || code=$?
+          if [ "$code" = 0 ] || [ "$code" = 124 ]; then echo "::error::backend started in production with a dev secret (exit $code)"; exit 1; fi
+      - name: Publish container state on failure
+        if: failure()
+        run: |
+          for p in deku-finance deku-restore deku-demo; do
+            out=$(docker compose -p "$p" ps -a 2>&1; docker compose -p "$p" logs --no-color --tail 25 2>&1 | cut -c1-220 | tail -70)
+            echo "::error title=$p containers::${out//$'\n'/%0A}"
+          done

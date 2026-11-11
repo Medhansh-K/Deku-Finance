@@ -1,0 +1,224 @@
+# Deku 3-Tier Multi-Interface Stack:
+# Interface 1 (Deku Admin):         Frontend http://localhost:3001  <->  Backend http://localhost:8081
+# Interface 2 (Distributor Portal): Frontend http://localhost:3002  <->  Backend http://localhost:8082
+# Interface 3 (Deku Platform ERP):  Frontend http://localhost:3000  <->  Backend http://localhost:8080
+# Shared Core: Single Postgres (5433), Single Migrate, Single PostgREST
+
+services:
+  # =========================================================================
+  # 1. SHARED PERSISTENCE & MIGRATION CORE (SINGLE DATABASE & POSTGREST)
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: deku-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: deku
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-only-postgres-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d deku"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    container_name: deku-migrate
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-dev-only-postgres-password}@postgres:5432/deku
+      AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgrest:
+    image: postgrest/postgrest:latest
+    container_name: deku-postgrest
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}@postgres:5432/deku
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      PGRST_JWT_AUD: deku
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # =========================================================================
+  # 2. THREE BACKEND CONTAINERS (FOR THE THREE INTERFACES)
+  # =========================================================================
+
+  # Backend 1: Deku Admin Backend (Port 8081)
+  backend-admin:
+    build: ./backend
+    container_name: deku-backend-admin
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DEKU_INTERFACE: admin
+      DEKU_ADMIN_EMAIL: ${DEKU_ADMIN_EMAIL:-medhanshk10@gmail.com}
+      POSTGREST_URL: http://postgrest:3000
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      CRON_SECRET: ${CRON_SECRET:-dev-only-cron-secret}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-ZGV2LW9ubHktZGF0YS1lbmNyeXB0aW9uLWtleS0zMmI=}
+      RAZORPAY_CLIENT_ID: ${RAZORPAY_CLIENT_ID:-}
+      RAZORPAY_CLIENT_SECRET: ${RAZORPAY_CLIENT_SECRET:-}
+      RAZORPAY_REDIRECT_URI: ${RAZORPAY_REDIRECT_URI:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      GSP_PROVIDER: ${GSP_PROVIDER:-}
+      KYC_PROVIDER: ${KYC_PROVIDER:-}
+      DEKU_ENV: ${DEKU_ENV:-development}
+    ports:
+      - "127.0.0.1:8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      - postgrest
+
+  # Backend 2: Distributor Portal Backend (Port 8082)
+  backend-distributor:
+    build: ./backend
+    container_name: deku-backend-distributor
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DEKU_INTERFACE: distributor
+      POSTGREST_URL: http://postgrest:3000
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      CRON_SECRET: ${CRON_SECRET:-dev-only-cron-secret}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-ZGV2LW9ubHktZGF0YS1lbmNyeXB0aW9uLWtleS0zMmI=}
+      RAZORPAY_CLIENT_ID: ${RAZORPAY_CLIENT_ID:-}
+      RAZORPAY_CLIENT_SECRET: ${RAZORPAY_CLIENT_SECRET:-}
+      RAZORPAY_REDIRECT_URI: ${RAZORPAY_REDIRECT_URI:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      GSP_PROVIDER: ${GSP_PROVIDER:-}
+      KYC_PROVIDER: ${KYC_PROVIDER:-}
+      DEKU_ENV: ${DEKU_ENV:-development}
+    ports:
+      - "127.0.0.1:8082:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      - postgrest
+
+  # Backend 3: Deku Platform ERP Backend (Port 8080)
+  backend-platform:
+    build: ./backend
+    container_name: deku-backend-platform
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DEKU_INTERFACE: platform
+      POSTGREST_URL: http://postgrest:3000
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+      CRON_SECRET: ${CRON_SECRET:-dev-only-cron-secret}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-ZGV2LW9ubHktZGF0YS1lbmNyeXB0aW9uLWtleS0zMmI=}
+      RAZORPAY_CLIENT_ID: ${RAZORPAY_CLIENT_ID:-}
+      RAZORPAY_CLIENT_SECRET: ${RAZORPAY_CLIENT_SECRET:-}
+      RAZORPAY_REDIRECT_URI: ${RAZORPAY_REDIRECT_URI:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      GSP_PROVIDER: ${GSP_PROVIDER:-}
+      KYC_PROVIDER: ${KYC_PROVIDER:-}
+      DEKU_ENV: ${DEKU_ENV:-development}
+      DEKU_ADMIN_EMAIL: ${DEKU_ADMIN_EMAIL:-}
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      - postgrest
+
+  # =========================================================================
+  # 3. THREE FRONTEND CONTAINERS (FOR THE THREE DISTINCT INTERFACES)
+  # =========================================================================
+
+  # Frontend 1: Deku Admin Portal (Port 3001) — apps/admin
+  frontend-admin:
+    build:
+      context: ./apps/admin
+      dockerfile: Dockerfile
+    container_name: deku-frontend-admin
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      BACKEND_URL: http://backend-admin:8080
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+    ports:
+      - "127.0.0.1:3001:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      backend-admin:
+        condition: service_healthy
+
+  # Frontend 2: Distributor Portal (Port 3002) — apps/distributor
+  frontend-distributor:
+    build:
+      context: ./apps/distributor
+      dockerfile: Dockerfile
+    container_name: deku-frontend-distributor
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      BACKEND_URL: http://backend-distributor:8080
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+    ports:
+      - "127.0.0.1:3002:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      backend-distributor:
+        condition: service_healthy
+
+  # Frontend 3: Deku Platform ERP Client App (Port 3000) — apps/platform
+  frontend-platform:
+    build:
+      context: ./apps/platform
+      dockerfile: Dockerfile
+    container_name: deku-frontend-platform
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      BACKEND_URL: http://backend-platform:8080
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      backend-platform:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,50 @@
+/* Deku Finance: legacy CSS variables and shared table styles.
+ * Colours come from the semantic tokens in src/app/globals.css (@theme); keep these in step. */
+
+:root {
+  --deku-obsidian: #0c1715;
+  --deku-charcoal: #13211f;
+  --deku-slate: #2c3c39;
+  --deku-teal: #05b8a5;
+  --deku-teal-hover: #04a594;
+  --deku-teal-light: rgb(5 184 165 / 0.12);
+  --deku-aqua: #a5e9de;
+  --deku-aqua-light: rgb(165 233 222 / 0.18);
+
+  --workspace-bg: #f4f6f5;
+  --workspace-surface: #ffffff;
+  --workspace-border: #e3e9e6;
+  --workspace-border-strong: #d2dad7;
+  --workspace-text-main: #0e1b19;
+  --workspace-text-muted: #5e6e6a;
+  --workspace-text-subtle: #9aa7a3;
+
+  --deku-focus-ring: 0 0 0 2px rgb(5 184 165 / 0.85);
+  --deku-row-active: rgb(5 184 165 / 0.08);
+}
+
+/* Keyboard-driven grid: the active cell stays visible while typing. */
+.tally-cell-focused {
+  outline: 2px solid var(--deku-teal) !important;
+  outline-offset: -1px;
+  background-color: var(--deku-row-active) !important;
+}
+
+.deku-table-th {
+  background-color: #fafbfa;
+  color: var(--color-ink-muted, #5e6e6a);
+  font-size: 12.5px;
+  padding: 11px 14px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-line, #e3e9e6);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.deku-table-td {
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--color-ink, #0e1b19);
+  border-bottom: 1px solid var(--color-line, #e3e9e6);
+  font-variant-numeric: tabular-nums;
+}

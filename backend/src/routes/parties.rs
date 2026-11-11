@@ -31,12 +31,17 @@ async fn create_party(
 ) -> Result<Json<Value>, AppError> {
     let token = extract_auth_token(&headers);
 
+    let gstin = payload.gstin.as_deref().map(|g| g.trim().to_uppercase()).filter(|g| !g.is_empty());
+    if gstin.as_deref().is_some_and(|g| !crate::gst::is_valid_gstin(g)) {
+        return Err(AppError::BadRequest("That GSTIN isn't valid. Check it for typing mistakes.".into()));
+    }
+
     let body = json!({
         "organisation_id": org_id,
         "type": payload.r#type,
         "legal_name": payload.legal_name,
         "display_name": payload.display_name,
-        "gstin": payload.gstin,
+        "gstin": gstin,
         "pan": payload.pan,
         "email": payload.email,
         "phone": payload.phone,
@@ -45,7 +50,7 @@ async fn create_party(
         "notes": payload.notes,
     });
 
-    let res = state.supabase.insert_table("parties", &body, token).await?;
+    let res = state.db.insert_table("parties", &body, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -61,7 +66,7 @@ async fn list_parties(
     let token = extract_auth_token(&headers);
     let org_filter = format!("eq.{}", org_id);
     let query = [("select", "*"), ("organisation_id", &org_filter), ("order", "created_at.desc")];
-    let res = state.supabase.query_table("parties", &query, token).await?;
+    let res = state.db.query_table("parties", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -82,7 +87,7 @@ async fn get_party(
         ("organisation_id", &org_filter),
         ("id", &id_filter),
     ];
-    let res = state.supabase.query_table("parties", &query, token).await?;
+    let res = state.db.query_table("parties", &query, token).await?;
 
     Ok(Json(json!({
         "success": true,

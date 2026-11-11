@@ -45,13 +45,19 @@ async fn create_invoice(
         "status": "draft",
         "supply_type": payload.supply_type,
         "place_of_supply": payload.place_of_supply,
+        "sales_channel": payload.sales_channel.unwrap_or_else(|| "direct".to_string()),
+        "invoice_type": payload.invoice_type.unwrap_or_else(|| "tax_invoice".to_string()),
+        "shipping_bill_number": payload.shipping_bill_number,
+        "shipping_bill_date": payload.shipping_bill_date,
+        "port_code": payload.port_code,
         "taxable_amount": payload.taxable_amount,
+        "round_off": payload.round_off.unwrap_or(0.0),
         "total_amount": payload.total_amount,
         "notes": payload.notes,
         "terms": payload.terms,
     });
 
-    let header_res = state.supabase.insert_table("sales_invoices", &header_body, token).await?;
+    let header_res = state.db.insert_table("sales_invoices", &header_body, token).await?;
     let inv_id = header_res
         .as_array()
         .and_then(|arr| arr.first())
@@ -92,7 +98,7 @@ async fn create_invoice(
         .collect();
 
     let lines_res = state
-        .supabase
+        .db
         .insert_table("sales_invoice_lines", &json!(lines_body), token)
         .await?;
 
@@ -115,7 +121,7 @@ async fn list_invoices(
         ("organisation_id", &org_filter),
         ("order", "invoice_date.desc"),
     ];
-    let res = state.supabase.query_table("sales_invoices", &query, token).await?;
+    let res = state.db.query_table("sales_invoices", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -133,7 +139,7 @@ async fn get_invoice(
         ("organisation_id", &org_filter),
         ("id", &id_filter),
     ];
-    let res = state.supabase.query_table("sales_invoices", &query, token).await?;
+    let res = state.db.query_table("sales_invoices", &query, token).await?;
 
     Ok(Json(json!({ "success": true, "data": res })))
 }
@@ -151,7 +157,7 @@ async fn issue_invoice(
         "p_create_journal": payload.create_journal.unwrap_or(true),
     });
 
-    let res = state.supabase.rpc("issue_sales_invoice", &rpc_payload, token).await?;
+    let res = state.db.rpc("issue_sales_invoice", &rpc_payload, token).await?;
 
     Ok(Json(json!({
         "success": true,
@@ -173,7 +179,7 @@ async fn cancel_invoice(
         "p_reason": payload.reason,
     });
 
-    let res = state.supabase.rpc("cancel_sales_invoice", &rpc_payload, token).await?;
+    let res = state.db.rpc("cancel_sales_invoice", &rpc_payload, token).await?;
 
     Ok(Json(json!({
         "success": true,

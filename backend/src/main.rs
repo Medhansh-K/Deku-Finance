@@ -1,14 +1,23 @@
+mod auth;
 mod config;
+mod crypto;
 mod error;
+mod gst;
+mod integrations;
 mod models;
+mod postgrest;
+mod razorpay;
 mod routes;
-mod supabase;
 
+use axum::http::HeaderValue;
 use config::Config;
+use postgrest::PostgrestClient;
 use routes::{create_router, AppState};
+use integrations::Choice;
 use std::net::SocketAddr;
-use supabase::SupabaseClient;
-use tower_http::cors::{Any, CorsLayer};
+use std::sync::Arc;
+use tower_http::cors::{AllowOrigin, Any, CorsLayer};
+use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -18,7 +27,14 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "deku_backend=debug,tower_http=debug,axum::rejection=trace".into()),
+                // Debug request spans carry query strings, such as Razorpay's OAuth code.
+                .unwrap_or_else(|_| {
+                    if std::env::var("DEKU_ENV").as_deref() == Ok("production") {
+                        "deku_backend=info,tower_http=info".into()
+                    } else {
+                        "deku_backend=debug,tower_http=debug,axum::rejection=trace".into()
+                    }
+                }),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -26,23 +42,55 @@ async fn main() {
     // 2. Load Configuration
     let config = Config::from_env();
     tracing::info!("Initializing Deku Finance Rust/Axum Backend...");
-    tracing::info!("Target Supabase URL: {}", config.supabase_url);
+    tracing::info!("PostgREST URL: {}", config.postgrest_url);
 
-    // 3. Initialize Clients and Shared State
-    let supabase_client = SupabaseClient::new(&config);
+    // 3. Initialize Clients and Shared State. A bad provider name, or sandbox in production, stops startup.
+    let gsp: Arc<dyn integrations::gsp::GspProvider> =
+        match integrations::choose("GSP_PROVIDER", config.gsp_provider.as_deref(), config.deku_env.as_deref())
+            .unwrap_or_else(|e| panic!("{}", e))
+        {
+            Choice::NotConfigured => Arc::new(integrations::gsp::NotConfigured),
+            Choice::Sandbox => Arc::new(integrations::gsp::Sandbox),
+        };
+    let kyc: Arc<dyn integrations::kyc::KycProvider> =
+        match integrations::choose("KYC_PROVIDER", config.kyc_provider.as_deref(), config.deku_env.as_deref())
+            .unwrap_or_else(|e| panic!("{}", e))
+        {
+            Choice::NotConfigured => Arc::new(integrations::kyc::NotConfigured),
+            Choice::Sandbox => Arc::new(integrations::kyc::Sandbox),
+        };
+    if gsp.is_sandbox() || kyc.is_sandbox() {
+        tracing::warn!("SANDBOX integration active (GSP: {}, KYC: {}): results are not legally valid", gsp.name(), kyc.name());
+    }
     let state = AppState {
-        supabase: supabase_client,
-        config: config.clone(),
+        gsp,
+        kyc,
+        db: PostgrestClient::new(&config),
+        jwt_secret: config.jwt_secret.clone(),
+        cron_secret: config.cron_secret.clone(),
+        admin_email: config.admin_email.clone(),
+        production: config.deku_env.as_deref() == Some("production"),
+        cipher: config.data_encryption_key.as_deref().and_then(crypto::Cipher::from_base64),
+        razorpay: razorpay::Razorpay::from_config(&config),
     };
+    if config.data_encryption_key.is_some() && state.cipher.is_none() {
+        panic!("DATA_ENCRYPTION_KEY must be base64 of exactly 32 bytes");
+    }
 
-    // 4. Configure CORS
+    // 4. Configure CORS: only explicitly configured origins (none by default)
+    let origins: Vec<HeaderValue> = config
+        .cors_allowed_origins
+        .iter()
+        .map(|o| o.parse().unwrap_or_else(|_| panic!("Invalid CORS origin: {}", o)))
+        .collect();
     let cors = CorsLayer::new()
-        .allow_origin(Any)
+        .allow_origin(AllowOrigin::list(origins))
         .allow_methods(Any)
         .allow_headers(Any);
 
     // 5. Build Router
     let app = create_router(state)
+        .layer(RequestBodyLimitLayer::new(routes::files::MAX_FILE_BYTES + 1024))
         .layer(TraceLayer::new_for_http())
         .layer(cors);
 
@@ -55,6 +103,30 @@ async fn main() {
         .unwrap_or_else(|e| panic!("Failed to bind to {}: {}", addr, e));
 
     axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .expect("Server failed to run");
+}
+
+/// Cloud Run sends SIGTERM before stopping an instance; finish in-flight requests first.
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c().await.expect("Failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("Failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    tracing::info!("Shutdown signal received, draining connections");
 }

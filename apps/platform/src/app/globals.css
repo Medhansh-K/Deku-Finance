@@ -1,0 +1,383 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Geist, self-hosted (the ₹ sign lives in the latin-ext subset). */
+@font-face { font-family: "Geist"; src: url("/fonts/geist-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Geist"; src: url("/fonts/geist-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/geist-mono-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/geist-mono-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+:root {
+  --background: #f4f6f5;
+  --foreground: #0e1b19;
+  --font-geist-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Deku design system ("calm ledger"): every screen colours through these semantic tokens.
+ * Light: canvas (mineral grey) < surface (white); evergreen ink, not navy.
+ * The mascot teal is the one accent: brand for fills and focus, brand-strong for teal text on light (5.2:1).
+ * panel-* stay dark for the few dark strips that remain. Status colours only for status. */
+@theme {
+  --color-canvas: #f4f6f5;
+  --color-canvas-sunken: #eef2f0;
+  --color-surface: #ffffff;
+  --color-ink: #0e1b19;
+  --color-ink-soft: #3f4f4b;
+  --color-ink-muted: #5e6e6a;
+  --color-ink-subtle: #9aa7a3;
+  --color-line: #e3e9e6;
+  --color-line-strong: #d2dad7;
+  --color-panel-deep: #0c1715;
+  --color-panel: #13211f;
+  --color-panel-raised: #1c2c29;
+  --color-edge: #2c3c39;
+  --color-brand: #05b8a5;
+  --color-brand-hover: #04a594;
+  --color-brand-strong: #0a7a6e;
+  --color-brand-soft: #a5e9de;
+  --color-brand-wash: #e7f6f3;
+  --color-brand-wash-strong: #d3efea;
+
+  --color-ok: #1d8a5a;
+  --color-ok-wash: #e8f5ee;
+  --color-warn: #a96a12;
+  --color-warn-wash: #fbf2e1;
+  --color-bad: #c0392b;
+  --color-bad-wash: #fbeceb;
+
+  --color-deku-obsidian: #0c1715;
+  --color-deku-charcoal: #13211f;
+  --color-deku-slate: #2c3c39;
+  --color-deku-teal: #05b8a5;
+  --color-deku-aqua: #a5e9de;
+
+  --radius-panel: 14px;
+  --radius-ctl: 9px;
+  --radius-chip: 6px;
+
+  --shadow-card: 0 1px 2px rgb(14 27 25 / 0.04);
+  --shadow-pop: 0 18px 50px -12px rgb(14 27 25 / 0.18), 0 4px 12px -4px rgb(14 27 25 / 0.08);
+}
+
+/* Dark mode redefines every semantic token, so screens switch without per-component dark: classes.
+ * Scoped to the app shell: the landing, auth and join pages keep their own fixed look.
+ * Screen-only so printed documents keep the light values. Panels stay the darkest layer for the sidebar. */
+@media screen {
+  .dark .app-shell-root {
+    color-scheme: dark;
+    --background: #101820;
+    --foreground: #e8eef2;
+    --color-canvas: #101820;
+    --color-canvas-sunken: #0b1218;
+    --color-surface: #162521;
+    --color-ink: #e8eef2;
+    --color-ink-soft: #c3cdd4;
+    --color-ink-muted: #9aa9b3;
+    --color-ink-subtle: #788993;
+    --color-line: #26343a;
+    --color-line-strong: #3c474b;
+    --color-panel-deep: #0b1218;
+    --color-panel: #202d35;
+    --color-panel-raised: #2a3942;
+    --color-edge: #3c474b;
+    --color-brand: #2ab3a6;
+    --color-brand-hover: #3cc4b7;
+    --color-brand-strong: #9eefe5;
+    --color-brand-soft: #a5e9de;
+    --color-brand-wash: #14322e;
+    --color-brand-wash-strong: #1b4640;
+    --color-ok: #6fd3a4;
+    --color-ok-wash: #15322a;
+    --color-warn: #f0c26b;
+    --color-warn-wash: #3a2c12;
+    --color-bad: #f2938a;
+    --color-bad-wash: #3b1c1a;
+
+    /* Status tints flip ends of the scale (50<->950 ... 300<->700), so pale badge fills
+     * with dark text become dark fills with pale text; 400-600 stay for solid buttons. */
+    --color-emerald-50: oklch(26.2% 0.051 172.552);
+    --color-emerald-950: oklch(97.9% 0.021 166.113);
+    --color-emerald-100: oklch(37.8% 0.077 168.94);
+    --color-emerald-900: oklch(95% 0.052 163.051);
+    --color-emerald-200: oklch(43.2% 0.095 166.913);
+    --color-emerald-800: oklch(90.5% 0.093 164.15);
+    --color-emerald-300: oklch(50.8% 0.118 165.612);
+    --color-emerald-700: oklch(84.5% 0.143 164.978);
+    --color-amber-50: oklch(27.9% 0.077 45.635);
+    --color-amber-950: oklch(98.7% 0.022 95.277);
+    --color-amber-100: oklch(41.4% 0.112 45.904);
+    --color-amber-900: oklch(96.2% 0.059 95.617);
+    --color-amber-200: oklch(47.3% 0.137 46.201);
+    --color-amber-800: oklch(92.4% 0.12 95.746);
+    --color-amber-300: oklch(55.5% 0.163 48.998);
+    --color-amber-700: oklch(87.9% 0.169 91.605);
+    --color-rose-50: oklch(27.1% 0.105 12.094);
+    --color-rose-950: oklch(96.9% 0.015 12.422);
+    --color-rose-100: oklch(41% 0.159 10.272);
+    --color-rose-900: oklch(94.1% 0.03 12.58);
+    --color-rose-200: oklch(45.5% 0.188 13.697);
+    --color-rose-800: oklch(89.2% 0.058 10.001);
+    --color-rose-300: oklch(51.4% 0.222 16.935);
+    --color-rose-700: oklch(81% 0.117 11.638);
+    --color-blue-50: oklch(28.2% 0.091 267.935);
+    --color-blue-950: oklch(97% 0.014 254.604);
+    --color-blue-100: oklch(37.9% 0.146 265.522);
+    --color-blue-900: oklch(93.2% 0.032 255.585);
+    --color-blue-200: oklch(42.4% 0.199 265.638);
+    --color-blue-800: oklch(88.2% 0.059 254.128);
+    --color-blue-300: oklch(48.8% 0.243 264.376);
+    --color-blue-700: oklch(80.9% 0.105 251.813);
+    --color-purple-50: oklch(29.1% 0.149 302.717);
+    --color-purple-950: oklch(97.7% 0.014 308.299);
+    --color-purple-100: oklch(38.1% 0.176 304.987);
+    --color-purple-900: oklch(94.6% 0.033 307.174);
+    --color-purple-200: oklch(43.8% 0.218 303.724);
+    --color-purple-800: oklch(90.2% 0.063 306.703);
+    --color-purple-300: oklch(49.6% 0.265 301.924);
+    --color-purple-700: oklch(82.7% 0.119 306.383);
+    --color-indigo-50: oklch(25.7% 0.09 281.288);
+    --color-indigo-950: oklch(96.2% 0.018 272.314);
+    --color-indigo-100: oklch(35.9% 0.144 278.697);
+    --color-indigo-900: oklch(93% 0.034 272.788);
+    --color-indigo-200: oklch(39.8% 0.195 277.366);
+    --color-indigo-800: oklch(87% 0.065 274.039);
+    --color-indigo-300: oklch(45.7% 0.24 277.023);
+    --color-indigo-700: oklch(78.5% 0.115 274.713);
+    --color-cyan-50: oklch(30.2% 0.056 229.695);
+    --color-cyan-950: oklch(98.4% 0.019 200.873);
+    --color-cyan-100: oklch(39.8% 0.07 227.392);
+    --color-cyan-900: oklch(95.6% 0.045 203.388);
+    --color-cyan-200: oklch(45% 0.085 224.283);
+    --color-cyan-800: oklch(91.7% 0.08 205.041);
+    --color-cyan-300: oklch(52% 0.105 223.128);
+    --color-cyan-700: oklch(86.5% 0.127 207.078);
+    --color-teal-50: oklch(27.7% 0.046 192.524);
+    --color-teal-950: oklch(98.4% 0.014 180.72);
+    --color-teal-100: oklch(38.6% 0.063 188.416);
+    --color-teal-900: oklch(95.3% 0.051 180.801);
+    --color-teal-200: oklch(43.7% 0.078 188.216);
+    --color-teal-800: oklch(91% 0.096 180.426);
+    --color-teal-300: oklch(51.1% 0.096 186.391);
+    --color-teal-700: oklch(85.5% 0.138 181.071);
+    --color-sky-50: oklch(29.3% 0.066 243.157);
+    --color-sky-950: oklch(97.7% 0.013 236.62);
+    --color-sky-100: oklch(39.1% 0.09 240.876);
+    --color-sky-900: oklch(95.1% 0.026 236.824);
+    --color-sky-200: oklch(44.3% 0.11 240.79);
+    --color-sky-800: oklch(90.1% 0.058 230.902);
+    --color-sky-300: oklch(50% 0.134 242.749);
+    --color-sky-700: oklch(82.8% 0.111 230.318);
+  }
+
+  .dark .app-shell-root ::-webkit-scrollbar-track {
+    background: #101820;
+  }
+
+  .dark .app-shell-root ::-webkit-scrollbar-thumb {
+    background: #3c474b;
+  }
+
+  .dark .app-shell-root ::-webkit-scrollbar-thumb:hover {
+    background: #4f7cac;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The accountant's double rule under a total. */
+.ledger-total {
+  border-bottom: 3px double var(--color-brand);
+  padding-bottom: 1px;
+}
+
+/* Figures line up in columns everywhere. */
+.font-mono,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgb(5 184 165 / 0.22);
+}
+
+/* Custom scrollbars for compact high-density accounting tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d2dad7;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9aa7a3;
+}
+
+/* Print standard styles for A4 invoice & business documents */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  /* Force exact background colors, borders, and fills across Chromium / Edge */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Hide all application chrome, navigation, toolbars, footers, and interactive elements */
+  header,
+  aside,
+  nav,
+  footer,
+  .no-print,
+  [role="banner"],
+  [role="navigation"],
+  #keyboard-shortcut-bar,
+  button,
+  input,
+  textarea,
+  select {
+    display: none !important;
+  }
+
+  /* Reset document root to clean printable canvas */
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Unclip all ancestor layout wrappers */
+  #__next,
+  .app-shell-root,
+  main,
+  section {
+    height: auto !important;
+    min-height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    float: none !important;
+    display: block !important;
+  }
+
+  /* Preview pane reset */
+  #document-preview-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+    display: block !important;
+    position: static !important;
+    float: none !important;
+  }
+
+  /* Wrapper reset: override the inline scaled pixel width and scaling transform */
+  #printable-a4-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    display: block !important;
+  }
+
+  /* Authentic A4 Document sheet */
+  #printable-a4-document {
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    overflow: visible !important;
+  }
+
+  /* Coupon card reset if printing coupon */
+  #printable-coupon-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  #printable-coupon-card {
+    box-shadow: none !important;
+    margin: 15mm auto !important;
+    width: 160mm !important;
+    max-width: 100% !important;
+    transform: none !important;
+    border: 1px solid #cbd5e1 !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* The element a tutorial step is pointing at. */
+.tour-highlight {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 6px rgba(5, 184, 165, 0.22);
+  position: relative;
+  z-index: 35;
+}
