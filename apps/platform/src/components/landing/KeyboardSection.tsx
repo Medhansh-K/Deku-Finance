@@ -68,7 +68,7 @@ function Cap({ k, active, onSelect }: { k: KeyInfo; active: boolean; onSelect: (
       className="group flex min-w-0 flex-col items-center gap-2 rounded-[12px] focus-visible:outline-none"
     >
       <span
-        className={`grid h-14 w-full place-items-center whitespace-nowrap rounded-[10px] border font-mono text-[15px] sm:text-[16px] transition-[transform,background-color,border-color,box-shadow] duration-150 group-focus-visible:ring-2 group-focus-visible:ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-panel sm:h-16 ${
+        className={`grid h-10 w-full place-items-center whitespace-nowrap rounded-[8px] border font-mono text-[12.5px] transition-[transform,background-color,border-color,box-shadow] duration-150 group-focus-visible:ring-2 group-focus-visible:ring-brand group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-panel sm:h-14 sm:rounded-[10px] sm:text-[15px] md:h-16 md:text-[16px] ${
           active
             ? "translate-y-[2px] border-brand bg-brand text-ink shadow-[0_1px_0_0_#078a7c]"
             : "border-[#d7dfdc] bg-[#f6f8f7] text-ink shadow-[0_3px_0_0_#b9c5c1] group-hover:bg-white group-active:translate-y-[2px] group-active:shadow-[0_1px_0_0_#b9c5c1]"
@@ -76,7 +76,7 @@ function Cap({ k, active, onSelect }: { k: KeyInfo; active: boolean; onSelect: (
       >
         {k.cap}
       </span>
-      <span className={`w-full text-center text-[12.5px] leading-tight transition-colors ${active ? "text-white" : "text-white/55"}`}>
+      <span className={`w-full truncate text-center text-[11px] leading-tight transition-colors sm:text-[12.5px] ${active ? "text-white" : "text-white/55"}`}>
         {k.short ?? k.name}
       </span>
     </button>
@@ -113,26 +113,26 @@ export default function KeyboardSection() {
 
   return (
     <section ref={ref} id="keyboard" aria-labelledby="keyboard-title" className="scroll-mt-20 bg-panel-deep text-white">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
         <Reveal className="max-w-[720px]">
-          <h2 id="keyboard-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[44px]">
+          <h2 id="keyboard-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[38px] lg:text-[44px]">
             Keep your hands on the keyboard
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-white/70 sm:text-[18px]">
+          <p className="mt-3 text-[15.5px] leading-[1.55] text-white/70 sm:mt-5 sm:text-[18px]">
             Every voucher has a function key and every register a letter, the way accountants who learned on desktop
             software already work. Press a key, or tap one, to see what it opens.
           </p>
         </Reveal>
 
-        <Reveal delay={100} className="mt-14">
-          <div className="rounded-[20px] border border-edge bg-panel p-4 sm:p-6">
-            <div className="grid grid-cols-4 gap-x-2.5 gap-y-4 sm:grid-cols-6 lg:grid-cols-12 lg:gap-x-2.5">
+        <Reveal delay={100} className="mt-7 sm:mt-14">
+          <div className="rounded-[16px] border border-edge bg-panel p-3 sm:rounded-[20px] sm:p-6">
+            <div className="grid grid-cols-4 gap-x-2 gap-y-2.5 sm:grid-cols-6 sm:gap-x-2.5 sm:gap-y-4 lg:grid-cols-12">
               {FUNCTION_ROW.map((k) => (
                 <Cap key={k.cap} k={k} active={active === k.cap} onSelect={setActive} />
               ))}
             </div>
-            <div className="my-5 border-t border-edge" />
-            <div className="grid grid-cols-4 gap-x-2.5 gap-y-4 sm:grid-cols-6 lg:grid-cols-12 lg:gap-x-2.5">
+            <div className="my-3.5 border-t border-edge sm:my-5" />
+            <div className="grid grid-cols-4 gap-x-2 gap-y-2.5 sm:grid-cols-6 sm:gap-x-2.5 sm:gap-y-4 lg:grid-cols-12">
               {LETTER_ROW.map((k) => (
                 <Cap key={k.cap} k={k} active={active === k.cap} onSelect={setActive} />
               ))}
@@ -141,7 +141,7 @@ export default function KeyboardSection() {
 
           <div
             aria-live="polite"
-            className="mt-6 grid gap-6 rounded-[20px] border border-edge p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-8 sm:p-7"
+            className="mt-4 grid gap-4 rounded-[16px] border border-edge p-4 sm:mt-6 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-8 sm:rounded-[20px] sm:p-7"
           >
             <span className="grid h-16 min-w-16 place-items-center self-start justify-self-start rounded-[12px] bg-brand px-3 font-mono text-[20px] text-ink">
               {current.cap}

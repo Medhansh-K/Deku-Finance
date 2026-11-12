@@ -32,7 +32,7 @@ const COLUMNS = [
 export default function LandingFooter() {
   return (
     <footer className="border-t border-line bg-surface font-sans">
-      <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-6 gap-y-10 px-5 py-16 sm:px-8 md:grid-cols-[1.4fr_repeat(3,1fr)] md:gap-12">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-x-6 gap-y-7 px-4 py-10 sm:px-8 sm:py-16 md:grid-cols-[1.4fr_repeat(3,1fr)] md:gap-12">
         <div className="col-span-2 max-w-xs space-y-4 md:col-span-1">
           <DekuWordmark />
           <p className="text-[14px] leading-relaxed text-ink-muted">

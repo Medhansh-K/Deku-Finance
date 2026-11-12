@@ -141,18 +141,18 @@ function CellValue({ v }: { v: Cell }) {
 export default function PricingPlansSection() {
   return (
     <section id="pricing" aria-labelledby="pricing-title" className="scroll-mt-20 border-t border-line bg-surface">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
         <Reveal className="max-w-[680px]">
-          <h2 id="pricing-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
+          <h2 id="pricing-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[34px] lg:text-[40px]">
             One yearly licence for each stage of growth
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-ink-soft sm:text-[18px]">
+          <p className="mt-3 text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[18px]">
             Every plan is an annual licence with setup by a partner near you, product and tax updates, and your
             company&apos;s data kept to itself. No charge per invoice or per transaction.
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-3">
           {ORDER.map((id, i) => {
             const plan = P[id];
             const info = PLANS[id];
@@ -160,7 +160,7 @@ export default function PricingPlansSection() {
             return (
               <Reveal key={id} delay={i * 80}>
                 <div
-                  className={`group/plan relative flex h-full flex-col rounded-panel border p-7 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 sm:p-8 ${
+                  className={`group/plan relative flex h-full flex-col rounded-panel border p-5 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 sm:p-8 ${
                     featured
                       ? "border-brand bg-surface shadow-[inset_0_3px_0_var(--color-brand),0_28px_70px_-34px_rgb(5_184_165/0.55)]"
                       : id === "enterprise"
@@ -169,47 +169,47 @@ export default function PricingPlansSection() {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className={`text-[22px] font-semibold tracking-[-0.02em] ${id === "enterprise" ? "text-white" : "text-ink"}`}>{plan.name}</h3>
+                    <h3 className={`text-[20px] font-semibold tracking-[-0.02em] sm:text-[22px] ${id === "enterprise" ? "text-white" : "text-ink"}`}>{plan.name}</h3>
                     {featured && (
                       <span className="inline-flex h-[24px] items-center rounded-chip bg-brand-wash px-2.5 text-xs font-medium text-brand-strong">
                         Most popular
                       </span>
                     )}
                   </div>
-                  <p className={`mt-1 text-[15px] font-medium ${id === "enterprise" ? "text-brand-soft" : "text-brand-strong"}`}>{info.idea}</p>
-                  <p className={`mt-3 text-[14.5px] leading-[1.55] lg:min-h-[92px] ${id === "enterprise" ? "text-white/70" : "text-ink-muted"}`}>{info.forWho}</p>
+                  <p className={`mt-1 text-[14.5px] font-medium sm:text-[15px] ${id === "enterprise" ? "text-brand-soft" : "text-brand-strong"}`}>{info.idea}</p>
+                  <p className={`mt-2 text-[14px] leading-[1.5] sm:mt-3 sm:text-[14.5px] sm:leading-[1.55] lg:min-h-[92px] ${id === "enterprise" ? "text-white/70" : "text-ink-muted"}`}>{info.forWho}</p>
 
-                  <p className="mt-6 flex items-baseline gap-2">
-                    <span className={`text-[40px] font-semibold tabular-nums leading-none tracking-[-0.035em] ${id === "enterprise" ? "text-white" : "text-ink"}`}>
+                  <p className="mt-4 flex items-baseline gap-2 sm:mt-6">
+                    <span className={`text-[32px] font-semibold tabular-nums leading-none tracking-[-0.035em] sm:text-[40px] ${id === "enterprise" ? "text-white" : "text-ink"}`}>
                       ₹{fmt(plan.priceInrYearly)}
                     </span>
-                    <span className={`text-[14px] ${id === "enterprise" ? "text-white/60" : "text-ink-muted"}`}>a year</span>
+                    <span className={`text-[13.5px] sm:text-[14px] ${id === "enterprise" ? "text-white/60" : "text-ink-muted"}`}>a year</span>
                   </p>
-                  <p className={`mt-1.5 text-[13px] tabular-nums ${id === "enterprise" ? "text-white/55" : "text-ink-muted"}`}>{perMonth(plan.priceInrYearly)}</p>
+                  <p className={`mt-1 text-[12.5px] tabular-nums sm:mt-1.5 sm:text-[13px] ${id === "enterprise" ? "text-white/55" : "text-ink-muted"}`}>{perMonth(plan.priceInrYearly)}</p>
 
-                  <dl className={`mt-6 grid grid-cols-3 overflow-hidden rounded-ctl border ${id === "enterprise" ? "border-white/10 bg-white/5" : "border-line bg-canvas"}`}>
+                  <dl className={`mt-4 grid grid-cols-3 overflow-hidden rounded-ctl border sm:mt-6 ${id === "enterprise" ? "border-white/10 bg-white/5" : "border-line bg-canvas"}`}>
                     {LIMITS.map((l, li) => (
-                      <div key={l.label} className={`px-3 py-3 ${li ? (id === "enterprise" ? "border-l border-white/10" : "border-l border-line") : ""}`}>
-                        <dt className={`text-[12px] ${id === "enterprise" ? "text-white/55" : "text-ink-muted"}`}>{l.label}</dt>
-                        <dd className={`mt-0.5 text-[15px] font-semibold tabular-nums ${id === "enterprise" ? "text-white" : "text-ink"}`}>{l.value(id)}</dd>
+                      <div key={l.label} className={`px-2.5 py-2.5 sm:px-3 sm:py-3 ${li ? (id === "enterprise" ? "border-l border-white/10" : "border-l border-line") : ""}`}>
+                        <dt className={`text-[11px] sm:text-[12px] ${id === "enterprise" ? "text-white/55" : "text-ink-muted"}`}>{l.label}</dt>
+                        <dd className={`mt-0.5 text-[13.5px] font-semibold tabular-nums sm:text-[15px] ${id === "enterprise" ? "text-white" : "text-ink"}`}>{l.value(id)}</dd>
                       </div>
                     ))}
                   </dl>
 
                   {info.plusLabel && (
-                    <p className={`mt-6 text-[13px] font-medium ${id === "enterprise" ? "text-white/70" : "text-ink-soft"}`}>{info.plusLabel}</p>
+                    <p className={`mt-4 text-[12.5px] font-medium sm:mt-6 sm:text-[13px] ${id === "enterprise" ? "text-white/70" : "text-ink-soft"}`}>{info.plusLabel}</p>
                   )}
-                  <ul className={`${info.plusLabel ? "mt-3" : "mt-6"} flex-1 space-y-3`}>
+                  <ul className={`${info.plusLabel ? "mt-2 sm:mt-3" : "mt-4 sm:mt-6"} flex-1 space-y-2 sm:space-y-3`}>
                     {info.adds.map((h) => (
-                      <li key={h} className={`flex gap-3 text-[14.5px] leading-[1.45] ${id === "enterprise" ? "text-white/80" : "text-ink-soft"}`}>
-                        <Check aria-hidden="true" className={`mt-[3px] h-4 w-4 shrink-0 ${id === "enterprise" ? "text-brand" : "text-brand-strong"}`} />
+                      <li key={h} className={`flex gap-2.5 text-[13.5px] leading-[1.4] sm:gap-3 sm:text-[14.5px] sm:leading-[1.45] ${id === "enterprise" ? "text-white/80" : "text-ink-soft"}`}>
+                        <Check aria-hidden="true" className={`mt-[2px] h-4 w-4 shrink-0 ${id === "enterprise" ? "text-brand" : "text-brand-strong"}`} />
                         <span>{h}</span>
                       </li>
                     ))}
                   </ul>
                   <Link
                     href="/request-setup"
-                    className={`mt-8 inline-flex h-11 items-center justify-center rounded-ctl text-[14.5px] font-medium transition-[background-color,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
+                    className={`mt-5 inline-flex h-11 items-center justify-center rounded-ctl text-[14.5px] font-medium transition-[background-color,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:mt-8 ${
                       featured
                         ? "bg-brand text-ink hover:bg-brand-hover"
                         : id === "enterprise"
@@ -225,7 +225,7 @@ export default function PricingPlansSection() {
           })}
         </div>
 
-        <details open className="group mt-6 rounded-panel border border-line">
+        <details className="group mt-5 rounded-panel border border-line sm:mt-6">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-panel px-6 py-5 transition-colors hover:bg-canvas/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand [&::-webkit-details-marker]:hidden">
             <span>
               <span className="block text-[16px] font-medium text-ink">Compare every plan, line by line</span>

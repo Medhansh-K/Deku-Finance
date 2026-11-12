@@ -10,15 +10,15 @@ import { SampleQr } from "./InteractiveModePreview";
 const DEMO = "/learn/demo/workspace?company=aster-trading&role=owner&plan=pro";
 
 const card =
-  "group flex h-full flex-col rounded-panel border border-line bg-surface p-7 transition-[border-color,box-shadow] duration-300 hover:border-line-strong hover:shadow-[0_12px_32px_-18px_rgb(14_27_25/0.25)] sm:p-8";
-const title = "text-[20px] font-semibold leading-tight tracking-[-0.02em] text-ink";
-const body = "mt-2.5 text-[15px] leading-[1.6] text-ink-soft";
+  "group flex h-full flex-col rounded-panel border border-line bg-surface p-5 transition-[border-color,box-shadow] duration-300 hover:border-line-strong hover:shadow-[0_12px_32px_-18px_rgb(14_27_25/0.25)] sm:p-8";
+const title = "text-[18px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[20px]";
+const body = "mt-2 text-[14.5px] leading-[1.55] text-ink-soft sm:mt-2.5 sm:text-[15px] sm:leading-[1.6]";
 
 function CardLink({ href, children, dark = false }: { href: string; children: React.ReactNode; dark?: boolean }) {
   return (
     <Link
       href={href}
-      className={`mt-auto inline-flex items-center gap-1.5 self-start rounded-chip pt-7 text-[14.5px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+      className={`mt-auto inline-flex items-center gap-1.5 self-start rounded-chip pt-4 text-[14px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:pt-7 sm:text-[14.5px] ${
         dark ? "text-brand-soft hover:text-white" : "text-brand-strong hover:text-ink"
       }`}
     >
@@ -110,24 +110,24 @@ const TRAIL = [
 export default function LandingBentoGrid() {
   return (
     <section id="features" aria-labelledby="features-title" className="scroll-mt-20 bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
         <Reveal className="max-w-[680px]">
-          <h2 id="features-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
+          <h2 id="features-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[34px] lg:text-[40px]">
             From the first bill to the balance sheet
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-ink-soft sm:text-[18px]">
+          <p className="mt-3 text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[18px]">
             Collections, keyboard entry, live statements and safe delegation, all working on the same double-entry
             books.
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-12">
+        <div className="mt-7 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-12">
           <Reveal className="lg:col-span-7">
             <GrowthCard />
           </Reveal>
 
           <Reveal className="lg:col-span-5" delay={80}>
-            <div className="group flex h-full flex-col rounded-panel border border-edge bg-panel-deep p-7 text-white sm:p-8">
+            <div className="group flex h-full flex-col rounded-panel border border-edge bg-panel-deep p-5 text-white sm:p-8">
               <h3 className="text-[20px] font-semibold leading-tight tracking-[-0.02em]">Books that balance themselves</h3>
               <p className="mt-2.5 text-[15px] leading-[1.6] text-white/70">
                 Every rupee sits in Assets, Liabilities, Equity, Revenue or Expenses, so reports are right without

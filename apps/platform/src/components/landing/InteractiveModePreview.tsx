@@ -17,8 +17,8 @@ function useTween(target: number, ms = 520) {
     if (start === target) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       from.current = target;
-      setValue(target);
-      return;
+      const raf = requestAnimationFrame(() => setValue(target));
+      return () => cancelAnimationFrame(raf);
     }
     const t0 = performance.now();
     let raf = 0;
@@ -69,19 +69,19 @@ export default function InteractiveModePreview() {
 
   return (
     <section id="modes" aria-labelledby="modes-title" className="scroll-mt-20 bg-panel-deep text-white">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
+        <div className="grid gap-7 sm:gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
           {/* Left: the story for each stage */}
           <div>
-            <h2 id="modes-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[40px]">
+            <h2 id="modes-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[34px] lg:text-[40px]">
               Start without GST. Switch it on when you register.
             </h2>
-            <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.55] text-white/70">
+            <p className="mt-3 max-w-[52ch] text-[15.5px] leading-[1.55] text-white/70 sm:mt-5 sm:text-[17px]">
               A small studio and a growing distributor need different paperwork. Deku keeps the same books underneath
               and changes what each bill carries.
             </p>
 
-            <div role="radiogroup" aria-label="Business stage" className="mt-8 inline-flex rounded-ctl border border-edge bg-panel p-1">
+            <div role="radiogroup" aria-label="Business stage" className="mt-5 inline-flex rounded-ctl border border-edge bg-panel p-1 sm:mt-8">
               {(
                 [
                   ["lean", "Not registered for GST"],
@@ -94,7 +94,7 @@ export default function InteractiveModePreview() {
                   role="radio"
                   aria-checked={mode === m}
                   onClick={() => setMode(m)}
-                  className={`rounded-[7px] px-3.5 py-2 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                  className={`rounded-[7px] px-2.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:px-3.5 sm:py-2 sm:text-[14px] ${
                     mode === m ? "bg-white text-ink" : "text-white/65 hover:text-white"
                   }`}
                 >
@@ -103,7 +103,7 @@ export default function InteractiveModePreview() {
               ))}
             </div>
 
-            <div key={mode} className="mt-8 space-y-6 motion-safe:animate-[dekuFade_.4s_ease-out]">
+            <div key={mode} className="mt-5 space-y-4 motion-safe:animate-[dekuFade_.4s_ease-out] sm:mt-8 sm:space-y-6">
               {gst ? (
                 <>
                   <div>
@@ -183,8 +183,8 @@ export default function InteractiveModePreview() {
               ))}
             </fieldset>
 
-            <div className="rounded-panel bg-surface p-6 text-ink shadow-[0_30px_80px_-20px_rgb(0_0_0/0.55)] sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-5">
+            <div className="rounded-panel bg-surface p-4 text-ink shadow-[0_30px_80px_-20px_rgb(0_0_0/0.55)] sm:p-8">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4 sm:gap-4 sm:pb-5">
                 <div>
                   <p className="text-[13px] text-ink-muted">{gst ? "Tax invoice" : "Bill of supply"}</p>
                   <p className="mt-1 font-mono text-[14px] text-ink">{gst ? "KDS/26-27/0088" : "KDS/26-27/0014"}</p>

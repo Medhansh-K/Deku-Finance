@@ -19,9 +19,9 @@ import gstReturnsShot from "../../public/landing/gst-returns.webp";
 import balanceSheetShot from "../../public/landing/balance-sheet.webp";
 
 const primaryBtn =
-  "inline-flex h-12 items-center justify-center rounded-ctl bg-brand px-6 text-[15.5px] font-medium text-ink transition-[background-color,transform] hover:bg-brand-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2";
-const h2 = "text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]";
-const lead = "mt-5 text-[17px] leading-[1.55] text-ink-soft sm:text-[18px]";
+  "inline-flex h-11 sm:h-12 items-center justify-center whitespace-nowrap rounded-ctl bg-brand px-5 sm:px-6 text-[15px] sm:text-[15.5px] font-medium text-ink transition-[background-color,transform] hover:bg-brand-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2";
+const h2 = "text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[34px] lg:text-[40px]";
+const lead = "mt-3 text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[18px]";
 
 const HIGHLIGHTS = ["UPI QR on every bill", "Live cash flow and P&L", "Team roles and approvals", "GST when you're ready"];
 
@@ -49,41 +49,41 @@ export default function Home() {
       <main>
         {/* Hero */}
         <section aria-labelledby="hero-title" className="bg-canvas">
-          <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-16 sm:px-8 sm:pt-16 lg:pb-20 lg:pt-20">
+          <div className="mx-auto max-w-[1200px] px-4 pb-8 pt-6 sm:px-8 sm:pb-14 sm:pt-14 lg:pb-20 lg:pt-20">
             <h1
               id="hero-title"
-              className="max-w-[16ch] text-[44px] font-semibold leading-[1.02] tracking-[-0.04em] text-ink motion-safe:animate-[dekuFade_.6s_ease-out_both] sm:text-[60px] lg:text-[68px]"
+              className="max-w-[16ch] text-[34px] font-semibold leading-[1.04] tracking-[-0.04em] text-ink motion-safe:animate-[dekuFade_.6s_ease-out_both] sm:text-[56px] lg:text-[68px]"
             >
               Invoices, GST and books that balance.
             </h1>
-            <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-end">
-              <p className="max-w-[60ch] text-[18px] leading-[1.55] text-ink-soft motion-safe:animate-[dekuFade_.6s_.08s_ease-out_both] sm:text-[19px]">
+            <div className="mt-5 grid gap-5 sm:mt-8 sm:gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-end lg:gap-10">
+              <p className="max-w-[60ch] text-[16px] leading-[1.5] text-ink-soft motion-safe:animate-[dekuFade_.6s_.08s_ease-out_both] sm:text-[19px] sm:leading-[1.55]">
                 Deku Finance is a GST and financial operating system for Indian businesses. Raise invoices, post
                 vouchers from the keyboard, have a second person approve them, and prepare GST returns from the same
                 double-entry books.
               </p>
               <div className="motion-safe:animate-[dekuFade_.6s_.16s_ease-out_both] lg:justify-self-end">
-                <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
                   <Link href="/learn/demo" className={primaryBtn}>
                     Try the demo
                   </Link>
                   <Link
                     href="/request-setup"
-                    className="inline-flex h-12 items-center justify-center rounded-ctl border border-line-strong bg-surface px-6 text-[15.5px] font-medium text-ink transition-[background-color,transform] hover:bg-canvas-sunken active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                    className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-ctl border border-line-strong bg-surface px-5 text-[15px] font-medium text-ink transition-[background-color,transform] hover:bg-canvas-sunken active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:h-12 sm:px-6 sm:text-[15.5px]"
                   >
                     Request a setup
                   </Link>
                 </div>
-                <p className="mt-3 text-[14px] text-ink-muted">
-                  {workflows} guided workflows on sample books. No sign-up.
+                <p className="mt-2.5 text-[13px] text-ink-muted sm:mt-3 sm:text-[14px]">
+                  {workflows} guided workflows on sample books (best on laptop). No sign-up.
                 </p>
               </div>
             </div>
-            <ul className="mt-12 flex flex-wrap gap-x-7 gap-y-3 border-t border-line pt-6 text-[14.5px] text-ink-soft">
+            <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line pt-4 text-[13px] text-ink-soft sm:mt-12 sm:flex sm:flex-wrap sm:gap-x-7 sm:gap-y-3 sm:pt-6 sm:text-[14.5px]">
               {HIGHLIGHTS.map((h) => (
-                <li key={h} className="flex items-center gap-2">
-                  <Check aria-hidden="true" className="h-4 w-4 text-brand-strong" />
-                  {h}
+                <li key={h} className="flex items-center gap-1.5 sm:gap-2">
+                  <Check aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-brand-strong sm:h-4 sm:w-4" />
+                  <span>{h}</span>
                 </li>
               ))}
             </ul>
@@ -92,7 +92,7 @@ export default function Home() {
 
         {/* The product shot straddles the hero and the dark section below it. */}
         <div className="bg-[linear-gradient(to_bottom,var(--color-canvas)_0,var(--color-canvas)_50%,var(--color-panel-deep)_50%)]">
-          <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-8">
             <div className="motion-safe:animate-[dekuRise_1s_.25s_cubic-bezier(.2,.7,.2,1)_both]">
               <ProductShot
                 src={executiveShot}
@@ -107,19 +107,19 @@ export default function Home() {
 
         {/* Real screens */}
         <section aria-labelledby="screens-title" className="bg-surface">
-          <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+          <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
             <h2 id="screens-title" className="sr-only">
               The product, screen by screen
             </h2>
 
-            <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
+            <div className="grid items-center gap-6 sm:gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
               <Reveal>
                 <h3 className={h2}>Every voucher shows who made it and who approved it</h3>
                 <p className={lead}>
                   The Day Book lists every voucher in date order. Open one to see its journal lines, the debit and
                   credit totals that must match, and the approval trail from created to posted.
                 </p>
-                <p className="mt-4 text-[15.5px] leading-[1.6] text-ink-muted">
+                <p className="mt-3 text-[14.5px] leading-[1.55] text-ink-muted sm:mt-4 sm:text-[15.5px] sm:leading-[1.6]">
                   Drafts wait in the approvals queue until an owner, CFO or admin signs off.
                 </p>
               </Reveal>
@@ -133,14 +133,14 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <div className="mt-16 grid items-center gap-12 lg:mt-40 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-16">
+            <div className="mt-10 grid items-center gap-6 sm:mt-16 sm:gap-12 lg:mt-36 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-16">
               <Reveal className="lg:order-2">
                 <h3 className={h2}>GSTR-1 and GSTR-3B, prepared from your invoices</h3>
                 <p className={lead}>
                   Deku sorts sales and eligible credit into the return sections, validates them and gives you offline
                   JSON to upload on the GST portal.
                 </p>
-                <p className="mt-4 text-[15.5px] leading-[1.6] text-ink-muted">
+                <p className="mt-3 text-[14.5px] leading-[1.55] text-ink-muted sm:mt-4 sm:text-[15.5px] sm:leading-[1.6]">
                   Sections Deku doesn&apos;t generate yet are listed on the screen. Filing straight from Deku needs a
                   GST Suvidha Provider connection.
                 </p>
@@ -154,7 +154,7 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <div className="mt-16 lg:mt-40">
+            <div className="mt-10 sm:mt-16 lg:mt-36">
               <Reveal className="max-w-[680px]">
                 <h3 className={h2}>Statements that tie out to the rupee</h3>
                 <p className={lead}>
@@ -163,18 +163,18 @@ export default function Home() {
                   accountant&apos;s double rule.
                 </p>
               </Reveal>
-              <Reveal delay={100} className="mt-12">
+              <Reveal delay={100} className="mt-6 sm:mt-12">
                 <ProductShot
                   src={balanceSheetShot}
                   chrome={false}
                   alt="A balance sheet with capital and liabilities totalling ₹34,53,600.00 on the left and assets totalling ₹34,53,600.00 on the right, both totals double-underlined."
                 />
               </Reveal>
-              <dl className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              <dl className="mt-8 grid grid-cols-2 gap-4 sm:mt-14 sm:gap-8 lg:grid-cols-4">
                 {ALSO.map((a) => (
-                  <div key={a.title} className="border-t border-line pt-5">
-                    <dt className="text-[15.5px] font-semibold text-ink">{a.title}</dt>
-                    <dd className="mt-1.5 text-[14.5px] leading-[1.55] text-ink-soft">{a.body}</dd>
+                  <div key={a.title} className="border-t border-line pt-3.5 sm:pt-5">
+                    <dt className="text-[14.5px] font-semibold text-ink sm:text-[15.5px]">{a.title}</dt>
+                    <dd className="mt-1 text-[13.5px] leading-[1.45] text-ink-soft sm:mt-1.5 sm:text-[14.5px] sm:leading-[1.55]">{a.body}</dd>
                   </div>
                 ))}
               </dl>
@@ -191,23 +191,23 @@ export default function Home() {
 
         {/* Learn Centre invitation */}
         <section aria-labelledby="learn-title" className="bg-panel-deep text-white">
-          <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-20 lg:py-24">
+          <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-10 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-20 lg:py-24">
             <Reveal>
-              <h2 id="learn-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-[44px]">
+              <h2 id="learn-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[38px] lg:text-[44px]">
                 Try it on sample books
               </h2>
-              <p className="mt-5 max-w-[52ch] text-[17px] leading-[1.55] text-white/70 sm:text-[18px]">
+              <p className="mt-3 max-w-[52ch] text-[15.5px] leading-[1.55] text-white/70 sm:mt-5 sm:text-[18px]">
                 {workflows} guided workflows run on the real screens, from issuing an invoice to closing the month.
-                Pick one of {DEMO_COMPANIES.length} fictional companies and any of the seven roles. No sign-up; the
-                sample books stay in your browser.
+                Pick one of {DEMO_COMPANIES.length} fictional companies and any of the seven roles on a desktop or
+                laptop browser. No sign-up; the sample books stay in your browser.
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-2.5 sm:mt-9 sm:flex-row sm:gap-3">
                 <Link href="/learn/demo" className={`${primaryBtn} focus-visible:ring-offset-panel-deep`}>
                   Try the demo
                 </Link>
                 <Link
                   href="/learn"
-                  className="inline-flex h-12 items-center justify-center rounded-ctl border border-edge px-6 text-[15.5px] font-medium text-white transition-[background-color,transform] hover:bg-panel active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                  className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-ctl border border-edge px-5 text-[15px] font-medium text-white transition-[background-color,transform] hover:bg-panel active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:h-12 sm:px-6 sm:text-[15.5px]"
                 >
                   Browse the Learn Centre
                 </Link>
@@ -219,7 +219,7 @@ export default function Home() {
                   <li key={c.slug}>
                     <Link
                       href={`/learn/demo/workspace?company=${c.slug}&role=owner&plan=${c.recommendedPlan}`}
-                      className="group flex items-center justify-between gap-4 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                      className="group flex items-center justify-between gap-4 py-3.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:py-5"
                     >
                       <span>
                         <span className="block text-[16.5px] font-medium text-white">{c.tradeName}</span>

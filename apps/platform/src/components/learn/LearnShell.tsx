@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import LandingFooter from "@/components/landing/LandingFooter";
+import { LearnMobileNotice } from "@/components/learn/LearnMobileNotice";
 import { BookOpen, Building2, Compass, Play } from "lucide-react";
 
 const SUBNAV = [
@@ -21,7 +22,7 @@ export function LearnShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-canvas text-ink flex flex-col font-sans selection:bg-brand/30 selection:text-ink">
       <LandingNavbar />
 
-      <div className="border-b border-line bg-surface">
+      <div className="hidden border-b border-line bg-surface md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 overflow-x-auto">
           <nav aria-label="Learn Centre navigation" className="flex items-center gap-1 py-2">
             {SUBNAV.map((item) => {
@@ -53,7 +54,12 @@ export function LearnShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <div className="md:hidden">
+          <LearnMobileNotice />
+        </div>
+        <div className="hidden md:block">{children}</div>
+      </main>
 
       <LandingFooter />
     </div>

@@ -37,38 +37,38 @@ const ROWS: { capability: string; deku: string; desktop: string; invoicing: stri
 export default function ComparisonSection() {
   return (
     <section aria-labelledby="compare-title" className="bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
         <Reveal className="max-w-[680px]">
-          <h2 id="compare-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
+          <h2 id="compare-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[34px] lg:text-[40px]">
             Why Indian businesses choose Deku Finance
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-ink-soft sm:text-[18px]">
+          <p className="mt-3 text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[18px]">
             How Deku compares with the two kinds of tool most small businesses use today. Other products differ by
             edition and add-on, so treat their columns as typical, not exact.
           </p>
         </Reveal>
 
-        <Reveal delay={80} className="mt-12">
-          {/* Phones get one block per capability instead of a sideways-scrolling table. */}
-          <ul className="space-y-4 md:hidden">
+        <Reveal delay={80} className="mt-7 sm:mt-12">
+          {/* Phones get one compact card per capability instead of a sideways-scrolling table. */}
+          <ul className="space-y-3 md:hidden">
             {ROWS.map((r) => (
-              <li key={r.capability} className="rounded-panel border border-line bg-surface p-5">
-                <p className="text-[16px] font-semibold text-ink">{r.capability}</p>
-                <p className="mt-3 flex gap-2.5 rounded-ctl bg-brand-wash p-3 text-[14.5px] text-ink">
-                  <Check aria-hidden="true" className="mt-[3px] h-4 w-4 shrink-0 text-brand-strong" />
+              <li key={r.capability} className="rounded-panel border border-line bg-surface p-4">
+                <p className="text-[15px] font-semibold text-ink">{r.capability}</p>
+                <p className="mt-2.5 flex gap-2 rounded-ctl bg-brand-wash p-2.5 text-[13.5px] leading-[1.45] text-ink">
+                  <Check aria-hidden="true" className="mt-[2px] h-4 w-4 shrink-0 text-brand-strong" />
                   <span>
-                    <span className="font-medium">Deku Finance: </span>
+                    <span className="font-medium">Deku: </span>
                     {r.deku}
                   </span>
                 </p>
-                <dl className="mt-3 space-y-2 text-[14px]">
+                <dl className="mt-2.5 grid grid-cols-2 gap-3 text-[12.5px] leading-[1.4]">
                   <div>
-                    <dt className="text-ink-muted">Desktop accounting software</dt>
-                    <dd className="text-ink-soft">{r.desktop}</dd>
+                    <dt className="text-ink-muted">Desktop software</dt>
+                    <dd className="mt-0.5 text-ink-soft">{r.desktop}</dd>
                   </div>
                   <div>
                     <dt className="text-ink-muted">Invoicing apps</dt>
-                    <dd className="text-ink-soft">{r.invoicing}</dd>
+                    <dd className="mt-0.5 text-ink-soft">{r.invoicing}</dd>
                   </div>
                 </dl>
               </li>

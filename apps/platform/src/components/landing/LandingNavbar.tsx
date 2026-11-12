@@ -18,9 +18,9 @@ const focusRing =
 
 export function DekuWordmark() {
   return (
-    <span className="flex items-center gap-2.5">
-      <DekuLogo size={28} aria-hidden="true" />
-      <span className="text-[17px] tracking-[-0.02em] text-ink">
+    <span className="flex items-center gap-2 sm:gap-2.5">
+      <DekuLogo size={26} aria-hidden="true" />
+      <span className="whitespace-nowrap text-[15.5px] tracking-[-0.02em] text-ink sm:text-[17px]">
         <span className="font-semibold">Deku</span> <span className="text-ink-soft">Finance</span>
       </span>
     </span>
@@ -37,7 +37,7 @@ export default function LandingNavbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-line bg-surface/90 backdrop-blur-md font-sans">
-      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-2.5 px-4 sm:h-16 sm:gap-6 sm:px-8">
         <Link href="/" aria-label="Deku Finance home" className={`shrink-0 rounded-ctl ${focusRing}`}>
           <DekuWordmark />
         </Link>
@@ -54,23 +54,23 @@ export default function LandingNavbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Link
             href={secondary.href}
-            className={`hidden rounded-ctl px-3 py-2 text-[14px] text-ink-soft transition-colors hover:bg-canvas hover:text-ink sm:block ${focusRing}`}
+            className={`hidden whitespace-nowrap rounded-ctl px-3 py-2 text-[14px] text-ink-soft transition-colors hover:bg-canvas hover:text-ink sm:block ${focusRing}`}
           >
             {secondary.label}
           </Link>
           <Link
             href="/learn/demo"
-            className={`inline-flex h-9 items-center rounded-ctl bg-brand px-4 text-[14px] font-medium text-ink transition-colors hover:bg-brand-hover ${focusRing}`}
+            className={`inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-ctl bg-brand px-3 text-[13px] font-medium text-ink transition-colors hover:bg-brand-hover sm:px-4 sm:text-[14px] ${focusRing}`}
           >
             Try the demo
           </Link>
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            className={`grid h-9 w-9 place-items-center rounded-ctl border border-line text-ink-soft hover:bg-canvas md:hidden ${focusRing}`}
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-ctl border border-line text-ink-soft hover:bg-canvas md:hidden ${focusRing}`}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="landing-mobile-menu"

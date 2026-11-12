@@ -105,31 +105,31 @@ export default function RequestSetupPage() {
         </Link>
         <Link
           href="/learn/demo"
-          className="rounded-ctl text-[15px] font-medium text-ink-soft hover:text-ink"
+          className="whitespace-nowrap rounded-ctl text-[14px] font-medium text-ink-soft hover:text-ink sm:text-[15px]"
         >
           Try the demo
         </Link>
       </header>
 
-      <main className="mx-auto grid w-full content-start max-w-[1200px] flex-1 gap-12 px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:grid-cols-[5fr_7fr] lg:gap-20 lg:px-8">
+      <main className="mx-auto grid w-full content-start max-w-[1200px] flex-1 gap-7 px-4 pb-12 pt-5 sm:gap-12 sm:px-6 sm:pb-24 sm:pt-16 lg:grid-cols-[5fr_7fr] lg:gap-20 lg:px-8">
         <Reveal>
-          <h1 className="text-[36px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[48px]">
+          <h1 className="text-[28px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[48px]">
             Request a setup
           </h1>
-          <p className="mt-5 max-w-[46ch] text-[17px] leading-[1.55] text-ink-soft">
+          <p className="mt-3 max-w-[46ch] text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[17px]">
             Tell us about your business and where you&apos;re based. Submitting
             opens WhatsApp with your details pre-filled so we can get you set
             up directly.
           </p>
 
-          <h2 className="mt-12 text-[15px] font-semibold tracking-[-0.01em]">
+          <h2 className="mt-6 text-[14.5px] font-semibold tracking-[-0.01em] sm:mt-12 sm:text-[15px]">
             What happens next
           </h2>
-          <ol className="mt-4 divide-y divide-line border-y border-line">
+          <ol className="mt-3 divide-y divide-line border-y border-line sm:mt-4">
             {NEXT_STEPS.map((s, i) => (
               <li
                 key={s}
-                className="flex gap-4 py-4 text-[15.5px] leading-[1.5] text-ink-soft"
+                className="flex gap-3 py-2.5 text-[14px] leading-[1.45] text-ink-soft sm:gap-4 sm:py-4 sm:text-[15.5px] sm:leading-[1.5]"
               >
                 <span className="w-4 shrink-0 font-mono text-[13px] leading-[1.75] text-ink-muted">
                   {i + 1}

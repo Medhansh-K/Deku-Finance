@@ -123,36 +123,36 @@ export default function AlerxLedgerSection() {
 
   return (
     <section id="alerx" aria-labelledby="alerx-title" className="scroll-mt-20 bg-surface">
-      <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-24">
+      <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-8 sm:py-16 lg:py-24">
         <Reveal className="max-w-[720px]">
-          <h2 id="alerx-title" className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink sm:text-[40px]">
+          <h2 id="alerx-title" className="text-[26px] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[34px] lg:text-[40px]">
             A clear chart of accounts for any kind of business
           </h2>
-          <p className="mt-5 text-[17px] leading-[1.55] text-ink-soft sm:text-[18px]">
+          <p className="mt-3 text-[15.5px] leading-[1.55] text-ink-soft sm:mt-5 sm:text-[18px]">
             Every company starts on the same four-tier ALERX structure. Pick a business type below to see how its
             revenue, bank accounts, receivables and costs sit inside it.
           </p>
         </Reveal>
 
         {/* The four tiers, read left to right */}
-        <Reveal delay={80} className="mt-14">
-          <ol className="grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+        <Reveal delay={80} className="mt-7 sm:mt-14">
+          <ol className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-5">
             {TIERS.map((t, i) => (
-              <li key={t.name} className="bg-surface p-5">
-                <p className="text-[13px] text-ink-muted">Tier {i + 1}</p>
-                <p className="mt-1 text-[16px] font-semibold text-ink">{t.name}</p>
-                <p className="mt-1.5 text-[13.5px] leading-[1.5] text-ink-soft">{t.desc}</p>
+              <li key={t.name} className="bg-surface p-3.5 sm:p-5">
+                <p className="text-[12px] text-ink-muted sm:text-[13px]">Tier {i + 1}</p>
+                <p className="mt-0.5 text-[15px] font-semibold text-ink sm:mt-1 sm:text-[16px]">{t.name}</p>
+                <p className="mt-1 text-[12.5px] leading-[1.45] text-ink-soft sm:mt-1.5 sm:text-[13.5px] sm:leading-[1.5]">{t.desc}</p>
               </li>
             ))}
-            <li className="bg-brand-wash p-5 sm:col-span-2 lg:col-span-1">
-              <p className="text-[13px] text-brand-strong">On every label</p>
-              <p className="mt-1 text-[16px] font-semibold text-ink">Entries and value</p>
-              <p className="mt-1.5 text-[13.5px] leading-[1.5] text-ink-soft">How many entries it has, and its rupee balance.</p>
+            <li className="col-span-2 bg-brand-wash p-3.5 sm:p-5 lg:col-span-1">
+              <p className="text-[12px] text-brand-strong sm:text-[13px]">On every label</p>
+              <p className="mt-0.5 text-[15px] font-semibold text-ink sm:mt-1 sm:text-[16px]">Entries and value</p>
+              <p className="mt-1 text-[12.5px] leading-[1.45] text-ink-soft sm:mt-1.5 sm:text-[13.5px] sm:leading-[1.5]">How many entries it has, and its rupee balance.</p>
             </li>
           </ol>
         </Reveal>
 
-        <Reveal className="mt-16">
+        <Reveal className="mt-8 sm:mt-16">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div role="tablist" aria-label="Business type" className="flex flex-wrap gap-2">
               {(Object.keys(PRESETS) as PresetKey[]).map((key) => (
@@ -251,7 +251,7 @@ export default function AlerxLedgerSection() {
           </div>
         </Reveal>
 
-        <div className="mt-16 grid gap-10 border-t border-line pt-12 md:grid-cols-3">
+        <div className="mt-8 grid gap-6 border-t border-line pt-8 sm:mt-16 sm:gap-10 sm:pt-12 md:grid-cols-3">
           {PILLARS.map((p, i) => (
             <Reveal key={p.title} delay={i * 80}>
               <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">{p.title}</h3>
