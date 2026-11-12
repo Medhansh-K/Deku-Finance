@@ -29,11 +29,41 @@ const label = "block text-[13.5px] font-medium text-ink-soft";
 const field =
   "mt-1.5 block h-11 w-full rounded-ctl border border-line-strong bg-surface px-3 text-[15px] text-ink placeholder:text-ink-subtle transition-[border-color,box-shadow] focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
+const SETUP_WHATSAPP_NUMBER = "917506461004";
+const SETUP_WHATSAPP_DISPLAY = "+91 75064 61004";
+
 const NEXT_STEPS = [
-  "Your request goes to the partner for your state or pincode.",
-  "They contact you to confirm your details.",
-  "They set up Deku for your business and walk you through it.",
+  "Submit your business details to pre-fill a setup message on WhatsApp.",
+  `Reach our onboarding team directly on WhatsApp (${SETUP_WHATSAPP_DISPLAY}) to confirm your details.`,
+  "We set up Deku for your business and walk you through your workspace.",
 ];
+
+type SubmittedLead = {
+  companyName: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  gstinOrPan: string;
+  stateName: string;
+  stateCode: string;
+  city: string;
+  pincode: string;
+  whatsappUrl: string;
+};
+
+function buildWhatsappSetupUrl(lead: Omit<SubmittedLead, "whatsappUrl">): string {
+  const lines = [
+    "Hello, I'd like to request a Deku Finance setup.",
+    "",
+    `Company: ${lead.companyName.trim()}`,
+    `Name: ${lead.clientName.trim()}`,
+    `Phone: ${lead.clientPhone.trim()}`,
+    `Work email: ${lead.clientEmail.trim()}`,
+    ...(lead.gstinOrPan.trim() ? [`GSTIN / PAN: ${lead.gstinOrPan.trim()}`] : []),
+    `Location: ${lead.city.trim()}, ${lead.stateName} (${lead.stateCode}) - ${lead.pincode.trim()}`,
+  ];
+  return `https://wa.me/${SETUP_WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
 
 export default function RequestSetupPage() {
   const [clientName, setClientName] = useState("");
@@ -44,41 +74,24 @@ export default function RequestSetupPage() {
   const [selectedState, setSelectedState] = useState(INDIAN_STATES[0]);
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<SubmittedLead | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      setSubmitting(true);
-      setError(null);
-      const res = await fetch("/api/ecosystem/onboarding-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientName,
-          clientPhone,
-          clientEmail,
-          companyName,
-          gstinOrPan,
-          stateCode: selectedState.code,
-          stateName: selectedState.name,
-          city,
-          pincode,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setResult(json.lead);
-      } else {
-        setError(json.error || "Failed to submit request");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
+    const details = {
+      clientName,
+      clientPhone,
+      clientEmail,
+      companyName,
+      gstinOrPan,
+      stateName: selectedState.name,
+      stateCode: selectedState.code,
+      city,
+      pincode,
+    };
+    const whatsappUrl = buildWhatsappSetupUrl(details);
+    setResult({ ...details, whatsappUrl });
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -104,9 +117,9 @@ export default function RequestSetupPage() {
             Request a setup
           </h1>
           <p className="mt-5 max-w-[46ch] text-[17px] leading-[1.55] text-ink-soft">
-            Deku is set up through regional partners. Tell us about your
-            business and where it is, and we&apos;ll pass your request to the
-            partner for your area.
+            Tell us about your business and where you&apos;re based. Submitting
+            opens WhatsApp with your details pre-filled so we can get you set
+            up directly.
           </p>
 
           <h2 className="mt-12 text-[15px] font-semibold tracking-[-0.01em]">
@@ -142,29 +155,22 @@ export default function RequestSetupPage() {
             {result ? (
               <div role="status">
                 <span className="inline-flex h-[22px] items-center rounded-chip bg-ok-wash px-2 text-xs font-medium text-ok">
-                  Request received
+                  Ready on WhatsApp
                 </span>
                 <h2 className="mt-4 text-[22px] font-semibold tracking-[-0.02em]">
-                  Thank you, we have your details.
+                  Send your details on WhatsApp.
                 </h2>
                 <p className="mt-2 text-[15.5px] leading-[1.55] text-ink-soft">
-                  Your request has been passed to the partner for your area.
-                  They&apos;ll get in touch to confirm the details and arrange
-                  your setup.
+                  We prepared your setup request for {SETUP_WHATSAPP_DISPLAY}. If
+                  WhatsApp didn&apos;t open automatically, tap the button below
+                  to send your details.
                 </p>
 
                 <dl className="mt-6 divide-y divide-line rounded-ctl border border-line text-[14.5px]">
                   <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4">
-                    <dt className="text-ink-muted">Partner</dt>
-                    <dd className="font-medium text-ink sm:text-right">
-                      {result.assignedDistributorName ||
-                        "Your regional partner"}
-                    </dd>
-                  </div>
-                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4">
-                    <dt className="text-ink-muted">Area</dt>
-                    <dd className="text-ink sm:text-right">
-                      {result.city}, {result.stateName} ({result.pincode})
+                    <dt className="text-ink-muted">WhatsApp</dt>
+                    <dd className="font-mono font-medium text-ink sm:text-right">
+                      {SETUP_WHATSAPP_DISPLAY}
                     </dd>
                   </div>
                   <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4">
@@ -173,20 +179,41 @@ export default function RequestSetupPage() {
                       {result.companyName}
                     </dd>
                   </div>
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4">
+                    <dt className="text-ink-muted">Contact</dt>
+                    <dd className="text-ink sm:text-right">
+                      {result.clientName} ({result.clientPhone})
+                    </dd>
+                  </div>
+                  <div className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4">
+                    <dt className="text-ink-muted">Area</dt>
+                    <dd className="text-ink sm:text-right">
+                      {result.city}, {result.stateName} ({result.pincode})
+                    </dd>
+                  </div>
                 </dl>
 
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    href="/learn/demo"
+                  <a
+                    href={result.whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex h-11 items-center justify-center rounded-ctl bg-brand px-5 text-[15px] font-semibold text-panel-deep transition-colors hover:bg-brand-hover"
                   >
-                    Try the demo
-                  </Link>
-                  <Link
-                    href="/"
+                    Open WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setResult(null)}
                     className="inline-flex h-11 items-center justify-center rounded-ctl border border-line-strong bg-surface px-5 text-[15px] font-medium text-ink transition-colors hover:bg-canvas"
                   >
-                    Back to home
+                    Edit details
+                  </button>
+                  <Link
+                    href="/learn/demo"
+                    className="inline-flex h-11 items-center justify-center rounded-ctl border border-line-strong bg-surface px-5 text-[15px] font-medium text-ink transition-colors hover:bg-canvas"
+                  >
+                    Try the demo
                   </Link>
                 </div>
               </div>
@@ -278,7 +305,7 @@ export default function RequestSetupPage() {
                     Where is your business?
                   </p>
                   <p className="mt-1 text-[14px] text-ink-muted">
-                    We use this to find the partner for your area.
+                    Included in your WhatsApp setup message for GST &amp; onboarding.
                   </p>
 
                   <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -337,21 +364,11 @@ export default function RequestSetupPage() {
                   </div>
                 </fieldset>
 
-                {error && (
-                  <p
-                    role="alert"
-                    className="rounded-ctl bg-bad-wash px-4 py-3 text-[14.5px] text-bad"
-                  >
-                    {error}
-                  </p>
-                )}
-
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="inline-flex h-11 w-full items-center justify-center rounded-ctl bg-brand px-5 text-[15px] font-semibold text-panel-deep transition-[background-color,transform] duration-150 hover:bg-brand-hover active:translate-y-px disabled:opacity-50 motion-reduce:transform-none"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-ctl bg-brand px-5 text-[15px] font-semibold text-panel-deep transition-[background-color,transform] duration-150 hover:bg-brand-hover active:translate-y-px motion-reduce:transform-none"
                 >
-                  {submitting ? "Sending your request…" : "Send request"}
+                  Continue on WhatsApp
                 </button>
 
                 <p className="text-center text-[14px] text-ink-muted">
