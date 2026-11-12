@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   cacheComponents: true,
   partialPrefetching: true,
   experimental: {
@@ -17,7 +18,25 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   async redirects() {
+    const adminUrl =
+      process.env.ADMIN_URL || (process.env.NODE_ENV !== "production" ? "http://localhost:3001/" : undefined);
+    const distributorUrl =
+      process.env.DISTRIBUTOR_URL || (process.env.NODE_ENV !== "production" ? "http://localhost:3002/" : undefined);
+
     return [
       {
         source: "/dashboard",
@@ -30,16 +49,12 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/invoices/:path*", destination: "/gst", permanent: true },
       { source: "/invoices", destination: "/gst", permanent: true },
       { source: "/marketplace", destination: "/reconciliation?tab=marketplace", permanent: true },
-      {
-        source: "/admin",
-        destination: process.env.ADMIN_URL || "http://localhost:3001/",
-        permanent: false,
-      },
-      {
-        source: "/distributor",
-        destination: process.env.DISTRIBUTOR_URL || "http://localhost:3002/",
-        permanent: false,
-      },
+      ...(adminUrl
+        ? [{ source: "/admin", destination: adminUrl, permanent: false }]
+        : []),
+      ...(distributorUrl
+        ? [{ source: "/distributor", destination: distributorUrl, permanent: false }]
+        : []),
     ];
   },
 };

@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   // The public setup form posts here; anonymous visitors must reach it.
   "/api/ecosystem/onboarding-request",
   "/api/auth",
+  "/api/health",
   "/features",
   "/gst-compliance",
   "/gst-returns",
