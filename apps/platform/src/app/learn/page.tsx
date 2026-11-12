@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
 import { LearnShell } from "@/components/learn/LearnShell";
+
+export const metadata: Metadata = {
+  title: "Learn Centre | Guided Accounting & GST Workflows",
+  description:
+    "Explore Deku Finance with 18 interactive guided workflows on sample books and comprehensive accounting, GST, and keyboard-shortcut manuals.",
+  alternates: { canonical: "/learn" },
+};
 import { DEMO_COMPANIES } from "@/lib/learn/companies";
 import { DEMO_ROLES } from "@/lib/learn/demo-roles";
 import { DOC_ARTICLES, DOC_CATEGORIES } from "@/lib/learn/docs-data";

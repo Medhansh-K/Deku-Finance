@@ -13,6 +13,9 @@ import ProductShot from "@/components/landing/ProductShot";
 import Reveal from "@/components/landing/Reveal";
 import { LEARN_WORKFLOWS } from "@/lib/learn/workflows/catalogue";
 import { DEMO_COMPANIES } from "@/lib/learn/companies";
+import { DEMO_PLANS } from "@/lib/learn/demo-plans";
+import { LANDING_FAQS } from "@/lib/landing/faqs";
+import { getSiteUrl } from "@/lib/site-url";
 import executiveShot from "../../public/landing/executive.webp";
 import dayBookShot from "../../public/landing/day-book-approval.webp";
 import gstReturnsShot from "../../public/landing/gst-returns.webp";
@@ -41,8 +44,58 @@ const KEYFRAMES = `
 
 export default function Home() {
   const workflows = LEARN_WORKFLOWS.length;
+  const siteUrl = getSiteUrl();
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        name: "Deku Finance",
+        applicationCategory: "BusinessApplication",
+        applicationSubCategory: "Accounting & GST Software",
+        operatingSystem: "Web",
+        url: siteUrl,
+        description:
+          "Indian GST invoicing, UPI QR collections, double-entry ALERX accounting, maker-checker approvals, bank CSV reconciliation, and GSTR-1/GSTR-3B preparation.",
+        featureList: [
+          "Non-GST bills of supply with registration threshold tracker",
+          "GST tax invoices with CGST, SGST, and IGST by place of supply",
+          "Dynamic UPI QR codes on every bill and WhatsApp payment reminders",
+          "Keyboard-first voucher entry (Esc, F1-F11, Gateway shortcuts)",
+          "Double-entry ALERX 4-tier chart of accounts",
+          "7-role maker-checker voucher approvals and audit log",
+          "GSTR-1 and GSTR-3B offline JSON export and section 17(5) ITC register",
+          "In-browser bank statement CSV reconciliation",
+        ],
+        offers: (["go", "pro", "enterprise"] as const).map((id) => ({
+          "@type": "Offer",
+          name: `Deku Finance ${DEMO_PLANS[id].name}`,
+          price: DEMO_PLANS[id].priceInrYearly,
+          priceCurrency: "INR",
+          availability: "https://schema.org/InStock",
+          url: `${siteUrl}/request-setup`,
+        })),
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: LANDING_FAQS.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: f.a,
+          },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-canvas font-sans text-ink selection:bg-brand/25">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <style>{KEYFRAMES}</style>
       <LandingNavbar />
 

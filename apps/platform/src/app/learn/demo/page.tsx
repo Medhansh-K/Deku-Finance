@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import React from "react";
 import Link from "next/link";
 import { LearnShell } from "@/components/learn/LearnShell";
+
+export const metadata: Metadata = {
+  title: "Interactive Demo | Sample Indian Business Books",
+  description:
+    "Try Deku Finance on sample Indian business books with 18 guided workflows and 7 user roles in your desktop or laptop browser, no sign-up required.",
+  alternates: { canonical: "/learn/demo" },
+};
 import { DemoCompanyGrid } from "@/components/learn/DemoCompanyGrid";
 import { WorkflowDemoExplorer } from "@/components/learn/WorkflowDemoExplorer";
 import { DEMO_COMPANIES } from "@/lib/learn/companies";
