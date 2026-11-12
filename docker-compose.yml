@@ -34,7 +34,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-dev-only-postgres-password}@postgres:5432/deku
       AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:-dev-only-authenticator-password}
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -161,7 +161,7 @@ services:
     environment:
       PORT: "3000"
       BACKEND_URL: http://backend-admin:8080
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3001:3000"
@@ -184,7 +184,7 @@ services:
     environment:
       PORT: "3000"
       BACKEND_URL: http://backend-distributor:8080
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3002:3000"
@@ -207,7 +207,7 @@ services:
     environment:
       PORT: "3000"
       BACKEND_URL: http://backend-platform:8080
-      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-true}
+      DEKU_SEED_DEMO: ${DEKU_SEED_DEMO:-false}
       JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me-0123456789abcdef}
     ports:
       - "127.0.0.1:3000:3000"
