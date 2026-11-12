@@ -148,9 +148,9 @@ export default function Home() {
           <div className="mx-auto max-w-[1200px] px-4 sm:px-8">
             <div className="motion-safe:animate-[dekuRise_1s_.25s_cubic-bezier(.2,.7,.2,1)_both]">
               <ProductShot
-                src={executiveShot}
-                priority
-                alt="The Executive summary in Deku Finance for the fictional Aster Trading Co.: turnover, net profit, cash, debtors and GST payable, and a balance check showing assets equal liabilities plus equity."
+                videoSrc="/landing/deku-demo.mp4"
+                poster={executiveShot.src}
+                alt="Walkthrough of Deku Finance: Executive summary, invoicing, keyboard vouchers, and double-entry books."
               />
             </div>
           </div>
