@@ -37,7 +37,7 @@ export default function ProductShot({
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           aria-label={alt}
           className="block h-auto w-full bg-surface"
         />
