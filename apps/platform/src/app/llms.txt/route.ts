@@ -4,8 +4,6 @@ import { DEMO_PLANS } from "@/lib/learn/demo-plans";
 import { DOC_CATEGORIES } from "@/lib/learn/docs-data";
 import { LEARN_WORKFLOWS } from "@/lib/learn/workflows/catalogue";
 
-export const dynamic = "force-static";
-
 export function GET() {
   const baseUrl = getSiteUrl();
   const body = `# Deku Finance
