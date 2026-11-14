@@ -616,6 +616,7 @@ function buildSeedDataset(slug: DemoCompanySlug): Omit<DemoDataset, "activity"> 
     bank_beneficiary: tmpl.legalName,
     bank_ifsc: "DEMO0000123",
     bank_account_number: "000123456789",
+    frozen_accounting_date: "2026-03-31",
     onboarded_at: "2026-04-01T09:00:00.000Z",
   };
 
@@ -624,11 +625,11 @@ function buildSeedDataset(slug: DemoCompanySlug): Omit<DemoDataset, "activity"> 
   ];
 
   const departments: Department[] = [
-    { id: `${orgId}-d1`, name: "Finance & Accounts", code: "FIN", description: "General ledger, GST and statutory audit", lead_name: "Meera Joshi", budget_allocated: 1200000, budget_utilized: 680000 },
-    { id: `${orgId}-d2`, name: "Sales & Revenue Ops", code: "SLS", description: "Invoicing, collections and customer accounts", lead_name: "Priya Nair", budget_allocated: 900000, budget_utilized: 510000 },
-    { id: `${orgId}-d3`, name: "Procurement & Inventory", code: "PRC", description: "Supplier bills, ITC and stock valuation", lead_name: "Rohan Kulkarni", budget_allocated: 1500000, budget_utilized: 1620000 },
-    { id: `${orgId}-d4`, name: "Treasury & Banking", code: "TRS", description: "Bank reconciliation and cash control", lead_name: "Kavita Iyer", budget_allocated: 600000, budget_utilized: 310000 },
-    { id: `${orgId}-d5`, name: "People & Payroll", code: "HR", description: "Monthly payroll, TDS and EPF", lead_name: "Neha Verma", budget_allocated: 1800000, budget_utilized: 1120000 },
+    { id: `${orgId}-d1`, name: "Finance & Accounts", code: "FIN", description: "General ledger, GST and statutory audit", lead_name: "Meera Joshi", budget_allocated: 1200000, budget_utilized: 680000, department_type: "shared_services", spending_block_enabled: true },
+    { id: `${orgId}-d2`, name: "Sales & Revenue Ops", code: "SLS", description: "Invoicing, collections and customer accounts", lead_name: "Priya Nair", budget_allocated: 900000, budget_utilized: 510000, department_type: "profit_centre", spending_block_enabled: false },
+    { id: `${orgId}-d3`, name: "Procurement & Inventory", code: "PRC", description: "Supplier bills, ITC and stock valuation", lead_name: "Rohan Kulkarni", budget_allocated: 1500000, budget_utilized: 1620000, department_type: "cost_centre", spending_block_enabled: true },
+    { id: `${orgId}-d4`, name: "Treasury & Banking", code: "TRS", description: "Bank reconciliation and cash control", lead_name: "Kavita Iyer", budget_allocated: 600000, budget_utilized: 310000, department_type: "cost_centre", parent_department_id: `${orgId}-d1`, spending_block_enabled: false },
+    { id: `${orgId}-d5`, name: "People & Payroll", code: "HR", description: "Monthly payroll, TDS and EPF", lead_name: "Neha Verma", budget_allocated: 1800000, budget_utilized: 1120000, department_type: "shared_services", parent_department_id: `${orgId}-d1`, spending_block_enabled: false },
   ];
 
   const members: OrgMember[] = TEAM.map(([role, userId, local, name], i) => ({

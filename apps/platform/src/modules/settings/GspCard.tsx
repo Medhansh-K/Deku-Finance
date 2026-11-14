@@ -17,6 +17,10 @@ const STATUS_BADGE = {
 
 /** GST portal access through a GST Suvidha Provider: off unless the server configures one. */
 export function GspCard({ orgId }: { orgId: string }) {
+  const [provider, setProvider] = useState<string>("sandbox_co_in");
+  const [environment, setEnvironment] = useState<string>("sandbox");
+  const [eInvoiceThresholdEnforced, setEInvoiceThresholdEnforced] = useState<boolean>(true);
+  const [thresholdAmount, setThresholdAmount] = useState<number>(50000);
   const [status, setStatus] = useState<GspStatus | null>(null);
   const [username, setUsername] = useState("");
   const [otp, setOtp] = useState("");
@@ -63,6 +67,46 @@ export function GspCard({ orgId }: { orgId: string }) {
       </div>
 
       {status?.sandbox && <SandboxBanner what="GSP" />}
+
+      {/* Gateway Connector Selection & Threshold Rules */}
+      <div className="grid sm:grid-cols-3 gap-3 p-3.5 bg-canvas rounded-ctl border border-line text-[13px]">
+        <div>
+          <label className="block font-medium text-ink-soft mb-1">GSP Gateway Hub</label>
+          <select
+            value={provider}
+            onChange={(e) => setProvider(e.target.value)}
+            className="w-full h-8 rounded border border-line bg-surface px-2 text-ink text-[13px]"
+          >
+            <option value="sandbox_co_in">Sandbox.co.in (Fintech API Hub)</option>
+            <option value="cleartax">ClearTax GSP Connector</option>
+            <option value="masters_india">Masters India Auto2GST</option>
+            <option value="iris">IRIS GST Sapphire</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium text-ink-soft mb-1">Environment Mode</label>
+          <select
+            value={environment}
+            onChange={(e) => setEnvironment(e.target.value)}
+            className="w-full h-8 rounded border border-line bg-surface px-2 text-ink text-[13px]"
+          >
+            <option value="sandbox">Sandbox (Simulation &amp; Testbed)</option>
+            <option value="production">Production (Live NIC / GSTN Gateway)</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-medium text-ink-soft mb-1">E-Invoice ₹50k+ Rule</label>
+          <label className="flex items-center gap-2 mt-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={eInvoiceThresholdEnforced}
+              onChange={(e) => setEInvoiceThresholdEnforced(e.target.checked)}
+              className="h-4 w-4 accent-brand rounded"
+            />
+            <span className="text-ink">Threshold Toggle (≥ ₹50,000)</span>
+          </label>
+        </div>
+      </div>
 
       <p className="text-ink-muted">
         Optional. When connected, Deku files GSTR-1 / GSTR-3B and generates e-invoice IRNs and e-way bills through a GST

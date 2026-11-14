@@ -535,6 +535,29 @@ export function SalesInvoiceEditor({ orgId, customers, onCreated, onCancel }: Pr
             <input type="checkbox" checked={roundToRupee} onChange={(e) => setRoundToRupee(e.target.checked)} className="accent-brand" />
             Round off to the nearest rupee
           </label>
+
+          {/* E-Invoicing ₹50,000+ Guidance & Sandbox.co.in Integration */}
+          <div className="border-t border-line pt-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-muted">
+                E-Invoice (IRN) Guidance
+              </span>
+              <span
+                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-medium ${
+                  summary.grandTotal >= 5000000
+                    ? "bg-ok-wash text-ok border border-ok/20"
+                    : "bg-surface text-ink-muted border border-line"
+                }`}
+              >
+                {summary.grandTotal >= 5000000 ? "≥ ₹50,000 Threshold" : "< ₹50,000 Threshold"}
+              </span>
+            </div>
+            <p className="text-[11.5px] text-ink-muted leading-relaxed">
+              {summary.grandTotal >= 5000000
+                ? "This invoice exceeds ₹50,000. You will have the option to generate a registered government IRN & signed QR code via Sandbox.co.in upon issuance."
+                : "Standard digital invoice. Government E-Invoicing (IRN) is typically statutory only for B2B supplies with total value of ₹50,000+."}
+            </p>
+          </div>
         </aside>
       </div>
 

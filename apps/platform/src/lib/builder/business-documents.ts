@@ -5,7 +5,7 @@
 import { computeTaxSummary, type TaxSummary } from "@/lib/invoices/tax-summary";
 import type { Address, Party } from "@/types/accounting";
 
-export type BusinessDocType = "quotation" | "proforma" | "purchase_order" | "delivery_challan";
+export type BusinessDocType = "quotation" | "proforma" | "purchase_order" | "delivery_challan" | "sales_order" | "recurring_profile";
 export type BusinessDocStatus = "draft" | "sent" | "accepted" | "rejected" | "converted" | "cancelled";
 
 export const BUSINESS_DOC_TYPES: ReadonlyArray<{ value: BusinessDocType; label: string }> = [
@@ -13,6 +13,8 @@ export const BUSINESS_DOC_TYPES: ReadonlyArray<{ value: BusinessDocType; label: 
   { value: "proforma", label: "Proforma invoice" },
   { value: "purchase_order", label: "Purchase order" },
   { value: "delivery_challan", label: "Delivery challan" },
+  { value: "sales_order", label: "Sales order" },
+  { value: "recurring_profile", label: "Recurring profile" },
 ];
 export const BUSINESS_DOC_STATUSES: ReadonlyArray<BusinessDocStatus> = [
   "draft", "sent", "accepted", "rejected", "converted", "cancelled",
@@ -29,7 +31,7 @@ export const NEXT_STATUSES: Record<BusinessDocStatus, BusinessDocStatus[]> = {
 };
 
 export const canConvert = (d: Pick<BusinessDocument, "doc_type" | "status">) =>
-  (d.doc_type === "quotation" || d.doc_type === "proforma") && ["draft", "sent", "accepted"].includes(d.status);
+  (d.doc_type === "quotation" || d.doc_type === "proforma" || d.doc_type === "sales_order") && ["draft", "sent", "accepted"].includes(d.status);
 
 export interface PartySnapshot {
   name?: string;

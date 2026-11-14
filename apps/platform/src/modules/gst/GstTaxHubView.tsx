@@ -536,7 +536,14 @@ export function GstTaxHubView() {
               invoiceNumber={selectedInvoice.invoice_number}
             />
             <InvoicePaymentLink orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
-            <InvoiceEInvoiceBlock orgId={orgId} invoiceId={selectedInvoice.id} issued={selectedInvoice.status === "issued"} />
+            <InvoiceEInvoiceBlock
+              orgId={orgId}
+              invoiceId={selectedInvoice.id}
+              issued={selectedInvoice.status === "issued"}
+              totalAmount={selectedInvoice.total_amount}
+              customerGstin={selectedInvoice.parties?.gstin ?? undefined}
+              invoiceNumber={selectedInvoice.invoice_number}
+            />
 
             <div className="flex justify-between items-center pt-3 border-t border-line">
               <Button

@@ -34,8 +34,14 @@ import {
   validateBill,
   VoucherAccounts,
 } from "@/lib/purchases/bills";
+import {
+  PurchaseOrdersTab,
+  MaterialRequestsTab,
+  ApPaymentCalendarTab,
+  type PurchaseOrder,
+} from "./ProcurementAndCalendarTabs";
 
-type Tab = "add" | "bulk" | "register";
+type Tab = "add" | "bulk" | "register" | "orders" | "requisitions" | "calendar";
 
 const fieldClass =
   "w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
@@ -137,6 +143,9 @@ export function PurchasesView() {
     { id: "add", label: "Add purchase bill" },
     { id: "bulk", label: "Bulk upload" },
     { id: "register", label: "Register" },
+    { id: "orders", label: "Purchase orders" },
+    { id: "requisitions", label: "Material requests" },
+    { id: "calendar", label: "AP payment calendar (MSME)" },
   ];
 
   return (
@@ -203,6 +212,16 @@ export function PurchasesView() {
             />
           )}
           {tab === "register" && <Register orgId={orgId} bills={bills} month={month} onChanged={loadBills} />}
+          {tab === "orders" && (
+            <PurchaseOrdersTab
+              parties={parties}
+              onConvertToBill={(po) => {
+                setTab("add");
+              }}
+            />
+          )}
+          {tab === "requisitions" && <MaterialRequestsTab />}
+          {tab === "calendar" && <ApPaymentCalendarTab />}
         </div>
       </div>
     </div>

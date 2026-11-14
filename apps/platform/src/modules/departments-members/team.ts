@@ -54,6 +54,9 @@ export interface Department {
   lead_name: string | null;
   budget_allocated: number | null;
   budget_utilized: number | null;
+  parent_department_id?: string | null;
+  department_type?: "operating" | "cost_centre" | "profit_centre" | "shared_services";
+  spending_block_enabled?: boolean;
   department_tasks?: DepartmentTask[];
 }
 

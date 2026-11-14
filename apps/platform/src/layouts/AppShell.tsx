@@ -14,6 +14,8 @@ import {
   Download,
   LogOut,
   Building2,
+  Briefcase,
+  Sliders,
   Calendar,
   Sparkles,
   Check,
@@ -481,6 +483,30 @@ export function AppShell({ children }: AppShellProps) {
                 >
                   <ShieldCheck className="h-4 w-4 text-ink-muted shrink-0" />
                   <span>GST returns</span>
+                </Link>
+                <Link
+                  href="/fixed-assets"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Building2 className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Fixed Assets</span>
+                </Link>
+                <Link
+                  href="/projects"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Briefcase className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>Projects &amp; Costing</span>
+                </Link>
+                <Link
+                  href="/fpa-forecast"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-2.5 py-2 rounded-ctl hover:bg-canvas-sunken font-medium text-ink-soft transition-colors"
+                >
+                  <Sliders className="h-4 w-4 text-ink-muted shrink-0" />
+                  <span>FP&amp;A Forecasting</span>
                 </Link>
                 <Link
                   href="/learn"

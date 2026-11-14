@@ -11,6 +11,7 @@ import { FiscalPeriod } from "@/types/accounting";
 import { formatDateTally, toISODateString } from "@/lib/formatters/date";
 import { logUserActivity } from "@/lib/logging/activity-logger";
 import { CompanyControlsCard } from "./CompanyControlsCard";
+import { AccountingControlsCard } from "./AccountingControlsCard";
 import { CompanyProfileCard } from "./CompanyProfileCard";
 import { PaymentsCard } from "./PaymentsCard";
 import { GspCard } from "./GspCard";
@@ -101,6 +102,7 @@ export function SettingsView() {
       <ChangePasswordCard />
       <KeyboardPreferencesCard />
       {orgId && <CompanyControlsCard orgId={orgId} />}
+      {orgId && <AccountingControlsCard orgId={orgId} />}
       {orgId && <PaymentsCard orgId={orgId} />}
       {orgId && <GspCard orgId={orgId} />}
       {orgId && <KycCard orgId={orgId} />}

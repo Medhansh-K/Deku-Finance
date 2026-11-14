@@ -106,7 +106,19 @@ export const teamHandler: Handler = (req: Req) => {
       if (ds.departments.some((d) => d.code === code)) fail(`Department code ${code} is already used`);
       const budget = Number(body.budget_allocated ?? 0);
       if (!(budget >= 0)) fail("The budget can't be negative");
-      const d: Department = { id: newId(ds, "dept"), name, code, description: body.description ?? null, lead_name: body.lead_name ?? null, budget_allocated: r2(budget), budget_utilized: 0, department_tasks: [] };
+      const d: Department = {
+        id: newId(ds, "dept"),
+        name,
+        code,
+        description: body.description ?? null,
+        lead_name: body.lead_name ?? null,
+        budget_allocated: r2(budget),
+        budget_utilized: 0,
+        parent_department_id: body.parent_department_id ?? null,
+        department_type: body.department_type ?? "cost_centre",
+        spending_block_enabled: !!body.spending_block_enabled,
+        department_tasks: [],
+      };
       save(req, { ...ds, departments: [...ds.departments, d] });
       ctx.record("department.updated", `Created department ${name}`, { departmentId: d.id, field: "created" });
       return { success: true, data: [d] };

@@ -12,6 +12,8 @@ import {
   FileMinus,
   FilePlus,
   ShoppingCart,
+  ShoppingBag,
+  Repeat,
   Printer,
   Download,
   Copy,
@@ -67,7 +69,12 @@ import { BusinessDocumentsRegister } from "./BusinessDocumentsRegister";
 export type DocumentType = BusinessDocType | "invoice" | "discount_coupon" | "credit_note" | "debit_note";
 const GST_HUB_TYPES: ReadonlyArray<DocumentType> = ["invoice", "credit_note", "debit_note"];
 const isBusinessType = (t: DocumentType): t is BusinessDocType =>
-  t === "quotation" || t === "proforma" || t === "purchase_order" || t === "delivery_challan";
+  t === "quotation" ||
+  t === "proforma" ||
+  t === "purchase_order" ||
+  t === "delivery_challan" ||
+  t === "sales_order" ||
+  t === "recurring_profile";
 
 export interface DocumentLineItem {
   id: string;
@@ -152,6 +159,22 @@ const DOCUMENT_TYPES: DocumentSidebarItem[] = [
     subtitle: "Vendor procurement order with delivery milestones",
     icon: ShoppingCart,
     badge: "Procure",
+    badgeColor: "bg-canvas-sunken text-ink-soft",
+  },
+  {
+    id: "sales_order",
+    title: "Sales order",
+    subtitle: "Confirmed customer order, dispatch pipeline & milestone billing",
+    icon: ShoppingBag,
+    badge: "Order",
+    badgeColor: "bg-brand/10 text-brand-strong",
+  },
+  {
+    id: "recurring_profile",
+    title: "Recurring profile",
+    subtitle: "Subscription billing schedule & early-payment discounts",
+    icon: Repeat,
+    badge: "Schedule",
     badgeColor: "bg-canvas-sunken text-ink-soft",
   },
 ];

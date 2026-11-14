@@ -61,7 +61,15 @@ export function DepartmentsMembersView() {
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [resetLink, setResetLink] = useState<{ name: string; url: string } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const [dept, setDept] = useState({ name: "", code: "", description: "", budget: "" });
+  const [dept, setDept] = useState({
+    name: "",
+    code: "",
+    description: "",
+    budget: "",
+    parent_department_id: "",
+    department_type: "cost_centre" as "operating" | "cost_centre" | "profit_centre" | "shared_services",
+    spending_block_enabled: false,
+  });
   const [period, setPeriod] = useState(() => (subscription?.server_time ?? new Date().toISOString()).slice(0, 7));
   const [payrollResult, setPayrollResult] = useState<PayrollResult | null>(null);
 
@@ -145,8 +153,19 @@ export function DepartmentsMembersView() {
         code: dept.code.trim(),
         description: dept.description.trim() || undefined,
         budget_allocated: dept.budget ? Number(dept.budget) : undefined,
+        parent_department_id: dept.parent_department_id || undefined,
+        department_type: dept.department_type,
+        spending_block_enabled: dept.spending_block_enabled,
+      } as any);
+      setDept({
+        name: "",
+        code: "",
+        description: "",
+        budget: "",
+        parent_department_id: "",
+        department_type: "cost_centre",
+        spending_block_enabled: false,
       });
-      setDept({ name: "", code: "", description: "", budget: "" });
     }, "Department created.");
   };
 
@@ -372,60 +391,142 @@ export function DepartmentsMembersView() {
       )}
 
       {tab === "departments" && (
-        <Panel title="Departments">
+        <Panel title="Departments & Hierarchical Cost Centres">
           {canManageDepartments(myRole) && (
-            <form data-tour="departments-form" onSubmit={createDepartment} className="grid sm:grid-cols-5 gap-2 items-end">
-              <Input label="Name" required value={dept.name} onChange={(e) => setDept({ ...dept, name: e.target.value })} />
-              <Input label="Code" required maxLength={10} value={dept.code} onChange={(e) => setDept({ ...dept, code: e.target.value })} />
-              <Input label="Description" value={dept.description} onChange={(e) => setDept({ ...dept, description: e.target.value })} />
-              <Input label="Annual budget" type="number" min={0} prefixSymbol="₹" value={dept.budget} onChange={(e) => setDept({ ...dept, budget: e.target.value })} />
-              <Button type="submit" variant="tally" size="sm" isLoading={busy}>
-                Create department
-              </Button>
+            <form data-tour="departments-form" onSubmit={createDepartment} className="space-y-3 p-4 bg-canvas rounded-panel border border-line">
+              <div className="grid sm:grid-cols-4 gap-2 items-end">
+                <Input label="Name" required value={dept.name} onChange={(e) => setDept({ ...dept, name: e.target.value })} />
+                <Input label="Code" required maxLength={10} value={dept.code} onChange={(e) => setDept({ ...dept, code: e.target.value })} />
+                <div>
+                  <label className="block text-[13px] font-medium text-ink-soft mb-1">Cost Centre Type</label>
+                  <select
+                    value={dept.department_type}
+                    onChange={(e) => setDept({ ...dept, department_type: e.target.value as any })}
+                    className="w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink"
+                  >
+                    <option value="cost_centre">Cost Centre (Indirect / Overhead)</option>
+                    <option value="operating">Operating Unit (Direct Production)</option>
+                    <option value="profit_centre">Profit Centre (Revenue Generating)</option>
+                    <option value="shared_services">Shared Services (Support)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[13px] font-medium text-ink-soft mb-1">Parent Department / Hierarchy</label>
+                  <select
+                    value={dept.parent_department_id}
+                    onChange={(e) => setDept({ ...dept, parent_department_id: e.target.value })}
+                    className="w-full h-9 rounded-ctl border border-line-strong bg-surface px-3 text-[13.5px] text-ink"
+                  >
+                    <option value="">None (Top-Level Department)</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {d.name} ({d.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-2 items-end pt-1">
+                <Input label="Description" value={dept.description} onChange={(e) => setDept({ ...dept, description: e.target.value })} />
+                <Input label="Annual budget" type="number" min={0} prefixSymbol="₹" value={dept.budget} onChange={(e) => setDept({ ...dept, budget: e.target.value })} />
+                <div className="flex items-center gap-3 h-9">
+                  <label className="flex items-center gap-2 cursor-pointer text-[13px] text-ink select-none">
+                    <input
+                      type="checkbox"
+                      checked={dept.spending_block_enabled}
+                      onChange={(e) => setDept({ ...dept, spending_block_enabled: e.target.checked })}
+                      className="h-4 w-4 accent-brand rounded"
+                    />
+                    <span className="font-medium">Hard Spending Block</span>
+                  </label>
+                  <Button type="submit" variant="tally" size="sm" isLoading={busy} className="ml-auto">
+                    Create department
+                  </Button>
+                </div>
+              </div>
             </form>
           )}
           {!departments.length && !loading && <p className="text-ink-muted">No departments yet.</p>}
           <div className="grid md:grid-cols-2 gap-3">
-            {departments.map((d) => (
-              <div key={d.id} className="rounded-panel border border-line bg-surface p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-[14px] font-[550] text-ink">
-                      {d.name} <span className="ml-1 font-mono text-[12.5px] text-ink-subtle">{d.code}</span>
-                    </p>
-                    {d.description && <p className="text-[12.5px] text-ink-muted">{d.description}</p>}
+            {departments.map((d) => {
+              const parent = departments.find((p) => p.id === d.parent_department_id);
+              const budget = d.budget_allocated || 0;
+              const used = d.budget_utilized || 0;
+              const pct = budget > 0 ? Math.min(Math.round((used / budget) * 100), 100) : 0;
+
+              return (
+                <div key={d.id} className="rounded-panel border border-line bg-surface p-4 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[14.5px] font-[600] text-ink">{d.name}</span>
+                        <span className="font-mono text-[12px] px-1.5 py-0.5 rounded bg-canvas border border-line text-ink-subtle">
+                          {d.code}
+                        </span>
+                        <Badge variant="outline" className="text-[11px] capitalize">
+                          {d.department_type?.replace("_", " ") ?? "Cost Centre"}
+                        </Badge>
+                        {d.spending_block_enabled && (
+                          <Badge variant="danger" className="text-[11px]">
+                            Block on Overrun
+                          </Badge>
+                        )}
+                      </div>
+                      {parent && (
+                        <p className="text-[12px] text-ink-muted mt-0.5">
+                          Parent: <span className="font-medium text-ink-soft">{parent.name}</span> ({parent.code})
+                        </p>
+                      )}
+                      {d.description && <p className="text-[12.5px] text-ink-muted mt-1">{d.description}</p>}
+                    </div>
+                    {canManageDepartments(myRole) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() =>
+                          confirm(`Delete the ${d.name} department and its tasks?`) &&
+                          act(() => departmentsApi.delete(orgId, d.id), "Department deleted.")
+                        }
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
-                  {canManageDepartments(myRole) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={busy}
-                      onClick={() =>
-                        confirm(`Delete the ${d.name} department and its tasks?`) &&
-                        act(() => departmentsApi.delete(orgId, d.id), "Department deleted.")
-                      }
-                    >
-                      Delete
-                    </Button>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[12.5px] text-ink-soft tabular-nums">
+                      <span>Lead: {d.lead_name ?? "–"}</span>
+                      <span>
+                        Budget: {formatINR(d.budget_allocated)} · Used: {formatINR(d.budget_utilized)} ({pct}%)
+                      </span>
+                    </div>
+                    {budget > 0 && (
+                      <div className="w-full h-1.5 rounded-full bg-canvas border border-line overflow-hidden">
+                        <div
+                          className={`h-full ${pct >= 90 ? "bg-bad" : pct >= 70 ? "bg-amber-500" : "bg-brand"}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {!!d.department_tasks?.length && (
+                    <ul className="space-y-1 border-t border-line pt-2 text-[13px]">
+                      {d.department_tasks.map((t) => (
+                        <li key={t.id} className="flex justify-between gap-2">
+                          <span className="text-ink">{t.title}</span>
+                          <span className="text-ink-muted first-letter:uppercase">
+                            {t.status.replace("_", " ")} · {t.priority}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
-                <p className="text-[13px] text-ink-soft tabular-nums">
-                  Lead: {d.lead_name ?? "–"} · Budget {formatINR(d.budget_allocated)} · Used {formatINR(d.budget_utilized)}
-                </p>
-                {!!d.department_tasks?.length && (
-                  <ul className="space-y-1 border-t border-line pt-2 text-[13px]">
-                    {d.department_tasks.map((t) => (
-                      <li key={t.id} className="flex justify-between gap-2">
-                        <span className="text-ink">{t.title}</span>
-                        <span className="text-ink-muted first-letter:uppercase">
-                          {t.status.replace("_", " ")} · {t.priority}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Panel>
       )}

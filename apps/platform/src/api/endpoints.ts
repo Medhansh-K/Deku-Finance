@@ -52,6 +52,7 @@ export interface OrgSummary {
   bank_name?: string | null;
   udyam_number?: string | null;
   composition_scheme?: boolean;
+  frozen_accounting_date?: string | null;
   onboarded_at?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -61,6 +62,7 @@ export interface OrgSummary {
 export interface OrgSettingsUpdate {
   require_journal_approval?: boolean;
   allow_negative_stock?: boolean;
+  frozen_accounting_date?: string | null;
   gstin?: string;
   operating_mode?: "gst" | "pure";
   state_code?: string;

@@ -52,6 +52,7 @@ function settingsPatch(body: Body) {
   }
   if (body.require_journal_approval != null) patch.require_journal_approval = !!body.require_journal_approval;
   if (body.allow_negative_stock != null) patch.allow_negative_stock = !!body.allow_negative_stock;
+  if (body.frozen_accounting_date !== undefined) patch.frozen_accounting_date = body.frozen_accounting_date ? String(body.frozen_accounting_date) : null;
   if (body.onboarded === true) patch.onboarded_at = new Date().toISOString();
   if (bad.length) fail(`Invalid fields: ${bad.join(", ")}`);
   if (!Object.keys(patch).length) fail("Nothing to update");

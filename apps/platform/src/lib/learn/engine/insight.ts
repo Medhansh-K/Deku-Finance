@@ -104,7 +104,7 @@ function answer(req: Req, question: string) {
 const SIMULATED = "Simulated in the public demo: no external service is connected and nothing is sent.";
 
 export const insightHandler: Handler = (req: Req) => {
-  const { sub, method, query, ctx } = req;
+  const { sub, method, query, ctx, body } = req;
   const ds = req.ds;
   const to = query.get("to") || query.get("end_date") || null;
   const from = query.get("from") || query.get("start_date") || null;
